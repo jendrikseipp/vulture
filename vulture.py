@@ -1,8 +1,5 @@
-#! /usr/bin/env python
-
 import ast
 from fnmatch import fnmatchcase
-import optparse
 import os
 import re
 
@@ -183,21 +180,3 @@ class Vulture(ast.NodeVisitor):
         self.code = node_string.splitlines()
         node = ast.parse(node_string)
         self.visit(node)
-
-
-def parse_args():
-    def csv(option, opt, value, parser):
-        setattr(parser.values, option.dest, value.split(','))
-    parser = optparse.OptionParser()
-    parser.add_option('--exclude', action='callback', callback=csv,
-                      type="string", default=[])
-    parser.add_option('-v', '--verbose', action='store_true')
-    options, args = parser.parse_args()
-    return options, args
-
-
-if __name__ == '__main__':
-    options, args = parse_args()
-    vulture = Vulture(exclude=options.exclude, verbose=options.verbose)
-    vulture.scavenge(args)
-    vulture.report()
