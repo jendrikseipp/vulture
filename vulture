@@ -27,9 +27,12 @@ from wake import Vulture
 def parse_args():
     def csv(option, opt, value, parser):
         setattr(parser.values, option.dest, value.split(','))
-    parser = optparse.OptionParser()
+    usage = "usage: %prog [options] PATH [PATH ...]"
+    parser = optparse.OptionParser(usage=usage)
     parser.add_option('--exclude', action='callback', callback=csv,
-                      type="string", default=[])
+                      type="string", default=[],
+                      help='Comma-separated list of filename patterns to '
+                           'exclude (e.g. svn,external).')
     parser.add_option('-v', '--verbose', action='store_true')
     options, args = parser.parse_args()
     return options, args
