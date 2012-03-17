@@ -75,10 +75,9 @@ def func():
     pass
 
 func()
-Bar().func()
-foo.func()
 """)
-    assert v.unused_funcs == ['Bar', 'func']
+    # TODO: Maybe we can differentiate between method and function use.
+    assert v.unused_funcs == ['Bar']
     assert v.defined_funcs == ['Bar', 'func', 'func']
 
 
