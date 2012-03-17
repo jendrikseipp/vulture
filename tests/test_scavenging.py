@@ -64,6 +64,37 @@ b = foo(5)
     assert v.defined_funcs == ['foo']
 
 
+def test_function_and_method1():
+    v = Vulture(verbose=True)
+    v.scan("""\
+class Bar(object):
+    def func(self):
+        pass
+
+def func():
+    pass
+
+func()
+Bar().func()
+foo.func()
+""")
+    assert v.unused_funcs == ['Bar', 'func']
+    assert v.defined_funcs == ['Bar', 'func', 'func']
+
+
+def test_attribute1():
+    v = Vulture(verbose=True)
+    v.scan("""\
+foo.bar = 1
+foo.bar = 2
+""")
+    assert v.unused_funcs == []
+    assert v.defined_funcs == []
+    assert v.defined_attrs == ['bar', 'bar']
+    assert v.used_attrs == []
+    assert v.unused_attrs == ['bar']
+
+
 def test_callback1():
     v = Vulture()
     v.scan("""\

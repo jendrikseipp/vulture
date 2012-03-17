@@ -50,6 +50,7 @@ class Vulture(ast.NodeVisitor):
         self.defined_funcs = []
         self.used_funcs = []
         self.defined_props = []
+        self.defined_attrs = []
         self.used_attrs = []
         self.defined_vars = []
         self.used_vars = []
@@ -80,8 +81,7 @@ class Vulture(ast.NodeVisitor):
                            self.unused_vars, key=sort_by_file):
             relpath = os.path.relpath(item.file)
             path = relpath if not relpath.startswith('..') else item.file
-            print '%s:%d: Unused %s \'%s\'' % (path, item.lineno, item.typ,
-                                               item)
+            print "%s:%d: Unused %s '%s'" % (path, item.lineno, item.typ, item)
 
     def get_unused(self, defined, used):
         return list(sorted(set(defined) - set(used), key=lambda x: x.lower()))
@@ -100,6 +100,10 @@ class Vulture(ast.NodeVisitor):
         return self.get_unused(self.defined_vars,
                     self.used_vars + self.used_attrs + self.tuple_assign_vars)
 
+    @property
+    def unused_attrs(self):
+        return self.get_unused(self.defined_attrs, self.used_attrs)
+
     def _get_line(self, node):
         lineno = getattr(node, 'lineno', 1)
         return self.code[lineno - 1] if self.code else ""
@@ -107,8 +111,9 @@ class Vulture(ast.NodeVisitor):
     def _get_item(self, node, typ):
         name = getattr(node, 'name', None)
         id = getattr(node, 'id', None)
-        assert name is None or id is None
-        return Item(name or id, typ, self.file, node.lineno,
+        attr = getattr(node, 'attr', None)
+        assert len([x for x in (name, id, attr) if x is not None]) == 1
+        return Item(name or id or attr, typ, self.file, node.lineno,
                     self._get_line(node))
 
     def log(self, *args):
@@ -152,7 +157,9 @@ class Vulture(ast.NodeVisitor):
                 self.defined_funcs.append(self._get_item(node, 'function'))
 
     def visit_Attribute(self, node):
-        if isinstance(node.ctx, ast.Load):
+        if isinstance(node.ctx, ast.Store):
+            self.defined_attrs.append(self._get_item(node, 'attribute'))
+        elif isinstance(node.ctx, ast.Load):
             self.used_attrs.append(node.attr)
 
     def visit_Name(self, node):
