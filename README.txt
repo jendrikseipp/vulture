@@ -37,7 +37,7 @@ You can install, upgrade, uninstall vulture.py with these commands::
 Usage
 -----
 
- ::
+::
 
   $ vulture --help
 
