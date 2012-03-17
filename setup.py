@@ -19,7 +19,7 @@ setup(name='vulture',
       classifiers=[
         "Environment :: Console",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: GPL3+",
+        "License :: OSI Approved :: GNU General Public License (GPL)",
         "Programming Language :: Python",
         "Topic :: Software Development",
         "Topic :: Utilities",
