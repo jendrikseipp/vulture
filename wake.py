@@ -105,9 +105,11 @@ class Vulture(ast.NodeVisitor):
     def unused_attrs(self):
         return self.get_unused(self.defined_attrs, self.used_attrs)
 
+    def _get_lineno(self, node):
+        return getattr(node, 'lineno', 1)
+
     def _get_line(self, node):
-        lineno = getattr(node, 'lineno', 1)
-        return self.code[lineno - 1] if self.code else ""
+        return self.code[self._get_lineno(node) - 1] if self.code else ""
 
     def _get_item(self, node, typ):
         name = getattr(node, 'name', None)
@@ -125,7 +127,7 @@ class Vulture(ast.NodeVisitor):
         print
 
     def print_node(self, node):
-        self.log(node.lineno, ast.dump(node), self._get_line(node))
+        self.log(self._get_lineno(node), ast.dump(node), self._get_line(node))
 
     def get_modules(self, paths):
         modules = []
@@ -174,7 +176,7 @@ class Vulture(ast.NodeVisitor):
 
     def _find_tuple_assigns(self, node):
         # Find all tuple assignments. Those have the form
-        # Assign->Tuple->Name or For->Tuple->Name
+        # Assign->Tuple->Name or For->Tuple->Name or comprehension->Tuple->Name
         for child in ast.iter_child_nodes(node):
             if not isinstance(child, ast.Tuple):
                 continue
@@ -187,6 +189,9 @@ class Vulture(ast.NodeVisitor):
         self._find_tuple_assigns(node)
 
     def visit_For(self, node):
+        self._find_tuple_assigns(node)
+
+    def visit_comprehension(self, node):
         self._find_tuple_assigns(node)
 
     def visit_ClassDef(self, node):
