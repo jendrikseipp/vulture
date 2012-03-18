@@ -199,7 +199,8 @@ class Vulture(ast.NodeVisitor):
         method = 'visit_' + node.__class__.__name__
         visitor = getattr(self, method, None)
         if visitor is not None:
-            self.print_node(node)
+            if self.verbose:
+                self.print_node(node)
             visitor(node)
         return self.generic_visit(node)
 
