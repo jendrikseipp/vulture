@@ -76,10 +76,10 @@ class Vulture(ast.NodeVisitor):
             self.scan(module_string)
 
     def report(self):
-        def sort_by_file(item):
-            return item.file.lower()
+        def file_lineno(item):
+            return (item.file.lower(), item.lineno)
         for item in sorted(self.unused_funcs + self.unused_props +
-                           self.unused_vars, key=sort_by_file):
+                           self.unused_vars, key=file_lineno):
             relpath = os.path.relpath(item.file)
             path = relpath if not relpath.startswith('..') else item.file
             print "%s:%d: Unused %s '%s'" % (path, item.lineno, item.typ, item)
