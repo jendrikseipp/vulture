@@ -1,8 +1,11 @@
 News
 ====
 
-
-0.1 (2012-03-16)
+0.2 (2012-03-18)
 ----------------
+* Only format nodes in verbose mode (gives 4x speedup).
 
+
+0.1 (2012-03-17)
+----------------
 * First release.

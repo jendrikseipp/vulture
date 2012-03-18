@@ -2,10 +2,11 @@
 
 from distutils.core import setup
 
-VERSION = '0.1'
+from wake import __version__
+
 
 setup(name='vulture',
-      version=VERSION,
+      version=__version__,
       description="Find dead code",
       long_description='\n\n'.join([open('README.txt').read(),
                                     open('NEWS.txt').read()]),

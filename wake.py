@@ -22,6 +22,7 @@ from fnmatch import fnmatchcase
 import os
 import re
 
+__version__ = "0.2"
 
 FORMAT_STRING_PATTERN = re.compile(r'\%\((\S+)\)s')
 
