@@ -79,7 +79,8 @@ class Vulture(ast.NodeVisitor):
         def file_lineno(item):
             return (item.file.lower(), item.lineno)
         for item in sorted(self.unused_funcs + self.unused_props +
-                           self.unused_vars, key=file_lineno):
+                           self.unused_vars + self.unused_attrs,
+                           key=file_lineno):
             relpath = os.path.relpath(item.file)
             path = relpath if not relpath.startswith('..') else item.file
             print "%s:%d: Unused %s '%s'" % (path, item.lineno, item.typ, item)
@@ -160,19 +161,25 @@ class Vulture(ast.NodeVisitor):
                 self.defined_funcs.append(self._get_item(node, 'function'))
 
     def visit_Attribute(self, node):
+        item = self._get_item(node, 'attribute')
         if isinstance(node.ctx, ast.Store):
-            self.defined_attrs.append(self._get_item(node, 'attribute'))
+            self.log('defined_attrs <-', item)
+            self.defined_attrs.append(item)
         elif isinstance(node.ctx, ast.Load):
-            self.used_attrs.append(node.attr)
+            self.log('useed_attrs <-', item)
+            self.used_attrs.append(item)
 
     def visit_Name(self, node):
         if node.id != 'object':
             self.used_funcs.append(node.id)
             if isinstance(node.ctx, ast.Load):
+                self.log('used_vars <-', node.id)
                 self.used_vars.append(node.id)
             elif isinstance(node.ctx, ast.Store):
                 if not (node.id.startswith('__') and node.id.endswith('__')):
-                    self.defined_vars.append(self._get_item(node, 'variable'))
+                    item = self._get_item(node, 'variable')
+                    self.log('defined_vars <-', item)
+                    self.defined_vars.append(item)
 
     def _find_tuple_assigns(self, node):
         # Find all tuple assignments. Those have the form
@@ -183,6 +190,7 @@ class Vulture(ast.NodeVisitor):
             for grandchild in ast.walk(child):
                 if (isinstance(grandchild, ast.Name) and
                     isinstance(grandchild.ctx, ast.Store)):
+                    self.log('tuple_assign_vars <-', grandchild.id)
                     self.tuple_assign_vars.append(grandchild.id)
 
     def visit_Assign(self, node):

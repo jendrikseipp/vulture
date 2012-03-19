@@ -1,6 +1,12 @@
 News
 ====
 
+
+0.3 ()
+----------------
+* Find tuple assignments in comprehensions
+
+
 0.2 (2012-03-18)
 ----------------
 * Only format nodes in verbose mode (gives 4x speedup).
