@@ -17,6 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import print_function
+
 import ast
 from fnmatch import fnmatchcase
 import os
@@ -83,7 +85,7 @@ class Vulture(ast.NodeVisitor):
                            key=file_lineno):
             relpath = os.path.relpath(item.file)
             path = relpath if not relpath.startswith('..') else item.file
-            print "%s:%d: Unused %s '%s'" % (path, item.lineno, item.typ, item)
+            print("%s:%d: Unused %s '%s'" % (path, item.lineno, item.typ, item))
 
     def get_unused(self, defined, used):
         return list(sorted(set(defined) - set(used), key=lambda x: x.lower()))
@@ -121,11 +123,8 @@ class Vulture(ast.NodeVisitor):
                     self._get_line(node))
 
     def log(self, *args):
-        if not self.verbose:
-            return
-        for arg in args:
-            print arg,
-        print
+        if self.verbose:
+            print(*args)
 
     def print_node(self, node):
         self.log(self._get_lineno(node), ast.dump(node), self._get_line(node))

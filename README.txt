@@ -23,7 +23,7 @@ Features
 Installation
 ------------
 
-* vulture requires Python2.7
+* vulture supports Python 2.6, 2.7 and 3.x
 
 You can install, upgrade, uninstall vulture.py with these commands::
 
