@@ -253,7 +253,7 @@ def test_variable4():
 
 def test_variable5():
     v = Vulture(verbose=True)
-    v.scan("for a, b in func(): print a")
+    v.scan("for a, b in func(): a")
     assert v.defined_funcs == []
     assert v.defined_vars == ['a', 'b']
     assert sorted(v.used_vars) == ['a', 'func']
