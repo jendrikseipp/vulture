@@ -300,3 +300,16 @@ prop = 1
     assert v.defined_props == ['prop']
     assert v.unused_props == ['prop']
     assert v.defined_vars == ['prop']
+
+def test_object_attribute():
+    v = Vulture(verbose=True)
+    v.scan("""\
+class Bar(object):
+    def __init__(self):
+        self.a = []
+""")
+    assert v.defined_funcs == ['Bar']
+    assert v.defined_vars == []
+    assert v.defined_attrs == ['a']
+    assert v.used_attrs == []
+    assert v.unused_attrs == ['a']
