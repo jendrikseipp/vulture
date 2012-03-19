@@ -62,8 +62,26 @@ class Vulture(ast.NodeVisitor):
         self.file = None
         self.code = None
 
+    def scan(self, node_string):
+        self.code = node_string.splitlines()
+        node = ast.parse(node_string)
+        self.visit(node)
+
+    def _get_modules(self, paths, toplevel=True):
+        """Take files from the command line even if they don't end with .py."""
+        modules = []
+        for path in paths:
+            path = os.path.abspath(path)
+            if os.path.isfile(path) and (path.endswith('.py') or toplevel):
+                modules.append(path)
+            elif os.path.isdir(path):
+                subpaths = [os.path.join(path, filename)
+                            for filename in sorted(os.listdir(path))]
+                modules.extend(self._get_modules(subpaths, toplevel=False))
+        return modules
+
     def scavenge(self, paths):
-        modules = self.get_modules(paths)
+        modules = self._get_modules(paths)
         included_modules = []
         for module in modules:
             if any(fnmatchcase(module, pattern) for pattern in self.exclude):
@@ -85,7 +103,8 @@ class Vulture(ast.NodeVisitor):
                            key=file_lineno):
             relpath = os.path.relpath(item.file)
             path = relpath if not relpath.startswith('..') else item.file
-            print("%s:%d: Unused %s '%s'" % (path, item.lineno, item.typ, item))
+            print("%s:%d: Unused %s '%s'" % (path, item.lineno, item.typ,
+                                             item))
 
     def get_unused(self, defined, used):
         return list(sorted(set(defined) - set(used), key=lambda x: x.lower()))
@@ -128,18 +147,6 @@ class Vulture(ast.NodeVisitor):
 
     def print_node(self, node):
         self.log(self._get_lineno(node), ast.dump(node), self._get_line(node))
-
-    def get_modules(self, paths):
-        modules = []
-        for path in paths:
-            path = os.path.abspath(path)
-            if os.path.isfile(path) and path.endswith('.py'):
-                modules.append(path)
-            elif os.path.isdir(path):
-                subpaths = [os.path.join(path, filename)
-                            for filename in sorted(os.listdir(path))]
-                modules.extend(self.get_modules(subpaths))
-        return modules
 
     def _get_func_name(self, func):
         for field in func._fields:
@@ -216,8 +223,3 @@ class Vulture(ast.NodeVisitor):
                 self.print_node(node)
             visitor(node)
         return self.generic_visit(node)
-
-    def scan(self, node_string):
-        self.code = node_string.splitlines()
-        node = ast.parse(node_string)
-        self.visit(node)

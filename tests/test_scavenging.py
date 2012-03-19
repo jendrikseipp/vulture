@@ -301,6 +301,7 @@ prop = 1
     assert v.unused_props == ['prop']
     assert v.defined_vars == ['prop']
 
+
 def test_object_attribute():
     v = Vulture(verbose=True)
     v.scan("""\
