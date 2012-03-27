@@ -270,6 +270,14 @@ def test_variable6():
     assert v.unused_vars == []
 
 
+def test_unused_var1():
+    v = Vulture(verbose=True)
+    v.scan("_a = 1\n__b = 2\n__c__ = 3")
+    assert v.defined_vars == []
+    assert sorted(v.used_vars) == []
+    assert v.unused_vars == []
+
+
 def test_prop1():
     v = Vulture(verbose=True)
     v.scan("""\

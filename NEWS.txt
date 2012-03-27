@@ -1,6 +1,10 @@
 News
 ====
 
+0.4 ()
+------
+* Ignore unused variables starting with an underscore (_x, _unused, _)
+
 
 0.3 (2012-03-19)
 ----------------

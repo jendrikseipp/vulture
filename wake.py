@@ -182,7 +182,8 @@ class Vulture(ast.NodeVisitor):
                 self.log('used_vars <-', node.id)
                 self.used_vars.append(node.id)
             elif isinstance(node.ctx, ast.Store):
-                if not (node.id.startswith('__') and node.id.endswith('__')):
+                # Ignore _x (pylint convention), __x, __x__ (special method).
+                if not node.id.startswith('_'):
                     item = self._get_item(node, 'variable')
                     self.log('defined_vars <-', item)
                     self.defined_vars.append(item)
