@@ -7,7 +7,7 @@ library and test suite you can find untested code.
 
 Due to Python's dynamic nature it is impossible to find all dead code for a
 static code analyzer like vulture, because it ignores scopes and scans only
-token names. Additionally some dynamic items that are not explicitly mentioned
+token names. Additionally some dynamic items that are not explicitly called
 in the code may be incorrectly reported as dead code.
 
 
@@ -40,6 +40,9 @@ Usage
 ::
 
   $ vulture --help
+
+After you have found and deleted dead code, run vulture again, because it
+may discover more dead code.
 
 
 Similar programs
