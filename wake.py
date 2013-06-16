@@ -66,7 +66,7 @@ class Vulture(ast.NodeVisitor):
     def scan(self, node_string):
         self.code = node_string.splitlines()
         try:
-            node = ast.parse(node_string)
+            node = ast.parse(node_string, filename=self.file)
         except SyntaxError:
             print()
             print('Syntax error in file %s:' % self.file)
