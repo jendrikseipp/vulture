@@ -23,6 +23,7 @@ import ast
 from fnmatch import fnmatchcase
 import os
 import re
+import traceback
 
 __version__ = "0.3"
 
@@ -66,9 +67,12 @@ class Vulture(ast.NodeVisitor):
         self.code = node_string.splitlines()
         try:
             node = ast.parse(node_string)
-        except SyntaxError as e:
-            print('Error in file', self.file)
-            raise e
+        except SyntaxError:
+            print()
+            print('Syntax error in file %s:' % self.file)
+            traceback.print_exc()
+            print()
+            return
         self.visit(node)
 
     def _get_modules(self, paths, toplevel=True):
