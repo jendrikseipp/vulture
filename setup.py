@@ -22,7 +22,7 @@ setup(name='vulture',
         "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU General Public License (GPL)",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3"
+        "Programming Language :: Python :: 3",
         "Topic :: Software Development",
         "Topic :: Utilities",
         ],
