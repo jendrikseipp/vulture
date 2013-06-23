@@ -60,7 +60,7 @@ class Vulture(ast.NodeVisitor):
         self.used_vars = []
         self.tuple_assign_vars = []
 
-        self.file = None
+        self.file = ''
         self.code = None
 
     def scan(self, node_string):
