@@ -1,9 +1,11 @@
 News
 ====
 
-0.4 ()
-------
-* Ignore unused variables starting with an underscore (_x, _unused, _)
+0.4 (2013-06-23)
+----------------
+* Ignore unused variables starting with an underscore.
+* Show warning for syntax errors instead of aborting directly.
+* Print warning if a file cannot be found.
 
 
 0.3 (2012-03-19)
