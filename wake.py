@@ -86,7 +86,7 @@ class Vulture(ast.NodeVisitor):
                 subpaths = [os.path.join(path, filename)
                             for filename in sorted(os.listdir(path))]
                 modules.extend(self._get_modules(subpaths, toplevel=False))
-            else:
+            elif toplevel:
                 print('Warning: %s could not be found.' % path)
         return modules
 
