@@ -18,20 +18,15 @@ Features
 * Lightweight: Only one module
 * Tested: Comes with a test suite
 * Complements *pyflakes* and has the same output syntax
+* Supports Python 2.6, 2.7 and 3.x
 
 
 Installation
 ------------
 
-* vulture supports Python 2.6, 2.7 and 3.x
+(Install ``pip``: ``sudo apt-get install python-pip``) ::
 
-You can install, upgrade, uninstall vulture.py with these commands::
-
-  $ sudo pip install vulture
-  $ sudo pip install --upgrade vulture
-  $ sudo pip uninstall vulture
-
-`pip` can be installed with `sudo apt-get install python-pip`.
+  $ sudo pip install -U vulture
 
 
 Usage

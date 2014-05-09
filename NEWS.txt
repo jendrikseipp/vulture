@@ -6,8 +6,8 @@ News
 * If dead code is found, exit with 1.
 
 
-0.4.1 ()
---------
+0.4.1 (2013-09-17)
+------------------
 * Only warn if a path given on the command line cannot be found.
 
 
