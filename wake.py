@@ -25,7 +25,7 @@ import os
 import re
 import traceback
 
-__version__ = '0.4.1'
+__version__ = '0.5'
 
 FORMAT_STRING_PATTERN = re.compile(r'\%\((\S+)\)s')
 
