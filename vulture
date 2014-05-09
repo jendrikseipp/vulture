@@ -20,6 +20,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import optparse
+import sys
 
 from wake import Vulture
 
@@ -42,4 +43,4 @@ if __name__ == '__main__':
     options, args = parse_args()
     vulture = Vulture(exclude=options.exclude, verbose=options.verbose)
     vulture.scavenge(args)
-    vulture.report()
+    sys.exit(vulture.report())
