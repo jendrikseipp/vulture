@@ -15,7 +15,11 @@ fi
 
 # Bump version.
 sed -i -e "s/__version__ = '.*'/__version__ = '$VERSION'/" wake.py
-hg commit -m "Update version number to $VERSION for release."
+if [[ -n $(hg diff) ]]; then
+    hg commit -m "Update version number to $VERSION for release."
+else
+    echo "version number has already been set to $VERSION"
+fi
 hg tag "v$VERSION"
 
 python setup.py register
