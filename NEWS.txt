@@ -1,7 +1,7 @@
 News
 ====
 
-0.5 (unreleased)
+0.5 (2014-05-09)
 ----------------
 * If dead code is found, exit with 1.
 
