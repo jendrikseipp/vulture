@@ -4,6 +4,8 @@ News
 0.5.1 ()
 ------------------
 * Ignore function names starting with "test_".
+* Parse variable names in new format strings (e.g. "This is {x}".format(x="nice")).
+* Only parse alphanumeric variable names format strings and ignore types.
 
 
 0.5 (2014-05-09)
