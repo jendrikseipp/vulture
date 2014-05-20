@@ -27,7 +27,8 @@ import traceback
 
 __version__ = '0.5'
 
-FORMAT_STRING_PATTERN = re.compile(r'\%\((\S+)\)s')
+# Parse variable names in template strings.
+FORMAT_STRING_PATTERNS = [re.compile(r'\%\((\S+)\)s'), re.compile(r'{(\S+)}')]
 
 
 def _ignore_function(name):
@@ -231,8 +232,15 @@ class Vulture(ast.NodeVisitor):
         self.defined_funcs.append(self._get_item(node, 'class'))
 
     def visit_Str(self, node):
-        """Variables may appear in format strings: '%(a)s' % locals()"""
-        self.used_vars.extend(FORMAT_STRING_PATTERN.findall(node.s))
+        """
+        Variables may appear in format strings:
+
+        '%(my_var)s' % locals()
+        '{my_var}'.format(**locals())
+
+        """
+        for pattern in FORMAT_STRING_PATTERNS:
+            self.used_vars.extend(pattern.findall(node.s))
 
     def visit(self, node):
         method = 'visit_' + node.__class__.__name__
