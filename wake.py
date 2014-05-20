@@ -30,6 +30,11 @@ __version__ = '0.5'
 FORMAT_STRING_PATTERN = re.compile(r'\%\((\S+)\)s')
 
 
+def _ignore_function(name):
+    return ((name.startswith('__') and name.endswith('__')) or
+            name.startswith('test_'))
+
+
 class Item(str):
     def __new__(cls, name, typ, file, lineno, line):
         item = str.__new__(cls, name)
@@ -175,8 +180,8 @@ class Vulture(ast.NodeVisitor):
                 self.defined_props.append(self._get_item(node, 'property'))
                 break
         else:
-            # Only executed if function is not a property.
-            if not (node.name.startswith('__') and node.name.endswith('__')):
+            # Function is not a property.
+            if not _ignore_function(node.name):
                 self.defined_funcs.append(self._get_item(node, 'function'))
 
     def visit_Attribute(self, node):
