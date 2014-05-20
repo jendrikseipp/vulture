@@ -234,24 +234,6 @@ def test_variable2():
 
 def test_variable3():
     v = Vulture(verbose=True)
-    v.scan("a = 1\n'%(a)s' % locals()")
-    assert v.defined_funcs == []
-    assert v.defined_vars == ['a']
-    assert v.used_vars == ['a', 'locals']
-    assert v.unused_vars == []
-
-
-def test_variable4():
-    v = Vulture(verbose=True)
-    v.scan("a = 1\n'%(a)d' % locals()")
-    assert v.defined_funcs == []
-    assert v.defined_vars == ['a']
-    assert v.used_vars == ['a', 'locals']
-    assert v.unused_vars == []
-
-
-def test_variable5():
-    v = Vulture(verbose=True)
     v.scan("(a, b), c = (d, e, f)")
     assert v.defined_funcs == []
     assert v.defined_vars == ['a', 'b', 'c']
@@ -260,7 +242,7 @@ def test_variable5():
     assert v.unused_vars == []
 
 
-def test_variable6():
+def test_variable4():
     v = Vulture(verbose=True)
     v.scan("for a, b in func(): a")
     assert v.defined_funcs == []
@@ -270,7 +252,7 @@ def test_variable6():
     assert v.unused_vars == []
 
 
-def test_variable7():
+def test_variable5():
     v = Vulture(verbose=True)
     v.scan("[a for a, b in func()]")
     assert v.defined_vars == ['a', 'b']
