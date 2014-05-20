@@ -24,7 +24,7 @@ Features
 Installation
 ------------
 
-(Install ``pip``: ``sudo apt-get install python-pip``) ::
+(Install pip: ``sudo apt-get install python-pip``) ::
 
   $ sudo pip install -U vulture
 
