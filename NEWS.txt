@@ -1,6 +1,11 @@
 News
 ====
 
+0.5.1 ()
+------------------
+* Ignore function names starting with "test_".
+
+
 0.5 (2014-05-09)
 ----------------
 * If dead code is found, exit with 1.
