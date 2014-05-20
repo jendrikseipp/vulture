@@ -28,7 +28,7 @@ import traceback
 __version__ = '0.5'
 
 # Parse variable names in template strings.
-FORMAT_STRING_PATTERNS = [re.compile(r'\%\((\S+)\)s'), re.compile(r'{(\S+)}')]
+FORMAT_STRING_PATTERNS = [re.compile(r'\%\((\w+)\)'), re.compile(r'{(\w+)}')]
 
 
 def _ignore_function(name):
