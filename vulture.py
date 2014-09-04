@@ -21,8 +21,10 @@ from __future__ import print_function
 
 import ast
 from fnmatch import fnmatchcase
+import optparse
 import os
 import re
+import sys
 import traceback
 
 __version__ = '0.5'
@@ -250,3 +252,24 @@ class Vulture(ast.NodeVisitor):
                 self.print_node(node)
             visitor(node)
         return self.generic_visit(node)
+
+
+def parse_args():
+    def csv(option, opt, value, parser):
+        setattr(parser.values, option.dest, value.split(','))
+    usage = "usage: %prog [options] PATH [PATH ...]"
+    parser = optparse.OptionParser(usage=usage)
+    parser.add_option('--exclude', action='callback', callback=csv,
+                      type="string", default=[],
+                      help='Comma-separated list of filename patterns to '
+                           'exclude (e.g. svn,external).')
+    parser.add_option('-v', '--verbose', action='store_true')
+    options, args = parser.parse_args()
+    return options, args
+
+
+def main():
+    options, args = parse_args()
+    vulture = Vulture(exclude=options.exclude, verbose=options.verbose)
+    vulture.scavenge(args)
+    sys.exit(vulture.report())

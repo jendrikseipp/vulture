@@ -1,6 +1,6 @@
 import pytest
 
-from wake import Vulture
+from vulture import Vulture
 
 
 @pytest.fixture

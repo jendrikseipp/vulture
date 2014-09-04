@@ -14,7 +14,7 @@ if [[ -n $(hg diff) ]]; then
 fi
 
 # Bump version.
-sed -i -e "s/__version__ = '.*'/__version__ = '$VERSION'/" wake.py
+sed -i -e "s/__version__ = '.*'/__version__ = '$VERSION'/" vulture.py
 if [[ -n $(hg diff) ]]; then
     hg commit -m "Update version number to $VERSION for release."
 else
