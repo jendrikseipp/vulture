@@ -1,4 +1,4 @@
-from wake import Vulture
+from vulture import Vulture
 
 
 def test_function_object1():

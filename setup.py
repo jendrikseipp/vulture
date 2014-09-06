@@ -1,8 +1,12 @@
 #! /usr/bin/env python
+try:
+    from setuptools import setup
+except ImportError:
+    import ez_setup
+    ez_setup.use_setuptools()
+    from setuptools import setup
 
-from distutils.core import setup
-
-from wake import __version__
+from vulture import __version__
 
 
 setup(name='vulture',
@@ -15,8 +19,7 @@ setup(name='vulture',
       author_email='jendrikseipp@web.de',
       url='https://bitbucket.org/jendrikseipp/vulture',
       license='GPL3+',
-      py_modules=['wake'],
-      scripts=['vulture'],
+      py_modules=['vulture'],
       classifiers=[
         "Environment :: Console",
         "Intended Audience :: Developers",
@@ -26,4 +29,7 @@ setup(name='vulture',
         "Topic :: Software Development",
         "Topic :: Utilities",
         ],
+      entry_points={
+        'console_scripts': ['vulture = vulture:main'],
+      },
       )
