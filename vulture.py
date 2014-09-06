@@ -274,5 +274,6 @@ def main():
     vulture.scavenge(args)
     sys.exit(vulture.report())
 
+
 if __name__ == '__main__':
     main()
