@@ -313,3 +313,20 @@ class Bar(object):
     assert v.defined_attrs == ['a']
     assert v.used_attrs == []
     assert v.unused_attrs == ['a']
+
+
+def test_function_names():
+    v = Vulture(verbose=True)
+    v.scan("""\
+def test_method():
+    pass
+
+def other_method():
+    pass
+""")
+    assert v.defined_funcs == ['other_method']
+    assert v.defined_vars == []
+    assert v.defined_attrs == []
+    assert v.used_attrs == []
+    assert v.unused_attrs == []
+    assert v.unused_funcs == ['other_method']
