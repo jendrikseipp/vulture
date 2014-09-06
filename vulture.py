@@ -273,3 +273,6 @@ def main():
     vulture = Vulture(exclude=options.exclude, verbose=options.verbose)
     vulture.scavenge(args)
     sys.exit(vulture.report())
+
+if __name__ == '__main__':
+    main()
