@@ -28,7 +28,7 @@ import re
 import sys
 import traceback
 
-__version__ = '0.5'
+__version__ = '0.6'
 
 # Parse variable names in template strings.
 FORMAT_STRING_PATTERNS = [re.compile(r'\%\((\w+)\)'), re.compile(r'{(\w+)}')]
