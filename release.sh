@@ -8,6 +8,11 @@ VERSION="$1"
 py.test-2.7
 py.test-3.4
 
+# Install with: sudo pip install -U collective.checkdocs
+# Note: python setup.py --long-description | rst2html.py > output.html
+# doesn't exit with 1 if an error occurs.
+python setup.py checkdocs
+
 if [[ -n $(hg diff) ]]; then
     echo "Error: repo has uncomitted changes"
     exit 1

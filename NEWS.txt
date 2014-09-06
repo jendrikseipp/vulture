@@ -3,7 +3,7 @@ News
 
 0.6 (2014-09-06)
 ----------------
-* Ignore function names starting with "test_".
+* Ignore function names starting with "test\_".
 * Parse variable names in new format strings (e.g. "This is {x}".format(x="nice")).
 * Only parse alphanumeric variable names in format strings and ignore types.
 * Abort with exit code 1 on syntax errors.
