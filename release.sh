@@ -6,7 +6,7 @@ set -e
 VERSION="$1"
 
 py.test-2.7
-py.test-3.3
+py.test-3.4
 
 if [[ -n $(hg diff) ]]; then
     echo "Error: repo has uncomitted changes"
