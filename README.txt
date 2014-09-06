@@ -48,18 +48,11 @@ Similar programs
   branches of the code to actually be run.
 
 
-About the name
---------------
-
-A *vulture* eats dead animals. A group of feeding vultures is called a *wake*.
-Simples.
-
-
 Feedback
 --------
 
-Your feedback is more than welcome. Write emails to
-jendrikseipp@web.de or post bugs and feature requests on bitbucket:
+Your feedback is more than welcome. Write emails to jendrikseipp@web.de
+or post bugs and feature or pull requests on bitbucket:
 
 https://bitbucket.org/jendrikseipp/vulture/issues
 

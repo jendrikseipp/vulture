@@ -1,11 +1,12 @@
 News
 ====
 
-0.5.1 ()
-------------------
+0.6 (2014-09-06)
+----------------
 * Ignore function names starting with "test_".
 * Parse variable names in new format strings (e.g. "This is {x}".format(x="nice")).
-* Only parse alphanumeric variable names format strings and ignore types.
+* Only parse alphanumeric variable names in format strings and ignore types.
+* Support installation under Windows by using setuptools (thanks Reuben Fletcher-Costin).
 
 
 0.5 (2014-05-09)
