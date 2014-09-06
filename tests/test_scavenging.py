@@ -1,3 +1,5 @@
+import pytest
+
 from vulture import Vulture
 
 
@@ -330,3 +332,10 @@ def other_method():
     assert v.used_attrs == []
     assert v.unused_attrs == []
     assert v.unused_funcs == ['other_method']
+
+
+def test_syntax_error():
+    v = Vulture(verbose=True)
+    with pytest.raises(SyntaxError):
+        v.scan("""foo bar""")
+
