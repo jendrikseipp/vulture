@@ -1,7 +1,5 @@
 TODO
 ====
 
-* Ignore specific variable and function names given on the commandline
-  (e.g. --ignore test_*,_*,__*__)
 * Parse all variable names in new format strings (vars with special formatting, etc.)
   Use string.Formatter.parse for this.
