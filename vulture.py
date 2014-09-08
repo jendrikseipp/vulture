@@ -146,7 +146,7 @@ class Vulture(ast.NodeVisitor):
         return getattr(node, 'lineno', 1)
 
     def _get_line(self, node):
-        return self.code[self._get_lineno(node) - 1] if self.code else ""
+        return self.code[self._get_lineno(node) - 1] if self.code else ''
 
     def _get_item(self, node, typ):
         name = getattr(node, 'name', None)
@@ -251,10 +251,10 @@ class Vulture(ast.NodeVisitor):
 def parse_args():
     def csv(option, opt, value, parser):
         setattr(parser.values, option.dest, value.split(','))
-    usage = "usage: %prog [options] PATH [PATH ...]"
+    usage = 'usage: %prog [options] PATH [PATH ...]'
     parser = optparse.OptionParser(usage=usage)
     parser.add_option('--exclude', action='callback', callback=csv,
-                      type="string", default=[],
+                      type='string', default=[],
                       help='Comma-separated list of filename patterns to '
                            'exclude (e.g. svn,external).')
     parser.add_option('-v', '--verbose', action='store_true')
