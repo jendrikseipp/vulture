@@ -40,12 +40,11 @@ def _ignore_function(name):
 
 
 class Item(str):
-    def __new__(cls, name, typ, file, lineno, line):
+    def __new__(cls, name, typ, file, lineno):
         item = str.__new__(cls, name)
         item.typ = typ
         item.file = file
         item.lineno = lineno
-        item.line = line
         return item
 
 
@@ -154,8 +153,7 @@ class Vulture(ast.NodeVisitor):
         id = getattr(node, 'id', None)
         attr = getattr(node, 'attr', None)
         assert len([x for x in (name, id, attr) if x is not None]) == 1
-        return Item(name or id or attr, typ, self.file, node.lineno,
-                    self._get_line(node))
+        return Item(name or id or attr, typ, self.file, node.lineno)
 
     def log(self, *args):
         if self.verbose:
