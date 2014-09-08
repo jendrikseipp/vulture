@@ -5,6 +5,7 @@ set -e
 
 VERSION="$1"
 
+pep8 setup.py vulture.py
 py.test-2.7
 py.test-3.4
 
