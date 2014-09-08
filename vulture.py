@@ -135,8 +135,9 @@ class Vulture(ast.NodeVisitor):
 
     @property
     def unused_vars(self):
-        return self.get_unused(self.defined_vars,
-                    self.used_vars + self.used_attrs + self.tuple_assign_vars)
+        return self.get_unused(
+            self.defined_vars,
+            self.used_vars + self.used_attrs + self.tuple_assign_vars)
 
     @property
     def unused_attrs(self):
@@ -211,9 +212,9 @@ class Vulture(ast.NodeVisitor):
                 continue
             for grandchild in ast.walk(child):
                 if (isinstance(grandchild, ast.Name) and
-                    isinstance(grandchild.ctx, ast.Store)):
-                    self.log('tuple_assign_vars <-', grandchild.id)
-                    self.tuple_assign_vars.append(grandchild.id)
+                        isinstance(grandchild.ctx, ast.Store)):
+                        self.log('tuple_assign_vars <-', grandchild.id)
+                        self.tuple_assign_vars.append(grandchild.id)
 
     def visit_Assign(self, node):
         self._find_tuple_assigns(node)
