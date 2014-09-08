@@ -8,6 +8,7 @@ VERSION="$1"
 pep8 setup.py vulture.py
 py.test-2.7
 py.test-3.4
+./vulture.py vulture.py whitelist.py
 
 # Install with: sudo pip install -U collective.checkdocs
 # Note: python setup.py --long-description | rst2html.py > output.html
