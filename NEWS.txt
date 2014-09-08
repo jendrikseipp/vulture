@@ -1,6 +1,11 @@
 News
 ====
 
+0.6.1 ()
+------------------
+* Test vulture with vulture using a whitelist module for undetected code usages.
+
+
 0.6 (2014-09-06)
 ----------------
 * Ignore function names starting with "test\_".
