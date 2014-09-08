@@ -1,5 +1,6 @@
 # Vulture sometimes incorrectly classifies code as unused. You can use
-# a separate python file to signal that the code is actually used:
+# a separate python file to signal that the code is actually used and
+# pass it to vulture:
 #
 # vulture vulture.py whitelist.py
 

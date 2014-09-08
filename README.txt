@@ -1,14 +1,14 @@
 vulture - Find dead code
 ========================
 
-vulture finds unused classes, functions and variables in your code. This helps
-you cleanup and find errors in your programs. If you run it on both your
-library and test suite you can find untested code.
+vulture finds unused classes, functions and variables in your code.
+This helps you cleanup and find errors in your programs. If you run it
+on both your library and test suite you can find untested code.
 
-Due to Python's dynamic nature it is impossible to find all dead code for a
-static code analyzer like vulture, because it ignores scopes and scans only
-token names. Additionally some dynamic items that are not explicitly called
-in the code may be incorrectly reported as dead code.
+Due to Python's dynamic nature it is impossible to find all dead code
+for a static code analyzer like vulture, because it ignores scopes and
+scans only token names. Additionally, some dynamic items that are not
+explicitly called in the code may be incorrectly reported as dead code.
 
 
 Features
@@ -16,7 +16,7 @@ Features
 
 * Fast: Uses static code analysis
 * Lightweight: Only one module
-* Tested: Comes with a test suite
+* Tested: Comes with a test suite and tests itself
 * Complements *pyflakes* and has the same output syntax
 * Supports Python 2.6, 2.7 and 3.x
 
@@ -24,9 +24,9 @@ Features
 Installation
 ------------
 
-(Install pip: ``sudo apt-get install python-pip``) ::
+::
 
-  $ sudo pip install -U vulture
+  $ pip install -U vulture
 
 
 Usage
@@ -36,16 +36,18 @@ Usage
 
   $ vulture --help
 
-After you have found and deleted dead code, run vulture again, because it
-may discover more dead code.
+After you have found and deleted dead code, run vulture again, because
+it may discover more dead code. You can list false-positives (used code
+that is marked as unused) in a python module and add it to the list of
+scanned paths (see ``whitelist.py``).
 
 
 Similar programs
 ----------------
 
 * vulture can be used together with *pyflakes*
-* The *coverage* module can find unused code more reliably, but requires all
-  branches of the code to actually be run.
+* The *coverage* module can find unused code more reliably, but requires
+  all branches of the code to actually be run.
 
 
 Feedback
