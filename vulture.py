@@ -102,7 +102,8 @@ class Vulture(ast.NodeVisitor):
 
         for module in included_modules:
             self.log('Scanning:', module)
-            module_string = open(module).read()
+            with open(module) as f:
+                module_string = f.read()
             self.file = module
             self.scan(module_string)
 
