@@ -11,8 +11,8 @@ py.test-3.4
 ./vulture.py vulture.py whitelist.py
 
 # Install with: sudo pip install -U collective.checkdocs
-# Note: python setup.py --long-description | rst2html.py > output.html
-# doesn't exit with 1 if an error occurs.
+# Alternative: python setup.py --long-description | \
+#              rst2html.py --exit-status 2 > output.html
 python setup.py checkdocs
 
 if [[ -n $(hg diff) ]]; then
