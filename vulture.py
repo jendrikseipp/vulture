@@ -178,7 +178,7 @@ class Vulture(ast.NodeVisitor):
             self.log('defined_attrs <-', item)
             self.defined_attrs.append(item)
         elif isinstance(node.ctx, ast.Load):
-            self.log('useed_attrs <-', item)
+            self.log('used_attrs <-', item)
             self.used_attrs.append(item)
 
     def visit_Name(self, node):
