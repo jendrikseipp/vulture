@@ -17,7 +17,7 @@ def test_script():
 
 
 def test_exclude():
-    assert call_vulture(['--exclude', 'vulture.py']) == 0
+    assert call_vulture(['vulture.py', '--exclude', 'vulture.py']) == 0
 
 
 def test_missing_file():
@@ -26,3 +26,7 @@ def test_missing_file():
 
 def test_dir():
     assert call_vulture(['tests']) == 0
+
+
+def test_report():
+    assert call_vulture(['vulture.py']) == 1
