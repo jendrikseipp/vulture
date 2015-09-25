@@ -9,9 +9,9 @@ setup(
     name='vulture',
     version=__version__,
     description='Find dead code',
-    long_description='\n\n'.join([open('README.txt').read(),
-                                  open('NEWS.txt').read()]),
-    keywords='vulture',
+    long_description='\n\n'.join(
+        [open('README.txt').read(), open('NEWS.txt').read()]),
+    keywords='vulture dead unused code pyflakes',
     author='Jendrik Seipp',
     author_email='jendrikseipp@web.de',
     url='https://bitbucket.org/jendrikseipp/vulture',
