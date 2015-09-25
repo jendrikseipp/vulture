@@ -35,8 +35,3 @@ def test_report():
 def test_whitelist():
     assert subprocess.call(
         [sys.executable, 'whitelist.py'], cwd=REPO) == 0
-
-
-def test_setup_py():
-    assert subprocess.call(
-        [sys.executable, 'setup.py', 'check'], cwd=REPO) == 0
