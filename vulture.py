@@ -162,14 +162,6 @@ class Vulture(ast.NodeVisitor):
     def print_node(self, node):
         self.log(self._get_lineno(node), ast.dump(node), self._get_line(node))
 
-    def _get_func_name(self, func):
-        for field in func._fields:
-            if field == 'id':
-                return func.id
-            elif field == 'func':
-                return self._get_func_name(func.func)
-        return func.attr
-
     def visit_FunctionDef(self, node):
         for decorator in node.decorator_list:
             if getattr(decorator, 'id', None) == 'property':
