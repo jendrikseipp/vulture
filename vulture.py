@@ -26,7 +26,6 @@ import optparse
 import os
 import re
 import sys
-import traceback
 
 __version__ = '0.6'
 

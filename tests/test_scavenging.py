@@ -338,4 +338,3 @@ def test_syntax_error():
     v = Vulture(verbose=True)
     with pytest.raises(SyntaxError):
         v.scan("""foo bar""")
-
