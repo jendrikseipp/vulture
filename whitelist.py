@@ -16,3 +16,5 @@ v.visit_For
 v.visit_comprehension
 v.visit_ClassDef
 v.visit_Str
+v.visit_Import
+v.visit_ImportFrom

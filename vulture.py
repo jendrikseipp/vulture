@@ -66,6 +66,7 @@ class Vulture(ast.NodeVisitor):
         self.defined_vars = []
         self.used_vars = []
         self.tuple_assign_vars = []
+        self.asname_to_name = {}
 
         self.file = ''
         self.code = None
@@ -184,6 +185,11 @@ class Vulture(ast.NodeVisitor):
     def visit_Name(self, node):
         if node.id != 'object':
             self.used_funcs.append(node.id)
+            if node.id in self.asname_to_name:
+                orig_name = self.asname_to_name[node.id]
+                self.log('used_funcs <- %s asname %s' % (orig_name, node.id))
+                self.used_funcs.append(orig_name)
+
             if isinstance(node.ctx, ast.Load):
                 self.log('used_vars <-', node.id)
                 self.used_vars.append(node.id)
@@ -193,6 +199,20 @@ class Vulture(ast.NodeVisitor):
                     item = self._get_item(node, 'variable')
                     self.log('defined_vars <-', item)
                     self.defined_vars.append(item)
+
+    def visit_Import(self, node):
+        self._add_asnames(node)
+
+    def visit_ImportFrom(self, node):
+        self._add_asnames(node)
+
+    def _add_asnames(self, node):
+        assert isinstance(node, (ast.Import, ast.ImportFrom))
+        for name_alias in node.names:
+            asname = name_alias.asname
+            if asname is not None:
+                self.log('asname alias <- %s -> %s' % (asname, name_alias.name))
+                self.asname_to_name[asname] = name_alias.name
 
     def _find_tuple_assigns(self, node):
         # Find all tuple assignments. Those have the form

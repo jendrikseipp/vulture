@@ -333,6 +333,30 @@ def other_method():
     assert v.unused_attrs == []
     assert v.unused_funcs == ['other_method']
 
+def test_import_from_alias():
+    v = Vulture(verbose=True)
+    v.scan("""\
+class MyClass(object):
+    pass
+class MyOtherClass(object):
+    pass
+
+from any_module import MyClass as AliasedMyClass
+import MyOtherClass as AliasedMyOtherClass
+
+AliasedMyClass()
+AliasedMyOtherClass()
+""")
+    assert v.defined_funcs == ['MyClass', 'MyOtherClass']
+    assert v.defined_vars == []
+    assert v.defined_attrs == []
+    assert v.used_attrs == []
+    assert v.unused_attrs == []
+    assert v.unused_funcs == []
+    # perhaps this should just be [MyClass, MyOtherClass]?
+    assert v.used_funcs == ['AliasedMyClass', 'MyClass',
+                            'AliasedMyOtherClass', 'MyOtherClass']
+
 
 def test_syntax_error():
     v = Vulture(verbose=True)
