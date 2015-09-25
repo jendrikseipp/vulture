@@ -30,3 +30,13 @@ def test_dir():
 
 def test_report():
     assert call_vulture(['vulture.py']) == 1
+
+
+def test_whitelist():
+    assert subprocess.call(
+        [sys.executable, 'whitelist.py'], cwd=REPO) == 0
+
+
+def test_setup_py():
+    assert subprocess.call(
+        [sys.executable, 'setup.py', 'check'], cwd=REPO) == 0
