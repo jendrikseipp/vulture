@@ -3,8 +3,8 @@ TODO
 
 * Parse all variable names in new format strings (vars with special formatting, etc.)
   Use string.Formatter.parse for this.
+* Allow using vulture as a module. Possibly using pyflakes as an example.
 * Check test coverage with *coverage*.
-* Use continuous integration service.
 * Use requirements-dev.txt file?
 
 
