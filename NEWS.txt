@@ -1,8 +1,9 @@
 News
 ====
 
-0.6.1 ()
+0.7 ()
 ------------------
+* Exit with exitcode 1 if path on commandline can't be found.
 * Test vulture with vulture using a whitelist module for undetected code usages.
 * Add test that runs vulture as a script.
 * Remove ez_setup.py.

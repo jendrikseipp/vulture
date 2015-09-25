@@ -87,7 +87,7 @@ class Vulture(ast.NodeVisitor):
                             for filename in sorted(os.listdir(path))]
                 modules.extend(self._get_modules(subpaths, toplevel=False))
             elif toplevel:
-                print('Warning: %s could not be found.' % path)
+                sys.exit('Error: %s could not be found.' % path)
         return modules
 
     def scavenge(self, paths):

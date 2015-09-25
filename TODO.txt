@@ -5,8 +5,7 @@ TODO
   Use string.Formatter.parse for this.
 * Allow using vulture as a module. Possibly using pyflakes as an example.
 * Check test coverage with *coverage*.
-* Use requirements-dev.txt file?
-
+* Remove Python 2.6 compatibility and use argparse.
 
 Non-Todo
 ========
