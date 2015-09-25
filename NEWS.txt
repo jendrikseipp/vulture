@@ -5,7 +5,8 @@ News
 ------------------
 * Exit with exitcode 1 if path on commandline can't be found.
 * Test vulture with vulture using a whitelist module for undetected code usages.
-* Add test that runs vulture as a script.
+* Add tests that run vulture as a script.
+* Add "python setup.py test" command for running tests.
 * Remove ez_setup.py.
 
 
