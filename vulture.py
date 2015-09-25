@@ -96,8 +96,8 @@ class Vulture(ast.NodeVisitor):
         for module in modules:
             if any(fnmatchcase(module, pattern) for pattern in self.exclude):
                 self.log('Excluded:', module)
-                continue
-            included_modules.append(module)
+            else:
+                included_modules.append(module)
 
         for module in included_modules:
             self.log('Scanning:', module)
