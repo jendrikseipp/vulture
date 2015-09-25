@@ -1,13 +1,14 @@
 #! /bin/bash
 
-set -u
-set -e
+set -euo pipefail
 
 VERSION="$1"
 
 pep8 setup.py vulture.py
 py.test-2.7
 py.test-3.4
+
+# Check vulture for dead code with vulture.
 ./vulture.py vulture.py whitelist.py
 
 # Install with: sudo pip install -U collective.checkdocs
@@ -25,7 +26,7 @@ sed -i -e "s/__version__ = '.*'/__version__ = '$VERSION'/" vulture.py
 if [[ -n $(hg diff) ]]; then
     hg commit -m "Update version number to $VERSION for release."
 else
-    echo "version number has already been set to $VERSION"
+    echo "Version number has already been set to $VERSION"
 fi
 hg tag "v$VERSION"
 
