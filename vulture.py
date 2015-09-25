@@ -160,7 +160,10 @@ class Vulture(ast.NodeVisitor):
             print(*args)
 
     def print_node(self, node):
-        self.log(self._get_lineno(node), ast.dump(node), self._get_line(node))
+        # Only create the strings, if we'll also print them.
+        if self.verbose:
+            self.log(
+                self._get_lineno(node), ast.dump(node), self._get_line(node))
 
     def visit_FunctionDef(self, node):
         for decorator in node.decorator_list:
@@ -233,8 +236,7 @@ class Vulture(ast.NodeVisitor):
         method = 'visit_' + node.__class__.__name__
         visitor = getattr(self, method, None)
         if visitor is not None:
-            if self.verbose:
-                self.print_node(node)
+            self.print_node(node)
             visitor(node)
         return self.generic_visit(node)
 
