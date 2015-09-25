@@ -2,9 +2,9 @@
 
 set -euo pipefail
 
-pep8 .
+pep8 *.py tests/*.py
 
-pyflakes .
+pyflakes *.py tests/*.py
 
 py.test
 
