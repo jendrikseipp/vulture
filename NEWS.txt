@@ -4,6 +4,7 @@ News
 0.6.1 ()
 ------------------
 * Test vulture with vulture using a whitelist module for undetected code usages.
+* Remove ez_setup.py.
 
 
 0.6 (2014-09-06)
