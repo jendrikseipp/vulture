@@ -1,24 +1,24 @@
 vulture - Find dead code
 ========================
 
-vulture finds unused classes, functions and variables in your code.
+Vulture finds unused classes, functions and variables in your code.
 This helps you cleanup and find errors in your programs. If you run it
 on both your library and test suite you can find untested code.
 
-Due to Python's dynamic nature it is impossible to find all dead code
-for a static code analyzer like vulture, because it ignores scopes and
-scans only token names. Additionally, some dynamic items that are not
-explicitly called in the code may be incorrectly reported as dead code.
+Due to Python's dynamic nature, static code analyzers like vulture are
+likely to miss some dead code. Also, code that is only called
+implicitly may be reported as unused. Nonetheless, vulture can be a
+very helpful tool for achieving high code quality.
 
 
 Features
 --------
 
-* Fast: Uses static code analysis
-* Lightweight: Only one module
-* Tested: Comes with a test suite and tests itself
-* Complements *pyflakes* and has the same output syntax
-* Supports Python 2.6, 2.7 and 3.x
+* fast: uses static code analysis
+* lightweight: only one module
+* tested: tests itself and has 100% test coverage
+* complements *pyflakes* and has the same output syntax
+* supports Python 2.6, 2.7 and 3.x
 
 
 Installation
@@ -37,9 +37,19 @@ Usage
   $ vulture --help
 
 After you have found and deleted dead code, run vulture again, because
-it may discover more dead code. You can list false-positives (used code
-that is marked as unused) in a python module and add it to the list of
-scanned paths (see ``whitelist.py``).
+it may discover more dead code. You can add false-positives (used code
+that is marked as unused) to a python module and add it to the list of
+scanned paths (see ``whitelist.py`` for an example).
+
+
+How does it work?
+-----------------
+
+Vulture uses the ``ast`` module to build abstract syntax trees for all
+given files. While traversing all syntax trees it records the names of
+defined and used objects. Afterwards, it reports the objects which have
+been defined, but not used. This analysis ignores scopes and focuses
+only on object names.
 
 
 Similar programs
