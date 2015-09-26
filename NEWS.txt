@@ -1,8 +1,8 @@
 News
 ====
 
-0.7 ()
-------------------
+0.7 (2015-09-26)
+----------------
 * Exit with exitcode 1 if path on commandline can't be found.
 * Test vulture with vulture using a whitelist module for false positives.
 * Add tests that run vulture as a script.
