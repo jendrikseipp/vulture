@@ -3,7 +3,7 @@
 #
 # vulture - Find dead code.
 #
-# Copyright (C) 2012-2014  Jendrik Seipp (jendrikseipp@web.de)
+# Copyright (C) 2012-2015  Jendrik Seipp (jendrikseipp@web.de)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import os
 import re
 import sys
 
-__version__ = '0.6'
+__version__ = '0.7'
 
 # Parse variable names in template strings.
 FORMAT_STRING_PATTERNS = [re.compile(r'\%\((\w+)\)'), re.compile(r'{(\w+)}')]
@@ -161,7 +161,10 @@ class Vulture(ast.NodeVisitor):
             print(*args)
 
     def print_node(self, node):
-        self.log(self._get_lineno(node), ast.dump(node), self._get_line(node))
+        # Only create the strings, if we'll also print them.
+        if self.verbose:
+            self.log(
+                self._get_lineno(node), ast.dump(node), self._get_line(node))
 
     def visit_FunctionDef(self, node):
         for decorator in node.decorator_list:
@@ -179,7 +182,7 @@ class Vulture(ast.NodeVisitor):
             self.log('defined_attrs <-', item)
             self.defined_attrs.append(item)
         elif isinstance(node.ctx, ast.Load):
-            self.log('useed_attrs <-', item)
+            self.log('used_attrs <-', item)
             self.used_attrs.append(item)
 
     def visit_Name(self, node):
@@ -253,8 +256,7 @@ class Vulture(ast.NodeVisitor):
         method = 'visit_' + node.__class__.__name__
         visitor = getattr(self, method, None)
         if visitor is not None:
-            if self.verbose:
-                self.print_node(node)
+            self.print_node(node)
             visitor(node)
         return self.generic_visit(node)
 
