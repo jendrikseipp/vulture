@@ -367,14 +367,11 @@ AliasedB()
 AliasedC()
 AliasedD()
 """)
+    assert v.defined_attrs == []
     assert v.defined_funcs == ['A', 'B', 'C']
     assert v.defined_vars == ['D']
-    assert v.defined_attrs == []
-    # TODO: Remove D and AliasedD.
-    assert v.used_funcs == [
-        'D', 'AliasedA', 'AliasedB', 'AliasedC', 'AliasedD']
-    assert v.used_vars == ['AliasedD']
     assert v.used_attrs == []
+    assert v.used_vars == ['AliasedA', 'AliasedB', 'AliasedC', 'AliasedD']
     assert v.unused_attrs == []
     assert v.unused_funcs == []
     assert v.unused_vars == []
