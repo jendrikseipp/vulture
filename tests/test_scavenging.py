@@ -216,6 +216,16 @@ class Bar(object):
     assert v.unused_funcs == ['Bar']
 
 
+def test_variable0():
+    v = Vulture(verbose=True)
+    v.scan("a = 1")
+    assert v.defined_funcs == []
+    assert v.used_funcs == []
+    assert v.defined_vars == ['a']
+    assert v.used_vars == []
+    assert v.unused_vars == ['a']
+
+
 def test_variable1():
     v = Vulture(verbose=True)
     v.scan("a = 1\nb = a")
@@ -333,29 +343,39 @@ def other_method():
     assert v.unused_attrs == []
     assert v.unused_funcs == ['other_method']
 
-def test_import_from_alias():
+
+def test_import_as_alias():
     v = Vulture(verbose=True)
     v.scan("""\
-class MyClass(object):
+class A(object):
     pass
-class MyOtherClass(object):
+class B(object):
     pass
+def C():
+    pass
+D = 42
 
-from any_module import MyClass as AliasedMyClass
-import MyOtherClass as AliasedMyOtherClass
+from any_module import A as AliasedA
+import B as AliasedB
+import C as AliasedC
+import D as AliasedD
 
-AliasedMyClass()
-AliasedMyOtherClass()
+AliasedA()
+AliasedB()
+AliasedC()
+AliasedD()
 """)
-    assert v.defined_funcs == ['MyClass', 'MyOtherClass']
-    assert v.defined_vars == []
+    assert v.defined_funcs == ['A', 'B', 'C']
+    assert v.defined_vars == ['D']
     assert v.defined_attrs == []
+    # TODO: Remove D and AliasedD.
+    assert v.used_funcs == [
+        'D', 'AliasedA', 'AliasedB', 'AliasedC', 'AliasedD']
+    assert v.used_vars == ['AliasedD']
     assert v.used_attrs == []
     assert v.unused_attrs == []
     assert v.unused_funcs == []
-    # perhaps this should just be [MyClass, MyOtherClass]?
-    assert v.used_funcs == ['AliasedMyClass', 'MyClass',
-                            'AliasedMyOtherClass', 'MyOtherClass']
+    assert v.unused_vars == []
 
 
 def test_syntax_error():
