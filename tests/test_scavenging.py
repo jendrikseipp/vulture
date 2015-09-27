@@ -3,6 +3,11 @@ import pytest
 from vulture import Vulture
 
 
+@pytest.fixture
+def v():
+    return Vulture(verbose=True)
+
+
 def test_function_object1():
     v = Vulture()
     v.scan("""\
@@ -24,7 +29,6 @@ def func():
 func
 """)
     assert v.defined_funcs == ['func']
-    assert v.used_funcs == ['func']
     assert v.unused_funcs == []
 
 
@@ -96,8 +100,7 @@ foo.bar = 2
     assert v.unused_attrs == ['bar']
 
 
-def test_callback1():
-    v = Vulture()
+def test_callback1(v):
     v.scan("""\
 class Bar(object):
     def foo(self):
@@ -111,8 +114,7 @@ b.foo
     assert v.defined_funcs == ['Bar', 'foo']
 
 
-def test_class1():
-    v = Vulture()
+def test_class1(v):
     v.scan("""\
 class Bar(object):
     pass
@@ -120,11 +122,9 @@ class Bar(object):
     assert v.used_attrs == []
     assert v.unused_funcs == ['Bar']
     assert v.defined_funcs == ['Bar']
-    assert v.used_funcs == []
 
 
-def test_class2():
-    v = Vulture()
+def test_class2(v):
     v.scan("""\
 class Bar():
     pass
@@ -135,11 +135,10 @@ Foo()
     assert v.used_attrs == []
     assert v.unused_funcs == []
     assert v.defined_funcs == ['Bar', 'Foo']
-    assert v.used_funcs == ['Bar', 'Foo']
+    assert v.used_vars == ['Bar', 'Foo']
 
 
-def test_class3():
-    v = Vulture()
+def test_class3(v):
     v.scan("""\
 class Bar():
     pass
@@ -147,12 +146,11 @@ class Bar():
 """)
     assert v.used_attrs == []
     assert v.defined_funcs == ['Bar']
-    assert v.used_funcs == ['Bar']
+    assert v.used_vars == ['Bar']
     assert v.unused_funcs == []
 
 
-def test_class4():
-    v = Vulture()
+def test_class4(v):
     v.scan("""\
 class Bar():
     pass
@@ -160,12 +158,10 @@ Bar()
 """)
     assert v.used_attrs == []
     assert v.defined_funcs == ['Bar']
-    assert v.used_funcs == ['Bar']
     assert v.unused_funcs == []
 
 
-def test_class5():
-    v = Vulture()
+def test_class5(v):
     v.scan("""\
 class Bar():
     pass
@@ -176,8 +172,7 @@ b = Bar()
     assert v.unused_funcs == []
 
 
-def test_class6():
-    v = Vulture()
+def test_class6(v):
     v.scan("""\
 class Bar():
     pass
@@ -216,14 +211,21 @@ class Bar(object):
     assert v.unused_funcs == ['Bar']
 
 
-def test_variable0():
-    v = Vulture(verbose=True)
-    v.scan("a = 1")
+def test_token_types(v):
+    v.scan("""\
+a
+b = 2
+c()
+x.d
+""")
     assert v.defined_funcs == []
-    assert v.used_funcs == []
-    assert v.defined_vars == ['a']
-    assert v.used_vars == []
-    assert v.unused_vars == ['a']
+    assert v.defined_vars == ['b']
+    assert v.used_vars == ['a', 'c', 'x']
+    assert v.used_attrs == ['d']
+    assert v.unused_attrs == []
+    assert v.unused_funcs == []
+    assert v.unused_props == []
+    assert v.unused_vars == ['b']
 
 
 def test_variable1():

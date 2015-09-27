@@ -58,12 +58,11 @@ class Vulture(ast.NodeVisitor):
 
         self.verbose = verbose
 
-        self.defined_funcs = []
-        self.used_funcs = []
-        self.defined_props = []
         self.defined_attrs = []
-        self.used_attrs = []
+        self.defined_funcs = []
+        self.defined_props = []
         self.defined_vars = []
+        self.used_attrs = []
         self.used_vars = []
         self.tuple_assign_vars = []
         self.import_aliases = {}
@@ -126,8 +125,9 @@ class Vulture(ast.NodeVisitor):
 
     @property
     def unused_funcs(self):
-        return self.get_unused(self.defined_funcs,
-                               self.used_funcs + self.used_attrs)
+        return self.get_unused(
+            self.defined_funcs,
+            self.used_vars + self.used_attrs)
 
     @property
     def unused_props(self):
@@ -187,9 +187,6 @@ class Vulture(ast.NodeVisitor):
 
     def visit_Name(self, node):
         if node.id != 'object':
-            self.log('used_funcs <-', node.id)
-            self.used_funcs.append(node.id)
-
             if isinstance(node.ctx, ast.Load):
                 self.log('used_vars <-', node.id)
                 self.used_vars.append(node.id)
