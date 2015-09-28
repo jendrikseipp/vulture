@@ -47,6 +47,18 @@ class Item(str):
         return item
 
 
+class LoggingList(list):
+    def __init__(self, name, verbose):
+        self._name = name
+        self._verbose = verbose
+        return list.__init__(self)
+
+    def append(self, item):
+        if self._verbose:
+            print('{0} <- {1}'.format(self._name, item))
+        list.append(self, item)
+
+
 class Vulture(ast.NodeVisitor):
     """Find dead stuff."""
     def __init__(self, exclude=None, verbose=False):
@@ -58,14 +70,17 @@ class Vulture(ast.NodeVisitor):
 
         self.verbose = verbose
 
-        self.defined_attrs = []
-        self.defined_funcs = []
-        self.defined_props = []
-        self.defined_vars = []
-        self.used_attrs = []
-        self.used_vars = []
-        self.tuple_assign_vars = []
-        self.names_imported_as_aliases = []
+        def get_list(name):
+            return LoggingList(name, self.verbose)
+
+        self.defined_attrs = get_list('defined_attrs')
+        self.defined_funcs = get_list('defined_funcs')
+        self.defined_props = get_list('defined_props')
+        self.defined_vars = get_list('defined_vars')
+        self.used_attrs = get_list('used_attrs')
+        self.used_vars = get_list('used_vars')
+        self.tuple_assign_vars = get_list('tuple_assign_vars')
+        self.names_imported_as_aliases = get_list('names_imported_as_aliases')
 
         self.file = ''
         self.code = None
@@ -180,22 +195,18 @@ class Vulture(ast.NodeVisitor):
     def visit_Attribute(self, node):
         item = self._get_item(node, 'attribute')
         if isinstance(node.ctx, ast.Store):
-            self.log('defined_attrs <-', item)
             self.defined_attrs.append(item)
         elif isinstance(node.ctx, ast.Load):
-            self.log('used_attrs <-', item)
             self.used_attrs.append(item)
 
     def visit_Name(self, node):
         if node.id != 'object':
             if isinstance(node.ctx, ast.Load):
-                self.log('used_vars <-', node.id)
                 self.used_vars.append(node.id)
             elif isinstance(node.ctx, ast.Store):
                 # Ignore _x (pylint convention), __x, __x__ (special method).
                 if not node.id.startswith('_'):
                     item = self._get_item(node, 'variable')
-                    self.log('defined_vars <-', item)
                     self.defined_vars.append(item)
 
     def visit_Import(self, node):
@@ -209,9 +220,7 @@ class Vulture(ast.NodeVisitor):
         for name_and_alias in node.names:
             alias = name_and_alias.asname
             if alias is not None:
-                name = name_and_alias.name
-                self.log('names_imported_as_aliases <- %s' % name)
-                self.names_imported_as_aliases.append(name)
+                self.names_imported_as_aliases.append(name_and_alias.name)
 
     def _find_tuple_assigns(self, node):
         # Find all tuple assignments. Those have the form
@@ -222,8 +231,7 @@ class Vulture(ast.NodeVisitor):
             for grandchild in ast.walk(child):
                 if (isinstance(grandchild, ast.Name) and
                         isinstance(grandchild.ctx, ast.Store)):
-                        self.log('tuple_assign_vars <-', grandchild.id)
-                        self.tuple_assign_vars.append(grandchild.id)
+                    self.tuple_assign_vars.append(grandchild.id)
 
     def visit_Assign(self, node):
         self._find_tuple_assigns(node)
