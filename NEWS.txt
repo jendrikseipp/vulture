@@ -1,7 +1,7 @@
 News
 ====
 
-0.8 ()
+0.8 (2015-09-28)
 ----------------
 * Do not flag names imported with "import as" as dead code.
 
