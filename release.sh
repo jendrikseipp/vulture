@@ -6,6 +6,8 @@ VERSION="$1"
 
 ./run-tests.sh
 
+tox
+
 if [[ -n $(hg diff) ]]; then
     echo "Error: repo has uncomitted changes"
     exit 1
