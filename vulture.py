@@ -96,11 +96,14 @@ class Vulture(ast.NodeVisitor):
         modules = []
         for path in paths:
             path = os.path.abspath(path)
+            if toplevel and path.endswith('.pyc'):
+                sys.exit('.pyc files are not supported: {0}'.format(path))
             if os.path.isfile(path) and (path.endswith('.py') or toplevel):
                 modules.append(path)
             elif os.path.isdir(path):
-                subpaths = [os.path.join(path, filename)
-                            for filename in sorted(os.listdir(path))]
+                subpaths = [
+                    os.path.join(path, filename)
+                    for filename in sorted(os.listdir(path))]
                 modules.extend(self._get_modules(subpaths, toplevel=False))
             elif toplevel:
                 sys.exit('Error: %s could not be found.' % path)

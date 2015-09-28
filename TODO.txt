@@ -1,7 +1,6 @@
 TODO
 ====
 
-* Use lists that log when elements are added to avoid repeating code.
 * Parse all variable names in new format strings (vars with special formatting, etc.)
   Use string.Formatter.parse for this.
 * Allow using vulture as a module. Possibly using pyflakes as an example.

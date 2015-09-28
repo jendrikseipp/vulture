@@ -1,6 +1,11 @@
 News
 ====
 
+0.9 ()
+------------------
+* Abort with error message when invoked on .pyc files.
+
+
 0.8.1 (2015-09-28)
 ------------------
 * Fix code for Python 3.
