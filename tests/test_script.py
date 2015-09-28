@@ -35,3 +35,7 @@ def test_report():
 def test_whitelist():
     assert subprocess.call(
         [sys.executable, 'whitelist.py'], cwd=REPO) == 0
+
+
+def test_pyc():
+    assert call_vulture(['missing.pyc']) == 1
