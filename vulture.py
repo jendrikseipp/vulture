@@ -39,10 +39,10 @@ def _ignore_function(name):
 
 
 class Item(str):
-    def __new__(cls, name, typ, file, lineno):
+    def __new__(cls, name, typ, filename, lineno):
         item = str.__new__(cls, name)
         item.typ = typ
-        item.file = file
+        item.filename = filename
         item.lineno = lineno
         return item
 
@@ -126,15 +126,15 @@ class Vulture(ast.NodeVisitor):
 
     def report(self):
         def file_lineno(item):
-            return (item.file.lower(), item.lineno)
+            return (item.filename.lower(), item.lineno)
         unused_item_found = False
         for item in sorted(self.unused_funcs + self.unused_props +
                            self.unused_vars + self.unused_attrs,
                            key=file_lineno):
-            relpath = os.path.relpath(item.file)
-            path = relpath if not relpath.startswith('..') else item.file
-            print("%s:%d: Unused %s '%s'" % (path, item.lineno, item.typ,
-                                             item))
+            relpath = os.path.relpath(item.filename)
+            path = relpath if not relpath.startswith('..') else item.filename
+            print(
+                "%s:%d: Unused %s '%s'" % (path, item.lineno, item.typ, item))
             unused_item_found = True
         return unused_item_found
 
