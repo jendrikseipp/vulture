@@ -41,9 +41,8 @@ def func1(a):
 def func2(b):
     func1(b)
 """)
-    # Maybe someday we will support conditional execution and detect func1 too?
-    assert v.unused_funcs == ['func2']
     assert v.defined_funcs == ['func1', 'func2']
+    assert v.unused_funcs == ['func2']
 
 
 def test_function2():
@@ -347,8 +346,7 @@ def other_method():
 
 
 def test_import_as_alias():
-    v = Vulture(verbose=True)
-    v.scan("""\
+    definitions = """\
 class A(object):
     pass
 class B(object):
@@ -356,17 +354,43 @@ class B(object):
 def C():
     pass
 D = 42
-
+"""
+    imports = """\
 from any_module import A as AliasedA
-import B as AliasedB
-import C as AliasedC
+import B as AliasedB, C as AliasedC
 import D as AliasedD
-
+"""
+    uses = """\
 AliasedA()
 AliasedB()
 AliasedC()
 AliasedD()
-""")
+"""
+    v = Vulture(verbose=True)
+    v.scan(definitions)
+    assert v.defined_attrs == []
+    assert v.defined_funcs == ['A', 'B', 'C']
+    assert v.defined_vars == ['D']
+    assert v.used_attrs == []
+    assert v.used_vars == []
+    assert v.unused_attrs == []
+    assert v.unused_funcs == ['A', 'B', 'C']
+    assert v.unused_vars == ['D']
+
+    v = Vulture(verbose=True)
+    v.scan(definitions + imports)
+    assert v.defined_attrs == []
+    assert v.defined_funcs == ['A', 'B', 'C']
+    assert v.defined_vars == ['D']
+    assert v.used_attrs == []
+    assert v.used_vars == []
+    assert v.unused_attrs == []
+    # Ignore unused imports. They are detected by pyflakes.
+    assert v.unused_funcs == []
+    assert v.unused_vars == []
+
+    v = Vulture(verbose=True)
+    v.scan(definitions + imports + uses)
     assert v.defined_attrs == []
     assert v.defined_funcs == ['A', 'B', 'C']
     assert v.defined_vars == ['D']
@@ -377,7 +401,6 @@ AliasedD()
     assert v.unused_vars == []
 
 
-def test_syntax_error():
-    v = Vulture(verbose=True)
+def test_syntax_error(v):
     with pytest.raises(SyntaxError):
         v.scan("""foo bar""")
