@@ -1,6 +1,11 @@
 News
 ====
 
+0.8 ()
+----------------
+* Do not flag names imported with "import as" as dead code.
+
+
 0.7 (2015-09-26)
 ----------------
 * Exit with exitcode 1 if path on commandline can't be found.

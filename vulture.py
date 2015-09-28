@@ -65,6 +65,7 @@ class Vulture(ast.NodeVisitor):
         self.used_attrs = []
         self.used_vars = []
         self.tuple_assign_vars = []
+        self.import_aliases = {}
 
         self.file = ''
         self.code = None
@@ -126,7 +127,7 @@ class Vulture(ast.NodeVisitor):
     def unused_funcs(self):
         return self.get_unused(
             self.defined_funcs,
-            self.used_vars + self.used_attrs)
+            self.used_attrs + self.used_vars + self.import_aliases.keys())
 
     @property
     def unused_props(self):
@@ -136,7 +137,8 @@ class Vulture(ast.NodeVisitor):
     def unused_vars(self):
         return self.get_unused(
             self.defined_vars,
-            self.used_vars + self.used_attrs + self.tuple_assign_vars)
+            self.used_attrs + self.used_vars + self.tuple_assign_vars +
+            self.import_aliases.keys())
 
     @property
     def unused_attrs(self):
@@ -195,6 +197,21 @@ class Vulture(ast.NodeVisitor):
                     item = self._get_item(node, 'variable')
                     self.log('defined_vars <-', item)
                     self.defined_vars.append(item)
+
+    def visit_Import(self, node):
+        self._add_aliases(node)
+
+    def visit_ImportFrom(self, node):
+        self._add_aliases(node)
+
+    def _add_aliases(self, node):
+        assert isinstance(node, (ast.Import, ast.ImportFrom))
+        for name_and_alias in node.names:
+            alias = name_and_alias.asname
+            if alias is not None:
+                name = name_and_alias.name
+                self.log('import_aliases <- %s : %s' % (name, alias))
+                self.import_aliases[name] = alias
 
     def _find_tuple_assigns(self, node):
         # Find all tuple assignments. Those have the form

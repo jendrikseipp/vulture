@@ -41,9 +41,8 @@ def func1(a):
 def func2(b):
     func1(b)
 """)
-    # Maybe someday we will support conditional execution and detect func1 too?
-    assert v.unused_funcs == ['func2']
     assert v.defined_funcs == ['func1', 'func2']
+    assert v.unused_funcs == ['func2']
 
 
 def test_function2():
@@ -346,7 +345,6 @@ def other_method():
     assert v.unused_funcs == ['other_method']
 
 
-def test_syntax_error():
-    v = Vulture(verbose=True)
+def test_syntax_error(v):
     with pytest.raises(SyntaxError):
         v.scan("""foo bar""")
