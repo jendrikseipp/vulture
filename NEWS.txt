@@ -8,7 +8,7 @@ News
 
 0.8 (2015-09-28)
 ----------------
-* Do not flag names imported with "import as" as dead code.
+* Do not flag names imported with "import as" as dead code (thanks Tom Terrace).
 
 
 0.7 (2015-09-26)
