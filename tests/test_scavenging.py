@@ -81,7 +81,6 @@ def func():
 
 func()
 """)
-    # TODO: Maybe we can differentiate between method and function use.
     assert v.unused_funcs == ['Bar']
     assert v.defined_funcs == ['Bar', 'func', 'func']
 
