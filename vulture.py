@@ -82,12 +82,13 @@ class Vulture(ast.NodeVisitor):
         self.tuple_assign_vars = get_list('tuple_assign_vars')
         self.names_imported_as_aliases = get_list('names_imported_as_aliases')
 
-        self.file = ''
+        self.filename = ''
         self.code = None
 
-    def scan(self, node_string):
+    def scan(self, node_string, filename=''):
         self.code = node_string.splitlines()
-        node = ast.parse(node_string, filename=self.file)
+        self.filename = filename
+        node = ast.parse(node_string, filename=self.filename)
         self.visit(node)
 
     def _get_modules(self, paths, toplevel=True):
@@ -118,8 +119,7 @@ class Vulture(ast.NodeVisitor):
             self.log('Scanning:', module)
             with open(module) as f:
                 module_string = f.read()
-            self.file = module
-            self.scan(module_string)
+            self.scan(module_string, filename=module)
 
     def report(self):
         def file_lineno(item):
@@ -170,7 +170,7 @@ class Vulture(ast.NodeVisitor):
         id = getattr(node, 'id', None)
         attr = getattr(node, 'attr', None)
         assert len([x for x in (name, id, attr) if x is not None]) == 1
-        return Item(name or id or attr, typ, self.file, node.lineno)
+        return Item(name or id or attr, typ, self.filename, node.lineno)
 
     def log(self, *args):
         if self.verbose:
