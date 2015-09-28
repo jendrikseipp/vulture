@@ -27,7 +27,7 @@ import os
 import re
 import sys
 
-__version__ = '0.7'
+__version__ = '0.8'
 
 # Parse variable names in template strings.
 FORMAT_STRING_PATTERNS = [re.compile(r'\%\((\w+)\)'), re.compile(r'{(\w+)}')]
