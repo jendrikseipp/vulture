@@ -170,10 +170,10 @@ class Vulture(ast.NodeVisitor):
 
     def _get_item(self, node, typ):
         name = getattr(node, 'name', None)
-        id = getattr(node, 'id', None)
+        id_ = getattr(node, 'id', None)
         attr = getattr(node, 'attr', None)
-        assert len([x for x in (name, id, attr) if x is not None]) == 1
-        return Item(name or id or attr, typ, self.filename, node.lineno)
+        assert bool(name) ^ bool(id_) ^ bool(attr)
+        return Item(name or id_ or attr, typ, self.filename, node.lineno)
 
     def log(self, *args):
         if self.verbose:
