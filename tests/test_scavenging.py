@@ -327,8 +327,7 @@ class Bar(object):
     assert v.unused_attrs == ['a']
 
 
-def test_function_names():
-    v = Vulture(verbose=True)
+def test_function_names(v):
     v.scan("""\
 def test_method():
     pass
@@ -336,12 +335,31 @@ def test_method():
 def other_method():
     pass
 """)
+    assert v.defined_attrs == []
     assert v.defined_funcs == ['other_method']
     assert v.defined_vars == []
-    assert v.defined_attrs == []
     assert v.used_attrs == []
+    assert v.used_vars == []
     assert v.unused_attrs == []
     assert v.unused_funcs == ['other_method']
+
+
+def test_global_attribute(v):
+    v.scan("""\
+# Module foo:
+a = 1
+if a == 1:
+    pass
+
+# Module bar:
+import foo
+foo.a = 2
+""")
+    assert v.defined_attrs == ['a']
+    assert v.defined_vars == ['a']
+    assert v.used_attrs == []
+    assert v.used_vars == ['a', 'foo']
+    assert v.unused_attrs == []
 
 
 def test_syntax_error(v):

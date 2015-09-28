@@ -160,7 +160,9 @@ class Vulture(ast.NodeVisitor):
 
     @property
     def unused_attrs(self):
-        return self.get_unused(self.defined_attrs, self.used_attrs)
+        return self.get_unused(
+            self.defined_attrs,
+            self.used_attrs + self.used_vars)
 
     def _get_lineno(self, node):
         return getattr(node, 'lineno', 1)
