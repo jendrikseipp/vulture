@@ -273,10 +273,10 @@ def parse_args():
         setattr(parser.values, option.dest, value.split(','))
     usage = 'usage: %prog [options] PATH [PATH ...]'
     parser = optparse.OptionParser(usage=usage)
-    parser.add_option('--exclude', action='callback', callback=csv,
-                      type='string', default=[],
-                      help='Comma-separated list of filename patterns to '
-                           'exclude (e.g. svn,external).')
+    parser.add_option(
+        '--exclude', action='callback', callback=csv,
+        type='string', default=[],
+        help='Comma-separated list of paths to ignore (e.g. .svn,external)')
     parser.add_option('-v', '--verbose', action='store_true')
     options, args = parser.parse_args()
     return options, args
