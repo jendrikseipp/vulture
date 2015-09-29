@@ -372,6 +372,19 @@ a
     assert v.unused_vars == []
 
 
+def test_builtin_types(v):
+    v.scan("""\
+a = b
+a = 1
+a = "s"
+a = object
+a = False
+""")
+    assert v.defined_vars == ['a'] * 5
+    assert v.used_vars == ['b']
+    assert v.unused_vars == ['a']
+
+
 def test_syntax_error(v):
     with pytest.raises(SyntaxError):
         v.scan("""foo bar""")
