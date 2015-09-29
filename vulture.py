@@ -32,8 +32,10 @@ __version__ = '0.8.1'
 # Parse variable names in template strings.
 FORMAT_STRING_PATTERNS = [re.compile(r'\%\((\w+)\)'), re.compile(r'{(\w+)}')]
 
-# True and False are NameConstants in Python 3, we add them here for Python 2.
-IGNORED_VARIABLE_NAMES = ['object', 'True', 'False']
+IGNORED_VARIABLE_NAMES = ['object']
+# True and False are NameConstants in Python 3.
+if sys.version_info < (3, 0):
+    IGNORED_VARIABLE_NAMES += ['True', 'False']
 
 
 def _ignore_function(name):
