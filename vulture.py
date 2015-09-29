@@ -33,8 +33,8 @@ __version__ = '0.8.1'
 FORMAT_STRING_PATTERNS = [re.compile(r'\%\((\w+)\)'), re.compile(r'{(\w+)}')]
 
 IGNORED_VARIABLE_NAMES = ['object']
-# True and False are NameConstants in Python 3.
-if sys.version_info < (3, 0):
+# True and False are NameConstants since Python 3.4.
+if sys.version_info < (3, 4):
     IGNORED_VARIABLE_NAMES += ['True', 'False']
 
 
