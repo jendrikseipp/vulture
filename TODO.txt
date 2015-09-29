@@ -1,7 +1,6 @@
 TODO
 ====
 
-* Don't count True and False as token names. (a = False adds False to used_vars)
 * Differentiate between functions and methods (for our purposes methods
   are functions with a "self" parameter and they are stored as
   attributes, not as variables)

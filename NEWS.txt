@@ -4,6 +4,7 @@ News
 0.9 ()
 ------------------
 * Don't flag attributes as unused if they are used as global variables in another module (#10, thanks Florian Bruhin).
+* Don't consider "True" and "False" variable names.
 * Abort with error message when invoked on .pyc files.
 
 

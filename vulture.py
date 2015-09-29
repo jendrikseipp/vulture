@@ -32,6 +32,9 @@ __version__ = '0.8.1'
 # Parse variable names in template strings.
 FORMAT_STRING_PATTERNS = [re.compile(r'\%\((\w+)\)'), re.compile(r'{(\w+)}')]
 
+# True and False are NameConstants in Python 3, we add them here for Python 2.
+IGNORED_VARIABLE_NAMES = ['object', 'True', 'False']
+
 
 def _ignore_function(name):
     return ((name.startswith('__') and name.endswith('__')) or
@@ -205,7 +208,7 @@ class Vulture(ast.NodeVisitor):
             self.used_attrs.append(item)
 
     def visit_Name(self, node):
-        if node.id != 'object':
+        if node.id not in IGNORED_VARIABLE_NAMES:
             if isinstance(node.ctx, ast.Load):
                 self.used_vars.append(node.id)
             elif isinstance(node.ctx, ast.Store):

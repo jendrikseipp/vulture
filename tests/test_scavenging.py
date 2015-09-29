@@ -362,6 +362,16 @@ foo.a = 2
     assert v.unused_attrs == []
 
 
+def test_boolean(v):
+    v.scan("""\
+a = True
+a
+""")
+    assert v.defined_vars == ['a']
+    assert v.used_vars == ['a']
+    assert v.unused_vars == []
+
+
 def test_syntax_error(v):
     with pytest.raises(SyntaxError):
         v.scan("""foo bar""")
