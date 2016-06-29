@@ -8,7 +8,7 @@ on both your library and test suite you can find untested code.
 Due to Python's dynamic nature, static code analyzers like vulture are
 likely to miss some dead code. Also, code that is only called
 implicitly may be reported as unused. Nonetheless, vulture can be a
-very helpful tool for achieving high code quality.
+very helpful tool for higher code quality.
 
 
 Features
