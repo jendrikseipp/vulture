@@ -385,6 +385,16 @@ a = False
     assert v.unused_vars == ['a']
 
 
+def test_unused_args(v):
+    v.scan("""\
+def foo(x, y):
+    return x + 1
+""")
+    assert v.defined_vars == []  # should be ['x', 'y']
+    assert v.used_vars == ['x']
+    assert v.unused_vars == []  # should be ['y']
+
+
 def test_syntax_error(v):
     with pytest.raises(SyntaxError):
         v.scan("""foo bar""")
