@@ -1,6 +1,11 @@
 News
 ====
 
+0.10 ()
+----------------
+* Change license from GPL to MIT.
+
+
 0.9 (2016-06-29)
 ----------------
 * Don't flag attributes as unused if they are used as global variables
