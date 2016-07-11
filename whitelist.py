@@ -8,6 +8,7 @@ from vulture import Vulture
 
 v = Vulture()
 
+v.visit_arg
 v.visit_Assign
 v.visit_Attribute
 v.visit_ClassDef

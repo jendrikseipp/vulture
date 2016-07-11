@@ -3,6 +3,7 @@ News
 
 0.10 ()
 ----------------
+* Detect unused function and method arguments (issue #15)
 * Change license from GPL to MIT.
 
 

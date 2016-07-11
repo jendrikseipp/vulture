@@ -38,7 +38,7 @@ __version__ = '0.9'
 # Parse variable names in template strings.
 FORMAT_STRING_PATTERNS = [re.compile(r'\%\((\w+)\)'), re.compile(r'{(\w+)}')]
 
-IGNORED_VARIABLE_NAMES = ['object']
+IGNORED_VARIABLE_NAMES = ['object', 'self']
 # True and False are NameConstants since Python 3.4.
 if sys.version_info < (3, 4):
     IGNORED_VARIABLE_NAMES += ['True', 'False']
@@ -175,6 +175,12 @@ class Vulture(ast.NodeVisitor):
             self.defined_attrs,
             self.used_attrs + self.used_vars)
 
+    def _define_variable(self, item):
+        assert item.typ == 'variable'
+        # Ignore _, _x (pylint convention), __x, __x__ (special method).
+        if item not in IGNORED_VARIABLE_NAMES and not item.startswith('_'):
+            self.defined_vars.append(item)
+
     def _get_lineno(self, node):
         return getattr(node, 'lineno', 1)
 
@@ -193,10 +199,15 @@ class Vulture(ast.NodeVisitor):
             print(*args)
 
     def print_node(self, node):
-        # Only create the strings, if we'll also print them.
+        # Only create the strings if we'll also print them.
         if self.verbose:
             self.log(
                 self._get_lineno(node), ast.dump(node), self._get_line(node))
+
+    def visit_arg(self, node):
+        """Function argument. Seems to be Python 3 only."""
+        self._define_variable(
+            Item(node.arg, 'variable', self.filename, node.lineno))
 
     def visit_FunctionDef(self, node):
         for decorator in node.decorator_list:
@@ -216,14 +227,11 @@ class Vulture(ast.NodeVisitor):
             self.used_attrs.append(item)
 
     def visit_Name(self, node):
-        if node.id not in IGNORED_VARIABLE_NAMES:
-            if isinstance(node.ctx, ast.Load):
-                self.used_vars.append(node.id)
-            elif isinstance(node.ctx, ast.Store):
-                # Ignore _x (pylint convention), __x, __x__ (special method).
-                if not node.id.startswith('_'):
-                    item = self._get_item(node, 'variable')
-                    self.defined_vars.append(item)
+        if (isinstance(node.ctx, ast.Load) and
+                node.id not in IGNORED_VARIABLE_NAMES):
+            self.used_vars.append(node.id)
+        elif isinstance(node.ctx, (ast.Param, ast.Store)):
+            self._define_variable(self._get_item(node, 'variable'))
 
     def visit_Import(self, node):
         self._add_aliases(node)
@@ -275,14 +283,16 @@ class Vulture(ast.NodeVisitor):
     def visit(self, node):
         method = 'visit_' + node.__class__.__name__
         visitor = getattr(self, method, None)
-        if visitor is not None:
-            self.print_node(node)
+        self.print_node(node)
+        if visitor:
             visitor(node)
+        else:
+            self.log('Unhandled')
         return self.generic_visit(node)
 
 
 def parse_args():
-    def csv(option, opt, value, parser):
+    def csv(option, _, value, parser):
         setattr(parser.values, option.dest, value.split(','))
     usage = 'usage: %prog [options] PATH [PATH ...]'
     parser = optparse.OptionParser(usage=usage)

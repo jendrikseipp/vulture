@@ -390,9 +390,9 @@ def test_unused_args(v):
 def foo(x, y):
     return x + 1
 """)
-    assert v.defined_vars == []  # should be ['x', 'y']
+    assert v.defined_vars == ['x', 'y']
     assert v.used_vars == ['x']
-    assert v.unused_vars == []  # should be ['y']
+    assert v.unused_vars == ['y']
 
 
 def test_syntax_error(v):

@@ -1,7 +1,6 @@
 TODO
 ====
 
-* Detect unused arguments (def foo(x, y): return x + 1) (issue #15)
 * Differentiate between functions and methods (for our purposes methods
   are functions with a "self" parameter and they are stored as
   attributes, not as variables)
