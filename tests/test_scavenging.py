@@ -395,6 +395,26 @@ def foo(x, y):
     assert v.unused_vars == ['y']
 
 
+def test_unused_kwargs(v):
+    v.scan("""\
+def foo(x, y=3, **kwargs):
+    return x + 1
+""")
+    assert set(v.defined_vars) == set(['kwargs', 'x', 'y'])
+    assert v.used_vars == ['x']
+    assert v.unused_vars == ['kwargs', 'y']
+
+
+def test_unused_kwargs_with_odd_name(v):
+    v.scan("""\
+def foo(**bar):
+    pass
+""")
+    assert v.defined_vars == ['bar']
+    assert v.used_vars == []
+    assert v.unused_vars == ['bar']
+
+
 def test_syntax_error(v):
     with pytest.raises(SyntaxError):
         v.scan("""foo bar""")
