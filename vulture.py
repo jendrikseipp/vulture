@@ -205,8 +205,8 @@ class Vulture(ast.NodeVisitor):
                 self._get_lineno(node), ast.dump(node), self._get_line(node))
 
     def visit_arg(self, node):
-        """Function argument. Seems to be Python 3 only."""
-        self._define_variable(node.arg, node.lineno)
+        """Function argument. Python 3 only. Has lineno since Python 3.4"""
+        self._define_variable(node.arg, getattr(node, 'lineno', -1))
 
     def visit_FunctionDef(self, node):
         for decorator in node.decorator_list:
