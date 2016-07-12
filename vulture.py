@@ -175,11 +175,11 @@ class Vulture(ast.NodeVisitor):
             self.defined_attrs,
             self.used_attrs + self.used_vars)
 
-    def _define_variable(self, item):
-        assert item.typ == 'variable'
+    def _define_variable(self, name, lineno):
         # Ignore _, _x (pylint convention), __x, __x__ (special method).
-        if item not in IGNORED_VARIABLE_NAMES and not item.startswith('_'):
-            self.defined_vars.append(item)
+        if name not in IGNORED_VARIABLE_NAMES and not name.startswith('_'):
+            self.defined_vars.append(
+                Item(name, 'variable', self.filename, lineno))
 
     def _get_lineno(self, node):
         return getattr(node, 'lineno', 1)
@@ -206,8 +206,7 @@ class Vulture(ast.NodeVisitor):
 
     def visit_arg(self, node):
         """Function argument. Seems to be Python 3 only."""
-        self._define_variable(
-            Item(node.arg, 'variable', self.filename, node.lineno))
+        self._define_variable(node.arg, node.lineno)
 
     def visit_FunctionDef(self, node):
         for decorator in node.decorator_list:
@@ -224,9 +223,7 @@ class Vulture(ast.NodeVisitor):
         # visit_arguments, since its node has no lineno.
         if node.args.kwarg:
             if isinstance(node.args.kwarg, str):
-                # Python 2
-                self._define_variable(
-                    Item(node.args.kwarg, 'variable', self.filename, node.lineno))
+                self._define_variable(node.args.kwarg, node.lineno)
 
     def visit_Attribute(self, node):
         item = self._get_item(node, 'attribute')
@@ -240,7 +237,7 @@ class Vulture(ast.NodeVisitor):
                 node.id not in IGNORED_VARIABLE_NAMES):
             self.used_vars.append(node.id)
         elif isinstance(node.ctx, (ast.Param, ast.Store)):
-            self._define_variable(self._get_item(node, 'variable'))
+            self._define_variable(node.id, node.lineno)
 
     def visit_Import(self, node):
         self._add_aliases(node)
