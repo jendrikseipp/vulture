@@ -4,7 +4,7 @@ News
 0.10 ()
 ----------------
 * Detect unused function and method arguments (issue #15).
-* Detect unused **kwargs parameters.
+* Detect unused *args and **kwargs parameters.
 * Change license from GPL to MIT.
 
 

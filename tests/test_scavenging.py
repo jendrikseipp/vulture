@@ -415,6 +415,16 @@ def foo(**bar):
     assert v.unused_vars == ['bar']
 
 
+def test_unused_vararg(v):
+    v.scan("""\
+def foo(*bar):
+    pass
+""")
+    assert v.defined_vars == ['bar']
+    assert v.used_vars == []
+    assert v.unused_vars == ['bar']
+
+
 def test_syntax_error(v):
     with pytest.raises(SyntaxError):
         v.scan("""foo bar""")

@@ -218,12 +218,12 @@ class Vulture(ast.NodeVisitor):
             if not _ignore_function(node.name):
                 self.defined_funcs.append(self._get_item(node, 'function'))
 
-        # Detect **kwargs parameters. Python 3 recognizes them in
-        # visit_Name. For Python 2 we use this workaround. We can't use
-        # visit_arguments, since its node has no lineno.
-        if node.args.kwarg:
-            if isinstance(node.args.kwarg, str):
-                self._define_variable(node.args.kwarg, node.lineno)
+        # Detect *args and **kwargs parameters. Python 3 recognizes them
+        # in visit_Name. For Python 2 we use this workaround. We can't
+        # use visit_arguments, because its node has no lineno.
+        for param in [node.args.vararg, node.args.kwarg]:
+            if param and isinstance(param, str):
+                self._define_variable(param, node.lineno)
 
     def visit_Attribute(self, node):
         item = self._get_item(node, 'attribute')
