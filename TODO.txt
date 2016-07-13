@@ -1,7 +1,6 @@
 TODO
 ====
 
-* Move more of run-tests.sh into tox.ini.
 * Differentiate between functions and methods (for our purposes methods
   are functions with a "self" parameter and they are stored as
   attributes, not as variables)
