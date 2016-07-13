@@ -1,2 +1,4 @@
 include *.txt
 include tests/*.py
+include tox.ini
+include whitelist.py
