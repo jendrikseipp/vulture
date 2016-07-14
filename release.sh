@@ -4,8 +4,6 @@ set -euo pipefail
 
 VERSION="$1"
 
-./run-tests.sh
-
 tox
 
 if [[ -n $(hg diff) ]]; then
