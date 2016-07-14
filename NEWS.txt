@@ -1,8 +1,8 @@
 News
 ====
 
-0.10 ()
-----------------
+0.10 (2016-07-14)
+-----------------
 * Detect unused function and method arguments (issue #15).
 * Detect unused \*args and \*\*kwargs parameters.
 * Change license from GPL to MIT.
