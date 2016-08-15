@@ -27,13 +27,22 @@
 from __future__ import print_function
 
 import ast
+import codecs
 from fnmatch import fnmatchcase
+import locale
 import optparse
 import os
 import re
 import sys
 
 __version__ = '0.10'
+
+# The ast module in Python 2 trips over with "coding" cookies, so strip them.
+ENCODING_REGEX = re.compile(
+    r"^[ \t\v]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+).*?$", flags=re.M)
+
+# Encoding to use when converting input files to unicode.
+ENCODING = sys.getfilesystemencoding() or locale.getlocale()[1] or 'UTF-8'
 
 # Parse variable names in template strings.
 FORMAT_STRING_PATTERNS = [re.compile(r'\%\((\w+)\)'), re.compile(r'{(\w+)}')]
@@ -97,6 +106,7 @@ class Vulture(ast.NodeVisitor):
         self.code = None
 
     def scan(self, node_string, filename=''):
+        node_string = ENCODING_REGEX.sub("", node_string, count=1)
         self.code = node_string.splitlines()
         self.filename = filename
         node = ast.parse(node_string, filename=self.filename)
@@ -131,7 +141,7 @@ class Vulture(ast.NodeVisitor):
 
         for module in included_modules:
             self.log('Scanning:', module)
-            with open(module) as f:
+            with codecs.open(module, encoding=ENCODING) as f:
                 module_string = f.read()
             self.scan(module_string, filename=module)
 

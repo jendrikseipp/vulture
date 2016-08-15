@@ -425,6 +425,23 @@ def foo(*bar):
     assert v.unused_vars == ['bar']
 
 
+def test_encoding1(v):
+    v.scan(u"""\
+# -*- coding: utf-8 -*-
+pass
+""")
+    assert True
+
+
+def test_encoding2(v):
+    v.scan(u"""\
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+pass
+""")
+    assert True
+
+
 def test_syntax_error(v):
     with pytest.raises(SyntaxError):
         v.scan("""foo bar""")
