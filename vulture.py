@@ -201,7 +201,7 @@ class Vulture(ast.NodeVisitor):
         name = getattr(node, 'name', None)
         id_ = getattr(node, 'id', None)
         attr = getattr(node, 'attr', None)
-        assert bool(name) ^ bool(id_) ^ bool(attr)
+        assert bool(name) ^ bool(id_) ^ bool(attr), (typ, dir(node))
         return Item(name or id_ or attr, typ, self.filename, node.lineno)
 
     def log(self, *args):
@@ -251,18 +251,11 @@ class Vulture(ast.NodeVisitor):
         elif isinstance(node.ctx, (ast.Param, ast.Store)):
             self._define_variable(node.id, node.lineno)
 
-    def visit_Import(self, node):
-        self._add_aliases(node)
-
-    def visit_ImportFrom(self, node):
-        self._add_aliases(node)
-
-    def _add_aliases(self, node):
-        assert isinstance(node, (ast.Import, ast.ImportFrom))
-        for name_and_alias in node.names:
-            alias = name_and_alias.asname
-            if alias is not None:
-                self.names_imported_as_aliases.append(name_and_alias.name)
+    def visit_alias(self, node):
+        name = node.name
+        alias = node.asname
+        if alias is not None:
+            self.names_imported_as_aliases.append(name)
 
     def _find_tuple_assigns(self, node):
         # Find all tuple assignments. Those have the form
