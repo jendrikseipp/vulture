@@ -226,7 +226,8 @@ class Vulture(ast.NodeVisitor):
         else:
             # Function is not a property.
             if _ignore_function(node.name):
-                self.log("Ignoring function {} due to its name".format(node.name))
+                self.log(
+                    "Ignoring function {0} due to its name".format(node.name))
             else:
                 self.defined_funcs.append(self._get_item(node, 'function'))
 
