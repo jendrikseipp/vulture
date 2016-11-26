@@ -440,8 +440,3 @@ def test_encoding2(v):
 pass
 """)
     assert True
-
-
-def test_syntax_error(v):
-    with pytest.raises(SyntaxError):
-        v.scan("""foo bar""")

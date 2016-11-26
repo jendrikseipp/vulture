@@ -58,6 +58,13 @@ def _ignore_function(name):
             name.startswith('test_'))
 
 
+def format_path(path):
+    if not path:
+        return path
+    relpath = os.path.relpath(path)
+    return relpath if not relpath.startswith('..') else path
+
+
 class Item(str):
     def __new__(cls, name, typ, filename, lineno):
         item = str.__new__(cls, name)
@@ -109,8 +116,13 @@ class Vulture(ast.NodeVisitor):
         node_string = ENCODING_REGEX.sub("", node_string, count=1)
         self.code = node_string.splitlines()
         self.filename = filename
-        node = ast.parse(node_string, filename=self.filename)
-        self.visit(node)
+        try:
+            node = ast.parse(node_string, filename=self.filename)
+        except SyntaxError as err:
+            print('%s:%d: %s at %s' %
+                  (format_path(filename), err.lineno, err.msg, err.text))
+        else:
+            self.visit(node)
 
     def _get_modules(self, paths, toplevel=True):
         """Take files from the command line even if they don't end with .py."""
@@ -152,10 +164,8 @@ class Vulture(ast.NodeVisitor):
         for item in sorted(self.unused_funcs + self.unused_props +
                            self.unused_vars + self.unused_attrs,
                            key=file_lineno):
-            relpath = os.path.relpath(item.filename)
-            path = relpath if not relpath.startswith('..') else item.filename
-            print(
-                "%s:%d: Unused %s '%s'" % (path, item.lineno, item.typ, item))
+            print("%s:%d: Unused %s '%s'" % (
+                format_path(item.filename), item.lineno, item.typ, item))
             unused_item_found = True
         return unused_item_found
 
