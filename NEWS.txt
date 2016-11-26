@@ -4,6 +4,7 @@ News
 0.11 (unreleased)
 -----------------
 * Use the system's default encoding when reading files.
+* Report syntax errors instead of aborting.
 
 
 0.10 (2016-07-14)
