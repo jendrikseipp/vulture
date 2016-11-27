@@ -102,6 +102,7 @@ class Vulture(ast.NodeVisitor):
 
         self.defined_attrs = get_list('defined_attrs')
         self.defined_funcs = get_list('defined_funcs')
+        self.defined_imports = get_list('defined_imports')
         self.defined_props = get_list('defined_props')
         self.defined_vars = get_list('defined_vars')
         self.used_attrs = get_list('used_attrs')
@@ -161,9 +162,9 @@ class Vulture(ast.NodeVisitor):
         def file_lineno(item):
             return (item.filename.lower(), item.lineno)
         unused_item_found = False
-        for item in sorted(self.unused_funcs + self.unused_props +
-                           self.unused_vars + self.unused_attrs,
-                           key=file_lineno):
+        for item in sorted(
+                self.unused_funcs + self.unused_imports + self.unused_props +
+                self.unused_vars + self.unused_attrs, key=file_lineno):
             print("%s:%d: Unused %s '%s'" % (
                 format_path(item.filename), item.lineno, item.typ, item))
             unused_item_found = True
@@ -177,6 +178,10 @@ class Vulture(ast.NodeVisitor):
         return self.get_unused(
             self.defined_funcs,
             self.used_attrs + self.used_vars + self.names_imported_as_aliases)
+
+    @property
+    def unused_imports(self):
+        return self.get_unused(self.defined_imports, self.used_vars)
 
     @property
     def unused_props(self):
@@ -263,10 +268,30 @@ class Vulture(ast.NodeVisitor):
             self._define_variable(node.id, node.lineno)
 
     def visit_alias(self, node):
-        name = node.name
-        alias = node.asname
-        if alias is not None:
-            self.names_imported_as_aliases.append(name)
+        """
+        Use the methods below for imports to have access to line numbers
+        and to filter imports from __future__.
+        """
+        pass
+
+    def visit_Import(self, node):
+        self._add_aliases(node)
+
+    def visit_ImportFrom(self, node):
+        if node.module != '__future__':
+            self._add_aliases(node)
+
+    def _add_aliases(self, node):
+        assert isinstance(node, (ast.Import, ast.ImportFrom))
+        for name_and_alias in node.names:
+            # Store only top-level module name ("os.path" -> "os").
+            # We can't detect when "os.path" is used.
+            name = name_and_alias.name.partition('.')[0]
+            alias = name_and_alias.asname
+            self.defined_imports.append(
+                Item(alias or name, 'import', self.filename, node.lineno))
+            if alias is not None:
+                self.names_imported_as_aliases.append(name_and_alias.name)
 
     def _find_tuple_assigns(self, node):
         # Find all tuple assignments. Those have the form
