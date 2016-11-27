@@ -120,8 +120,8 @@ class Vulture(ast.NodeVisitor):
         try:
             node = ast.parse(node_string, filename=self.filename)
         except SyntaxError as err:
-            print('%s:%d: %s at %s' %
-                  (format_path(filename), err.lineno, err.msg, err.text))
+            print('%s:%d: %s at "%s"' % (
+                format_path(filename), err.lineno, err.msg, err.text.strip()))
         else:
             self.visit(node)
 
