@@ -1,7 +1,7 @@
 News
 ====
 
-0.11 (unreleased)
+0.11 (2016-11-27)
 -----------------
 * Use the system's default encoding when reading files.
 * Report syntax errors instead of aborting.
