@@ -35,7 +35,7 @@ import os
 import re
 import sys
 
-__version__ = '0.10'
+__version__ = '0.11'
 
 # The ast module in Python 2 trips over with "coding" cookies, so strip them.
 ENCODING_REGEX = re.compile(
