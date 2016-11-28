@@ -159,8 +159,10 @@ class Vulture(ast.NodeVisitor):
                     module_string = f.read()
             except UnicodeDecodeError as err:
                 print('Error: Could not read file %s - %s' % (module, err))
-                print('Default encoding:', sys.getfilesystemencoding())
-                print('Locale:', locale.getlocale())
+                print('You might want to change environment variable LANG. '
+                      'For example to "C.UTF-8".')
+                print('Current filesystem encoding:', sys.getfilesystemencoding())
+                print('Current locale:', locale.getlocale())
             else:
                 self.scan(module_string, filename=module)
 
