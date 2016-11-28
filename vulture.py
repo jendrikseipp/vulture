@@ -154,9 +154,15 @@ class Vulture(ast.NodeVisitor):
 
         for module in included_modules:
             self.log('Scanning:', module)
-            with codecs.open(module, encoding=ENCODING) as f:
-                module_string = f.read()
-            self.scan(module_string, filename=module)
+            try:
+                with codecs.open(module, encoding=ENCODING) as f:
+                    module_string = f.read()
+            except UnicodeDecodeError as err:
+                print('Error: Could not read file %s - %s' % (module, err))
+                print('Default encoding:', sys.getfilesystemencoding())
+                print('Locale:', locale.getlocale())
+            else:
+                self.scan(module_string, filename=module)
 
     def report(self):
         def file_lineno(item):
