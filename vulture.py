@@ -349,7 +349,12 @@ class Vulture(ast.NodeVisitor):
 def parse_args():
     def csv(option, _, value, parser):
         setattr(parser.values, option.dest, value.split(','))
-    usage = 'usage: %prog [options] PATH [PATH ...]'
+    usage = """\
+usage: %prog [options] PATH [PATH ...]
+
+Paths may be Python files or directories. For each directory vulture
+analyzes all contained *.py files.
+"""
     parser = optparse.OptionParser(usage=usage)
     parser.add_option(
         '--exclude', action='callback', callback=csv,

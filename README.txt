@@ -26,7 +26,7 @@ Installation
 
 ::
 
-  $ pip install -U vulture
+  $ pip install vulture
 
 
 Usage
@@ -34,7 +34,12 @@ Usage
 
 ::
 
-  $ vulture --help
+  $ vulture myscript.py
+  $ vulture myscript.py mypackage1/ mypackage2/
+  $ vulture myscript.py whitelist.py
+
+The provided arguments may be Python files or directories. For each
+directory vulture analyzes all contained *.py files.
 
 After you have found and deleted dead code, run vulture again, because
 it may discover more dead code. You can add false-positives (used code
