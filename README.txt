@@ -17,7 +17,7 @@ Features
 * fast: uses static code analysis
 * lightweight: only one module
 * tested: tests itself and has 100% test coverage
-* complements *pyflakes* and has the same output syntax
+* complements pyflakes and has the same output syntax
 * supports Python 2.6, 2.7 and 3.x
 
 
@@ -39,7 +39,7 @@ Usage
   $ vulture myscript.py whitelist.py
 
 The provided arguments may be Python files or directories. For each
-directory vulture analyzes all contained *.py files.
+directory vulture analyzes all contained `*.py` files.
 
 After you have found and deleted dead code, run vulture again, because
 it may discover more dead code. You can add false-positives (used code
