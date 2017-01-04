@@ -4,6 +4,7 @@ News
 0.12 (unreleased)
 -----------------
 * Detect unused imports.
+* Assume UTF-8 encoding for all input files.
 
 
 0.11 (2016-11-27)

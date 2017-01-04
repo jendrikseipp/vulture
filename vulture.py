@@ -29,7 +29,6 @@ from __future__ import print_function
 import ast
 import codecs
 from fnmatch import fnmatchcase
-import locale
 import optparse
 import os
 import re
@@ -37,12 +36,12 @@ import sys
 
 __version__ = '0.11'
 
-# The ast module in Python 2 trips over with "coding" cookies, so strip them.
+# The ast module in Python 2 trips over "coding" cookies, so strip them.
 ENCODING_REGEX = re.compile(
     r"^[ \t\v]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+).*?$", flags=re.M)
 
 # Encoding to use when converting input files to unicode.
-ENCODING = sys.getfilesystemencoding() or locale.getlocale()[1] or 'UTF-8'
+ENCODING = 'utf-8'
 
 # Parse variable names in template strings.
 FORMAT_STRING_PATTERNS = [re.compile(r'\%\((\w+)\)'), re.compile(r'{(\w+)}')]
@@ -159,10 +158,7 @@ class Vulture(ast.NodeVisitor):
                     module_string = f.read()
             except UnicodeDecodeError as err:
                 print('Error: Could not read file %s - %s' % (module, err))
-                print('You might want to change environment variable LANG. '
-                      'For example to "C.UTF-8".')
-                print('Current filesystem encoding:', sys.getfilesystemencoding())
-                print('Current locale:', locale.getlocale())
+                print('You might want to change the encoding to UTF-8.')
             else:
                 self.scan(module_string, filename=module)
 
