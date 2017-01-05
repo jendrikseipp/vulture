@@ -1,7 +1,7 @@
 News
 ====
 
-0.12 (unreleased)
+0.12 (2017-01-05)
 -----------------
 * Detect unused imports.
 * Use tokenize.open() on Python >= 3.2 for reading input files, assume
