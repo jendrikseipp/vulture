@@ -35,7 +35,7 @@ import re
 import sys
 import tokenize
 
-__version__ = '0.11'
+__version__ = '0.12'
 
 # The ast module in Python 2 trips over "coding" cookies, so strip them.
 ENCODING_REGEX = re.compile(
