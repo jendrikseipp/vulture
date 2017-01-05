@@ -4,7 +4,8 @@ News
 0.12 (unreleased)
 -----------------
 * Detect unused imports.
-* Assume UTF-8 encoding for all input files.
+* Use tokenize.open() on Python >= 3.2 for reading input files, assume
+  UTF-8 encoding on older Python versions.
 
 
 0.11 (2016-11-27)

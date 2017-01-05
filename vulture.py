@@ -33,6 +33,7 @@ import optparse
 import os
 import re
 import sys
+import tokenize
 
 __version__ = '0.11'
 
@@ -62,6 +63,29 @@ def format_path(path):
         return path
     relpath = os.path.relpath(path)
     return relpath if not relpath.startswith('..') else path
+
+
+class VultureInputException(Exception):
+    pass
+
+
+def read_file(filename):
+    # Python >= 3.2
+    try:
+        with tokenize.open(filename) as f:
+            return f.read()
+    except (SyntaxError, UnicodeDecodeError) as err:
+        raise VultureInputException(err)
+    except AttributeError:
+        # tokenize.open was added in Python 3.2.
+        pass
+
+    # Python < 3.2
+    try:
+        with codecs.open(filename, encoding=ENCODING) as f:
+            return f.read()
+    except UnicodeDecodeError as err:
+        raise VultureInputException(err)
 
 
 class Item(str):
@@ -154,9 +178,8 @@ class Vulture(ast.NodeVisitor):
         for module in included_modules:
             self.log('Scanning:', module)
             try:
-                with codecs.open(module, encoding=ENCODING) as f:
-                    module_string = f.read()
-            except UnicodeDecodeError as err:
+                module_string = read_file(module)
+            except VultureInputException as err:
                 print('Error: Could not read file %s - %s' % (module, err))
                 print('You might want to change the encoding to UTF-8.')
             else:
