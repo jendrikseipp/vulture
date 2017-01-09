@@ -8,6 +8,15 @@ def v():
     return Vulture(verbose=True)
 
 
+def test_import_star(v):
+    v.scan("""\
+from a import *
+from a.b import *
+""")
+    assert v.defined_imports == ['*', '*']
+    assert v.unused_imports == []
+
+
 def test_import_from_future(v):
     v.scan("""from __future__ import division""")
     assert v.defined_imports == []

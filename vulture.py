@@ -52,6 +52,9 @@ IGNORED_VARIABLE_NAMES = ['object', 'self']
 if sys.version_info < (3, 4):
     IGNORED_VARIABLE_NAMES += ['True', 'False']
 
+# Ignore star-imported names, since we cannot detect whether they are used.
+IGNORED_IMPORTS = ["*"]
+
 
 def _ignore_function(name):
     return ((name.startswith('__') and name.endswith('__')) or
@@ -208,7 +211,8 @@ class Vulture(ast.NodeVisitor):
 
     @property
     def unused_imports(self):
-        return self.get_unused(self.defined_imports, self.used_vars)
+        return self.get_unused(
+            self.defined_imports, self.used_vars + IGNORED_IMPORTS)
 
     @property
     def unused_props(self):

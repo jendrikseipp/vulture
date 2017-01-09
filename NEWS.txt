@@ -1,6 +1,11 @@
 News
 ====
 
+0.13 (unreleased)
+-----------------
+* Ignore star-imported names since we cannot detect whether they are used.
+
+
 0.12 (2017-01-05)
 -----------------
 * Detect unused imports.
