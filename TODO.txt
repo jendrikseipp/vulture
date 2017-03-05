@@ -2,6 +2,7 @@ TODO
 ====
 
 * Return with exit code 1 when syntax errors are found or files can't be read.
+* Detect unreachable code à la `if False:` (try to evaluate condition).
 * Differentiate between functions and methods (for our purposes methods
   are functions with a "self" parameter and they are stored as
   attributes, not as variables)
