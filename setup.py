@@ -28,10 +28,10 @@ setup(
     description='Find dead code',
     long_description='\n\n'.join(
         [open('README.txt').read(), open('NEWS.txt').read()]),
-    keywords='vulture dead unused code pyflakes',
+    keywords='dead-code-removal',
     author='Jendrik Seipp',
-    author_email='jendrikseipp@web.de',
-    url='https://bitbucket.org/jendrikseipp/vulture',
+    author_email='jendrikseipp@gmail.com',
+    url='https://github.com/jendrikseipp/vulture',
     license='MIT',
     py_modules=['vulture'],
     classifiers=[
