@@ -16,4 +16,4 @@ matrix:
 install:
   - pip install tox
 script:
-  - tox -e py
+  - tox -e cleanup,py,docs,style
