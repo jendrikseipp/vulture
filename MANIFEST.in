@@ -1,3 +1,4 @@
+include README.md
 include *.txt
 include tests/*.py
 include tox.ini
