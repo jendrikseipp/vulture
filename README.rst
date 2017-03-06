@@ -1,7 +1,8 @@
 vulture - Find dead code
 ========================
 
-[![Travis build status](https://travis-ci.org/jendrikseipp/vulture.svg?branch=master)](https://travis-ci.org/jendrikseipp/vulture)
+.. image:: https://travis-ci.org/jendrikseipp/vulture.svg?branch=master
+   :target: https://travis-ci.org/jendrikseipp/vulture
 
 Vulture finds unused classes, functions and variables in your code.
 This helps you cleanup and find errors in your programs. If you run it
@@ -26,15 +27,19 @@ Features
 Installation
 ------------
 
-    $ pip install vulture
+::
+
+  $ pip install vulture
 
 
 Usage
 -----
 
-    $ vulture myscript.py
-    $ vulture myscript.py mypackage1/ mypackage2/
-    $ vulture myscript.py whitelist.py
+::
+
+  $ vulture myscript.py
+  $ vulture myscript.py mypackage1/ mypackage2/
+  $ vulture myscript.py whitelist.py
 
 The provided arguments may be Python files or directories. For each
 directory vulture analyzes all contained `*.py` files.
