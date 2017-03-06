@@ -20,16 +20,13 @@ fi
 
 # Bump version.
 sed -i -e "s/__version__ = '.*'/__version__ = '$VERSION'/" vulture.py
-
-# Ignore the error raised if the version had already been changed.
-set +e
-git commit -am "Update version number to $VERSION for release."
-set -e
-
+git commit -am "Update version number to ${VERSION} for release."
 git tag -a "v$VERSION" -m "v$VERSION" HEAD
+sed -i -e "s/__version__ = '.*'/__version__ = '$VERSION+'/" vulture.py
+git commit -am "Update version number to ${VERSION}+ after release."
 
 python setup.py register
 python setup.py sdist upload
 
-#git push
-#git push --tags
+git push
+git push --tags
