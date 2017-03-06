@@ -1,6 +1,8 @@
 vulture - Find dead code
 ========================
 
+[![Travis build status](https://travis-ci.org/jendrikseipp/vulture.svg?branch=master)](https://travis-ci.org/jendrikseipp/vulture)
+
 Vulture finds unused classes, functions and variables in your code.
 This helps you cleanup and find errors in your programs. If you run it
 on both your library and test suite you can find untested code.
@@ -16,7 +18,7 @@ Features
 
 * fast: static code analysis
 * lightweight: only one module
-* tested: tests itself and has 100% test coverage
+* tested: tests itself and has complete test coverage
 * complements pyflakes and has the same output syntax
 * supports Python 2.6, 2.7 and 3.x
 
