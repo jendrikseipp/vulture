@@ -1,9 +1,10 @@
 News
 ====
 
-0.13 (unreleased)
+0.13 (2017-03-06)
 -----------------
 * Ignore star-imported names since we cannot detect whether they are used.
+* Move repository to GitHub.
 
 
 0.12 (2017-01-05)
