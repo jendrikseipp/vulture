@@ -1,9 +1,0 @@
-~$
-\.pyc$
-^MANIFEST$
-^.cache/
-^.coverage
-^.tox/
-^dist/
-^htmlcov/
-^vulture.egg-info/
