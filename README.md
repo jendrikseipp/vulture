@@ -14,7 +14,7 @@ very helpful tool for higher code quality.
 Features
 --------
 
-* fast: uses static code analysis
+* fast: static code analysis
 * lightweight: only one module
 * tested: tests itself and has 100% test coverage
 * complements pyflakes and has the same output syntax
@@ -24,19 +24,15 @@ Features
 Installation
 ------------
 
-::
-
-  $ pip install vulture
+    $ pip install vulture
 
 
 Usage
 -----
 
-::
-
-  $ vulture myscript.py
-  $ vulture myscript.py mypackage1/ mypackage2/
-  $ vulture myscript.py whitelist.py
+    $ vulture myscript.py
+    $ vulture myscript.py mypackage1/ mypackage2/
+    $ vulture myscript.py whitelist.py
 
 The provided arguments may be Python files or directories. For each
 directory vulture analyzes all contained `*.py` files.
@@ -65,18 +61,8 @@ Similar programs
   all branches of the code to actually be run.
 
 
-Feedback
---------
+Participate
+-----------
 
-Your feedback is more than welcome. Write emails to jendrikseipp@web.de
-or post bugs and feature or pull requests on bitbucket:
-
-https://bitbucket.org/jendrikseipp/vulture/issues
-
-
-Source download
----------------
-
-The source code is available on bitbucket. Fork away!
-
-https://bitbucket.org/jendrikseipp/vulture
+Please visit https://github.com/jendrikseipp/vulture to report any 
+issues or to make pull requests.
