@@ -6,19 +6,30 @@ VERSION="$1"
 
 tox
 
-if [[ -n $(hg diff) ]]; then
-    echo "Error: repo has uncomitted changes"
+# Check for uncommited changes.
+set +e
+git diff --quiet && git diff --cached --quiet
+retcode=$?
+set -e
+
+if [[ $retcode != 0 ]]; then
+    echo "There are uncommited changes:"
+    git status
     exit 1
 fi
 
 # Bump version.
 sed -i -e "s/__version__ = '.*'/__version__ = '$VERSION'/" vulture.py
-if [[ -n $(hg diff) ]]; then
-    hg commit -m "Update version number to $VERSION for release."
-else
-    echo "Version number has already been set to $VERSION"
-fi
-hg tag "v$VERSION"
+
+# Ignore the error raised if the version had already been changed.
+set +e
+git commit -am "Update version number to $VERSION for release."
+set -e
+
+git tag -a "v$VERSION" -m "v$VERSION" HEAD
 
 python setup.py register
 python setup.py sdist upload
+
+#git push
+#git push --tags
