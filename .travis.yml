@@ -16,4 +16,6 @@ matrix:
 install:
   - pip install tox
 script:
-  - tox -e cleanup,py,docs,style
+  - tox -e cleanup,py,docs
+  # flake8 doesn't support Python 2.6
+  - if [[ $TRAVIS_PYTHON_VERSION != 2.6 ]]; then tox -e style; fi
