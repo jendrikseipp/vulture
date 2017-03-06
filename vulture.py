@@ -345,6 +345,11 @@ class Vulture(ast.NodeVisitor):
         self._find_tuple_assigns(node)
 
     def visit_ClassDef(self, node):
+        if (os.path.basename(self.filename).startswith('test_') and
+                node.name.startswith('Test')):
+            self.log(
+                "Ignoring test class {0} due to its name".format(node.name))
+            return
         self.defined_funcs.append(self._get_item(node, 'class'))
 
     def visit_Str(self, node):
