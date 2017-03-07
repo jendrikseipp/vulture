@@ -1,6 +1,11 @@
 News
 ====
 
+0.14 (unreleased)
+-----------------
+* Ignore class names starting with "Test" in "test_" files (thanks @thisch).
+* Ignore "test_" functions only in "test_" files.
+
 0.13 (2017-03-06)
 -----------------
 * Ignore star-imported names since we cannot detect whether they are used.
