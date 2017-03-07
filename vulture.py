@@ -56,11 +56,6 @@ if sys.version_info < (3, 4):
 IGNORED_IMPORTS = ["*"]
 
 
-def _ignore_function(name):
-    return ((name.startswith('__') and name.endswith('__')) or
-            name.startswith('test_'))
-
-
 def format_path(path):
     if not path:
         return path
@@ -250,6 +245,16 @@ class Vulture(ast.NodeVisitor):
         assert bool(name) ^ bool(id_) ^ bool(attr), (typ, dir(node))
         return Item(name or id_ or attr, typ, self.filename, node.lineno)
 
+    def _ignore_function(self, name):
+        ignore = (
+            (name.startswith('__') and name.endswith('__')) or
+            (os.path.basename(self.filename).startswith('test_') and
+                name.startswith(('test_', 'Test'))))
+        if ignore:
+            self.log(
+                'Ignoring class or function {0} due to its name'.format(name))
+        return ignore
+
     def log(self, *args):
         if self.verbose:
             print(*args)
@@ -271,10 +276,7 @@ class Vulture(ast.NodeVisitor):
                 break
         else:
             # Function is not a property.
-            if _ignore_function(node.name):
-                self.log(
-                    "Ignoring function {0} due to its name".format(node.name))
-            else:
+            if not self._ignore_function(node.name):
                 self.defined_funcs.append(self._get_item(node, 'function'))
 
         # Detect *args and **kwargs parameters. Python 3 recognizes them
@@ -345,12 +347,8 @@ class Vulture(ast.NodeVisitor):
         self._find_tuple_assigns(node)
 
     def visit_ClassDef(self, node):
-        if (os.path.basename(self.filename).startswith('test_') and
-                node.name.startswith('Test')):
-            self.log(
-                "Ignoring test class {0} due to its name".format(node.name))
-            return
-        self.defined_funcs.append(self._get_item(node, 'class'))
+        if not self._ignore_function(node.name):
+            self.defined_funcs.append(self._get_item(node, 'class'))
 
     def visit_Str(self, node):
         """
