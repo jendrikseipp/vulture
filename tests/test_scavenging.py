@@ -327,21 +327,52 @@ class Bar(object):
     assert v.unused_attrs == ['a']
 
 
-def test_function_names(v):
+def test_function_names_in_test_file(v):
     v.scan("""\
-def test_method():
+def test_func():
     pass
 
-def other_method():
+def other_func():
     pass
-""")
+
+class TestClass:
+    pass
+
+class OtherClass:
+    pass
+""", filename='test_function_names')
     assert v.defined_attrs == []
-    assert v.defined_funcs == ['other_method']
+    assert v.defined_funcs == ['other_func', 'OtherClass']
     assert v.defined_vars == []
     assert v.used_attrs == []
     assert v.used_vars == []
     assert v.unused_attrs == []
-    assert v.unused_funcs == ['other_method']
+    assert v.unused_funcs == ['other_func', 'OtherClass']
+
+
+def test_function_names_in_normal_file(v):
+    v.scan("""\
+def test_func():
+    pass
+
+def other_func():
+    pass
+
+class TestClass:
+    pass
+
+class OtherClass:
+    pass
+""")
+    assert v.defined_attrs == []
+    assert v.defined_funcs == [
+        'test_func', 'other_func', 'TestClass', 'OtherClass']
+    assert v.defined_vars == []
+    assert v.used_attrs == []
+    assert v.used_vars == []
+    assert v.unused_attrs == []
+    assert v.unused_funcs == [
+        'other_func', 'OtherClass', 'test_func', 'TestClass']
 
 
 def test_global_attribute(v):
