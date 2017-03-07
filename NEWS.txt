@@ -3,8 +3,8 @@ News
 
 0.14 (unreleased)
 -----------------
-* Ignore class names starting with "Test" in "test_" files (thanks @thisch).
-* Ignore "test_" functions only in "test_" files.
+* Ignore class names starting with "Test" in "test\_" files (thanks @thisch).
+* Ignore "test\_" functions only in "test\_" files.
 
 0.13 (2017-03-06)
 -----------------
