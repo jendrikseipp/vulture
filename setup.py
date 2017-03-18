@@ -27,7 +27,7 @@ setup(
     version=__version__,
     description='Find dead code',
     long_description='\n\n'.join(
-        [open('README.rst').read(), open('NEWS.txt').read()]),
+        [open('README.rst').read(), open('NEWS.rst').read()]),
     keywords='dead-code-removal',
     author='Jendrik Seipp',
     author_email='jendrikseipp@gmail.com',

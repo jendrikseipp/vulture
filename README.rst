@@ -71,8 +71,8 @@ Similar programs
 Participate
 -----------
 
-Please visit https://github.com/jendrikseipp/vulture to report any 
+Please visit https://github.com/jendrikseipp/vulture to report any
 issues or to make pull requests.
 
-* Changelog: `NEWS.txt <https://github.com/jendrikseipp/vulture/blob/master/NEWS.txt>`_
+* Changelog: `NEWS.rst <https://github.com/jendrikseipp/vulture/blob/master/NEWS.rst>`_
 * Roadmap: `TODO.txt <https://github.com/jendrikseipp/vulture/blob/master/TODO.txt>`_
