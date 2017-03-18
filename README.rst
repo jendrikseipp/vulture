@@ -73,3 +73,6 @@ Participate
 
 Please visit https://github.com/jendrikseipp/vulture to report any 
 issues or to make pull requests.
+
+* Changelog: `NEWS.txt <https://github.com/jendrikseipp/vulture/blob/master/NEWS.txt>`_
+* Roadmap: `TODO.txt <https://github.com/jendrikseipp/vulture/blob/master/TODO.txt>`_
