@@ -1,0 +1,16 @@
+#  This file contains snippets of code which are currently in 
+#  whitelist_python.py which is used for testing. If changes are 
+#  made here, suitable changes should be made in
+#  tests/test_whitelist_python.py
+
+
+import collections
+
+
+def get_dd():
+    dd = collections.defaultdict(list)
+    dd['foo'].append('bar')
+    dd.default_factory = None
+    return dd
+
+get_dd()
