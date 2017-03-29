@@ -1,5 +1,5 @@
-#  This file contains snippets of code which are currently in 
-#  whitelist_python.py which is used for testing. If changes are 
+#  This file contains snippets of code which are currently in
+#  whitelist_python.py which is used for testing. If changes are
 #  made here, suitable changes should be made in
 #  tests/test_whitelist_python.py
 
