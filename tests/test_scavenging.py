@@ -26,7 +26,7 @@ def test_function_object2():
 def func():
     pass
 
-func
+func()
 """)
     assert v.defined_funcs == ['func']
     assert v.unused_funcs == []
