@@ -8,8 +8,7 @@ def v():
     return Vulture(verbose=True)
 
 
-def test_function_object1():
-    v = Vulture()
+def test_function_object1(v):
     v.scan("""\
 def func():
     pass
@@ -20,8 +19,7 @@ a = func
     assert v.unused_funcs == []
 
 
-def test_function_object2():
-    v = Vulture()
+def test_function_object2(v):
     v.scan("""\
 def func():
     pass
@@ -32,8 +30,7 @@ func
     assert v.unused_funcs == []
 
 
-def test_function1():
-    v = Vulture()
+def test_function1(v):
     v.scan("""\
 def func1(a):
     pass
@@ -45,8 +42,7 @@ def func2(b):
     assert v.unused_funcs == ['func2']
 
 
-def test_function2():
-    v = Vulture()
+def test_function2(v):
     v.scan("""\
 def func(a):
     pass
@@ -57,8 +53,7 @@ func(5)
     assert v.defined_funcs == ['func']
 
 
-def test_function3():
-    v = Vulture()
+def test_function3(v):
     v.scan("""\
 def foo(a):
     pass
@@ -69,8 +64,7 @@ b = foo(5)
     assert v.defined_funcs == ['foo']
 
 
-def test_function_and_method1():
-    v = Vulture(verbose=True)
+def test_function_and_method1(v):
     v.scan("""\
 class Bar(object):
     def func(self):
@@ -85,8 +79,7 @@ func()
     assert v.defined_funcs == ['Bar', 'func', 'func']
 
 
-def test_attribute1():
-    v = Vulture(verbose=True)
+def test_attribute1(v):
     v.scan("""\
 foo.bar = 1
 foo.bar = 2
@@ -181,8 +174,7 @@ a.insert(0, Bar())
     assert v.unused_funcs == []
 
 
-def test_class7():
-    v = Vulture()
+def test_class7(v):
     v.scan("""\
 class Bar(object):
     pass
@@ -195,8 +187,7 @@ class Foo(object):
     assert v.unused_funcs == ['Foo']
 
 
-def test_method1():
-    v = Vulture()
+def test_method1(v):
     v.scan("""\
 def __init__(self):
     self.a.foo()
@@ -226,8 +217,7 @@ x.d
     assert v.unused_vars == ['b']
 
 
-def test_variable1():
-    v = Vulture(verbose=True)
+def test_variable1(v):
     v.scan("a = 1\nb = a")
     assert v.defined_funcs == []
     assert v.used_vars == ['a']
@@ -235,8 +225,7 @@ def test_variable1():
     assert v.unused_vars == ['b']
 
 
-def test_variable2():
-    v = Vulture(verbose=True)
+def test_variable2(v):
     v.scan("a = 1\nc = b.a")
     assert v.defined_funcs == []
     assert v.defined_vars == ['a', 'c']
@@ -244,8 +233,7 @@ def test_variable2():
     assert v.unused_vars == ['c']
 
 
-def test_variable3():
-    v = Vulture(verbose=True)
+def test_variable3(v):
     v.scan("(a, b), c = (d, e, f)")
     assert v.defined_funcs == []
     assert v.defined_vars == ['a', 'b', 'c']
@@ -254,8 +242,7 @@ def test_variable3():
     assert v.unused_vars == []
 
 
-def test_variable4():
-    v = Vulture(verbose=True)
+def test_variable4(v):
     v.scan("for a, b in func(): a")
     assert v.defined_funcs == []
     assert v.defined_vars == ['a', 'b']
@@ -264,8 +251,7 @@ def test_variable4():
     assert v.unused_vars == []
 
 
-def test_variable5():
-    v = Vulture(verbose=True)
+def test_variable5(v):
     v.scan("[a for a, b in func()]")
     assert v.defined_vars == ['a', 'b']
     assert sorted(v.used_vars) == ['a', 'func']
@@ -273,16 +259,14 @@ def test_variable5():
     assert v.unused_vars == []
 
 
-def test_unused_var1():
-    v = Vulture(verbose=True)
+def test_unused_var1(v):
     v.scan("_a = 1\n__b = 2\n__c__ = 3")
     assert v.defined_vars == []
     assert sorted(v.used_vars) == []
     assert v.unused_vars == []
 
 
-def test_prop1():
-    v = Vulture(verbose=True)
+def test_prop1(v):
     v.scan("""\
 class Bar(object):
     @property
@@ -297,8 +281,7 @@ c.prop
     assert v.unused_props == []
 
 
-def test_prop2():
-    v = Vulture(verbose=True)
+def test_prop2(v):
     v.scan("""\
 class Bar(object):
     @property
@@ -313,8 +296,7 @@ prop = 1
     assert v.defined_vars == ['prop']
 
 
-def test_object_attribute():
-    v = Vulture(verbose=True)
+def test_object_attribute(v):
     v.scan("""\
 class Bar(object):
     def __init__(self):
