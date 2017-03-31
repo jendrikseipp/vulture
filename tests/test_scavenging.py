@@ -77,10 +77,10 @@ class Bar(object):
 b = Bar()
 b.foo
 """)
-	assert (await v.used_attrs == ['foo'])
-	assert (await v.unused_funcs == [])
-	assert (await v.defined_props == [])
-	assert (await v.defined_funcs == ['Bar', 'foo'])
+	assert v.used_attrs == ['foo']
+	assert v.unused_funcs == []
+	assert v.defined_props == []
+	assert v.defined_funcs == ['Bar', 'foo']
     
 
 def test_function_and_method1(v):
