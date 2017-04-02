@@ -39,7 +39,8 @@ Usage
 
   $ vulture myscript.py
   $ vulture myscript.py mypackage1/ mypackage2/
-  $ vulture myscript.py whitelist.py
+  $ vulture myscript.py whitelists/stdlib.py
+  $ vulture myscript.py mywhitelist.py
 
 The provided arguments may be Python files or directories. For each
 directory vulture analyzes all contained `*.py` files.
@@ -47,7 +48,7 @@ directory vulture analyzes all contained `*.py` files.
 After you have found and deleted dead code, run vulture again, because
 it may discover more dead code. You can add false-positives (used code
 that is marked as unused) to a python module and add it to the list of
-scanned paths (see ``whitelist.py`` for an example).
+scanned paths (see ``whitelists/stdlib.py`` for an example).
 
 
 How does it work?
