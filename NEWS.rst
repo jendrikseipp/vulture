@@ -3,8 +3,10 @@ News
 
 0.14 (unreleased)
 -----------------
+* Add stub whitelist file for Python standard library (thanks @RJ722)
 * Ignore class names starting with "Test" in "test\_" files (thanks @thisch).
 * Ignore "test\_" functions only in "test\_" files.
+
 
 0.13 (2017-03-06)
 -----------------
