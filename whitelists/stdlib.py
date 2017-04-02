@@ -20,6 +20,7 @@ class WhitelistNodeVisitor(ast.NodeVisitor):
     def __getattr__(self, attr):
         pass
 
+
 whitelist_node_visitor = WhitelistNodeVisitor()
 
 # TODO: Add missing methods.
