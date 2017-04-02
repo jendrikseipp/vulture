@@ -13,11 +13,12 @@ often incorrectly detected as unused.
 
 import ast
 import collections
+import sys
 
 
 # NodeVisitor methods are called implicitly.
 class WhitelistNodeVisitor(ast.NodeVisitor):
-    def __getattr__(self, attr):
+    def __getattr__(self, _):
         pass
 
 
@@ -41,3 +42,9 @@ whitelist_node_visitor.visit_Str
 # To free memory, the "default_factory" attribute can be set to None.
 collections.defaultdict(list).default_factory = None
 collections.defaultdict(list).default_factory
+
+
+# Never report redirected streams as unused.
+sys.stderr
+sys.stdin
+sys.stdout
