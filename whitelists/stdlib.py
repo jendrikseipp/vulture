@@ -11,60 +11,30 @@ often incorrectly detected as unused.
 
 """
 
-from ast import NodeVisitor
+import ast
 import collections
 
+
 # NodeVisitor methods are called implicitly.
-class WhitelistNodeVisitor(NodeVisitor):
-    def visit_arg(self, node):
-        node
+class WhitelistNodeVisitor(ast.NodeVisitor):
+    def __getattr__(self, attr):
         pass
 
-    def visit_alias(self, node):
-        pass
+whitelist_node_visitor = WhitelistNodeVisitor()
 
-    def visit_Assign(self, node):
-        pass
-
-    def visit_Attribute(self, node):
-        pass
-
-    def visit_ClassDef(self, node):
-        pass
-
-    def visit_comprehension(self, node):
-        pass
-
-    def visit_For(self, node):
-        pass
-
-    def visit_FunctionDef(self, node):
-        pass
-
-    def visit_Import(self, node):
-        pass
-
-    def visit_ImportFrom(self, node):
-        pass
-
-    def visit_Name(self, node):
-        pass
-
-    def visit_Str(self, node):
-        pass
-
-WhitelistNodeVisitor.visit_arg
-WhitelistNodeVisitor.visit_alias
-WhitelistNodeVisitor.visit_Assign
-WhitelistNodeVisitor.visit_Attribute
-WhitelistNodeVisitor.visit_ClassDef
-WhitelistNodeVisitor.visit_comprehension
-WhitelistNodeVisitor.visit_For
-WhitelistNodeVisitor.visit_FunctionDef
-WhitelistNodeVisitor.visit_Import
-WhitelistNodeVisitor.visit_ImportFrom
-WhitelistNodeVisitor.visit_Name
-WhitelistNodeVisitor.visit_Str
+# TODO: Add missing methods.
+whitelist_node_visitor.visit_arg
+whitelist_node_visitor.visit_alias
+whitelist_node_visitor.visit_Assign
+whitelist_node_visitor.visit_Attribute
+whitelist_node_visitor.visit_ClassDef
+whitelist_node_visitor.visit_comprehension
+whitelist_node_visitor.visit_For
+whitelist_node_visitor.visit_FunctionDef
+whitelist_node_visitor.visit_Import
+whitelist_node_visitor.visit_ImportFrom
+whitelist_node_visitor.visit_Name
+whitelist_node_visitor.visit_Str
 
 
 # To free memory, the "default_factory" attribute can be set to None.
