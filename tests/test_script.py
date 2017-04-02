@@ -13,8 +13,12 @@ def call_vulture(args, **kwargs):
         [sys.executable, 'vulture.py'] + args, cwd=REPO, **kwargs)
 
 
-def test_script():
-    assert call_vulture([WHITELIST, 'vulture.py']) == 0
+def test_script_with_whitelist():
+    assert call_vulture(['vulture.py', WHITELIST]) == 0
+
+
+def test_script_without_whitelist():
+    assert call_vulture(['vulture.py']) == 1
 
 
 def test_exclude():
@@ -29,12 +33,12 @@ def test_dir():
     assert call_vulture(['tests']) == 0
 
 
-def test_report():
-    assert call_vulture(['vulture.py']) == 1
-
-
-def test_whitelist():
+def test_whitelist_with_python():
     assert subprocess.call([sys.executable, WHITELIST], cwd=REPO) == 0
+
+
+def test_whitelist_with_vulture():
+    assert call_vulture([WHITELIST]) == 0
 
 
 def test_pyc():
