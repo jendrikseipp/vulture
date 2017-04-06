@@ -1,7 +1,7 @@
 News
 ====
 
-0.14 (unreleased)
+0.14 (2017-04-06)
 -----------------
 * Add stub whitelist file for Python standard library (thanks @RJ722)
 * Ignore class names starting with "Test" in "test\_" files (thanks @thisch).
