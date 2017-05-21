@@ -246,10 +246,20 @@ class Vulture(ast.NodeVisitor):
         return Item(name or id_ or attr, typ, self.filename, node.lineno)
 
     def _ignore_function(self, name):
+        """Determining if class/function should be skipped in a scan.
+        Args:
+            name(str): Name of the function/Class.
+        Returns:
+            ignore(bool): True if function should be skipped.
+        """
         ignore = (
             (name.startswith('__') and name.endswith('__')) or
             (os.path.basename(self.filename).startswith('test_') and
-                name.startswith(('test_', 'Test'))))
+                name.startswith(('test_', 'Test'))) or
+            (name.startswith('clean') and os.path.basename(self.filename).startswith('form')) or
+            '.eggs' in str(os.path) or
+            '.parts' in str(os.path)
+        )
         if ignore:
             self.log(
                 'Ignoring class or function {0} due to its name'.format(name))
@@ -375,6 +385,7 @@ class Vulture(ast.NodeVisitor):
 def parse_args():
     def csv(option, _, value, parser):
         setattr(parser.values, option.dest, value.split(','))
+
     usage = """\
 usage: %prog [options] PATH [PATH ...]
 
