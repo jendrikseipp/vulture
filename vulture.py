@@ -381,7 +381,8 @@ usage: %prog [options] PATH [PATH ...]
 Paths may be Python files or directories. For each directory vulture
 analyzes all contained *.py files.
 """
-    parser = optparse.OptionParser(usage=usage)
+    version = "%prog {0}".format(__version__)
+    parser = optparse.OptionParser(usage=usage, version=version)
     parser.add_option(
         '--exclude', action='callback', callback=csv,
         type='string', default=[],
