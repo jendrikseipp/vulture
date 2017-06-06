@@ -22,8 +22,6 @@ fi
 sed -i -e "s/__version__ = '.*'/__version__ = '$VERSION'/" vulture.py
 git commit -am "Update version number to ${VERSION} for release."
 git tag -a "v$VERSION" -m "v$VERSION" HEAD
-sed -i -e "s/__version__ = '.*'/__version__ = '$VERSION+'/" vulture.py
-git commit -am "Update version number to ${VERSION}+ after release."
 
 python setup.py register
 python setup.py sdist upload
