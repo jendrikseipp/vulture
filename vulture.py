@@ -70,6 +70,7 @@ class VultureInputException(Exception):
 def read_file(filename):
     # Python >= 3.2
     try:
+        # Use encoding detected by tokenize.detect_encoding().
         with tokenize.open(filename) as f:
             return f.read()
     except (SyntaxError, UnicodeDecodeError) as err:
