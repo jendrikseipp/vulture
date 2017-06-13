@@ -16,6 +16,7 @@ often incorrectly detected as unused.
 
 """
 
+
 class Whitelist:
     """
     Helper class that allows mocking Python objects.
@@ -26,6 +27,7 @@ class Whitelist:
     """
     def __getattr__(self, _):
         pass
+
 
 # NodeVisitor methods are called implicitly.
 # TODO: Add missing methods.
