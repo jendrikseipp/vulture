@@ -20,12 +20,16 @@ def get_output(args):
     return child.communicate()[0].decode("utf-8")
 
 
-def test_script_with_whitelist():
+def test_script_with_explicit_whitelist():
     assert call_vulture(['vulture/core.py', WHITELIST]) == 0
 
 
+def test_script_with_implicit_whitelist():
+    assert call_vulture(['vulture/core.py']) == 0
+
+
 def test_script_without_whitelist():
-    assert call_vulture(['vulture/core.py']) == 1
+    assert call_vulture(['vulture/core.py', '--exclude', 'whitelists']) == 1
 
 
 def test_exclude():
