@@ -54,5 +54,4 @@ def test_pyc():
 
 def test_version():
     assert call_vulture(['--version']) == 0
-    assert get_output(['--version']).replace('\r\n', '\n') == \
-        'vulture {0}\n'.format(__version__)
+    assert get_output(['--version']).strip() == 'vulture ' + __version__
