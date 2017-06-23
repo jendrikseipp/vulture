@@ -3,7 +3,8 @@ News
 
 0.15 (unreleased)
 -----------------
-* Add --version parameter.
+* Add --version parameter (thanks @RJ722).
+* Add appveyor tests for testing on Windows (thanks @RJ722).
 
 
 0.14 (2017-04-06)
