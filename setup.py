@@ -45,8 +45,10 @@ setup(
         'Topic :: Software Development :: Quality Assurance'
     ],
     entry_points={
-        'console_scripts': ['vulture = vulture:main'],
+        'console_scripts': ['vulture = vulture.core:main'],
     },
     tests_require=['pytest', 'pytest-cov'],
     cmdclass={'test': PyTest},
+    packages=['vulture'],
+    package_dir={'vulture': 'vulture'},
 )

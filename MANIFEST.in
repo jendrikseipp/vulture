@@ -2,4 +2,4 @@ include *.rst
 include *.txt
 include tests/*.py
 include tox.ini
-include whitelists/*.py
+include vulture/whitelists/*.py
