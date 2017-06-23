@@ -1,4 +1,6 @@
 import pytest
+import sys
+import asyncio
 
 from vulture import Vulture
 
@@ -63,6 +65,23 @@ b = foo(5)
     assert v.unused_funcs == []
     assert v.defined_funcs == ['foo']
 
+    
+@pytest.mark.skipif(sys.version_info < (3,5),
+                reason="requires python3.5")
+async def test_function4(v):
+	await v.scan("""\
+class Bar(object):
+    def foo(self):
+        pass
+
+b = Bar()
+b.foo
+""")
+	assert v.used_attrs == ['foo']
+	assert v.unused_funcs == []
+	assert v.defined_props == []
+	assert v.defined_funcs == ['Bar', 'foo']
+    
 
 def test_function_and_method1(v):
     v.scan("""\
