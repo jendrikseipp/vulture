@@ -3,6 +3,7 @@ News
 
 0.15 (unreleased)
 -----------------
+* Use stdlib.py whitelist by default (thanks @RJ722).
 * Add --version parameter (thanks @RJ722).
 * Add appveyor tests for testing on Windows (thanks @RJ722).
 
