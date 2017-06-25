@@ -31,6 +31,7 @@ import codecs
 from fnmatch import fnmatchcase
 import optparse
 import os
+import pkgutil
 import re
 import sys
 import tokenize
@@ -166,15 +167,14 @@ class Vulture(ast.NodeVisitor):
         return modules
 
     def scavenge(self, paths):
-        modules = self._get_modules(paths)
-        included_modules = []
-        for module in modules:
-            if any(fnmatchcase(module, pattern) for pattern in self.exclude):
-                self.log('Excluded:', module)
-            else:
-                included_modules.append(module)
+        def exclude(name):
+            return any(fnmatchcase(name, pattern) for pattern in self.exclude)
 
-        for module in included_modules:
+        for module in self._get_modules(paths):
+            if exclude(module):
+                self.log('Excluded:', module)
+                continue
+
             self.log('Scanning:', module)
             try:
                 module_string = read_file(module)
@@ -183,6 +183,18 @@ class Vulture(ast.NodeVisitor):
                 print('You might want to change the encoding to UTF-8.')
             else:
                 self.scan(module_string, filename=module)
+
+            whitelist_names = ['stdlib.py']
+            for name in whitelist_names:
+                path = os.path.join('whitelists', name)
+                if exclude(path):
+                    self.log('Excluded Whitelist:', path)
+                else:
+                    module_data = pkgutil.get_data('vulture', path)
+                    if module_data is None:
+                        sys.exit('Error: Please use "python -m vulture.core".')
+                    module_string = module_data.decode("utf-8")
+                    self.scan(module_string, filename=path)
 
     def report(self):
         def file_lineno(item):
