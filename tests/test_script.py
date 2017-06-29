@@ -10,8 +10,11 @@ WHITELIST = os.path.join(REPO, 'vulture', 'whitelists', 'stdlib.py')
 
 
 def call_vulture(args, **kwargs):
+    core = 'vulture'
+    if sys.version_info < (2, 7):
+        core = 'vulture.core'
     return subprocess.call(
-        [sys.executable, 'vulture/core.py'] + args, cwd=REPO, **kwargs)
+        [sys.executable, '-m', core] + args, cwd=REPO, **kwargs)
 
 
 def get_output(args):
