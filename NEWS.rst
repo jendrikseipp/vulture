@@ -3,7 +3,8 @@ News
 
 0.15 (unreleased)
 -----------------
-* Use stdlib.py whitelist by default (thanks @RJ722).
+* Automatically include whitelists based on imported modules (thanks @RJ722).
+* Use whitelist for Python standard library by default (thanks @RJ722).
 * Add --version parameter (thanks @RJ722).
 * Add appveyor tests for testing on Windows (thanks @RJ722).
 
