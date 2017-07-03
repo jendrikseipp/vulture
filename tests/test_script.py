@@ -1,3 +1,4 @@
+import glob
 import os.path
 import subprocess
 import sys
@@ -6,7 +7,7 @@ from vulture import __version__
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(DIR)
-WHITELIST = os.path.join(REPO, 'vulture', 'whitelists', 'stdlib.py')
+WHITELISTS = glob.glob(os.path.join(REPO, 'vulture', 'whitelists', '*.py'))
 
 
 def call_vulture(args, **kwargs):
@@ -24,7 +25,8 @@ def get_output(args):
 
 
 def test_script_with_explicit_whitelist():
-    assert call_vulture(['vulture/core.py', WHITELIST]) == 0
+    for whitelist in WHITELISTS:
+        assert call_vulture(['vulture/core.py', whitelist]) == 0
 
 
 def test_script_with_implicit_whitelist():
@@ -48,11 +50,13 @@ def test_dir():
 
 
 def test_whitelist_with_python():
-    assert subprocess.call([sys.executable, WHITELIST], cwd=REPO) == 0
+    for whitelist in WHITELISTS:
+        assert subprocess.call([sys.executable, whitelist], cwd=REPO) == 0
 
 
 def test_whitelist_with_vulture():
-    assert call_vulture([WHITELIST]) == 0
+    for whitelist in WHITELISTS:
+        assert call_vulture([whitelist]) == 0
 
 
 def test_pyc():

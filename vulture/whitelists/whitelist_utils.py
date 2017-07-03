@@ -29,28 +29,4 @@ class Whitelist:
         pass
 
 
-# NodeVisitor methods are called implicitly.
-# TODO: Add missing methods.
-whitelist_node_visitor = Whitelist()
-whitelist_node_visitor.visit_arg
-whitelist_node_visitor.visit_alias
-whitelist_node_visitor.visit_Assign
-whitelist_node_visitor.visit_Attribute
-whitelist_node_visitor.visit_ClassDef
-whitelist_node_visitor.visit_comprehension
-whitelist_node_visitor.visit_For
-whitelist_node_visitor.visit_FunctionDef
-whitelist_node_visitor.visit_Import
-whitelist_node_visitor.visit_ImportFrom
-whitelist_node_visitor.visit_Name
-whitelist_node_visitor.visit_Str
-
-# To free memory, the "default_factory" attribute can be set to None.
-whitelist_defaultdict = Whitelist()
-whitelist_defaultdict.default_factory
-
-# Never report redirected streams as unused.
-whitelist_sys = Whitelist()
-whitelist_sys.stderr
-whitelist_sys.stdin
-whitelist_sys.stdout
+assert Whitelist

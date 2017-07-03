@@ -1,0 +1,17 @@
+from whitelist_utils import Whitelist
+
+# NodeVisitor methods are called implicitly.
+# TODO: Add missing methods.
+whitelist_node_visitor = Whitelist()
+whitelist_node_visitor.visit_arg
+whitelist_node_visitor.visit_alias
+whitelist_node_visitor.visit_Assign
+whitelist_node_visitor.visit_Attribute
+whitelist_node_visitor.visit_ClassDef
+whitelist_node_visitor.visit_comprehension
+whitelist_node_visitor.visit_For
+whitelist_node_visitor.visit_FunctionDef
+whitelist_node_visitor.visit_Import
+whitelist_node_visitor.visit_ImportFrom
+whitelist_node_visitor.visit_Name
+whitelist_node_visitor.visit_Str
