@@ -12,6 +12,8 @@ TODOs
 * Choose whitelists depending on used imports (turn stdlib.py into "stdlib"
   dir with files "ast.py", "sys.py", etc. Then if "ast" is imported, use "ast"
   whitelist).
+* Distinguish between unused classes and functions.
+* Distribute and test vulture wheel file.
 
 
 Non-TODOs
