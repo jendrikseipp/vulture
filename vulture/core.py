@@ -187,15 +187,16 @@ class Vulture(ast.NodeVisitor):
             for name in self.defined_imports:
                 path = os.path.join('whitelists', name) + '.py'
                 if exclude(path):
-                    self.log('Excluded Whitelist:', path)
+                    self.log('Excluded whitelist:', path)
                 else:
                     try:
                         module_data = pkgutil.get_data('vulture', path)
+                        self.log('Included whitelist:', path)
                     except IOError:
-                        # Most imports don't have a whitelist.
+                        # Most imported modules don't have a whitelist.
                         continue
                     if module_data is None:
-                        sys.exit('Error: Please use "python -m vulture.core".')
+                        sys.exit('Error: Please use "python -m vulture".')
                     module_string = module_data.decode("utf-8")
                     self.scan(module_string, filename=path)
 
