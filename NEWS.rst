@@ -1,10 +1,9 @@
 News
 ====
 
-0.15 (unreleased)
+0.15 (2017-07-04)
 -----------------
 * Automatically include whitelists based on imported modules (thanks @RJ722).
-* Use whitelist for Python standard library by default (thanks @RJ722).
 * Add --version parameter (thanks @RJ722).
 * Add appveyor tests for testing on Windows (thanks @RJ722).
 
