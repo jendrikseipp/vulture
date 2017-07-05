@@ -14,7 +14,7 @@ def func():
     if "foo" == "bar":
         return "xyz"
     import sys
-    print sys.argv
+    return len(sys.argv)
 """)
     assert wv.defined_funcs[0].weight == 5
 
@@ -29,7 +29,7 @@ class Foo(object):
         if "foo" == "bar":
             return "xyz"
         import sys
-        print sys.argv
+        return len(sys.argv)
 """)
     assert wv.defined_classes[0].weight == 8
 
