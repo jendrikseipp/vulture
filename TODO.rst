@@ -9,6 +9,7 @@ TODOs
 * Once we drop Python 2.6 compatibility use argparse instead of optparse.
 * Extend whitelist files.
 * Distribute and test vulture wheel file.
+* Add get_unused_code() method.
 
 
 Non-TODOs
