@@ -57,7 +57,7 @@ if sys.version_info < (3, 4):
 IGNORED_IMPORTS = ["*"]
 
 
-def format_path(path):
+def _format_path(path):
     if not path:
         return path
     relpath = os.path.relpath(path)
@@ -88,6 +88,10 @@ def read_file(filename):
         raise VultureInputException(err)
 
 
+def _get_unused_items(defined, used):
+    return list(sorted(set(defined) - set(used), key=lambda x: x.lower()))
+
+
 class Item(str):
     def __new__(cls, name, typ, filename, lineno):
         item = str.__new__(cls, name)
@@ -110,7 +114,7 @@ class LoggingList(list):
 
 
 class Vulture(ast.NodeVisitor):
-    """Find dead stuff."""
+    """Find dead code."""
     def __init__(self, exclude=None, verbose=False):
         self.exclude = []
         for pattern in exclude or []:
@@ -135,17 +139,17 @@ class Vulture(ast.NodeVisitor):
         self.names_imported_as_aliases = get_list('names_imported_as_aliases')
 
         self.filename = ''
-        self.code = None
+        self.code = []
 
-    def scan(self, node_string, filename=''):
-        node_string = ENCODING_REGEX.sub("", node_string, count=1)
-        self.code = node_string.splitlines()
+    def scan(self, code, filename=''):
+        code = ENCODING_REGEX.sub("", code, count=1)
+        self.code = code.splitlines()
         self.filename = filename
         try:
-            node = ast.parse(node_string, filename=self.filename)
+            node = ast.parse(code, filename=self.filename)
         except SyntaxError as err:
             print('%s:%d: %s at "%s"' % (
-                format_path(filename), err.lineno, err.msg, err.text.strip()))
+                _format_path(filename), err.lineno, err.msg, err.text.strip()))
         else:
             self.visit(node)
 
@@ -173,10 +177,10 @@ class Vulture(ast.NodeVisitor):
 
         for module in self._get_modules(paths):
             if exclude(module):
-                self.log('Excluded:', module)
+                self._log('Excluded:', module)
                 continue
 
-            self.log('Scanning:', module)
+            self._log('Scanning:', module)
             try:
                 module_string = read_file(module)
             except VultureInputException as err:
@@ -188,11 +192,11 @@ class Vulture(ast.NodeVisitor):
             for name in self.defined_imports:
                 path = os.path.join('whitelists', name) + '.py'
                 if exclude(path):
-                    self.log('Excluded whitelist:', path)
+                    self._log('Excluded whitelist:', path)
                 else:
                     try:
                         module_data = pkgutil.get_data('vulture', path)
-                        self.log('Included whitelist:', path)
+                        self._log('Included whitelist:', path)
                     except IOError:
                         # Most imported modules don't have a whitelist.
                         continue
@@ -210,44 +214,41 @@ class Vulture(ast.NodeVisitor):
                 self.unused_classes + self.unused_vars + self.unused_attrs,
                 key=file_lineno):
             print("%s:%d: Unused %s '%s'" % (
-                format_path(item.filename), item.lineno, item.typ, item))
+                _format_path(item.filename), item.lineno, item.typ, item))
             unused_item_found = True
         return unused_item_found
 
-    def get_unused(self, defined, used):
-        return list(sorted(set(defined) - set(used), key=lambda x: x.lower()))
-
     @property
     def unused_classes(self):
-        return self.get_unused(
+        return _get_unused_items(
             self.defined_classes,
             self.used_attrs + self.used_vars + self.names_imported_as_aliases)
 
     @property
     def unused_funcs(self):
-        return self.get_unused(
+        return _get_unused_items(
             self.defined_funcs,
             self.used_attrs + self.used_vars + self.names_imported_as_aliases)
 
     @property
     def unused_imports(self):
-        return self.get_unused(
+        return _get_unused_items(
             self.defined_imports, self.used_vars + IGNORED_IMPORTS)
 
     @property
     def unused_props(self):
-        return self.get_unused(self.defined_props, self.used_attrs)
+        return _get_unused_items(self.defined_props, self.used_attrs)
 
     @property
     def unused_vars(self):
-        return self.get_unused(
+        return _get_unused_items(
             self.defined_vars,
             self.used_attrs + self.used_vars + self.tuple_assign_vars +
             self.names_imported_as_aliases)
 
     @property
     def unused_attrs(self):
-        return self.get_unused(
+        return _get_unused_items(
             self.defined_attrs,
             self.used_attrs + self.used_vars)
 
@@ -276,18 +277,18 @@ class Vulture(ast.NodeVisitor):
             (os.path.basename(self.filename).startswith('test_') and
                 name.startswith(('test_', 'Test'))))
         if ignore:
-            self.log(
+            self._log(
                 'Ignoring class or function {0} due to its name'.format(name))
         return ignore
 
-    def log(self, *args):
+    def _log(self, *args):
         if self.verbose:
             print(*args)
 
-    def print_node(self, node):
+    def _print_node(self, node):
         # Only create the strings if we'll also print them.
         if self.verbose:
-            self.log(
+            self._log(
                 self._get_lineno(node), ast.dump(node), self._get_line(node))
 
     def visit_arg(self, node):
@@ -389,15 +390,15 @@ class Vulture(ast.NodeVisitor):
     def visit(self, node):
         method = 'visit_' + node.__class__.__name__
         visitor = getattr(self, method, None)
-        self.print_node(node)
+        self._print_node(node)
         if visitor:
             visitor(node)
         else:
-            self.log('Unhandled')
+            self._log('Unhandled')
         return self.generic_visit(node)
 
 
-def parse_args():
+def _parse_args():
     def csv(option, _, value, parser):
         setattr(parser.values, option.dest, value.split(','))
     usage = """\
@@ -418,7 +419,7 @@ analyzes all contained *.py files.
 
 
 def main():
-    options, args = parse_args()
+    options, args = _parse_args()
     vulture = Vulture(exclude=options.exclude, verbose=options.verbose)
     vulture.scavenge(args)
     sys.exit(vulture.report())
