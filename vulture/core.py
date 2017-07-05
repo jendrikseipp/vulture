@@ -124,6 +124,7 @@ class Vulture(ast.NodeVisitor):
             return LoggingList(name, self.verbose)
 
         self.defined_attrs = get_list('defined_attrs')
+        self.defined_classes = get_list('defined_classes')
         self.defined_funcs = get_list('defined_funcs')
         self.defined_imports = get_list('defined_imports')
         self.defined_props = get_list('defined_props')
@@ -206,7 +207,8 @@ class Vulture(ast.NodeVisitor):
         unused_item_found = False
         for item in sorted(
                 self.unused_funcs + self.unused_imports + self.unused_props +
-                self.unused_vars + self.unused_attrs, key=file_lineno):
+                self.unused_classes + self.unused_vars + self.unused_attrs,
+                key=file_lineno):
             print("%s:%d: Unused %s '%s'" % (
                 format_path(item.filename), item.lineno, item.typ, item))
             unused_item_found = True
@@ -214,6 +216,12 @@ class Vulture(ast.NodeVisitor):
 
     def get_unused(self, defined, used):
         return list(sorted(set(defined) - set(used), key=lambda x: x.lower()))
+
+    @property
+    def unused_classes(self):
+        return self.get_unused(
+            self.defined_classes,
+            self.used_attrs + self.used_vars + self.names_imported_as_aliases)
 
     @property
     def unused_funcs(self):
@@ -365,7 +373,7 @@ class Vulture(ast.NodeVisitor):
 
     def visit_ClassDef(self, node):
         if not self._ignore_function(node.name):
-            self.defined_funcs.append(self._get_item(node, 'class'))
+            self.defined_classes.append(self._get_item(node, 'class'))
 
     def visit_Str(self, node):
         """
