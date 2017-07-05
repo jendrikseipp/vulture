@@ -1,6 +1,11 @@
 News
 ====
 
+0.16 (unreleased)
+-----------------
+* Differentiate between unused classes and functions (thanks @RJ722).
+
+
 0.15 (2017-07-04)
 -----------------
 * Automatically include whitelists based on imported modules (thanks @RJ722).

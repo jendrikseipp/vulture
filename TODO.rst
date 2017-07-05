@@ -8,11 +8,6 @@ TODOs
   Use string.Formatter.parse for this.
 * Once we drop Python 2.6 compatibility use argparse instead of optparse.
 * Extend whitelist files.
-* Allow running "python -m vulture" (probably needs __main__.py file).
-* Choose whitelists depending on used imports (turn stdlib.py into "stdlib"
-  dir with files "ast.py", "sys.py", etc. Then if "ast" is imported, use "ast"
-  whitelist).
-* Distinguish between unused classes and functions.
 * Distribute and test vulture wheel file.
 
 
