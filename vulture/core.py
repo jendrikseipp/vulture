@@ -29,6 +29,7 @@ from __future__ import print_function
 import ast
 import codecs
 from fnmatch import fnmatchcase
+from functools import wraps
 import optparse
 import os
 import pkgutil
@@ -68,6 +69,33 @@ class VultureInputException(Exception):
     pass
 
 
+# Reinventing wheel here to keep vulture lightweight
+def memoize(func):
+    _cache = {}
+
+    @wraps(func)
+    def wrapped(*args):
+        try:
+            return _cache[args]
+        except KeyError:
+            _cache[args] = result = func(*args)
+            return result
+    return wrapped
+
+
+@memoize
+def weigh(node):
+    """
+    Recursively count child AST nodes under `node`. It is an approximation
+    of the amount of code belonging to the node, which is useful for
+    sorting the list of unused code that a developer might want to remove
+    """
+    if isinstance(node, (ast.FunctionDef, ast.If, ast.For, ast.ClassDef)):
+        return 1 + sum(weigh(child) for child in node.body)
+    else:
+        return 1
+
+
 def read_file(filename):
     # Python >= 3.2
     try:
@@ -93,11 +121,12 @@ def _get_unused_items(defined, used):
 
 
 class Item(str):
-    def __new__(cls, name, typ, filename, lineno):
+    def __new__(cls, name, typ, filename, lineno, weight=1):
         item = str.__new__(cls, name)
         item.typ = typ
         item.filename = filename
         item.lineno = lineno
+        item.weight = weight
         return item
 
 
@@ -115,8 +144,9 @@ class LoggingList(list):
 
 class Vulture(ast.NodeVisitor):
     """Find dead code."""
-    def __init__(self, exclude=None, verbose=False):
+    def __init__(self, exclude=None, verbose=False, weigh=False):
         self.exclude = []
+        self.weigh = weigh
         for pattern in exclude or []:
             if not any(char in pattern for char in ['*', '?', '[']):
                 pattern = '*%s*' % pattern
@@ -206,6 +236,24 @@ class Vulture(ast.NodeVisitor):
                     self.scan(module_string, filename=path)
 
     def report(self):
+        if self.weigh:
+            return self.report_weight_sorted()
+        else:
+            return self.report_alpha_sorted()
+
+    def report_weight_sorted(self):
+        unused_item_found = False
+        for item in sorted(
+                self.unused_funcs + self.unused_imports + self.unused_props +
+                self.unused_classes + self.unused_vars + self.unused_attrs,
+                key=lambda item: item.weight):
+            print("%s:%d: Unused %s '%s' weight:%d" % (
+                _format_path(item.filename), item.lineno,
+                item.typ, item, item.weight))
+            unused_item_found = True
+        return unused_item_found
+
+    def report_alpha_sorted(self):
         def file_lineno(item):
             return (item.filename.lower(), item.lineno)
         unused_item_found = False
@@ -265,11 +313,17 @@ class Vulture(ast.NodeVisitor):
         return self.code[self._get_lineno(node) - 1] if self.code else ''
 
     def _get_item(self, node, typ):
+        """
+        Returns a lighter representation of the ast node ``node`` for
+        later reporting purposes
+        """
         name = getattr(node, 'name', None)
         id_ = getattr(node, 'id', None)
         attr = getattr(node, 'attr', None)
         assert bool(name) ^ bool(id_) ^ bool(attr), (typ, dir(node))
-        return Item(name or id_ or attr, typ, self.filename, node.lineno)
+        weight = weigh(node) if self.weigh else 1
+        label = name or id_ or attr
+        return Item(label, typ, self.filename, node.lineno, weight)
 
     def _ignore_function(self, name):
         ignore = (
@@ -413,6 +467,9 @@ analyzes all contained *.py files.
         '--exclude', action='callback', callback=csv,
         type='string', default=[],
         help='Comma-separated list of paths to ignore (e.g. .svn,external)')
+    parser.add_option(
+        "--weigh", action="store_true",
+        help="Sort unused functions and classes by their approximate size")
     parser.add_option('-v', '--verbose', action='store_true')
     options, args = parser.parse_args()
     return options, args
@@ -420,7 +477,8 @@ analyzes all contained *.py files.
 
 def main():
     options, args = _parse_args()
-    vulture = Vulture(exclude=options.exclude, verbose=options.verbose)
+    vulture = Vulture(exclude=options.exclude, verbose=options.verbose,
+                      weigh=options.weigh)
     vulture.scavenge(args)
     sys.exit(vulture.report())
 
