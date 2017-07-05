@@ -32,4 +32,3 @@ class Foo(object):
         return len(sys.argv)
 """)
     assert wv.defined_classes[0].weight == 8
-
