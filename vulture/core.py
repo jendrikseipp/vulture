@@ -57,6 +57,19 @@ if sys.version_info < (3, 4):
 # Ignore star-imported names, since we cannot detect whether they are used.
 IGNORED_IMPORTS = ["*"]
 
+TRAVERSABLE_FIELDS = {
+        ast.ClassDef: ('body', 'decorator_list'),
+        ast.ExceptHandler: ('body',),
+        ast.For: ('body', 'orelse'),
+        ast.FunctionDef: ('body', 'decorator_list'),
+        ast.If: ('body', 'orelse'),
+        ast.Module: ('body',),
+        ast.TryExcept: ('body', 'handlers', 'orelse'),
+        ast.TryFinally: ('body', 'finalbody'),
+        ast.While: ('body', 'orelse'),
+        ast.With: ('body',),
+}
+
 
 def _format_path(path):
     if not path:
@@ -69,7 +82,7 @@ class VultureInputException(Exception):
     pass
 
 
-# Reinventing wheel here to keep vulture lightweight
+# Reinventing wheel here to keep vulture lightweight.
 def memoize(func):
     _cache = {}
 
@@ -84,16 +97,15 @@ def memoize(func):
 
 
 @memoize
-def weigh(node):
+def estimate_lines(node):
     """
     Recursively count child AST nodes under `node`. It is an approximation
     of the amount of code belonging to the node, which is useful for
-    sorting the list of unused code that a developer might want to remove
+    sorting the list of unused code that a developer might want to remove.
     """
-    if isinstance(node, (ast.FunctionDef, ast.If, ast.For, ast.ClassDef)):
-        return 1 + sum(weigh(child) for child in node.body)
-    else:
-        return 1
+    return 1 + sum(estimate_lines(child)
+                   for field in TRAVERSABLE_FIELDS.get(node.__class__, ())
+                   for child in getattr(node, field))
 
 
 def read_file(filename):
@@ -236,18 +248,20 @@ class Vulture(ast.NodeVisitor):
                     self.scan(module_string, filename=path)
 
     def report(self):
-        if self.sort_by_size:
-            sort_key = lambda item: item.size
-        else:
-            sort_key = lambda item: (item.filename.lower(), item.lineno)
+        def by_size(item):
+            return item.size
+
+        def by_name(item):
+            return (item.filename.lower(), item.lineno)
         unused_item_found = False
         for item in sorted(
                 self.unused_funcs + self.unused_imports + self.unused_props +
                 self.unused_classes + self.unused_vars + self.unused_attrs,
-                key=sort_key):
+                key=by_size if self.sort_by_size else by_name):
             if self.sort_by_size:
                 print("%s:%d: Unused %s '%s' size:%d" % (
-                    _format_path(item.filename), item.lineno, item.typ, item, item.size))
+                    _format_path(item.filename), item.lineno, item.typ,
+                    item, item.size))
             else:
                 print("%s:%d: Unused %s '%s'" % (
                     _format_path(item.filename), item.lineno, item.typ, item))
@@ -309,7 +323,7 @@ class Vulture(ast.NodeVisitor):
         id_ = getattr(node, 'id', None)
         attr = getattr(node, 'attr', None)
         assert bool(name) ^ bool(id_) ^ bool(attr), (typ, dir(node))
-        size = weigh(node) if self.sort_by_size else 1
+        size = estimate_lines(node) if self.sort_by_size else 1
         label = name or id_ or attr
         return Item(label, typ, self.filename, node.lineno, size)
 
