@@ -64,11 +64,18 @@ TRAVERSABLE_FIELDS = {
         ast.FunctionDef: ('body', 'decorator_list'),
         ast.If: ('body', 'orelse'),
         ast.Module: ('body',),
-        ast.TryExcept: ('body', 'handlers', 'orelse'),
-        ast.TryFinally: ('body', 'finalbody'),
         ast.While: ('body', 'orelse'),
         ast.With: ('body',),
 }
+if sys.version_info.major == 2:
+    TRAVERSABLE_FIELDS.update({
+        ast.TryExcept: ('body', 'handlers', 'orelse'),
+        ast.TryFinally: ('body', 'finalbody'),
+    })
+if sys.version_info.major == 3:
+    TRAVERSABLE_FIELDS.update({
+        ast.Try: ('body', 'handlers', 'orelse', 'finalbody')
+    })
 
 
 def _format_path(path):
