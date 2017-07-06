@@ -121,12 +121,12 @@ def _get_unused_items(defined, used):
 
 
 class Item(str):
-    def __new__(cls, name, typ, filename, lineno, weight=1):
+    def __new__(cls, name, typ, filename, lineno, size=1):
         item = str.__new__(cls, name)
         item.typ = typ
         item.filename = filename
         item.lineno = lineno
-        item.weight = weight
+        item.size = size
         return item
 
 
@@ -144,9 +144,9 @@ class LoggingList(list):
 
 class Vulture(ast.NodeVisitor):
     """Find dead code."""
-    def __init__(self, exclude=None, verbose=False, weigh=False):
+    def __init__(self, exclude=None, verbose=False, sort_by_size=False):
         self.exclude = []
-        self.weigh = weigh
+        self.sort_by_size = sort_by_size
         for pattern in exclude or []:
             if not any(char in pattern for char in ['*', '?', '[']):
                 pattern = '*%s*' % pattern
@@ -236,33 +236,21 @@ class Vulture(ast.NodeVisitor):
                     self.scan(module_string, filename=path)
 
     def report(self):
-        if self.weigh:
-            return self.report_weight_sorted()
+        if self.sort_by_size:
+            sort_key = lambda item: item.size
         else:
-            return self.report_alpha_sorted()
-
-    def report_weight_sorted(self):
+            sort_key = lambda item: (item.filename.lower(), item.lineno)
         unused_item_found = False
         for item in sorted(
                 self.unused_funcs + self.unused_imports + self.unused_props +
                 self.unused_classes + self.unused_vars + self.unused_attrs,
-                key=lambda item: item.weight):
-            print("%s:%d: Unused %s '%s' weight:%d" % (
-                _format_path(item.filename), item.lineno,
-                item.typ, item, item.weight))
-            unused_item_found = True
-        return unused_item_found
-
-    def report_alpha_sorted(self):
-        def file_lineno(item):
-            return (item.filename.lower(), item.lineno)
-        unused_item_found = False
-        for item in sorted(
-                self.unused_funcs + self.unused_imports + self.unused_props +
-                self.unused_classes + self.unused_vars + self.unused_attrs,
-                key=file_lineno):
-            print("%s:%d: Unused %s '%s'" % (
-                _format_path(item.filename), item.lineno, item.typ, item))
+                key=sort_key):
+            if self.sort_by_size:
+                print("%s:%d: Unused %s '%s' size:%d" % (
+                    _format_path(item.filename), item.lineno, item.typ, item, item.size))
+            else:
+                print("%s:%d: Unused %s '%s'" % (
+                    _format_path(item.filename), item.lineno, item.typ, item))
             unused_item_found = True
         return unused_item_found
 
@@ -321,9 +309,9 @@ class Vulture(ast.NodeVisitor):
         id_ = getattr(node, 'id', None)
         attr = getattr(node, 'attr', None)
         assert bool(name) ^ bool(id_) ^ bool(attr), (typ, dir(node))
-        weight = weigh(node) if self.weigh else 1
+        size = weigh(node) if self.sort_by_size else 1
         label = name or id_ or attr
-        return Item(label, typ, self.filename, node.lineno, weight)
+        return Item(label, typ, self.filename, node.lineno, size)
 
     def _ignore_function(self, name):
         ignore = (
@@ -468,7 +456,7 @@ analyzes all contained *.py files.
         type='string', default=[],
         help='Comma-separated list of paths to ignore (e.g. .svn,external)')
     parser.add_option(
-        "--weigh", action="store_true",
+        "--sort-by-size", action="store_true",
         help="Sort unused functions and classes by their approximate size")
     parser.add_option('-v', '--verbose', action='store_true')
     options, args = parser.parse_args()
@@ -478,7 +466,7 @@ analyzes all contained *.py files.
 def main():
     options, args = _parse_args()
     vulture = Vulture(exclude=options.exclude, verbose=options.verbose,
-                      weigh=options.weigh)
+                      sort_by_size=options.sort_by_size)
     vulture.scavenge(args)
     sys.exit(vulture.report())
 

@@ -5,10 +5,10 @@ from vulture import Vulture
 
 @pytest.fixture
 def wv():
-    return Vulture(verbose=True, weigh=True)
+    return Vulture(verbose=True, sort_by_size=True)
 
 
-def test_weigh_function(wv):
+def test_size_function(wv):
     wv.scan("""\
 def func():
     if "foo" == "bar":
@@ -16,10 +16,10 @@ def func():
     import sys
     return len(sys.argv)
 """)
-    assert wv.defined_funcs[0].weight == 5
+    assert wv.defined_funcs[0].size == 5
 
 
-def test_weigh_class(wv):
+def test_size_class(wv):
     wv.scan("""\
 class Foo(object):
     def bar():
@@ -31,4 +31,4 @@ class Foo(object):
         import sys
         return len(sys.argv)
 """)
-    assert wv.defined_classes[0].weight == 8
+    assert wv.defined_classes[0].size == 8
