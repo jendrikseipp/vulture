@@ -36,6 +36,7 @@ class Foo(object):
 """)
     assert wv.defined_classes[0].size == 9
 
+
 def test_estimate_lines():
     example = """
 def identity(o):

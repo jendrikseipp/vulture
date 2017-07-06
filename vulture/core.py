@@ -67,12 +67,12 @@ TRAVERSABLE_FIELDS = {
         ast.While: ('body', 'orelse'),
         ast.With: ('body',),
 }
-if sys.version_info.major == 2:
+if sys.version_info < (3, 0):
     TRAVERSABLE_FIELDS.update({
         ast.TryExcept: ('body', 'handlers', 'orelse'),
         ast.TryFinally: ('body', 'finalbody'),
     })
-if sys.version_info.major == 3:
+else:
     TRAVERSABLE_FIELDS.update({
         ast.Try: ('body', 'handlers', 'orelse', 'finalbody')
     })
