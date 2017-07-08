@@ -266,9 +266,10 @@ class Vulture(ast.NodeVisitor):
                 self.unused_classes + self.unused_vars + self.unused_attrs,
                 key=by_size if self.sort_by_size else by_name):
             if self.sort_by_size:
-                print("%s:%d: Unused %s '%s' size:%d" % (
+                line_format = "line" if item.size == 1 else "lines"
+                print("%s:%d: Unused %s '%s' (%d %s)" % (
                     _format_path(item.filename), item.lineno, item.typ,
-                    item, item.size))
+                    item, item.size, line_format))
             else:
                 print("%s:%d: Unused %s '%s'" % (
                     _format_path(item.filename), item.lineno, item.typ, item))
@@ -324,7 +325,7 @@ class Vulture(ast.NodeVisitor):
     def _get_item(self, node, typ):
         """
         Returns a lighter representation of the ast node ``node`` for
-        later reporting purposes
+        later reporting purposes.
         """
         name = getattr(node, 'name', None)
         id_ = getattr(node, 'id', None)

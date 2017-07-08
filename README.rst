@@ -21,7 +21,7 @@ Features
 * lightweight: only one module
 * tested: tests itself and has complete test coverage
 * complements pyflakes and has the same output syntax
-* sort unused code items by relative weight
+* sorts unused classes and functions by size with `--sort-by-size`
 * supports Python 2.6, 2.7 and 3.x
 
 
@@ -65,10 +65,10 @@ defined and used objects. Afterwards, it reports the objects which have
 been defined, but not used. This analysis ignores scopes and focuses
 only on object names.
 
-What does weight mean?
-----------------------
+Sort by size
+------------
 
-When using the ``--weight`` option, vulture will sort the unused items by
+When using the ``--sort-by-size`` option, vulture will sort the unused items by
 the relative sizes of their syntax trees, which is a proxy for the amount of code.
 This feature helps developers prioritize where to look to remove code first.
 

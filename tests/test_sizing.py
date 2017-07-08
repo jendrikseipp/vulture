@@ -1,28 +1,25 @@
-import pytest
-
 import ast
-from vulture import Vulture
 from vulture.core import estimate_lines
 
 
-@pytest.fixture
-def wv():
-    return Vulture(verbose=True, sort_by_size=True)
+def check_span(example, span):
+    node = ast.parse(example)
+    assert estimate_lines(node) == span
 
 
-def test_size_function(wv):
-    wv.scan("""\
+def test_size_function():
+    example = """
 def func():
     if "foo" == "bar":
         return "xyz"
     import sys
     return len(sys.argv)
-""")
-    assert wv.defined_funcs[0].size == 5
+"""
+    check_span(example, 5)
 
 
-def test_size_class(wv):
-    wv.scan("""\
+def test_size_class():
+    example = """
 class Foo(object):
     def bar():
         pass
@@ -33,8 +30,8 @@ class Foo(object):
             return "xyz"
         import sys
         return len(sys.argv)
-""")
-    assert wv.defined_classes[0].size == 9
+"""
+    check_span(example, 9)
 
 
 def test_estimate_lines():
@@ -78,7 +75,6 @@ class Foo(object):
         finally:
             return 99
 """
-    node = ast.parse(example)
     # TODO improve estimate_lines to count the "else" clauses
     # and the estimate will get better (higher).
-    assert estimate_lines(node) == 33
+    check_span(example, 33)
