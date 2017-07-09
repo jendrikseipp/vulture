@@ -10,7 +10,8 @@ TODOs
 * Extend whitelist files.
 * Distribute and test vulture wheel file.
 * Add get_unused_code() method.
-
+* Let Item inherit from "object", not from "str". The new class needs
+  members "name", "__eq__" (returns name) and "__hash__" (returns hash(name)).
 
 Non-TODOs
 =========

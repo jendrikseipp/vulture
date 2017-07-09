@@ -4,6 +4,7 @@ News
 0.16 (unreleased)
 -----------------
 * Differentiate between unused classes and functions (thanks @RJ722).
+* Add --sort-by-size option (thanks @jackric and @RJ722).
 
 
 0.15 (2017-07-04)
