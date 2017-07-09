@@ -35,8 +35,11 @@ class Foo(object):
 """
     check_size(example, 9)
 
+# TODO improve estimate_lines to count the "else" clauses
+# and the estimate will get better (higher).
 
-def test_estimate_lines():
+
+def test_size_if_else():
     example = """
 def identity(o):
     return o
@@ -52,31 +55,57 @@ class Foo(object):
             pass
         else:
             pass
-        with open("/dev/null") as f:
-            f.write("")
-        import sys
-        while "b" > "a":
-            pass
-        else:
-            pass
-        for arg in sys.argv:
-            if arg == "foo":
-                break
-        else:
-            pass
-        try:
-            x = sys.argv[99]
-        except IndexError:
-            pass
-        except Exception:
-            pass
-        else:
-            pass
-        try:
-            1/0
-        finally:
-            return 99
 """
-    # TODO improve estimate_lines to count the "else" clauses
-    # and the estimate will get better (higher).
-    check_size(example, 32)
+    check_size(example, 12)
+
+
+def test_size_try_except():
+    example = """
+try:
+    x = sys.argv[99]
+except IndexError:
+    pass
+except Exception:
+    pass
+else:
+    pass
+"""
+    check_size(example, 7)
+
+
+def test_size_file():
+    example = """
+with open("/dev/null") as f:
+    f.write("")
+"""
+    check_size(example, 2)
+
+
+def test_size_while_else():
+    example = """
+while "b" > "a":
+    pass
+else:
+    pass
+"""
+    check_size(example, 3)
+
+
+def test_size_try_finally():
+    example = """
+try:
+    1/0
+finally:
+    return 99
+"""
+    check_size(example, 3)
+
+
+def test_size_for_else():
+    example = """
+for arg in sys.argv:
+    print("loop")
+else:
+    print("else")
+"""
+    check_size(example, 3)
