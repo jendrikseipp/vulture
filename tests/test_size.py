@@ -1,10 +1,12 @@
 import ast
-from vulture.core import estimate_lines
+
+from vulture.lines import estimate_lines
 
 
-def check_span(example, span):
+def check_size(example, span):
+    # offset of one because 'node' is ast.Module object
     node = ast.parse(example)
-    assert estimate_lines(node) == span
+    assert estimate_lines(node) - 1 == span
 
 
 def test_size_function():
@@ -15,7 +17,7 @@ def func():
     import sys
     return len(sys.argv)
 """
-    check_span(example, 5)
+    check_size(example, 5)
 
 
 def test_size_class():
@@ -31,7 +33,7 @@ class Foo(object):
         import sys
         return len(sys.argv)
 """
-    check_span(example, 9)
+    check_size(example, 9)
 
 
 def test_estimate_lines():
@@ -77,4 +79,4 @@ class Foo(object):
 """
     # TODO improve estimate_lines to count the "else" clauses
     # and the estimate will get better (higher).
-    check_span(example, 33)
+    check_size(example, 32)

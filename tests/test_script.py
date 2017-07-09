@@ -54,11 +54,6 @@ def test_whitelist_with_python():
         assert subprocess.call([sys.executable, whitelist], cwd=REPO) == 0
 
 
-def test_whitelist_with_vulture():
-    for whitelist in WHITELISTS:
-        assert call_vulture([whitelist]) == 0
-
-
 def test_pyc():
     assert call_vulture(['missing.pyc']) == 1
 
@@ -66,3 +61,7 @@ def test_pyc():
 def test_version():
     assert call_vulture(['--version']) == 0
     assert get_output(['--version']).strip() == 'vulture ' + __version__
+
+
+def test_module():
+    assert call_vulture(['vulture']) == 0

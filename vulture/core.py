@@ -29,13 +29,14 @@ from __future__ import print_function
 import ast
 import codecs
 from fnmatch import fnmatchcase
-from functools import wraps
 import optparse
 import os
 import pkgutil
 import re
 import sys
 import tokenize
+
+from vulture.lines import estimate_lines
 
 __version__ = '0.15'
 
@@ -57,26 +58,6 @@ if sys.version_info < (3, 4):
 # Ignore star-imported names, since we cannot detect whether they are used.
 IGNORED_IMPORTS = ["*"]
 
-TRAVERSABLE_FIELDS = {
-        ast.ClassDef: ('body', 'decorator_list'),
-        ast.ExceptHandler: ('body',),
-        ast.For: ('body', 'orelse'),
-        ast.FunctionDef: ('body', 'decorator_list'),
-        ast.If: ('body', 'orelse'),
-        ast.Module: ('body',),
-        ast.While: ('body', 'orelse'),
-        ast.With: ('body',),
-}
-if sys.version_info < (3, 0):
-    TRAVERSABLE_FIELDS.update({
-        ast.TryExcept: ('body', 'handlers', 'orelse'),
-        ast.TryFinally: ('body', 'finalbody'),
-    })
-else:
-    TRAVERSABLE_FIELDS.update({
-        ast.Try: ('body', 'handlers', 'orelse', 'finalbody')
-    })
-
 
 def _format_path(path):
     if not path:
@@ -87,32 +68,6 @@ def _format_path(path):
 
 class VultureInputException(Exception):
     pass
-
-
-# Reinventing wheel here to keep vulture lightweight.
-def memoize(func):
-    _cache = {}
-
-    @wraps(func)
-    def wrapped(*args):
-        try:
-            return _cache[args]
-        except KeyError:
-            _cache[args] = result = func(*args)
-            return result
-    return wrapped
-
-
-@memoize
-def estimate_lines(node):
-    """
-    Recursively count child AST nodes under `node`. It is an approximation
-    of the amount of code belonging to the node, which is useful for
-    sorting the list of unused code that a developer might want to remove.
-    """
-    return 1 + sum(estimate_lines(child)
-                   for field in TRAVERSABLE_FIELDS.get(node.__class__, ())
-                   for child in getattr(node, field))
 
 
 def read_file(filename):
@@ -265,14 +220,12 @@ class Vulture(ast.NodeVisitor):
                 self.unused_funcs + self.unused_imports + self.unused_props +
                 self.unused_classes + self.unused_vars + self.unused_attrs,
                 key=by_size if self.sort_by_size else by_name):
-            if self.sort_by_size:
-                line_format = "line" if item.size == 1 else "lines"
-                print("%s:%d: Unused %s '%s' (%d %s)" % (
-                    _format_path(item.filename), item.lineno, item.typ,
-                    item, item.size, line_format))
-            else:
-                print("%s:%d: Unused %s '%s'" % (
-                    _format_path(item.filename), item.lineno, item.typ, item))
+            line_format = 'line' if item.size == 1 else 'lines'
+            size_report = (' (%d %s)' % (item.size, line_format)
+                           if self.sort_by_size else '')
+            print("%s:%d: Unused %s '%s'%s" % (
+                 _format_path(item.filename), item.lineno, item.typ,
+                 item, size_report))
             unused_item_found = True
         return unused_item_found
 
@@ -324,7 +277,7 @@ class Vulture(ast.NodeVisitor):
 
     def _get_item(self, node, typ):
         """
-        Returns a lighter representation of the ast node ``node`` for
+        Return a lighter representation of the ast node ``node`` for
         later reporting purposes.
         """
         name = getattr(node, 'name', None)

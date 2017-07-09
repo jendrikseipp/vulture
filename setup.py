@@ -51,5 +51,5 @@ setup(
     cmdclass={'test': PyTest},
     packages=['vulture'],
     package_dir={'vulture': 'vulture'},
-    package_data={'vulture': ['whitelists/*.py']},
+    package_data={'vulture': ['lines.py', 'whitelists/*.py']},
 )
