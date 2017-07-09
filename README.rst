@@ -21,6 +21,7 @@ Features
 * lightweight: only one module
 * tested: tests itself and has complete test coverage
 * complements pyflakes and has the same output syntax
+* sorts unused classes and functions by size with `--sort-by-size`
 * supports Python 2.6, 2.7 and 3.x
 
 
@@ -63,6 +64,13 @@ given files. While traversing all syntax trees it records the names of
 defined and used objects. Afterwards, it reports the objects which have
 been defined, but not used. This analysis ignores scopes and focuses
 only on object names.
+
+Sort by size
+------------
+
+When using the ``--sort-by-size`` option, vulture will sort the unused items by
+the relative sizes of their syntax trees, which is a proxy for the amount of code.
+This feature helps developers prioritize where to look to remove code first.
 
 
 Similar programs
