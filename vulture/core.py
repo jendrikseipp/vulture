@@ -244,7 +244,8 @@ class Vulture(ast.NodeVisitor):
     @property
     def unused_imports(self):
         return _get_unused_items(
-            self.defined_imports, self.used_vars + IGNORED_IMPORTS)
+            self.defined_imports,
+            self.used_vars + self.used_attrs + IGNORED_IMPORTS)
 
     @property
     def unused_props(self):

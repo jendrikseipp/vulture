@@ -23,6 +23,23 @@ def test_import_from_future(v):
     assert v.unused_imports == []
 
 
+def test_attribute_access(v):
+    v.scan("""\
+# foo.py
+class Foo:
+    pass
+
+# bar.py
+from foo import Foo
+
+# main.py
+import bar
+bar.Foo
+""")
+    assert v.defined_imports == ['Foo', 'bar']
+    assert v.unused_imports == []
+
+
 def test_nested_import(v):
     v.scan("""\
 import os.path
