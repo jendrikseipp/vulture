@@ -4,6 +4,7 @@ News
 0.17 (unreleased)
 -----------------
 * Add `get_unused_code()` method.
+* Return with exit code 1 when syntax errors are found or files can't be read.
 
 
 0.16 (2017-07-12)

@@ -1,7 +1,6 @@
 TODOs
 =====
 
-* Return with exit code 1 when syntax errors are found or files can't be read.
 * Detect unreachable code à la `if False:` (try to evaluate condition).
 * Detect dead code after return statements.
 * Parse all variable names in new format strings (vars with special formatting, etc.)
@@ -13,6 +12,7 @@ TODOs
   members "name", "__eq__" (returns name) and "__hash__" (returns hash(name)).
 * Only count lines for unused code.
 * If count_lines() is fast enough, always list the number of lines in the output.
+* Print errors to stderr.
 
 Non-TODOs
 =========
