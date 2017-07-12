@@ -27,25 +27,18 @@
 from __future__ import print_function
 
 import ast
-import codecs
 from fnmatch import fnmatchcase
 import optparse
 import os
 import pkgutil
 import re
 import sys
-import tokenize
 
+from vulture.utils import (ENCODING_REGEX, format_path, LoggingList, read_file,
+                           VultureInputException)
 from vulture.lines import estimate_lines
 
 __version__ = '0.15'
-
-# The ast module in Python 2 trips over "coding" cookies, so strip them.
-ENCODING_REGEX = re.compile(
-    r"^[ \t\v]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+).*?$", flags=re.M)
-
-# Encoding to use when converting input files to unicode.
-ENCODING = 'utf-8'
 
 # Parse variable names in template strings.
 FORMAT_STRING_PATTERNS = [re.compile(r'\%\((\w+)\)'), re.compile(r'{(\w+)}')]
@@ -57,37 +50,6 @@ if sys.version_info < (3, 4):
 
 # Ignore star-imported names, since we cannot detect whether they are used.
 IGNORED_IMPORTS = ["*"]
-
-
-def _format_path(path):
-    if not path:
-        return path
-    relpath = os.path.relpath(path)
-    return relpath if not relpath.startswith('..') else path
-
-
-class VultureInputException(Exception):
-    pass
-
-
-def read_file(filename):
-    # Python >= 3.2
-    try:
-        # Use encoding detected by tokenize.detect_encoding().
-        with tokenize.open(filename) as f:
-            return f.read()
-    except (SyntaxError, UnicodeDecodeError) as err:
-        raise VultureInputException(err)
-    except AttributeError:
-        # tokenize.open was added in Python 3.2.
-        pass
-
-    # Python < 3.2
-    try:
-        with codecs.open(filename, encoding=ENCODING) as f:
-            return f.read()
-    except UnicodeDecodeError as err:
-        raise VultureInputException(err)
 
 
 def _get_unused_items(defined, used):
@@ -102,18 +64,6 @@ class Item(str):
         item.lineno = lineno
         item.size = size
         return item
-
-
-class LoggingList(list):
-    def __init__(self, name, verbose):
-        self._name = name
-        self._verbose = verbose
-        return list.__init__(self)
-
-    def append(self, item):
-        if self._verbose:
-            print('{0} <- {1}'.format(self._name, item))
-        list.append(self, item)
 
 
 class Vulture(ast.NodeVisitor):
@@ -153,7 +103,7 @@ class Vulture(ast.NodeVisitor):
             node = ast.parse(code, filename=self.filename)
         except SyntaxError as err:
             print('%s:%d: %s at "%s"' % (
-                _format_path(filename), err.lineno, err.msg, err.text.strip()))
+                format_path(filename), err.lineno, err.msg, err.text.strip()))
         else:
             self.visit(node)
 
@@ -224,7 +174,7 @@ class Vulture(ast.NodeVisitor):
             size_report = (' (%d %s)' % (item.size, line_format)
                            if self.sort_by_size else '')
             print("%s:%d: Unused %s '%s'%s" % (
-                 _format_path(item.filename), item.lineno, item.typ,
+                 format_path(item.filename), item.lineno, item.typ,
                  item, size_report))
             unused_item_found = True
         return unused_item_found
