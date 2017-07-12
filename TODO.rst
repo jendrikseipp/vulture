@@ -12,6 +12,8 @@ TODOs
 * Add get_unused_code() method.
 * Let Item inherit from "object", not from "str". The new class needs
   members "name", "__eq__" (returns name) and "__hash__" (returns hash(name)).
+* Only count lines for unused code.
+* If count_lines() is fast enough, always list the number of lines in the output.
 
 Non-TODOs
 =========
