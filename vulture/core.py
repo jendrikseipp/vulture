@@ -108,7 +108,7 @@ class Vulture(ast.NodeVisitor):
         except SyntaxError as err:
             print('%s:%d: %s at "%s"' % (
                 utils.format_path(filename), err.lineno,
-                err.msg, err.text.strip()))
+                err.msg, err.text.strip()), file=sys.stderr)
             self.found_dead_code_or_error = True
         else:
             self.visit(node)
@@ -144,8 +144,10 @@ class Vulture(ast.NodeVisitor):
             try:
                 module_string = utils.read_file(module)
             except utils.VultureInputException as err:
-                print('Error: Could not read file %s - %s' % (module, err))
-                print('You might want to change the encoding to UTF-8.')
+                print(
+                    'Error: Could not read file {module} - {err}\n'
+                    'Try to change the encoding to UTF-8.'.format(**locals()),
+                    file=sys.stderr)
                 self.found_dead_code_or_error = True
             else:
                 self.scan(module_string, filename=module)

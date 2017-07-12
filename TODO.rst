@@ -12,7 +12,7 @@ TODOs
   members "name", "__eq__" (returns name) and "__hash__" (returns hash(name)).
 * Only count lines for unused code.
 * If count_lines() is fast enough, always list the number of lines in the output.
-* Print errors to stderr.
+
 
 Non-TODOs
 =========
