@@ -27,25 +27,21 @@
 from __future__ import print_function
 
 import ast
-import codecs
 from fnmatch import fnmatchcase
 import optparse
 import os
 import pkgutil
 import re
 import sys
-import tokenize
 
-from vulture.lines import estimate_lines
+from vulture import lines
+from vulture import utils
 
 __version__ = '0.15'
 
 # The ast module in Python 2 trips over "coding" cookies, so strip them.
 ENCODING_REGEX = re.compile(
     r"^[ \t\v]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+).*?$", flags=re.M)
-
-# Encoding to use when converting input files to unicode.
-ENCODING = 'utf-8'
 
 # Parse variable names in template strings.
 FORMAT_STRING_PATTERNS = [re.compile(r'\%\((\w+)\)'), re.compile(r'{(\w+)}')]
@@ -57,37 +53,6 @@ if sys.version_info < (3, 4):
 
 # Ignore star-imported names, since we cannot detect whether they are used.
 IGNORED_IMPORTS = ["*"]
-
-
-def _format_path(path):
-    if not path:
-        return path
-    relpath = os.path.relpath(path)
-    return relpath if not relpath.startswith('..') else path
-
-
-class VultureInputException(Exception):
-    pass
-
-
-def read_file(filename):
-    # Python >= 3.2
-    try:
-        # Use encoding detected by tokenize.detect_encoding().
-        with tokenize.open(filename) as f:
-            return f.read()
-    except (SyntaxError, UnicodeDecodeError) as err:
-        raise VultureInputException(err)
-    except AttributeError:
-        # tokenize.open was added in Python 3.2.
-        pass
-
-    # Python < 3.2
-    try:
-        with codecs.open(filename, encoding=ENCODING) as f:
-            return f.read()
-    except UnicodeDecodeError as err:
-        raise VultureInputException(err)
 
 
 def _get_unused_items(defined, used):
@@ -104,18 +69,6 @@ class Item(str):
         return item
 
 
-class LoggingList(list):
-    def __init__(self, name, verbose):
-        self._name = name
-        self._verbose = verbose
-        return list.__init__(self)
-
-    def append(self, item):
-        if self._verbose:
-            print('{0} <- {1}'.format(self._name, item))
-        list.append(self, item)
-
-
 class Vulture(ast.NodeVisitor):
     """Find dead code."""
     def __init__(self, exclude=None, verbose=False, sort_by_size=False):
@@ -129,7 +82,7 @@ class Vulture(ast.NodeVisitor):
         self.verbose = verbose
 
         def get_list(name):
-            return LoggingList(name, self.verbose)
+            return utils.LoggingList(name, self.verbose)
 
         self.defined_attrs = get_list('defined_attrs')
         self.defined_classes = get_list('defined_classes')
@@ -153,7 +106,8 @@ class Vulture(ast.NodeVisitor):
             node = ast.parse(code, filename=self.filename)
         except SyntaxError as err:
             print('%s:%d: %s at "%s"' % (
-                _format_path(filename), err.lineno, err.msg, err.text.strip()))
+                utils.format_path(filename), err.lineno,
+                err.msg, err.text.strip()))
         else:
             self.visit(node)
 
@@ -186,8 +140,8 @@ class Vulture(ast.NodeVisitor):
 
             self._log('Scanning:', module)
             try:
-                module_string = read_file(module)
-            except VultureInputException as err:
+                module_string = utils.read_file(module)
+            except utils.VultureInputException as err:
                 print('Error: Could not read file %s - %s' % (module, err))
                 print('You might want to change the encoding to UTF-8.')
             else:
@@ -224,7 +178,7 @@ class Vulture(ast.NodeVisitor):
             size_report = (' (%d %s)' % (item.size, line_format)
                            if self.sort_by_size else '')
             print("%s:%d: Unused %s '%s'%s" % (
-                 _format_path(item.filename), item.lineno, item.typ,
+                 utils.format_path(item.filename), item.lineno, item.typ,
                  item, size_report))
             unused_item_found = True
         return unused_item_found
@@ -285,7 +239,7 @@ class Vulture(ast.NodeVisitor):
         id_ = getattr(node, 'id', None)
         attr = getattr(node, 'attr', None)
         assert bool(name) ^ bool(id_) ^ bool(attr), (typ, dir(node))
-        size = estimate_lines(node) if self.sort_by_size else 1
+        size = lines.estimate_lines(node) if self.sort_by_size else 1
         label = name or id_ or attr
         return Item(label, typ, self.filename, node.lineno, size)
 
