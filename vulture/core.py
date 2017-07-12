@@ -97,6 +97,7 @@ class Vulture(ast.NodeVisitor):
 
         self.filename = ''
         self.code = []
+        self.found_dead_code_or_error = False
 
     def scan(self, code, filename=''):
         code = ENCODING_REGEX.sub("", code, count=1)
@@ -182,7 +183,6 @@ class Vulture(ast.NodeVisitor):
         """
         Print ordered list of Item objects to stdout.
         """
-        unused_item_found = False
         for item in self.get_unused_code():
             line_format = 'line' if item.size == 1 else 'lines'
             size_report = (' (%d %s)' % (item.size, line_format)
@@ -190,8 +190,8 @@ class Vulture(ast.NodeVisitor):
             print("%s:%d: Unused %s '%s'%s" % (
                 utils.format_path(item.filename), item.lineno, item.typ,
                 item, size_report))
-            unused_item_found = True
-        return unused_item_found
+            self.found_dead_code_or_error = True
+        return self.found_dead_code_or_error
 
     @property
     def unused_classes(self):
