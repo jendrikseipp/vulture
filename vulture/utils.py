@@ -1,14 +1,9 @@
 import codecs
 import os
-import re
 import tokenize
 
 # Encoding to use when converting input files to unicode.
 ENCODING = 'utf-8'
-
-# The ast module in Python 2 trips over "coding" cookies, so strip them.
-ENCODING_REGEX = re.compile(
-    r"^[ \t\v]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+).*?$", flags=re.M)
 
 
 class VultureInputException(Exception):

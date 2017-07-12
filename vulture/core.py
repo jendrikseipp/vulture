@@ -34,11 +34,14 @@ import pkgutil
 import re
 import sys
 
-from vulture.utils import (ENCODING_REGEX, format_path, LoggingList, read_file,
-                           VultureInputException)
-from vulture.lines import estimate_lines
+from vulture import lines
+from vulture import utils
 
 __version__ = '0.15'
+
+# The ast module in Python 2 trips over "coding" cookies, so strip them.
+ENCODING_REGEX = re.compile(
+    r"^[ \t\v]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+).*?$", flags=re.M)
 
 # Parse variable names in template strings.
 FORMAT_STRING_PATTERNS = [re.compile(r'\%\((\w+)\)'), re.compile(r'{(\w+)}')]
@@ -79,7 +82,7 @@ class Vulture(ast.NodeVisitor):
         self.verbose = verbose
 
         def get_list(name):
-            return LoggingList(name, self.verbose)
+            return utils.LoggingList(name, self.verbose)
 
         self.defined_attrs = get_list('defined_attrs')
         self.defined_classes = get_list('defined_classes')
@@ -103,7 +106,8 @@ class Vulture(ast.NodeVisitor):
             node = ast.parse(code, filename=self.filename)
         except SyntaxError as err:
             print('%s:%d: %s at "%s"' % (
-                format_path(filename), err.lineno, err.msg, err.text.strip()))
+                utils.format_path(filename), err.lineno,
+                err.msg, err.text.strip()))
         else:
             self.visit(node)
 
@@ -136,8 +140,8 @@ class Vulture(ast.NodeVisitor):
 
             self._log('Scanning:', module)
             try:
-                module_string = read_file(module)
-            except VultureInputException as err:
+                module_string = utils.read_file(module)
+            except utils.VultureInputException as err:
                 print('Error: Could not read file %s - %s' % (module, err))
                 print('You might want to change the encoding to UTF-8.')
             else:
@@ -174,7 +178,7 @@ class Vulture(ast.NodeVisitor):
             size_report = (' (%d %s)' % (item.size, line_format)
                            if self.sort_by_size else '')
             print("%s:%d: Unused %s '%s'%s" % (
-                 format_path(item.filename), item.lineno, item.typ,
+                 utils.format_path(item.filename), item.lineno, item.typ,
                  item, size_report))
             unused_item_found = True
         return unused_item_found
@@ -234,7 +238,7 @@ class Vulture(ast.NodeVisitor):
         id_ = getattr(node, 'id', None)
         attr = getattr(node, 'attr', None)
         assert bool(name) ^ bool(id_) ^ bool(attr), (typ, dir(node))
-        size = estimate_lines(node) if self.sort_by_size else 1
+        size = lines.estimate_lines(node) if self.sort_by_size else 1
         label = name or id_ or attr
         return Item(label, typ, self.filename, node.lineno, size)
 
