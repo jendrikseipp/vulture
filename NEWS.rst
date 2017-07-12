@@ -1,6 +1,11 @@
 News
 ====
 
+0.17 (unreleased)
+-----------------
+* Add `get_unused_code()` method.
+
+
 0.16 (2017-07-12)
 -----------------
 * Differentiate between unused classes and functions (thanks @RJ722).

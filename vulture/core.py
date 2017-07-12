@@ -163,17 +163,24 @@ class Vulture(ast.NodeVisitor):
                     module_string = module_data.decode("utf-8")
                     self.scan(module_string, filename=path)
 
-    def report(self):
+    def get_unused_code(self):
+        """
+        Return ordered list of Item objects.
+        """
         def by_size(item):
             return item.size
 
         def by_name(item):
             return (item.filename.lower(), item.lineno)
+
+        return sorted(
+            self.unused_attrs + self.unused_classes + self.unused_funcs +
+            self.unused_imports + self.unused_props + self.unused_vars,
+            key=by_size if self.sort_by_size else by_name)
+
+    def report(self):
         unused_item_found = False
-        for item in sorted(
-                self.unused_funcs + self.unused_imports + self.unused_props +
-                self.unused_classes + self.unused_vars + self.unused_attrs,
-                key=by_size if self.sort_by_size else by_name):
+        for item in self.get_unused_code():
             line_format = 'line' if item.size == 1 else 'lines'
             size_report = (' (%d %s)' % (item.size, line_format)
                            if self.sort_by_size else '')
