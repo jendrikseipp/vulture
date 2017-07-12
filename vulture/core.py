@@ -165,7 +165,7 @@ class Vulture(ast.NodeVisitor):
 
     def get_unused_code(self):
         """
-        Return ordered list of Item objects.
+        Return ordered list of unused Item objects.
         """
         def by_size(item):
             return item.size
@@ -179,14 +179,17 @@ class Vulture(ast.NodeVisitor):
             key=by_size if self.sort_by_size else by_name)
 
     def report(self):
+        """
+        Print ordered list of Item objects to stdout.
+        """
         unused_item_found = False
         for item in self.get_unused_code():
             line_format = 'line' if item.size == 1 else 'lines'
             size_report = (' (%d %s)' % (item.size, line_format)
                            if self.sort_by_size else '')
             print("%s:%d: Unused %s '%s'%s" % (
-                 utils.format_path(item.filename), item.lineno, item.typ,
-                 item, size_report))
+                utils.format_path(item.filename), item.lineno, item.typ,
+                item, size_report))
             unused_item_found = True
         return unused_item_found
 
@@ -408,5 +411,6 @@ def main():
     sys.exit(vulture.report())
 
 
+# Only useful for Python 2.6 which doesn't support "python -m vulture".
 if __name__ == '__main__':
     main()
