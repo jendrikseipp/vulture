@@ -60,12 +60,13 @@ def _get_unused_items(defined, used):
 
 
 class Item(str):
-    def __new__(cls, name, typ, filename, lineno, size=1):
+    def __new__(cls, name, typ, filename, lineno, size=1, span=1):
         item = str.__new__(cls, name)
         item.typ = typ
         item.filename = filename
         item.lineno = lineno
         item.size = size
+        item.span = span
         return item
 
 
@@ -189,7 +190,7 @@ class Vulture(ast.NodeVisitor):
         """
         for item in self.get_unused_code():
             line_format = 'line' if item.size == 1 else 'lines'
-            size_report = (' (%d %s)' % (item.size, line_format)
+            size_report = (' (%d %s)' % (item.span, line_format)
                            if self.sort_by_size else '')
             print("%s:%d: Unused %s '%s'%s" % (
                 utils.format_path(item.filename), item.lineno, item.typ,
@@ -254,8 +255,9 @@ class Vulture(ast.NodeVisitor):
         attr = getattr(node, 'attr', None)
         assert bool(name) ^ bool(id_) ^ bool(attr), (typ, dir(node))
         size = lines.estimate_lines(node) if self.sort_by_size else 1
+        span = lines.count_lines(node)
         label = name or id_ or attr
-        return Item(label, typ, self.filename, node.lineno, size)
+        return Item(label, typ, self.filename, node.lineno, size, span)
 
     def _ignore_function(self, name):
         ignore = (
