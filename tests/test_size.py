@@ -1,15 +1,9 @@
 import ast
 
-from vulture.lines import estimate_lines, count_lines
+from vulture.lines import count_lines
 
 
-def check_size(example, size):
-    # offset of one because 'node' is ast.Module object
-    node = ast.parse(example)
-    assert estimate_lines(node) - 1 == size
-
-
-def check_span(example, span):
+def check_size(example, span):
     tree = ast.parse(example)
     results = []
     for node in tree.body:
@@ -25,8 +19,7 @@ def func():
     import sys
     return len(sys.argv)
 """
-    check_size(example, 5)
-    check_span(example, [5])
+    check_size(example, [5])
 
 
 def test_size_class():
@@ -42,8 +35,7 @@ class Foo(object):
         import sys
         return len(sys.argv)
 """
-    check_size(example, 9)
-    check_span(example, [10])
+    check_size(example, [10])
 
 # TODO improve estimate_lines to count the "else" clauses
 # and the estimate will get better (higher).
@@ -66,7 +58,7 @@ class Foo(object):
         else:
             pass
 """
-    check_span(example, [2, 11])
+    check_size(example, [2, 11])
 
 
 def test_size_while_else():
@@ -77,8 +69,7 @@ class Foo:
     else:
         pass
 """
-    check_size(example, 4)
-    check_span(example, [5])
+    check_size(example, [5])
 
 
 def test_size_file():
@@ -87,8 +78,7 @@ class Foo:
     with open("/dev/null") as f:
         f.write("")
 """
-    check_size(example, 3)
-    check_span(example, [3])
+    check_size(example, [3])
 
 
 def test_size_try_except_else():
@@ -103,8 +93,7 @@ class Foo:
     else:
         pass
 """
-    check_size(example, 8)
-    check_span(example, [9])
+    check_size(example, [9])
 
 
 def test_size_try_finally():
@@ -115,8 +104,7 @@ class Foo:
     finally:
         return 99
 """
-    check_size(example, 4)
-    check_span(example, [5])
+    check_size(example, [5])
 
 
 def test_size_try_except():
@@ -127,8 +115,7 @@ class Foo:
     except:
         bar()
 """
-    check_size(example, 5)
-    check_span(example, [5])
+    check_size(example, [5])
 
 
 def test_size_for_else():
@@ -139,8 +126,7 @@ class Foo:
     else:
         print("else")
 """
-    check_size(example, 4)
-    check_span(example, [5])
+    check_size(example, [5])
 
 
 def test_size_class_nested():
@@ -149,7 +135,7 @@ class Foo:
     class test:
         pass
 """
-    check_span(example, [3])
+    check_size(example, [3])
 
 
 def test_multi_line_return():
@@ -161,4 +147,4 @@ def long_string_return(o):
     string.
     '''
 """
-    check_span(example, [2])
+    check_size(example, [2])
