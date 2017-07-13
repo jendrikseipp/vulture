@@ -150,3 +150,15 @@ class Foo:
         pass
 """
     check_span(example, [3])
+
+
+def test_multi_line_return():
+    example = """
+def long_string_return(o):
+    return '''I am a
+    veryyy
+    long
+    string.
+    '''
+"""
+    check_span(example, [2])
