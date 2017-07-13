@@ -3,23 +3,23 @@ import ast
 from vulture.lines import count_lines
 
 
-def check_size(example, span):
+def check_size(example, size):
     tree = ast.parse(example)
-    results = []
     for node in tree.body:
-        results.append(count_lines(node))
-    assert span == results
+        if isinstance(node, ast.ClassDef) and node.name == 'Foo':
+            assert count_lines(node) == size
+            break
+    else:
+        assert False, 'Failed to find top-level class "Foo" in code'
 
 
-def test_size_function():
+def test_size_basic():
     example = """
-def func():
-    if "foo" == "bar":
-        return "xyz"
-    import sys
-    return len(sys.argv)
+class Foo:
+    foo = 1
+    bar = 2
 """
-    check_size(example, [5])
+    check_size(example, 3)
 
 
 def test_size_class():
@@ -35,7 +35,7 @@ class Foo(object):
         import sys
         return len(sys.argv)
 """
-    check_size(example, [10])
+    check_size(example, 10)
 
 # TODO improve estimate_lines to count the "else" clauses
 # and the estimate will get better (higher).
@@ -43,9 +43,6 @@ class Foo(object):
 
 def test_size_if_else():
     example = """
-def identity(o):
-    return o
-
 @identity
 class Foo(object):
     @identity
@@ -58,7 +55,16 @@ class Foo(object):
         else:
             pass
 """
-    check_size(example, [2, 11])
+    check_size(example, 11)
+
+
+def test_size_while():
+    example = """
+class Foo:
+    while 1:
+        print(1)
+"""
+    check_size(example, 3)
 
 
 def test_size_while_else():
@@ -69,7 +75,7 @@ class Foo:
     else:
         pass
 """
-    check_size(example, [5])
+    check_size(example, 5)
 
 
 def test_size_file():
@@ -78,7 +84,7 @@ class Foo:
     with open("/dev/null") as f:
         f.write("")
 """
-    check_size(example, [3])
+    check_size(example, 3)
 
 
 def test_size_try_except_else():
@@ -93,7 +99,7 @@ class Foo:
     else:
         pass
 """
-    check_size(example, [9])
+    check_size(example, 9)
 
 
 def test_size_try_finally():
@@ -104,7 +110,7 @@ class Foo:
     finally:
         return 99
 """
-    check_size(example, [5])
+    check_size(example, 5)
 
 
 def test_size_try_except():
@@ -115,7 +121,29 @@ class Foo:
     except:
         bar()
 """
-    check_size(example, [5])
+    check_size(example, 5)
+
+
+def test_size_try_excepts():
+    example = """
+class Foo:
+    try:
+        foo()
+    except IOError:
+        bar()
+    except AttributeError:
+        pass
+"""
+    check_size(example, 7)
+
+
+def test_size_for():
+    example = """
+class Foo:
+    for i in range(10):
+        print(i)
+"""
+    check_size(example, 3)
 
 
 def test_size_for_else():
@@ -126,25 +154,26 @@ class Foo:
     else:
         print("else")
 """
-    check_size(example, [5])
+    check_size(example, 5)
 
 
 def test_size_class_nested():
     example = """
 class Foo:
-    class test:
+    class Bar:
         pass
 """
-    check_size(example, [3])
+    check_size(example, 3)
 
 
 def test_multi_line_return():
     example = """
-def long_string_return(o):
-    return '''I am a
-    veryyy
-    long
-    string.
-    '''
+class Foo:
+    def long_string_return(o):
+        return (
+            'very'
+            'long'
+            'string')
 """
-    check_size(example, [2])
+    # We currently cannot handle code ending with multiline statements
+    check_size(example, 3)
