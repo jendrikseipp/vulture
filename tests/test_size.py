@@ -177,3 +177,14 @@ class Foo:
 """
     # We currently cannot handle code ending with multiline statements
     check_size(example, 3)
+
+
+def test_size_comment_after_last_line():
+    example = """
+class Foo:
+    def bar():
+        # A comment
+        pass
+        # Another comment
+"""
+    check_size(example, 4)
