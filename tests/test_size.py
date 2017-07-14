@@ -1,6 +1,10 @@
 import ast
+import pytest
+import sys
 
 from vulture.lines import count_lines
+
+PY35 = sys.version_info >= (3, 5)
 
 
 def check_size(example, size):
@@ -166,7 +170,7 @@ class Foo:
     check_size(example, 3)
 
 
-def test_multi_line_return():
+def test_size_multi_line_return():
     example = """
 class Foo:
     def long_string_return(o):
@@ -183,8 +187,62 @@ def test_size_comment_after_last_line():
     example = """
 class Foo:
     def bar():
-        # A comment
+        # A comment.
         pass
-        # Another comment
+        # This comment won't be detected.
 """
     check_size(example, 4)
+
+
+@pytest.mark.skipif(not PY35, reason='requires Python3.5')
+def test_size_generator():
+    example = """
+class Foo:
+    def bar():
+        yield something
+"""
+    check_size(example, 3)
+
+
+@pytest.mark.skipif(not PY35, reason='requires Python3.5')
+def test_size_coroutines_basic():
+    example = """
+class Foo:
+    async def foo(some_attr):
+        pass
+"""
+    check_size(example, 3)
+
+
+@pytest.mark.skipif(not PY35, reason='requires Python3.5')
+def test_size_await():
+    example = """
+class Foo:
+    async def __aenter__(self):
+        await log('entering context')
+
+    async def __aexit__(self, exc_type, exc, tb):
+        await log('exiting context')
+"""
+    check_size(example, 6)
+
+
+@pytest.mark.skipif(not PY35, reason='requires Python3.5')
+def test_size_async_with():
+    example = """
+class Foo:
+    async def bar():
+        async with x:
+            pass
+"""
+    check_size(example, 4)
+
+
+@pytest.mark.skipif(not PY35, reason='requires Python3.5')
+def test_size_async_for():
+    example = """
+class Foo:
+    async def foo():
+        async for a in b: pass
+"""
+    check_size(example, 3)
