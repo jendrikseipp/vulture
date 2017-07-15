@@ -1,15 +1,16 @@
 import ast
 
-from vulture.lines import count_lines
-
 import pytest
 
-HAS_ASYNC = getattr(ast, 'AsyncFunctionDef', None)
+from vulture.lines import count_lines
+
+HAS_ASYNC = hasattr(ast, 'AsyncFunctionDef')
 
 
-def skip_if_not_has_async(item):
-    if callable(item) and not HAS_ASYNC:
-            pytest.mark.skip(item, "needs async definitions")
+def skip_if_not_has_async(function):
+    if not HAS_ASYNC:
+        pytest.mark.skip(
+            function, reason="needs async support (added in Python 3.5)")
 
 
 def check_size(example, size):
@@ -172,19 +173,20 @@ class Foo:
     check_size(example, 3)
 
 
+# We currently cannot handle code ending with multiline statements.
 def test_size_multi_line_return():
     example = """
 class Foo:
-    def long_string_return(o):
+    def foo():
         return (
             'very'
             'long'
             'string')
 """
-    # We currently cannot handle code ending with multiline statements
     check_size(example, 3)
 
 
+# We currently cannot handle code ending with comment lines.
 def test_size_comment_after_last_line():
     example = """
 class Foo:
@@ -196,7 +198,6 @@ class Foo:
     check_size(example, 4)
 
 
-@skip_if_not_has_async
 def test_size_generator():
     example = """
 class Foo:
@@ -207,26 +208,13 @@ class Foo:
 
 
 @skip_if_not_has_async
-def test_size_coroutines_basic():
+def test_size_async_function_def():
     example = """
 class Foo:
     async def foo(some_attr):
         pass
 """
     check_size(example, 3)
-
-
-@skip_if_not_has_async
-def test_size_await():
-    example = """
-class Foo:
-    async def __aenter__(self):
-        await log('entering context')
-
-    async def __aexit__(self, exc_type, exc, tb):
-        await log('exiting context')
-"""
-    check_size(example, 6)
 
 
 @skip_if_not_has_async
@@ -245,6 +233,7 @@ def test_size_async_for():
     example = """
 class Foo:
     async def foo():
-        async for a in b: pass
+        async for a in b:
+            pass
 """
-    check_size(example, 3)
+    check_size(example, 4)
