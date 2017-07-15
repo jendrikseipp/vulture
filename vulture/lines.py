@@ -1,6 +1,6 @@
 def _get_last_child(node):
-    fields = ['finalbody', 'orelse', 'handlers', 'body']
-    for name in fields:
+    reverse_ordered_fields = ['finalbody', 'orelse', 'handlers', 'body']
+    for name in reverse_ordered_fields:
         try:
             field = getattr(node, name)
         except AttributeError:

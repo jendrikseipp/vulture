@@ -1,10 +1,15 @@
 import ast
-import pytest
-import sys
 
 from vulture.lines import count_lines
 
-PY35 = sys.version_info >= (3, 5)
+import pytest
+
+HAS_ASYNC = getattr(ast, 'AsyncFunctionDef', None)
+
+
+def skip_if_not_has_async(item):
+    if callable(item) and not HAS_ASYNC:
+            pytest.mark.skip(item, "needs async definitions")
 
 
 def check_size(example, size):
@@ -26,6 +31,16 @@ class Foo:
     check_size(example, 3)
 
 
+def test_size_return():
+    example = """
+class Foo:
+    a = 1
+    b = 2
+    return 3
+"""
+    check_size(example, 4)
+
+
 def test_size_class():
     example = """
 class Foo(object):
@@ -40,9 +55,6 @@ class Foo(object):
         return len(sys.argv)
 """
     check_size(example, 10)
-
-# TODO improve estimate_lines to count the "else" clauses
-# and the estimate will get better (higher).
 
 
 def test_size_if_else():
@@ -82,7 +94,7 @@ class Foo:
     check_size(example, 5)
 
 
-def test_size_file():
+def test_size_with():
     example = """
 class Foo:
     with open("/dev/null") as f:
@@ -194,7 +206,7 @@ class Foo:
     check_size(example, 4)
 
 
-@pytest.mark.skipif(not PY35, reason='requires Python3.5')
+@skip_if_not_has_async
 def test_size_generator():
     example = """
 class Foo:
@@ -204,7 +216,7 @@ class Foo:
     check_size(example, 3)
 
 
-@pytest.mark.skipif(not PY35, reason='requires Python3.5')
+@skip_if_not_has_async
 def test_size_coroutines_basic():
     example = """
 class Foo:
@@ -214,7 +226,7 @@ class Foo:
     check_size(example, 3)
 
 
-@pytest.mark.skipif(not PY35, reason='requires Python3.5')
+@skip_if_not_has_async
 def test_size_await():
     example = """
 class Foo:
@@ -227,7 +239,7 @@ class Foo:
     check_size(example, 6)
 
 
-@pytest.mark.skipif(not PY35, reason='requires Python3.5')
+@skip_if_not_has_async
 def test_size_async_with():
     example = """
 class Foo:
@@ -238,7 +250,7 @@ class Foo:
     check_size(example, 4)
 
 
-@pytest.mark.skipif(not PY35, reason='requires Python3.5')
+@skip_if_not_has_async
 def test_size_async_for():
     example = """
 class Foo:
