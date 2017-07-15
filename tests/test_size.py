@@ -31,16 +31,6 @@ class Foo:
     check_size(example, 3)
 
 
-def test_size_return():
-    example = """
-class Foo:
-    a = 1
-    b = 2
-    return 3
-"""
-    check_size(example, 4)
-
-
 def test_size_class():
     example = """
 class Foo(object):
