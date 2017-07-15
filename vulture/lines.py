@@ -1,16 +1,15 @@
 def _get_last_child(node):
+    """
+    Return the last direct child of `node`, or None if `node` has no children.
+
+    We test all fields that contain lists of nodes, choose the last field
+    that actually contains nodes and return the last node in the list.
+    """
     reverse_ordered_fields = ['finalbody', 'orelse', 'handlers', 'body']
     for name in reverse_ordered_fields:
-        try:
-            field = getattr(node, name)
-        except AttributeError:
-            continue
-
-        if isinstance(field, list):
-            if field:
-                return field[-1]
-        else:
-            return field
+        last_children = getattr(node, name, [])
+        if last_children:
+            return last_children[-1]
     return None
 
 
