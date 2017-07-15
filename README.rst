@@ -47,12 +47,12 @@ The provided arguments may be Python files or directories. For each
 directory vulture analyzes all contained `*.py` files.
 
 After you have found and deleted dead code, run vulture again, because
-it may discover more dead code. 
+it may discover more dead code.
 
 **Handling false positives**
 
-You can add false positives (used code that is marked as unused) to a 
-python module and add it to the list of scanned paths (see 
+You can add false positives (used code that is marked as unused) to a
+python module and add it to the list of scanned paths (see
 ``whitelists/stdlib.py`` for an example).
 
 
@@ -65,12 +65,13 @@ defined and used objects. Afterwards, it reports the objects which have
 been defined, but not used. This analysis ignores scopes and focuses
 only on object names.
 
+
 Sort by size
 ------------
 
-When using the ``--sort-by-size`` option, vulture will sort the unused items by
-the relative sizes of their syntax trees, which is a proxy for the amount of code.
-This feature helps developers prioritize where to look to remove code first.
+When using the ``--sort-by-size`` option, vulture sorts unused classes
+and functions by their lines of code. This helps developers prioritize
+where to look for dead code first.
 
 
 Similar programs

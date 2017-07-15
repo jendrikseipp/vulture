@@ -401,7 +401,7 @@ analyzes all contained *.py files.
         help='Comma-separated list of paths to ignore (e.g. .svn,external)')
     parser.add_option(
         "--sort-by-size", action="store_true",
-        help="Sort unused functions and classes by their approximate size")
+        help="Sort unused functions and classes by their lines of code")
     parser.add_option('-v', '--verbose', action='store_true')
     options, args = parser.parse_args()
     return options, args

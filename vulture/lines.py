@@ -22,4 +22,8 @@ def get_last_line_number(node):
 
 
 def count_lines(node):
+    """
+    Note: This function underestimates the size of code ending with multiline
+    statements and comments.
+    """
     return get_last_line_number(node) - node.lineno + 1
