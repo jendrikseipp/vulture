@@ -253,7 +253,7 @@ class Vulture(ast.NodeVisitor):
         id_ = getattr(node, 'id', None)
         attr = getattr(node, 'attr', None)
         assert bool(name) ^ bool(id_) ^ bool(attr), (typ, dir(node))
-        size = lines.estimate_lines(node) if self.sort_by_size else 1
+        size = lines.count_lines(node) if self.sort_by_size else 1
         label = name or id_ or attr
         return Item(label, typ, self.filename, node.lineno, size)
 
@@ -401,7 +401,7 @@ analyzes all contained *.py files.
         help='Comma-separated list of paths to ignore (e.g. .svn,external)')
     parser.add_option(
         "--sort-by-size", action="store_true",
-        help="Sort unused functions and classes by their approximate size")
+        help="Sort unused functions and classes by their lines of code")
     parser.add_option('-v', '--verbose', action='store_true')
     options, args = parser.parse_args()
     return options, args
