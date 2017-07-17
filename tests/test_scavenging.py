@@ -266,11 +266,17 @@ def test_variable5(v):
     assert v.unused_vars == []
 
 
-def test_unused_var1(v):
-    v.scan("_a = 1\n__b = 2\n__c__ = 3")
-    assert v.defined_vars == []
+def test_ignored_variables(v):
+    v.scan("""\
+_ = 0
+_a = 1
+__b = 2
+__c__ = 3
+_d_ = 4
+""")
+    assert v.defined_vars == ['__b']
     assert sorted(v.used_vars) == []
-    assert v.unused_vars == []
+    assert v.unused_vars == ['__b']
 
 
 def test_prop1(v):

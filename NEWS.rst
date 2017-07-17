@@ -1,6 +1,11 @@
 News
 ====
 
+0.19 (unreleased)
+-----------------
+* Don't ignore `__foo` variable names.
+
+
 0.18 (2017-07-17)
 -----------------
 * Make `--sort-by-size` faster and more accurate (thanks @RJ722).

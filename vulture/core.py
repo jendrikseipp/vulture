@@ -233,8 +233,13 @@ class Vulture(ast.NodeVisitor):
             self.used_attrs + self.used_vars)
 
     def _define_variable(self, name, lineno):
-        # Ignore _, _x (pylint convention), __x, __x__ (special method).
-        if name not in IGNORED_VARIABLE_NAMES and not name.startswith('_'):
+        # Ignore _ (Python idiom), _x (pylint convention) and
+        # __x__ (special variable or method), but not __x.
+        if (name in IGNORED_VARIABLE_NAMES or
+                (name.startswith('_') and not name.startswith('__')) or
+                (name.startswith('__') and name.endswith('__'))):
+            self._log('Ignoring variable {0} due to its name'.format(name))
+        else:
             self.defined_vars.append(
                 Item(name, 'variable', self.filename, lineno))
 
