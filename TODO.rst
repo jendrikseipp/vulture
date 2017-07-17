@@ -13,6 +13,7 @@ TODOs
 * Only count lines for unused code.
 * If count_lines() is fast enough, always list the number of lines in the output.
 * Use separate version of _ignore_function() for classes.
+* If an unused item is defined multiple times, report it multiple times.
 
 
 Non-TODOs
