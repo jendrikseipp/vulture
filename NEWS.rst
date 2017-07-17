@@ -1,9 +1,13 @@
 News
 ====
 
-0.17 (2017-07-17)
+0.18 (2017-07-17)
 -----------------
 * Make `--sort-by-size` faster and more accurate (thanks @RJ722).
+
+
+0.17 (2017-07-17)
+-----------------
 * Add `get_unused_code()` method.
 * Return with exit code 1 when syntax errors are found or files can't be read.
 
