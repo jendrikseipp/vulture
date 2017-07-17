@@ -18,6 +18,8 @@ if [[ $retcode != 0 ]]; then
     exit 1
 fi
 
+git pull
+
 # Bump version.
 sed -i -e "s/__version__ = '.*'/__version__ = '$VERSION'/" vulture/core.py
 git commit -am "Update version number to ${VERSION} for release."
