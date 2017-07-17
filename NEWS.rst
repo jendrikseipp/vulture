@@ -4,6 +4,7 @@ News
 0.19 (unreleased)
 -----------------
 * Don't ignore `__foo` variable names.
+* Use separate methods for determining whether to ignore classes and functions.
 
 
 0.18 (2017-07-17)

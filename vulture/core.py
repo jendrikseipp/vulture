@@ -59,6 +59,10 @@ def _get_unused_items(defined, used):
     return list(sorted(set(defined) - set(used), key=lambda x: x.lower()))
 
 
+def _is_special_name(name):
+    return name.startswith('__') and name.endswith('__')
+
+
 class Item(str):
     def __new__(cls, name, typ, filename, lineno, size=1):
         item = str.__new__(cls, name)
@@ -237,7 +241,7 @@ class Vulture(ast.NodeVisitor):
         # __x__ (special variable or method), but not __x.
         if (name in IGNORED_VARIABLE_NAMES or
                 (name.startswith('_') and not name.startswith('__')) or
-                (name.startswith('__') and name.endswith('__'))):
+                _is_special_name(name)):
             self._log('Ignoring variable {0} due to its name'.format(name))
         else:
             self.defined_vars.append(
@@ -248,6 +252,12 @@ class Vulture(ast.NodeVisitor):
 
     def _get_line(self, node):
         return self.code[self._get_lineno(node) - 1] if self.code else ''
+
+    def _is_test_file(self):
+        name = os.path.basename(self.filename)
+        return any(
+            fnmatchcase(name, pattern)
+            for pattern in ['test_*.py', '*_test.py'])
 
     def _get_item(self, node, typ):
         """
@@ -261,16 +271,6 @@ class Vulture(ast.NodeVisitor):
         size = lines.count_lines(node) if self.sort_by_size else 1
         label = name or id_ or attr
         return Item(label, typ, self.filename, node.lineno, size)
-
-    def _ignore_function(self, name):
-        ignore = (
-            (name.startswith('__') and name.endswith('__')) or
-            (os.path.basename(self.filename).startswith('test_') and
-                name.startswith(('test_', 'Test'))))
-        if ignore:
-            self._log(
-                'Ignoring class or function {0} due to its name'.format(name))
-        return ignore
 
     def _log(self, *args):
         if self.verbose:
@@ -286,6 +286,11 @@ class Vulture(ast.NodeVisitor):
         """Function argument. Python 3 only. Has lineno since Python 3.4"""
         self._define_variable(node.arg, getattr(node, 'lineno', -1))
 
+    def _ignore_function(self, name):
+        return (
+            _is_special_name(name) or
+            (self._is_test_file() and name.startswith('test_')))
+
     def visit_FunctionDef(self, node):
         for decorator in node.decorator_list:
             if getattr(decorator, 'id', None) == 'property':
@@ -293,7 +298,10 @@ class Vulture(ast.NodeVisitor):
                 break
         else:
             # Function is not a property.
-            if not self._ignore_function(node.name):
+            if self._ignore_function(node.name):
+                self._log(
+                    'Ignoring function {0} due to its name'.format(node.name))
+            else:
                 self.defined_funcs.append(self._get_item(node, 'function'))
 
         # Detect *args and **kwargs parameters. Python 3 recognizes them
@@ -363,8 +371,15 @@ class Vulture(ast.NodeVisitor):
     def visit_comprehension(self, node):
         self._find_tuple_assigns(node)
 
+    def _ignore_class(self, name):
+        return (
+            _is_special_name(name) or
+            (self._is_test_file() and name.startswith('Test')))
+
     def visit_ClassDef(self, node):
-        if not self._ignore_function(node.name):
+        if self._ignore_class(node.name):
+            self._log('Ignoring class {0} due to its name'.format(node.name))
+        else:
             self.defined_classes.append(self._get_item(node, 'class'))
 
     def visit_Str(self, node):

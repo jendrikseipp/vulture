@@ -338,7 +338,7 @@ class TestClass:
 
 class OtherClass:
     pass
-""", filename='test_function_names')
+""", filename='test_function_names.py')
     assert v.defined_attrs == []
     assert v.defined_classes == ['OtherClass']
     assert v.defined_funcs == ['other_func']
