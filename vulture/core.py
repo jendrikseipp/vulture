@@ -63,6 +63,23 @@ def _is_special_name(name):
     return name.startswith('__') and name.endswith('__')
 
 
+def _is_test_file(filename):
+    name = os.path.basename(filename)
+    return any(
+        fnmatchcase(name, pattern)
+        for pattern in ['test_*.py', '*_test.py'])
+
+
+def _ignore_class(filename, class_name):
+        return _is_test_file(filename) and class_name.startswith('Test')
+
+
+def _ignore_function(filename, function_name):
+    return (
+        _is_special_name(function_name) or
+        (function_name.startswith('test_') and _is_test_file(filename)))
+
+
 class Item(str):
     def __new__(cls, name, typ, filename, lineno, size=1):
         item = str.__new__(cls, name)
@@ -253,12 +270,6 @@ class Vulture(ast.NodeVisitor):
     def _get_line(self, node):
         return self.code[self._get_lineno(node) - 1] if self.code else ''
 
-    def _is_test_file(self):
-        name = os.path.basename(self.filename)
-        return any(
-            fnmatchcase(name, pattern)
-            for pattern in ['test_*.py', '*_test.py'])
-
     def _get_item(self, node, typ):
         """
         Return a lighter representation of the ast node ``node`` for
@@ -286,11 +297,6 @@ class Vulture(ast.NodeVisitor):
         """Function argument. Python 3 only. Has lineno since Python 3.4"""
         self._define_variable(node.arg, getattr(node, 'lineno', -1))
 
-    def _ignore_function(self, name):
-        return (
-            _is_special_name(name) or
-            (self._is_test_file() and name.startswith('test_')))
-
     def visit_FunctionDef(self, node):
         for decorator in node.decorator_list:
             if getattr(decorator, 'id', None) == 'property':
@@ -298,7 +304,7 @@ class Vulture(ast.NodeVisitor):
                 break
         else:
             # Function is not a property.
-            if self._ignore_function(node.name):
+            if _ignore_function(self.filename, node.name):
                 self._log(
                     'Ignoring function {0} due to its name'.format(node.name))
             else:
@@ -371,13 +377,8 @@ class Vulture(ast.NodeVisitor):
     def visit_comprehension(self, node):
         self._find_tuple_assigns(node)
 
-    def _ignore_class(self, name):
-        return (
-            _is_special_name(name) or
-            (self._is_test_file() and name.startswith('Test')))
-
     def visit_ClassDef(self, node):
-        if self._ignore_class(node.name):
+        if _ignore_class(self.filename, node.name):
             self._log('Ignoring class {0} due to its name'.format(node.name))
         else:
             self.defined_classes.append(self._get_item(node, 'class'))
