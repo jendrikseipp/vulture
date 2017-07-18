@@ -1,6 +1,7 @@
 import pytest
-
 from vulture import Vulture
+
+from . import check
 
 
 @pytest.fixture
@@ -13,14 +14,14 @@ def test_import_star(v):
 from a import *
 from a.b import *
 """)
-    assert v.defined_imports == ['*', '*']
-    assert v.unused_imports == []
+    check(v.defined_imports, ['*', '*'])
+    check(v.unused_imports, [])
 
 
 def test_import_from_future(v):
     v.scan("""from __future__ import division""")
-    assert v.defined_imports == []
-    assert v.unused_imports == []
+    check(v.defined_imports, [])
+    check(v.unused_imports, [])
 
 
 def test_attribute_access(v):
@@ -36,8 +37,8 @@ from foo import Foo
 import bar
 bar.Foo
 """)
-    assert v.defined_imports == ['Foo', 'bar']
-    assert v.unused_imports == []
+    check(v.defined_imports, ['Foo', 'bar'])
+    check(v.unused_imports, [])
 
 
 def test_nested_import(v):
@@ -45,11 +46,11 @@ def test_nested_import(v):
 import os.path
 os.path.expanduser("~")
 """)
-    assert v.defined_imports == ['os']
-    assert v.used_vars == ['os']
-    assert v.unused_funcs == []
-    assert v.unused_imports == []
-    assert v.unused_vars == []
+    check(v.defined_imports, ['os'])
+    check(v.used_vars, ['os'])
+    check(v.unused_funcs, [])
+    check(v.unused_imports, [])
+    check(v.unused_vars, [])
 
 
 definitions = """\
@@ -91,103 +92,103 @@ AliasD()
 
 def test_definitions(v):
     v.scan(definitions)
-    assert v.defined_classes == ['A', 'B']
-    assert v.defined_funcs == ['C']
-    assert v.defined_imports == []
-    assert v.defined_vars == ['D']
-    assert v.used_vars == []
-    assert v.unused_classes == ['A', 'B']
-    assert v.unused_funcs == ['C']
-    assert v.unused_imports == []
-    assert v.unused_vars == ['D']
+    check(v.defined_classes, ['A', 'B'])
+    check(v.defined_funcs, ['C'])
+    check(v.defined_imports, [])
+    check(v.defined_vars, ['D'])
+    check(v.used_vars, [])
+    check(v.unused_classes, ['A', 'B'])
+    check(v.unused_funcs, ['C'])
+    check(v.unused_imports, [])
+    check(v.unused_vars, ['D'])
 
 
 def test_use_original(v):
     v.scan(definitions + uses)
-    assert v.defined_classes == ['A', 'B']
-    assert v.defined_funcs == ['C']
-    assert v.defined_imports == []
-    assert v.defined_vars == ['D']
-    assert v.used_vars == ['A', 'B', 'C', 'D']
-    assert v.unused_funcs == []
-    assert v.unused_classes == []
-    assert v.unused_imports == []
-    assert v.unused_vars == []
+    check(v.defined_classes, ['A', 'B'])
+    check(v.defined_funcs, ['C'])
+    check(v.defined_imports, [])
+    check(v.defined_vars, ['D'])
+    check(v.used_vars, ['A', 'B', 'C', 'D'])
+    check(v.unused_funcs, [])
+    check(v.unused_classes, [])
+    check(v.unused_imports, [])
+    check(v.unused_vars, [])
 
 
 def test_import_original(v):
     v.scan(definitions + imports)
-    assert v.defined_classes == ['A', 'B']
-    assert v.defined_funcs == ['C']
-    assert v.defined_imports == ['A', 'B', 'C', 'D']
-    assert v.defined_vars == ['D']
-    assert v.used_vars == []
-    assert v.unused_classes == ['A', 'B']
-    assert v.unused_funcs == ['C']
-    assert v.unused_imports == ['A', 'B', 'C', 'D']
-    assert v.unused_vars == ['D']
+    check(v.defined_classes, ['A', 'B'])
+    check(v.defined_funcs, ['C'])
+    check(v.defined_imports, ['A', 'B', 'C', 'D'])
+    check(v.defined_vars, ['D'])
+    check(v.used_vars, [])
+    check(v.unused_classes, ['A', 'B'])
+    check(v.unused_funcs, ['C'])
+    check(v.unused_imports, ['A', 'B', 'C', 'D'])
+    check(v.unused_vars, ['D'])
 
 
 def test_import_original_use_original(v):
     v.scan(definitions + imports + uses)
-    assert v.defined_classes == ['A', 'B']
-    assert v.defined_funcs == ['C']
-    assert v.defined_imports == ['A', 'B', 'C', 'D']
-    assert v.defined_vars == ['D']
-    assert v.used_vars == ['A', 'B', 'C', 'D']
-    assert v.unused_classes == []
-    assert v.unused_funcs == []
-    assert v.unused_imports == []
-    assert v.unused_vars == []
+    check(v.defined_classes, ['A', 'B'])
+    check(v.defined_funcs, ['C'])
+    check(v.defined_imports, ['A', 'B', 'C', 'D'])
+    check(v.defined_vars, ['D'])
+    check(v.used_vars, ['A', 'B', 'C', 'D'])
+    check(v.unused_classes, [])
+    check(v.unused_funcs, [])
+    check(v.unused_imports, [])
+    check(v.unused_vars, [])
 
 
 def test_import_original_use_alias(v):
     v.scan(definitions + imports + aliased_uses)
-    assert v.defined_classes == ['A', 'B']
-    assert v.defined_funcs == ['C']
-    assert v.defined_imports == ['A', 'B', 'C', 'D']
-    assert v.defined_vars == ['D']
-    assert v.used_vars == ['AliasA', 'AliasB', 'AliasC', 'AliasD']
-    assert v.unused_classes == ['A', 'B']
-    assert v.unused_funcs == ['C']
-    assert v.unused_imports == ['A', 'B', 'C', 'D']
-    assert v.unused_vars == ['D']
+    check(v.defined_classes, ['A', 'B'])
+    check(v.defined_funcs, ['C'])
+    check(v.defined_imports, ['A', 'B', 'C', 'D'])
+    check(v.defined_vars, ['D'])
+    check(v.used_vars, ['AliasA', 'AliasB', 'AliasC', 'AliasD'])
+    check(v.unused_classes, ['A', 'B'])
+    check(v.unused_funcs, ['C'])
+    check(v.unused_imports, ['A', 'B', 'C', 'D'])
+    check(v.unused_vars, ['D'])
 
 
 def test_import_alias(v):
     v.scan(definitions + aliased_imports)
-    assert v.defined_classes == ['A', 'B']
-    assert v.defined_funcs == ['C']
-    assert v.defined_imports == ['AliasA', 'AliasB', 'AliasC', 'AliasD']
-    assert v.defined_vars == ['D']
-    assert v.used_vars == []
-    assert v.unused_classes == []
-    assert v.unused_funcs == []
-    assert v.unused_imports == ['AliasA', 'AliasB', 'AliasC', 'AliasD']
-    assert v.unused_vars == []
+    check(v.defined_classes, ['A', 'B'])
+    check(v.defined_funcs, ['C'])
+    check(v.defined_imports, ['AliasA', 'AliasB', 'AliasC', 'AliasD'])
+    check(v.defined_vars, ['D'])
+    check(v.used_vars, [])
+    check(v.unused_classes, [])
+    check(v.unused_funcs, [])
+    check(v.unused_imports, ['AliasA', 'AliasB', 'AliasC', 'AliasD'])
+    check(v.unused_vars, [])
 
 
 def test_import_alias_use_original(v):
     v.scan(definitions + aliased_imports + uses)
-    assert v.defined_classes == ['A', 'B']
-    assert v.defined_funcs == ['C']
-    assert v.defined_imports == ['AliasA', 'AliasB', 'AliasC', 'AliasD']
-    assert v.defined_vars == ['D']
-    assert v.used_vars == ['A', 'B', 'C', 'D']
-    assert v.unused_classes == []
-    assert v.unused_funcs == []
-    assert v.unused_imports == ['AliasA', 'AliasB', 'AliasC', 'AliasD']
-    assert v.unused_vars == []
+    check(v.defined_classes, ['A', 'B'])
+    check(v.defined_funcs, ['C'])
+    check(v.defined_imports, ['AliasA', 'AliasB', 'AliasC', 'AliasD'])
+    check(v.defined_vars, ['D'])
+    check(v.used_vars, ['A', 'B', 'C', 'D'])
+    check(v.unused_classes, [])
+    check(v.unused_funcs, [])
+    check(v.unused_imports, ['AliasA', 'AliasB', 'AliasC', 'AliasD'])
+    check(v.unused_vars, [])
 
 
 def test_import_alias_use_alias(v):
     v.scan(definitions + aliased_imports + aliased_uses)
-    assert v.defined_classes == ['A', 'B']
-    assert v.defined_funcs == ['C']
-    assert v.defined_imports == ['AliasA', 'AliasB', 'AliasC', 'AliasD']
-    assert v.defined_vars == ['D']
-    assert v.used_vars == ['AliasA', 'AliasB', 'AliasC', 'AliasD']
-    assert v.unused_classes == []
-    assert v.unused_funcs == []
-    assert v.unused_imports == []
-    assert v.unused_vars == []
+    check(v.defined_classes, ['A', 'B'])
+    check(v.defined_funcs, ['C'])
+    check(v.defined_imports, ['AliasA', 'AliasB', 'AliasC', 'AliasD'])
+    check(v.defined_vars, ['D'])
+    check(v.used_vars, ['AliasA', 'AliasB', 'AliasC', 'AliasD'])
+    check(v.unused_classes, [])
+    check(v.unused_funcs, [])
+    check(v.unused_imports, [])
+    check(v.unused_vars, [])
