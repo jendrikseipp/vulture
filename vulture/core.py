@@ -80,6 +80,17 @@ def _ignore_function(filename, function_name):
         (function_name.startswith('test_') and _is_test_file(filename)))
 
 
+def _ignore_variable(filename, varname):
+    """
+    Ignore _ (Python idiom), _x (pylint convention) and
+    __x__ (special variable or method), but not __x.
+    """
+    return (
+        varname in IGNORED_VARIABLE_NAMES or
+        (varname.startswith('_') and not varname.startswith('__')) or
+        _is_special_name(varname))
+
+
 class Item(str):
     def __new__(cls, name, typ, filename, lineno, size=1):
         item = str.__new__(cls, name)
@@ -254,11 +265,7 @@ class Vulture(ast.NodeVisitor):
             self.used_attrs + self.used_vars)
 
     def _define_variable(self, name, lineno):
-        # Ignore _ (Python idiom), _x (pylint convention) and
-        # __x__ (special variable or method), but not __x.
-        if (name in IGNORED_VARIABLE_NAMES or
-                (name.startswith('_') and not name.startswith('__')) or
-                _is_special_name(name)):
+        if _ignore_variable(self.filename, name):
             self._log('Ignoring variable {0} due to its name'.format(name))
         else:
             self.defined_vars.append(
