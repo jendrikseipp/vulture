@@ -33,7 +33,6 @@ setup(
     author_email='jendrikseipp@gmail.com',
     url='https://github.com/jendrikseipp/vulture',
     license='MIT',
-    py_modules=['vulture'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
