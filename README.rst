@@ -30,7 +30,8 @@ Installation
 
 ::
 
-  $ pip install vulture
+  $ pip install vulture  # from PyPI
+  $ pip install .        # from cloned repo
 
 
 Usage
