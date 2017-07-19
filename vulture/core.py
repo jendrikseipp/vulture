@@ -329,7 +329,7 @@ class Vulture(ast.NodeVisitor):
         if isinstance(node.ctx, ast.Store):
             self.defined_attrs.append(item)
         elif isinstance(node.ctx, ast.Load):
-            self.used_attrs.append(item)
+            self.used_attrs.append(node.attr)
 
     def visit_Name(self, node):
         if (isinstance(node.ctx, ast.Load) and
