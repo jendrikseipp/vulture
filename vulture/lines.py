@@ -1,15 +1,27 @@
+import ast
+
+
 def _get_last_child(node):
     """
     Return the last direct child of `node`, or None if `node` has no children.
 
-    We test all fields that contain lists of nodes, choose the last field
-    that actually contains nodes and return the last node in the list.
+    We order the field names in the opposite order in which they appear
+    in source code. Then we choose the first field (i.e., the field with
+    the highest line number) that actually contains a node. If it
+    contains a list of nodes, we return the last one.
+
     """
     reverse_ordered_fields = ['finalbody', 'orelse', 'handlers', 'body']
     for name in reverse_ordered_fields:
-        last_children = getattr(node, name, [])
-        if last_children:
-            return last_children[-1]
+        try:
+            last_field = getattr(node, name)
+        except AttributeError:
+            continue
+
+        if isinstance(last_field, ast.AST):
+            return last_field
+        elif isinstance(last_field, list) and last_field:
+            return last_field[-1]
     return None
 
 

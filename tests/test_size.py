@@ -207,6 +207,14 @@ class Foo:
     check_size(example, 3)
 
 
+def test_size_exec():
+    example = """
+class Foo:
+    exec('a')
+"""
+    check_size(example, 2)
+
+
 @skip_if_not_has_async
 def test_size_async_function_def():
     example = """
