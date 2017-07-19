@@ -2,7 +2,7 @@
 
 import sys
 
-from setuptools import setup
+import setuptools
 from setuptools.command.test import test as TestCommand
 
 from vulture import __version__
@@ -22,7 +22,7 @@ class PyTest(TestCommand):
         sys.exit(pytest.main(self.test_args))
 
 
-setup(
+setuptools.setup(
     name='vulture',
     version=__version__,
     description='Find dead code',
@@ -48,7 +48,6 @@ setup(
     },
     tests_require=['pytest', 'pytest-cov'],
     cmdclass={'test': PyTest},
-    packages=['vulture'],
-    package_dir={'vulture': 'vulture'},
+    packages=setuptools.find_packages(exclude=['tests']),
     package_data={'vulture': ['whitelists/*.py']},
 )
