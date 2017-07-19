@@ -11,10 +11,13 @@ TODOs
 * Distribute and test vulture wheel file.
 * Let Item inherit from "object", not from "str". The new class needs
   members "name", "__eq__" (returns name) and "__hash__" (returns hash(name)).
+  * Store used_vars, used_attrs, tuple_assign_vars and names_imported_as_aliases
+    as plain str objects in new LoggingSet classes.
 * Only count lines for unused code, then always list the number of lines in the output.
 * If an unused item is defined multiple times, report it multiple times
   (Item needs to inherit from "object" first).
 * Rethink which attribute names should be ignored.
+* Unify ignore-mechanism. Use decorator for logging.
 
 
 Non-TODOs
