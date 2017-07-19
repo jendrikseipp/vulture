@@ -173,7 +173,7 @@ class Foo:
     check_size(example, 3)
 
 
-# We currently cannot handle code ending with multiline statements.
+# We currently cannot handle code ending with multiline strings.
 def test_size_multi_line_return():
     example = """
 class Foo:
@@ -183,7 +183,7 @@ class Foo:
             'long'
             'string')
 """
-    check_size(example, 3)
+    check_size(example, 4)
 
 
 # We currently cannot handle code ending with comment lines.
@@ -213,6 +213,60 @@ class Foo:
     exec('a')
 """
     check_size(example, 2)
+
+
+def test_size_print1():
+    example = """
+class Foo:
+    print(
+        'foo')
+"""
+    check_size(example, 3)
+
+
+def test_size_print2():
+    example = """
+class Foo:
+    print(
+        'foo',)
+"""
+    check_size(example, 3)
+
+
+def test_size_return():
+    example = """
+class Foo:
+    return (True and
+        False)
+"""
+    check_size(example, 3)
+
+
+def test_size_import_from():
+    example = """
+class Foo:
+    from a import b
+"""
+    check_size(example, 2)
+
+
+def test_size_delete():
+    example = """
+class Foo:
+    del a[:
+        foo()]
+"""
+    check_size(example, 3)
+
+
+def test_size_list_comprehension():
+    example = """
+class Foo:
+    [a
+     for a in
+     b]
+"""
+    check_size(example, 4)
 
 
 @skip_if_not_has_async

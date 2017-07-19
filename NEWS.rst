@@ -5,6 +5,7 @@ News
 -----------------
 * Don't ignore `__foo` variable names.
 * Use separate methods for determining whether to ignore classes and functions.
+* Fix finding the last child for many types of AST nodes.
 
 
 0.18 (2017-07-17)
