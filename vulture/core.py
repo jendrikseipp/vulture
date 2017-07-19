@@ -264,13 +264,6 @@ class Vulture(ast.NodeVisitor):
             self.defined_attrs,
             self.used_attrs + self.used_vars)
 
-    def _define_variable(self, name, lineno):
-        if _ignore_variable(self.filename, name):
-            self._log('Ignoring variable {0} due to its name'.format(name))
-        else:
-            self.defined_vars.append(
-                Item(name, 'variable', self.filename, lineno))
-
     def _get_lineno(self, node):
         return getattr(node, 'lineno', 1)
 
@@ -300,9 +293,68 @@ class Vulture(ast.NodeVisitor):
             self._log(
                 self._get_lineno(node), ast.dump(node), self._get_line(node))
 
+    def _add_aliases(self, node):
+        assert isinstance(node, (ast.Import, ast.ImportFrom))
+        for name_and_alias in node.names:
+            # Store only top-level module name ("os.path" -> "os").
+            # We can't detect when "os.path" is used.
+            name = name_and_alias.name.partition('.')[0]
+            alias = name_and_alias.asname
+            self.defined_imports.append(
+                Item(alias or name, 'import', self.filename, node.lineno))
+            if alias is not None:
+                self.names_imported_as_aliases.append(name_and_alias.name)
+
+    def _define_variable(self, name, lineno):
+        if _ignore_variable(self.filename, name):
+            self._log('Ignoring variable {0} due to its name'.format(name))
+        else:
+            self.defined_vars.append(
+                Item(name, 'variable', self.filename, lineno))
+
+    def _find_tuple_assigns(self, node):
+        # Find all tuple assignments. Those have the form
+        # Assign->Tuple->Name or For->Tuple->Name or comprehension->Tuple->Name
+        for child in ast.iter_child_nodes(node):
+            if not isinstance(child, ast.Tuple):
+                continue
+            for grandchild in ast.walk(child):
+                if (isinstance(grandchild, ast.Name) and
+                        isinstance(grandchild.ctx, ast.Store)):
+                    self.tuple_assign_vars.append(grandchild.id)
+
+    def visit_alias(self, node):
+        """
+        Use the methods below for imports to have access to line numbers
+        and to filter imports from __future__.
+        """
+        pass
+
     def visit_arg(self, node):
         """Function argument. Python 3 only. Has lineno since Python 3.4"""
         self._define_variable(node.arg, getattr(node, 'lineno', -1))
+
+    def visit_Assign(self, node):
+        self._find_tuple_assigns(node)
+
+    def visit_Attribute(self, node):
+        item = self._get_item(node, 'attribute')
+        if isinstance(node.ctx, ast.Store):
+            self.defined_attrs.append(item)
+        elif isinstance(node.ctx, ast.Load):
+            self.used_attrs.append(node.attr)
+
+    def visit_ClassDef(self, node):
+        if _ignore_class(self.filename, node.name):
+            self._log('Ignoring class {0} due to its name'.format(node.name))
+        else:
+            self.defined_classes.append(self._get_item(node, 'class'))
+
+    def visit_comprehension(self, node):
+        self._find_tuple_assigns(node)
+
+    def visit_For(self, node):
+        self._find_tuple_assigns(node)
 
     def visit_FunctionDef(self, node):
         for decorator in node.decorator_list:
@@ -324,27 +376,6 @@ class Vulture(ast.NodeVisitor):
             if param and isinstance(param, str):
                 self._define_variable(param, node.lineno)
 
-    def visit_Attribute(self, node):
-        item = self._get_item(node, 'attribute')
-        if isinstance(node.ctx, ast.Store):
-            self.defined_attrs.append(item)
-        elif isinstance(node.ctx, ast.Load):
-            self.used_attrs.append(node.attr)
-
-    def visit_Name(self, node):
-        if (isinstance(node.ctx, ast.Load) and
-                node.id not in IGNORED_VARIABLE_NAMES):
-            self.used_vars.append(node.id)
-        elif isinstance(node.ctx, (ast.Param, ast.Store)):
-            self._define_variable(node.id, node.lineno)
-
-    def visit_alias(self, node):
-        """
-        Use the methods below for imports to have access to line numbers
-        and to filter imports from __future__.
-        """
-        pass
-
     def visit_Import(self, node):
         self._add_aliases(node)
 
@@ -352,43 +383,12 @@ class Vulture(ast.NodeVisitor):
         if node.module != '__future__':
             self._add_aliases(node)
 
-    def _add_aliases(self, node):
-        assert isinstance(node, (ast.Import, ast.ImportFrom))
-        for name_and_alias in node.names:
-            # Store only top-level module name ("os.path" -> "os").
-            # We can't detect when "os.path" is used.
-            name = name_and_alias.name.partition('.')[0]
-            alias = name_and_alias.asname
-            self.defined_imports.append(
-                Item(alias or name, 'import', self.filename, node.lineno))
-            if alias is not None:
-                self.names_imported_as_aliases.append(name_and_alias.name)
-
-    def _find_tuple_assigns(self, node):
-        # Find all tuple assignments. Those have the form
-        # Assign->Tuple->Name or For->Tuple->Name or comprehension->Tuple->Name
-        for child in ast.iter_child_nodes(node):
-            if not isinstance(child, ast.Tuple):
-                continue
-            for grandchild in ast.walk(child):
-                if (isinstance(grandchild, ast.Name) and
-                        isinstance(grandchild.ctx, ast.Store)):
-                    self.tuple_assign_vars.append(grandchild.id)
-
-    def visit_Assign(self, node):
-        self._find_tuple_assigns(node)
-
-    def visit_For(self, node):
-        self._find_tuple_assigns(node)
-
-    def visit_comprehension(self, node):
-        self._find_tuple_assigns(node)
-
-    def visit_ClassDef(self, node):
-        if _ignore_class(self.filename, node.name):
-            self._log('Ignoring class {0} due to its name'.format(node.name))
-        else:
-            self.defined_classes.append(self._get_item(node, 'class'))
+    def visit_Name(self, node):
+        if (isinstance(node.ctx, ast.Load) and
+                node.id not in IGNORED_VARIABLE_NAMES):
+            self.used_vars.append(node.id)
+        elif isinstance(node.ctx, (ast.Param, ast.Store)):
+            self._define_variable(node.id, node.lineno)
 
     def visit_Str(self, node):
         """
