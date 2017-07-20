@@ -1,10 +1,11 @@
 News
 ====
 
-0.19 (unreleased)
+0.19 (2017-07-20)
 -----------------
 * Don't ignore `__foo` variable names.
 * Use separate methods for determining whether to ignore classes and functions.
+* Only try to find a whitelist for each defined import once (thanks @roivanov).
 * Fix finding the last child for many types of AST nodes.
 
 
