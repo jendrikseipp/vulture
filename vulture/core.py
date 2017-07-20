@@ -124,7 +124,6 @@ class Vulture(ast.NodeVisitor):
         self.defined_vars = get_list('defined_vars')
         self.used_attrs = get_list('used_attrs')
         self.used_vars = get_list('used_vars')
-        self.tuple_assign_vars = get_list('tuple_assign_vars')
         self.names_imported_as_aliases = get_list('names_imported_as_aliases')
 
         self.filename = ''
@@ -255,8 +254,7 @@ class Vulture(ast.NodeVisitor):
     def unused_vars(self):
         return _get_unused_items(
             self.defined_vars,
-            self.used_attrs + self.used_vars + self.tuple_assign_vars +
-            self.names_imported_as_aliases)
+            self.used_attrs + self.used_vars + self.names_imported_as_aliases)
 
     @property
     def unused_attrs(self):
@@ -312,17 +310,6 @@ class Vulture(ast.NodeVisitor):
             self.defined_vars.append(
                 Item(name, 'variable', self.filename, lineno))
 
-    def _find_tuple_assigns(self, node):
-        # Find all tuple assignments. Those have the form
-        # Assign->Tuple->Name or For->Tuple->Name or comprehension->Tuple->Name
-        for child in ast.iter_child_nodes(node):
-            if not isinstance(child, ast.Tuple):
-                continue
-            for grandchild in ast.walk(child):
-                if (isinstance(grandchild, ast.Name) and
-                        isinstance(grandchild.ctx, ast.Store)):
-                    self.tuple_assign_vars.append(grandchild.id)
-
     def visit_alias(self, node):
         """
         Use the methods below for imports to have access to line numbers
@@ -333,9 +320,6 @@ class Vulture(ast.NodeVisitor):
     def visit_arg(self, node):
         """Function argument. Python 3 only. Has lineno since Python 3.4"""
         self._define_variable(node.arg, getattr(node, 'lineno', -1))
-
-    def visit_Assign(self, node):
-        self._find_tuple_assigns(node)
 
     def visit_Attribute(self, node):
         item = self._get_item(node, 'attribute')
@@ -349,12 +333,6 @@ class Vulture(ast.NodeVisitor):
             self._log('Ignoring class {0} due to its name'.format(node.name))
         else:
             self.defined_classes.append(self._get_item(node, 'class'))
-
-    def visit_comprehension(self, node):
-        self._find_tuple_assigns(node)
-
-    def visit_For(self, node):
-        self._find_tuple_assigns(node)
 
     def visit_FunctionDef(self, node):
         for decorator in node.decorator_list:

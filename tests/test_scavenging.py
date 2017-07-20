@@ -245,8 +245,7 @@ def test_variable3(v):
     assert v.defined_funcs == []
     assert v.defined_vars == ['a', 'b', 'c']
     assert v.used_vars == ['d', 'e', 'f']
-    assert sorted(v.tuple_assign_vars) == ['a', 'b', 'c']
-    assert v.unused_vars == []
+    assert v.unused_vars == ['a', 'b', 'c']
 
 
 def test_variable4(v):
@@ -254,16 +253,14 @@ def test_variable4(v):
     assert v.defined_funcs == []
     assert v.defined_vars == ['a', 'b']
     assert sorted(v.used_vars) == ['a', 'func']
-    assert v.tuple_assign_vars == ['a', 'b']
-    assert v.unused_vars == []
+    assert v.unused_vars == ['b']
 
 
 def test_variable5(v):
     v.scan("[a for a, b in func()]")
     assert v.defined_vars == ['a', 'b']
     assert sorted(v.used_vars) == ['a', 'func']
-    assert v.tuple_assign_vars == ['a', 'b']
-    assert v.unused_vars == []
+    assert v.unused_vars == ['b']
 
 
 def test_ignored_variables(v):
