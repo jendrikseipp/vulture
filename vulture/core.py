@@ -55,8 +55,12 @@ if sys.version_info < (3, 4):
 IGNORED_IMPORTS = ["*"]
 
 
-def _get_unused_items(defined, used):
-    return list(sorted(set(defined) - set(used), key=lambda x: x.lower()))
+def _get_unused_items(defined_items, used_names):
+    used_names = set(used_names)
+    unused_items = [item for item in set(defined_items)
+                    if item.name not in used_names]
+    unused_items.sort(key=lambda item: item.name.lower())
+    return unused_items
 
 
 def _is_special_name(name):
@@ -91,14 +95,19 @@ def _ignore_variable(filename, varname):
         _is_special_name(varname))
 
 
-class Item(str):
-    def __new__(cls, name, typ, filename, lineno, size=1):
-        item = str.__new__(cls, name)
-        item.typ = typ
-        item.filename = filename
-        item.lineno = lineno
-        item.size = size
-        return item
+class Item(object):
+    def __init__(self, name, typ, filename, lineno, size=1):
+        self.name = name
+        self.typ = typ
+        self.filename = filename
+        self.lineno = lineno
+        self.size = size
+
+    def __eq__(self, other):
+        return self.name == other.name
+
+    def __hash__(self):
+        return hash(self.name)
 
 
 class Vulture(ast.NodeVisitor):
@@ -183,8 +192,8 @@ class Vulture(ast.NodeVisitor):
             else:
                 self.scan(module_string, filename=module)
 
-        for name in self.defined_imports:
-            path = os.path.join('whitelists', name) + '.py'
+        for defined_import in self.defined_imports:
+            path = os.path.join('whitelists', defined_import.name) + '.py'
             if exclude(path):
                 self._log('Excluded whitelist:', path)
             else:
