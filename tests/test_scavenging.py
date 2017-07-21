@@ -94,6 +94,20 @@ foo.bar = 2
     check(v.unused_attrs, ['bar'])
 
 
+def test_ignored_attributes(v):
+    v.scan("""\
+A._ = 0
+A._a = 1
+A.__b = 2
+A.__c__ = 3
+A._d_ = 4
+""")
+    check(v.defined_attrs, ['_', '_a', '__b', '__c__', '_d_'])
+    check(v.used_attrs, [])
+    check(v.unused_attrs, ['_', '__b', '__c__', '_a', '_d_'])
+    check(v.unused_vars, [])
+
+
 def test_callback1(v):
     v.scan("""\
 class Bar(object):
