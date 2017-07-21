@@ -4,6 +4,7 @@ News
 0.20 (unreleased)
 -----------------
 * Report unused tuple assignments as dead code.
+* Report attribute names that have the same names as variables as dead code.
 
 
 0.19 (2017-07-20)

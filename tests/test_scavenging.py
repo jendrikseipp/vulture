@@ -402,7 +402,7 @@ foo.a = 2
     check(v.defined_vars, ['a'])
     check(v.used_attrs, [])
     check(v.used_vars, ['a', 'foo'])
-    check(v.unused_attrs, [])
+    check(v.unused_attrs, ['a'])
 
 
 def test_boolean(v):
