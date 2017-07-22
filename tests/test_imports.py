@@ -24,6 +24,17 @@ def test_import_from_future(v):
     check(v.unused_imports, [])
 
 
+def test_double_import(v):
+    v.scan("""\
+import foo as bar
+import foo
+""")
+    check(v.names_imported_as_aliases, ['foo'])
+    check(v.defined_imports, ['bar', 'foo'])
+    # Once the bar import is removed, the foo import will be detected.
+    check(v.unused_imports, ['bar'])
+
+
 def test_attribute_access(v):
     v.scan("""\
 # foo.py
