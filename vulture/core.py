@@ -309,22 +309,22 @@ class Vulture(ast.NodeVisitor):
             # We can't detect when "os.path" is used.
             name = name_and_alias.name.partition('.')[0]
             alias = name_and_alias.asname
-            import_name = alias or name
-            if _ignore_import(self.filename, import_name):
-                self._log(
-                    'Ignoring import {0} due to its name'.format(import_name))
-            else:
-                self.defined_imports.append(
-                    Item(import_name, 'import', self.filename, node.lineno))
+            self._define_item(
+                Item(alias or name, 'import', self.filename, node.lineno),
+                self.defined_imports,
+                _ignore_import)
             if alias is not None:
                 self.used_names.append(name_and_alias.name)
 
-    def _define_variable(self, name, lineno):
-        if _ignore_variable(self.filename, name):
-            self._log('Ignoring variable {0} due to its name'.format(name))
+    def _define_item(self, item, collection, ignore):
+        if ignore(self.filename, item.name):
+            self._log('Ignoring {0.typ} {0.name} due to its name'.format(item))
         else:
-            self.defined_vars.append(
-                Item(name, 'variable', self.filename, lineno))
+            collection.append(item)
+
+    def _define_variable(self, name, lineno):
+        item = Item(name, 'variable', self.filename, lineno)
+        self._define_item(item, self.defined_vars, _ignore_variable)
 
     def visit_alias(self, node):
         """
@@ -345,10 +345,8 @@ class Vulture(ast.NodeVisitor):
             self.used_attrs.append(node.attr)
 
     def visit_ClassDef(self, node):
-        if _ignore_class(self.filename, node.name):
-            self._log('Ignoring class {0} due to its name'.format(node.name))
-        else:
-            self.defined_classes.append(self._get_item(node, 'class'))
+        self._define_item(
+            self._get_item(node, 'class'), self.defined_classes, _ignore_class)
 
     def visit_FunctionDef(self, node):
         for decorator in node.decorator_list:
@@ -357,11 +355,10 @@ class Vulture(ast.NodeVisitor):
                 break
         else:
             # Function is not a property.
-            if _ignore_function(self.filename, node.name):
-                self._log(
-                    'Ignoring function {0} due to its name'.format(node.name))
-            else:
-                self.defined_funcs.append(self._get_item(node, 'function'))
+            self._define_item(
+                self._get_item(node, 'function'),
+                self.defined_funcs,
+                _ignore_function)
 
         # Detect *args and **kwargs parameters. Python 3 recognizes them
         # in visit_Name. For Python 2 we use this workaround. We can't
