@@ -292,13 +292,6 @@ class Vulture(ast.NodeVisitor):
         if self.verbose:
             print(*args)
 
-    def _print_node(self, node):
-        # Only create the strings if we'll also print them.
-        if self.verbose:
-            lineno = getattr(node, 'lineno', 1)
-            line = self.code[lineno - 1] if self.code else ''
-            self._log(lineno, ast.dump(node), line)
-
     def _add_aliases(self, node):
         assert isinstance(node, (ast.Import, ast.ImportFrom))
         for name_and_alias in node.names:
@@ -391,7 +384,10 @@ class Vulture(ast.NodeVisitor):
     def visit(self, node):
         method = 'visit_' + node.__class__.__name__
         visitor = getattr(self, method, None)
-        self._print_node(node)
+        if self.verbose:
+            lineno = getattr(node, 'lineno', 1)
+            line = self.code[lineno - 1] if self.code else ''
+            self._log(lineno, ast.dump(node), line)
         if visitor:
             visitor(node)
         else:
