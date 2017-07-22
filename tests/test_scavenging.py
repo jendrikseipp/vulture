@@ -267,14 +267,14 @@ def test_variable4(v):
     v.scan("for a, b in func(): a")
     check(v.defined_funcs, [])
     check(v.defined_vars, ['a', 'b'])
-    check(sorted(v.used_names), ['a', 'func'])
+    check(v.used_names, ['a', 'func'])
     check(v.unused_vars, ['b'])
 
 
 def test_variable5(v):
     v.scan("[a for a, b in func()]")
     check(v.defined_vars, ['a', 'b'])
-    check(sorted(v.used_names), ['a', 'func'])
+    check(v.used_names, ['a', 'func'])
     check(v.unused_vars, ['b'])
 
 
@@ -443,7 +443,7 @@ def test_unused_kwargs(v):
 def foo(x, y=3, **kwargs):
     return x + 1
 """)
-    check(set(v.defined_vars), set(['kwargs', 'x', 'y']))
+    check(v.defined_vars, ['kwargs', 'x', 'y'])
     check(v.used_names, ['x'])
     check(v.unused_vars, ['kwargs', 'y'])
 

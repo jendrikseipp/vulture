@@ -1,4 +1,7 @@
-# TODO: Convert used_names and used_attrs to sets and use dedicated tests.
 def check(items_or_names, expected_names):
-    names = set(getattr(item, 'name', item) for item in items_or_names)
-    assert names == set(expected_names)
+    if isinstance(items_or_names, set):
+        # items_or_names is a set of strings.
+        assert items_or_names == set(expected_names)
+    else:
+        # items_or_names is a list of Item objects.
+        assert set(item.name for item in items_or_names) == set(expected_names)
