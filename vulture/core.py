@@ -103,6 +103,9 @@ class Item(object):
         self.lineno = lineno
         self.size = size
 
+    def __repr__(self):
+        return repr(self.name)
+
     def __eq__(self, other):
         return self.name == other.name
 
