@@ -53,7 +53,6 @@ if sys.version_info < (3, 4):
 
 
 def _get_unused_items(defined_items, used_names):
-    used_names = set(used_names)
     unused_items = [item for item in set(defined_items)
                     if item.name not in used_names]
     unused_items.sort(key=lambda item: item.name.lower())
@@ -130,14 +129,17 @@ class Vulture(ast.NodeVisitor):
         def get_list(name):
             return utils.LoggingList(name, self.verbose)
 
+        def get_set(name):
+            return utils.LoggingSet(name, self.verbose)
+
         self.defined_attrs = get_list('defined_attrs')
         self.defined_classes = get_list('defined_classes')
         self.defined_funcs = get_list('defined_funcs')
         self.defined_imports = get_list('defined_imports')
         self.defined_props = get_list('defined_props')
         self.defined_vars = get_list('defined_vars')
-        self.used_attrs = get_list('used_attrs')
-        self.used_names = get_list('used_vars')
+        self.used_attrs = get_set('used_attrs')
+        self.used_names = get_set('used_vars')
 
         self.filename = ''
         self.code = []
@@ -246,19 +248,19 @@ class Vulture(ast.NodeVisitor):
     def unused_classes(self):
         return _get_unused_items(
             self.defined_classes,
-            self.used_attrs + self.used_names)
+            self.used_attrs | self.used_names)
 
     @property
     def unused_funcs(self):
         return _get_unused_items(
             self.defined_funcs,
-            self.used_attrs + self.used_names)
+            self.used_attrs | self.used_names)
 
     @property
     def unused_imports(self):
         return _get_unused_items(
             self.defined_imports,
-            self.used_names + self.used_attrs)
+            self.used_names | self.used_attrs)
 
     @property
     def unused_props(self):
@@ -268,7 +270,7 @@ class Vulture(ast.NodeVisitor):
     def unused_vars(self):
         return _get_unused_items(
             self.defined_vars,
-            self.used_attrs + self.used_names)
+            self.used_attrs | self.used_names)
 
     @property
     def unused_attrs(self):
@@ -315,7 +317,7 @@ class Vulture(ast.NodeVisitor):
                 self.defined_imports,
                 _ignore_import)
             if alias is not None:
-                self.used_names.append(name_and_alias.name)
+                self.used_names.add(name_and_alias.name)
 
     def _define_item(self, item, collection, ignore):
         if ignore(self.filename, item.name):
@@ -343,7 +345,7 @@ class Vulture(ast.NodeVisitor):
         if isinstance(node.ctx, ast.Store):
             self.defined_attrs.append(item)
         elif isinstance(node.ctx, ast.Load):
-            self.used_attrs.append(node.attr)
+            self.used_attrs.add(node.attr)
 
     def visit_ClassDef(self, node):
         self._define_item(
@@ -378,7 +380,7 @@ class Vulture(ast.NodeVisitor):
     def visit_Name(self, node):
         if (isinstance(node.ctx, ast.Load) and
                 node.id not in IGNORED_VARIABLE_NAMES):
-            self.used_names.append(node.id)
+            self.used_names.add(node.id)
         elif isinstance(node.ctx, (ast.Param, ast.Store)):
             self._define_variable(node.id, node.lineno)
 
@@ -391,7 +393,7 @@ class Vulture(ast.NodeVisitor):
 
         """
         for pattern in FORMAT_STRING_PATTERNS:
-            self.used_names.extend(pattern.findall(node.s))
+            self.used_names |= set(pattern.findall(node.s))
 
     def visit(self, node):
         method = 'visit_' + node.__class__.__name__

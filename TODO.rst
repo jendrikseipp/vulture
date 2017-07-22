@@ -10,8 +10,6 @@ TODOs
 * Extend whitelist files.
 * Distribute and test vulture wheel file.
 * Use better name for used_attrs.
-* Store used_names and used_attrs as plain str objects in new LoggingSet
-  classes.
 * Only count lines for unused code, then always list the number of lines in the output.
 * If an unused item is defined multiple times, report it multiple times.
 * Rethink which attribute names should be ignored.

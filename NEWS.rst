@@ -10,6 +10,7 @@ News
 * Rename used_vars to used_names.
 * Use function for determining which imports to ignore.
 * Only try to import each whitelist file once.
+* Store used names and used attributes as plain strings in sets instead of lists.
 
 
 0.19 (2017-07-20)

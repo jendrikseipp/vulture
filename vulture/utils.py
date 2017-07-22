@@ -47,3 +47,15 @@ class LoggingList(list):
         if self._verbose:
             print('{0} <- {1}'.format(self._name, item))
         list.append(self, item)
+
+
+class LoggingSet(set):
+    def __init__(self, name, verbose):
+        self._name = name
+        self._verbose = verbose
+        return set.__init__(self)
+
+    def add(self, item):
+        if self._verbose:
+            print('{0} <- {1}'.format(self._name, item))
+        set.add(self, item)
