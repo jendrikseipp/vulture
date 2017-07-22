@@ -276,12 +276,6 @@ class Vulture(ast.NodeVisitor):
     def unused_attrs(self):
         return _get_unused_items(self.defined_attrs, self.used_attrs)
 
-    def _get_lineno(self, node):
-        return getattr(node, 'lineno', 1)
-
-    def _get_line(self, node):
-        return self.code[self._get_lineno(node) - 1] if self.code else ''
-
     def _get_item(self, node, typ):
         """
         Return a lighter representation of the ast node ``node`` for
@@ -301,8 +295,9 @@ class Vulture(ast.NodeVisitor):
     def _print_node(self, node):
         # Only create the strings if we'll also print them.
         if self.verbose:
-            self._log(
-                self._get_lineno(node), ast.dump(node), self._get_line(node))
+            lineno = getattr(node, 'lineno', 1)
+            line = self.code[lineno - 1] if self.code else ''
+            self._log(lineno, ast.dump(node), line)
 
     def _add_aliases(self, node):
         assert isinstance(node, (ast.Import, ast.ImportFrom))
