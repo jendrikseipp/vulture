@@ -9,7 +9,6 @@ TODOs
 * Once we drop Python 2.6 compatibility use argparse instead of optparse.
 * Extend whitelist files.
 * Distribute and test vulture wheel file.
-* Rename used_vars to used_names.
 * Use better name for used_attrs.
 * Store used_names and used_attrs as plain str objects in new LoggingSet
   classes.

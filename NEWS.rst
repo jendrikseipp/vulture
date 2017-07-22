@@ -7,6 +7,7 @@ News
 * Report attribute names that have the same names as variables as dead code.
 * Let Item class inherit from ``object`` (thanks @RJ722).
 * Handle names imported as aliases like all other used variable names.
+* Rename used_vars to used_names.
 
 
 0.19 (2017-07-20)

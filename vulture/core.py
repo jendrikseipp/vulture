@@ -135,7 +135,7 @@ class Vulture(ast.NodeVisitor):
         self.defined_props = get_list('defined_props')
         self.defined_vars = get_list('defined_vars')
         self.used_attrs = get_list('used_attrs')
-        self.used_vars = get_list('used_vars')
+        self.used_names = get_list('used_vars')
 
         self.filename = ''
         self.code = []
@@ -243,19 +243,19 @@ class Vulture(ast.NodeVisitor):
     def unused_classes(self):
         return _get_unused_items(
             self.defined_classes,
-            self.used_attrs + self.used_vars)
+            self.used_attrs + self.used_names)
 
     @property
     def unused_funcs(self):
         return _get_unused_items(
             self.defined_funcs,
-            self.used_attrs + self.used_vars)
+            self.used_attrs + self.used_names)
 
     @property
     def unused_imports(self):
         return _get_unused_items(
             self.defined_imports,
-            self.used_vars + self.used_attrs + IGNORED_IMPORTS)
+            self.used_names + self.used_attrs + IGNORED_IMPORTS)
 
     @property
     def unused_props(self):
@@ -265,7 +265,7 @@ class Vulture(ast.NodeVisitor):
     def unused_vars(self):
         return _get_unused_items(
             self.defined_vars,
-            self.used_attrs + self.used_vars)
+            self.used_attrs + self.used_names)
 
     @property
     def unused_attrs(self):
@@ -310,7 +310,7 @@ class Vulture(ast.NodeVisitor):
             self.defined_imports.append(
                 Item(alias or name, 'import', self.filename, node.lineno))
             if alias is not None:
-                self.used_vars.append(name_and_alias.name)
+                self.used_names.append(name_and_alias.name)
 
     def _define_variable(self, name, lineno):
         if _ignore_variable(self.filename, name):
@@ -373,7 +373,7 @@ class Vulture(ast.NodeVisitor):
     def visit_Name(self, node):
         if (isinstance(node.ctx, ast.Load) and
                 node.id not in IGNORED_VARIABLE_NAMES):
-            self.used_vars.append(node.id)
+            self.used_names.append(node.id)
         elif isinstance(node.ctx, (ast.Param, ast.Store)):
             self._define_variable(node.id, node.lineno)
 
@@ -386,7 +386,7 @@ class Vulture(ast.NodeVisitor):
 
         """
         for pattern in FORMAT_STRING_PATTERNS:
-            self.used_vars.extend(pattern.findall(node.s))
+            self.used_names.extend(pattern.findall(node.s))
 
     def visit(self, node):
         method = 'visit_' + node.__class__.__name__

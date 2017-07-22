@@ -143,7 +143,7 @@ class Foo(Bar):
 Foo()
 """)
     check(v.used_attrs, [])
-    check(v.used_vars, ['Bar', 'Foo'])
+    check(v.used_names, ['Bar', 'Foo'])
     check(v.defined_classes, ['Bar', 'Foo'])
     check(v.unused_classes, [])
 
@@ -155,7 +155,7 @@ class Bar():
 [Bar]
 """)
     check(v.used_attrs, [])
-    check(v.used_vars, ['Bar'])
+    check(v.used_names, ['Bar'])
     check(v.defined_classes, ['Bar'])
     check(v.unused_classes, [])
 
@@ -231,7 +231,7 @@ x.d
 """)
     check(v.defined_funcs, [])
     check(v.defined_vars, ['b'])
-    check(v.used_vars, ['a', 'c', 'x'])
+    check(v.used_names, ['a', 'c', 'x'])
     check(v.used_attrs, ['d'])
     check(v.unused_attrs, [])
     check(v.unused_funcs, [])
@@ -242,7 +242,7 @@ x.d
 def test_variable1(v):
     v.scan("a = 1\nb = a")
     check(v.defined_funcs, [])
-    check(v.used_vars, ['a'])
+    check(v.used_names, ['a'])
     check(v.defined_vars, ['a', 'b'])
     check(v.unused_vars, ['b'])
 
@@ -251,7 +251,7 @@ def test_variable2(v):
     v.scan("a = 1\nc = b.a")
     check(v.defined_funcs, [])
     check(v.defined_vars, ['a', 'c'])
-    check(v.used_vars, ['b'])
+    check(v.used_names, ['b'])
     check(v.unused_vars, ['c'])
 
 
@@ -259,7 +259,7 @@ def test_variable3(v):
     v.scan("(a, b), c = (d, e, f)")
     check(v.defined_funcs, [])
     check(v.defined_vars, ['a', 'b', 'c'])
-    check(v.used_vars, ['d', 'e', 'f'])
+    check(v.used_names, ['d', 'e', 'f'])
     check(v.unused_vars, ['a', 'b', 'c'])
 
 
@@ -267,14 +267,14 @@ def test_variable4(v):
     v.scan("for a, b in func(): a")
     check(v.defined_funcs, [])
     check(v.defined_vars, ['a', 'b'])
-    check(sorted(v.used_vars), ['a', 'func'])
+    check(sorted(v.used_names), ['a', 'func'])
     check(v.unused_vars, ['b'])
 
 
 def test_variable5(v):
     v.scan("[a for a, b in func()]")
     check(v.defined_vars, ['a', 'b'])
-    check(sorted(v.used_vars), ['a', 'func'])
+    check(sorted(v.used_names), ['a', 'func'])
     check(v.unused_vars, ['b'])
 
 
@@ -287,7 +287,7 @@ __c__ = 3
 _d_ = 4
 """)
     check(v.defined_vars, ['__b'])
-    check(sorted(v.used_vars), [])
+    check(sorted(v.used_names), [])
     check(v.unused_vars, ['__b'])
 
 
@@ -356,7 +356,7 @@ class OtherClass:
     check(v.defined_funcs, ['other_func'])
     check(v.defined_vars, [])
     check(v.used_attrs, [])
-    check(v.used_vars, [])
+    check(v.used_names, [])
     check(v.unused_attrs, [])
     check(v.unused_classes, ['OtherClass'])
     check(v.unused_funcs, ['other_func'])
@@ -381,7 +381,7 @@ class OtherClass:
     check(v.defined_funcs, ['test_func', 'other_func'])
     check(v.defined_vars, [])
     check(v.used_attrs, [])
-    check(v.used_vars, [])
+    check(v.used_names, [])
     check(v.unused_attrs, [])
     check(v.unused_classes, ['OtherClass', 'TestClass'])
     check(v.unused_funcs, ['other_func', 'test_func'])
@@ -401,7 +401,7 @@ foo.a = 2
     check(v.defined_attrs, ['a'])
     check(v.defined_vars, ['a'])
     check(v.used_attrs, [])
-    check(v.used_vars, ['a', 'foo'])
+    check(v.used_names, ['a', 'foo'])
     check(v.unused_attrs, ['a'])
 
 
@@ -411,7 +411,7 @@ a = True
 a
 """)
     check(v.defined_vars, ['a'])
-    check(v.used_vars, ['a'])
+    check(v.used_names, ['a'])
     check(v.unused_vars, [])
 
 
@@ -424,7 +424,7 @@ a = object
 a = False
 """)
     check(v.defined_vars, ['a'] * 5)
-    check(v.used_vars, ['b'])
+    check(v.used_names, ['b'])
     check(v.unused_vars, ['a'])
 
 
@@ -434,7 +434,7 @@ def foo(x, y):
     return x + 1
 """)
     check(v.defined_vars, ['x', 'y'])
-    check(v.used_vars, ['x'])
+    check(v.used_names, ['x'])
     check(v.unused_vars, ['y'])
 
 
@@ -444,7 +444,7 @@ def foo(x, y=3, **kwargs):
     return x + 1
 """)
     check(set(v.defined_vars), set(['kwargs', 'x', 'y']))
-    check(v.used_vars, ['x'])
+    check(v.used_names, ['x'])
     check(v.unused_vars, ['kwargs', 'y'])
 
 
@@ -454,7 +454,7 @@ def foo(**bar):
     pass
 """)
     check(v.defined_vars, ['bar'])
-    check(v.used_vars, [])
+    check(v.used_names, [])
     check(v.unused_vars, ['bar'])
 
 
@@ -464,7 +464,7 @@ def foo(*bar):
     pass
 """)
     check(v.defined_vars, ['bar'])
-    check(v.used_vars, [])
+    check(v.used_names, [])
     check(v.unused_vars, ['bar'])
 
 
