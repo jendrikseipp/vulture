@@ -6,6 +6,7 @@ News
 * Report unused tuple assignments as dead code.
 * Report attribute names that have the same names as variables as dead code.
 * Let Item class inherit from ``object`` (thanks @RJ722).
+* Handle names imported as aliases like all other used variable names.
 
 
 0.19 (2017-07-20)

@@ -29,7 +29,6 @@ def test_double_import(v):
 import foo as bar
 import foo
 """)
-    check(v.names_imported_as_aliases, ['foo'])
     check(v.defined_imports, ['bar', 'foo'])
     # Once the bar import is removed, the foo import will be detected.
     check(v.unused_imports, ['bar'])
@@ -172,7 +171,7 @@ def test_import_alias(v):
     check(v.defined_funcs, ['C'])
     check(v.defined_imports, ['AliasA', 'AliasB', 'AliasC', 'AliasD'])
     check(v.defined_vars, ['D'])
-    check(v.used_vars, [])
+    check(v.used_vars, ['A', 'B', 'C', 'D'])
     check(v.unused_classes, [])
     check(v.unused_funcs, [])
     check(v.unused_imports, ['AliasA', 'AliasB', 'AliasC', 'AliasD'])
@@ -198,7 +197,9 @@ def test_import_alias_use_alias(v):
     check(v.defined_funcs, ['C'])
     check(v.defined_imports, ['AliasA', 'AliasB', 'AliasC', 'AliasD'])
     check(v.defined_vars, ['D'])
-    check(v.used_vars, ['AliasA', 'AliasB', 'AliasC', 'AliasD'])
+    check(
+        v.used_vars,
+        ['A', 'B', 'C', 'D', 'AliasA', 'AliasB', 'AliasC', 'AliasD'])
     check(v.unused_classes, [])
     check(v.unused_funcs, [])
     check(v.unused_imports, [])
