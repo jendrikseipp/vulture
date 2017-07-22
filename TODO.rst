@@ -9,10 +9,9 @@ TODOs
 * Once we drop Python 2.6 compatibility use argparse instead of optparse.
 * Extend whitelist files.
 * Distribute and test vulture wheel file.
-* Use better name for used_attrs.
-* Only count lines for unused code, then always list the number of lines in the output.
+* Only count lines for unused code (by storing the node in Item), then
+  always list the number of lines in the output.
 * If an unused item is defined multiple times, report it multiple times.
-* Rethink which attribute names should be ignored.
 
 
 Non-TODOs
