@@ -51,9 +51,6 @@ IGNORED_VARIABLE_NAMES = ['object', 'self']
 if sys.version_info < (3, 4):
     IGNORED_VARIABLE_NAMES += ['True', 'False']
 
-# Ignore star-imported names, since we cannot detect whether they are used.
-IGNORED_IMPORTS = ["*"]
-
 
 def _get_unused_items(defined_items, used_names):
     used_names = set(used_names)
@@ -76,6 +73,11 @@ def _is_test_file(filename):
 
 def _ignore_class(filename, class_name):
         return _is_test_file(filename) and class_name.startswith('Test')
+
+
+def _ignore_import(_filename, import_name):
+    # Ignore star-imported names, since we can't detect whether they are used.
+    return import_name == '*'
 
 
 def _ignore_function(filename, function_name):
@@ -255,7 +257,7 @@ class Vulture(ast.NodeVisitor):
     def unused_imports(self):
         return _get_unused_items(
             self.defined_imports,
-            self.used_names + self.used_attrs + IGNORED_IMPORTS)
+            self.used_names + self.used_attrs)
 
     @property
     def unused_props(self):
@@ -307,8 +309,13 @@ class Vulture(ast.NodeVisitor):
             # We can't detect when "os.path" is used.
             name = name_and_alias.name.partition('.')[0]
             alias = name_and_alias.asname
-            self.defined_imports.append(
-                Item(alias or name, 'import', self.filename, node.lineno))
+            import_name = alias or name
+            if _ignore_import(self.filename, import_name):
+                self._log(
+                    'Ignoring import {0} due to its name'.format(import_name))
+            else:
+                self.defined_imports.append(
+                    Item(import_name, 'import', self.filename, node.lineno))
             if alias is not None:
                 self.used_names.append(name_and_alias.name)
 

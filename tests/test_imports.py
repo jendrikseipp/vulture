@@ -14,7 +14,7 @@ def test_import_star(v):
 from a import *
 from a.b import *
 """)
-    check(v.defined_imports, ['*', '*'])
+    check(v.defined_imports, [])
     check(v.unused_imports, [])
 
 

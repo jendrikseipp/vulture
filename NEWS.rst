@@ -8,6 +8,7 @@ News
 * Let Item class inherit from ``object`` (thanks @RJ722).
 * Handle names imported as aliases like all other used variable names.
 * Rename used_vars to used_names.
+* Use function for determining which imports to ignore.
 
 
 0.19 (2017-07-20)

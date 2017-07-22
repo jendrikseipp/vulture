@@ -14,7 +14,6 @@ TODOs
   classes.
 * Only count lines for unused code, then always list the number of lines in the output.
 * If an unused item is defined multiple times, report it multiple times.
-  (Item needs to inherit from "object" first).
 * Rethink which attribute names should be ignored.
 * Unify ignore-mechanism. Use decorator for logging? Use _define_* methods?
 
