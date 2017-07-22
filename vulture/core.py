@@ -240,7 +240,7 @@ class Vulture(ast.NodeVisitor):
                            if self.sort_by_size else '')
             print("%s:%d: Unused %s '%s'%s" % (
                 utils.format_path(item.filename), item.lineno, item.typ,
-                item, size_report))
+                item.name, size_report))
             self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
 
