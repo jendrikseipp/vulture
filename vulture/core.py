@@ -46,10 +46,10 @@ ENCODING_REGEX = re.compile(
 # Parse variable names in template strings.
 FORMAT_STRING_PATTERNS = [re.compile(r'\%\((\w+)\)'), re.compile(r'{(\w+)}')]
 
-IGNORED_VARIABLE_NAMES = ['object', 'self']
+IGNORED_VARIABLE_NAMES = set(['object', 'self'])
 # True and False are NameConstants since Python 3.4.
 if sys.version_info < (3, 4):
-    IGNORED_VARIABLE_NAMES += ['True', 'False']
+    IGNORED_VARIABLE_NAMES |= set(['True', 'False'])
 
 
 def _get_unused_items(defined_items, used_names):
