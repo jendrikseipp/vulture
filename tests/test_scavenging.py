@@ -348,6 +348,9 @@ def other_func():
 class TestClass:
     pass
 
+class BasicsTestCase:
+    pass
+
 class OtherClass:
     pass
 """, filename='test_function_names.py')
@@ -373,17 +376,20 @@ def other_func():
 class TestClass:
     pass
 
+class BasicsTestCase:
+    pass
+
 class OtherClass:
     pass
 """)
     check(v.defined_attrs, [])
-    check(v.defined_classes, ['TestClass', 'OtherClass'])
+    check(v.defined_classes, ['TestClass', 'BasicsTestCase', 'OtherClass'])
     check(v.defined_funcs, ['test_func', 'other_func'])
     check(v.defined_vars, [])
     check(v.used_attrs, [])
     check(v.used_names, [])
     check(v.unused_attrs, [])
-    check(v.unused_classes, ['OtherClass', 'TestClass'])
+    check(v.unused_classes, ['OtherClass', 'BasicsTestCase', 'TestClass'])
     check(v.unused_funcs, ['other_func', 'test_func'])
 
 
