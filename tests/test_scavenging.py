@@ -348,7 +348,7 @@ def other_func():
 class TestClass:
     pass
 
-class BasicsTestCase:
+class BasicTestCase:
     pass
 
 class OtherClass:
@@ -383,13 +383,13 @@ class OtherClass:
     pass
 """)
     check(v.defined_attrs, [])
-    check(v.defined_classes, ['TestClass', 'BasicTestCase', 'OtherClass'])
+    check(v.defined_classes, ['BasicTestCase', 'OtherClass', 'TestClass'])
     check(v.defined_funcs, ['test_func', 'other_func'])
     check(v.defined_vars, [])
     check(v.used_attrs, [])
     check(v.used_names, [])
     check(v.unused_attrs, [])
-    check(v.unused_classes, ['OtherClass', 'BasicsTestCase', 'TestClass'])
+    check(v.unused_classes, ['BasicTestCase', 'OtherClass', 'TestClass'])
     check(v.unused_funcs, ['other_func', 'test_func'])
 
 
