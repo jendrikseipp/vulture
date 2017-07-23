@@ -12,6 +12,8 @@ TODOs
 * Only count lines for unused code (by storing the node in Item), then
   always list the number of lines in the output.
 * If an unused item is defined multiple times, report it multiple times.
+* Estimate size not only for classes and functions.
+* Support Python 3.5 async/await (#20).
 
 
 Non-TODOs
