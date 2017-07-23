@@ -67,7 +67,14 @@ def count_lines(node):
 
     Note: A simpler and mor accurate (but probably also slower) strategy
     would be to use ast.walk() to traverse all descendents of node and
-    just record the highest line number seen.
+    just record the highest line number seen:
+
+    max_lineno = max(getattr(node, 'lineno', -1) for node in ast.walk(node))
+
+    This code is 1.6 times slower than the current code on the Python
+    subset of tensorflow. It reports the same sizes for all test cases.
+    We can revisit this once we only compute line numbers for unused
+    code.
 
     """
     return _get_last_line_number(node) - node.lineno + 1
