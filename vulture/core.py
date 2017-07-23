@@ -152,9 +152,10 @@ class Vulture(ast.NodeVisitor):
         try:
             node = ast.parse(code, filename=self.filename)
         except SyntaxError as err:
-            print('%s:%d: %s at "%s"' % (
-                utils.format_path(filename), err.lineno,
-                err.msg, err.text.strip()), file=sys.stderr)
+            text = ' at "{0}"'.format(err.text.strip()) if err.text else ''
+            print('{0}:{1:d}: {2}{3}'.format(
+                utils.format_path(filename), err.lineno, err.msg, text),
+                file=sys.stderr)
             self.found_dead_code_or_error = True
         else:
             self.visit(node)
