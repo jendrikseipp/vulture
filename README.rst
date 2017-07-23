@@ -4,8 +4,8 @@ vulture - Find dead code
 .. image:: https://travis-ci.org/jendrikseipp/vulture.svg?branch=master
    :target: https://travis-ci.org/jendrikseipp/vulture
 
-Vulture finds unused classes, functions and variables in your code.
-This helps you cleanup and find errors in your programs. If you run it
+Vulture finds unused code in Python programs. This is useful for
+cleaning up and finding errors in large code bases. If you run vulture
 on both your library and test suite you can find untested code.
 
 Due to Python's dynamic nature, static code analyzers like vulture are
@@ -39,9 +39,9 @@ Usage
 
 ::
 
-  $ vulture myscript.py
+  $ vulture myscript.py  # or
+  $ python3 -m vulture myscript.py
   $ vulture myscript.py mypackage1/ mypackage2/
-  $ vulture myscript.py whitelists/stdlib.py
   $ vulture myscript.py mywhitelist.py
 
 The provided arguments may be Python files or directories. For each
@@ -53,8 +53,9 @@ it may discover more dead code.
 **Handling false positives**
 
 You can add false positives (used code that is marked as unused) to a
-python module and add it to the list of scanned paths (see
-``whitelists/stdlib.py`` for an example).
+Python module and add it to the list of scanned paths. We collect
+whitelists for common Python modules and packages in
+``vulture/whitelists/``. Pull requests are welcome.
 
 
 How does it work?
