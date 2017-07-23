@@ -391,8 +391,6 @@ class Vulture(ast.NodeVisitor):
             self._log(lineno, ast.dump(node), line)
         if visitor:
             visitor(node)
-        else:
-            self._log('Unhandled')
         return self.generic_visit(node)
 
 
