@@ -67,11 +67,11 @@ def _is_test_file(filename):
     name = os.path.basename(filename)
     return any(
         fnmatchcase(name, pattern)
-        for pattern in ['test_*.py', '*_test.py'])
+        for pattern in ['test*.py', '*_test.py'])
 
 
 def _ignore_class(filename, class_name):
-        return _is_test_file(filename) and class_name.startswith('Test')
+        return _is_test_file(filename) and 'Test' in class_name
 
 
 def _ignore_import(_filename, import_name):
