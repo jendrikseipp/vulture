@@ -121,7 +121,7 @@ class Vulture(ast.NodeVisitor):
         self.sort_by_size = sort_by_size
         for pattern in exclude or []:
             if not any(char in pattern for char in ['*', '?', '[']):
-                pattern = '*%s*' % pattern
+                pattern = '*{0}*'.format(pattern)
             self.exclude.append(pattern)
 
         self.verbose = verbose
@@ -138,6 +138,7 @@ class Vulture(ast.NodeVisitor):
         self.defined_imports = get_list('defined_imports')
         self.defined_props = get_list('defined_props')
         self.defined_vars = get_list('defined_vars')
+
         self.used_attrs = get_set('used_attrs')
         self.used_names = get_set('used_vars')
 
@@ -175,7 +176,7 @@ class Vulture(ast.NodeVisitor):
                     for filename in sorted(os.listdir(path))]
                 modules.extend(self._get_modules(subpaths, toplevel=False))
             elif toplevel:
-                sys.exit('Error: %s could not be found.' % path)
+                sys.exit('Error: {0} could not be found.'.format(path))
         return modules
 
     def scavenge(self, paths):
@@ -237,9 +238,9 @@ class Vulture(ast.NodeVisitor):
         """
         for item in self.get_unused_code():
             line_format = 'line' if item.size == 1 else 'lines'
-            size_report = (' (%d %s)' % (item.size, line_format)
+            size_report = (' ({0:d} {1})'.format(item.size, line_format)
                            if self.sort_by_size else '')
-            print("%s:%d: Unused %s '%s'%s" % (
+            print("{0}:{1:d}: Unused {2} '{3}'{4}".format(
                 utils.format_path(item.filename), item.lineno, item.typ,
                 item.name, size_report))
             self.found_dead_code_or_error = True
@@ -279,7 +280,7 @@ class Vulture(ast.NodeVisitor):
 
     def _get_item(self, node, typ):
         """
-        Return a lighter representation of the ast node ``node`` for
+        Return a lighter representation of the AST node ``node`` for
         later reporting purposes.
         """
         name = getattr(node, 'name', None)  # ast.ClassDef and ast.FunctionDef
