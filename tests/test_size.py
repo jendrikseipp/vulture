@@ -287,7 +287,7 @@ class Foo:
     bar[1:2,
         ...]
 """
-    if sys.version_info < (3, 4):
+    if sys.version_info < (3, 0):
         check_size(example, 2)
     else:
         # ast.Ellipsis is a subclass of ast.expr in Python 3.
