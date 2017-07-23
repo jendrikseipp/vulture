@@ -1,4 +1,5 @@
 import ast
+import sys
 
 import pytest
 
@@ -267,6 +268,30 @@ class Foo:
      b]
 """
     check_size(example, 4)
+
+
+# We currently cannot handle closing brackets on a separate line.
+def test_size_list():
+    example = """
+class Foo:
+    [a, b
+    ]
+"""
+    check_size(example, 2)
+
+
+# We currently cannot handle code ending with an ellipsis on Python 2.
+def test_size_ellipsis():
+    example = """
+class Foo:
+    bar[1:2,
+        ...]
+"""
+    if sys.version_info < (3, 4):
+        check_size(example, 2)
+    else:
+        # ast.Ellipsis is a subclass of ast.expr in Python 3.
+        check_size(example, 3)
 
 
 @skip_if_not_has_async

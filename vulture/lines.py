@@ -33,17 +33,41 @@ def _get_last_child_with_lineno(node):
     return None
 
 
-def get_last_line_number(node):
+def _get_last_line_number(node):
+    """Estimate last line number of the given AST node.
+
+    When traversing the tree, we may see a mix of nodes with line
+    numbers and nodes without line numbers. We therefore, store the
+    maximum line number seen so far and report it at the end. A more
+    accurate (but also slower to compute) estimate would traverse all
+    children, instead of just the last one, since choosing the last one
+    may lead to a path that ends with a node without line number.
+
+    """
+    max_lineno = node.lineno
     while True:
         last_child = _get_last_child_with_lineno(node)
         if last_child is None:
-            return node.lineno
+            return max_lineno
+        else:
+            try:
+                max_lineno = max(max_lineno, last_child.lineno)
+            except AttributeError:
+                pass
         node = last_child
 
 
 def count_lines(node):
     """
-    Note: This function underestimates the size of code ending with multiline
-    strings and comments.
+    Estimate the number of lines of the given AST node.
+
+    The estimate is based on the line number of the last descendent of
+    `node` that has a lineno attribute. Therefore, it underestimates the
+    size of code ending with, e.g., multiline strings and comments.
+
+    Note: A simpler and mor accurate (but probably also slower) strategy
+    would be to use ast.walk() to traverse all descendents of node and
+    just record the highest line number seen.
+
     """
-    return get_last_line_number(node) - node.lineno + 1
+    return _get_last_line_number(node) - node.lineno + 1

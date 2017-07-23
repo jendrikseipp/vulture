@@ -11,6 +11,7 @@ News
 * Use function for determining which imports to ignore.
 * Only try to import each whitelist file once.
 * Store used names and used attributes as plain strings in sets instead of lists.
+* Fix estimating the size of code containing ellipses (...).
 
 
 0.19 (2017-07-20)
