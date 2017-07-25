@@ -7,7 +7,7 @@ python:
 - '3.5'
 - '3.6'
 - 3.7-dev
-- pypy
+- pypy2-5.8.0
 
 matrix:
   fast_finish: true
