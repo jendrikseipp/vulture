@@ -308,8 +308,8 @@ class Vulture(ast.NodeVisitor):
             if alias is not None:
                 self.used_names.add(name_and_alias.name)
 
-    def _define_item(self, item, collection, ignore):
-        if ignore(self.filename, item.name):
+    def _define_item(self, item, collection, ignore=None):
+        if ignore and ignore(self.filename, item.name):
             self._log('Ignoring {0.typ} {0.name} due to its name'.format(item))
         else:
             collection.append(item)
@@ -331,7 +331,8 @@ class Vulture(ast.NodeVisitor):
 
     def visit_Attribute(self, node):
         if isinstance(node.ctx, ast.Store):
-            self.defined_attrs.append(self._get_item(node, 'attribute'))
+            self._define_item(
+                self._get_item(node, 'attribute'), self.defined_attrs)
         elif isinstance(node.ctx, ast.Load):
             self.used_attrs.add(node.attr)
 
@@ -342,7 +343,8 @@ class Vulture(ast.NodeVisitor):
     def visit_FunctionDef(self, node):
         for decorator in node.decorator_list:
             if getattr(decorator, 'id', None) == 'property':
-                self.defined_props.append(self._get_item(node, 'property'))
+                self._define_item(
+                    self._get_item(node, 'property'), self.defined_props)
                 break
         else:
             # Function is not a property.
