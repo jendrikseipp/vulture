@@ -117,7 +117,7 @@ class Item(object):
 class Vulture(ast.NodeVisitor):
     """Find dead code."""
     def __init__(self, exclude=None, verbose=False, sort_by_size=False):
-        self.exclude = []
+        self.exclude = ['*settings.py', '*conf.py']
         self.sort_by_size = sort_by_size
         for pattern in exclude or []:
             if not any(char in pattern for char in ['*', '?', '[']):
