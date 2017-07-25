@@ -38,24 +38,24 @@ def read_file(filename):
 
 
 class LoggingList(list):
-    def __init__(self, name, verbose):
-        self._name = name
+    def __init__(self, typ, verbose):
+        self._typ = typ
         self._verbose = verbose
         return list.__init__(self)
 
     def append(self, item):
         if self._verbose:
-            print('{0} <- {1}'.format(self._name, item))
+            print('define {0} "{1}"'.format(self._typ, item.name))
         list.append(self, item)
 
 
 class LoggingSet(set):
-    def __init__(self, name, verbose):
-        self._name = name
+    def __init__(self, typ, verbose):
+        self._typ = typ
         self._verbose = verbose
         return set.__init__(self)
 
-    def add(self, item):
+    def add(self, name):
         if self._verbose:
-            print('{0} <- {1}'.format(self._name, item))
-        set.add(self, item)
+            print('use {0} "{1}"'.format(self._typ, name))
+        set.add(self, name)

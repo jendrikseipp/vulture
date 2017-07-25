@@ -126,21 +126,21 @@ class Vulture(ast.NodeVisitor):
 
         self.verbose = verbose
 
-        def get_list(name):
-            return utils.LoggingList(name, self.verbose)
+        def get_list(typ):
+            return utils.LoggingList(typ, self.verbose)
 
-        def get_set(name):
-            return utils.LoggingSet(name, self.verbose)
+        def get_set(typ):
+            return utils.LoggingSet(typ, self.verbose)
 
-        self.defined_attrs = get_list('defined_attrs')
-        self.defined_classes = get_list('defined_classes')
-        self.defined_funcs = get_list('defined_funcs')
-        self.defined_imports = get_list('defined_imports')
-        self.defined_props = get_list('defined_props')
-        self.defined_vars = get_list('defined_vars')
+        self.defined_attrs = get_list('attribute')
+        self.defined_classes = get_list('class')
+        self.defined_funcs = get_list('function')
+        self.defined_imports = get_list('import')
+        self.defined_props = get_list('property')
+        self.defined_vars = get_list('variable')
 
-        self.used_attrs = get_set('used_attrs')
-        self.used_names = get_set('used_vars')
+        self.used_attrs = get_set('attribute')
+        self.used_names = get_set('name')
 
         self.filename = ''
         self.code = []
@@ -301,14 +301,14 @@ class Vulture(ast.NodeVisitor):
             # We can't detect when "os.path" is used.
             name = name_and_alias.name.partition('.')[0]
             alias = name_and_alias.asname
-            self._define_item(
+            self._define(
                 Item(alias or name, 'import', self.filename, node.lineno),
                 self.defined_imports,
                 _ignore_import)
             if alias is not None:
                 self.used_names.add(name_and_alias.name)
 
-    def _define_item(self, item, collection, ignore=None):
+    def _define(self, item, collection, ignore=None):
         if ignore and ignore(self.filename, item.name):
             self._log('Ignoring {0.typ} {0.name} due to its name'.format(item))
         else:
@@ -316,7 +316,7 @@ class Vulture(ast.NodeVisitor):
 
     def _define_variable(self, name, lineno):
         item = Item(name, 'variable', self.filename, lineno)
-        self._define_item(item, self.defined_vars, _ignore_variable)
+        self._define(item, self.defined_vars, _ignore_variable)
 
     def visit_alias(self, node):
         """
@@ -331,24 +331,23 @@ class Vulture(ast.NodeVisitor):
 
     def visit_Attribute(self, node):
         if isinstance(node.ctx, ast.Store):
-            self._define_item(
-                self._get_item(node, 'attribute'), self.defined_attrs)
+            self._define(self._get_item(node, 'attribute'), self.defined_attrs)
         elif isinstance(node.ctx, ast.Load):
             self.used_attrs.add(node.attr)
 
     def visit_ClassDef(self, node):
-        self._define_item(
+        self._define(
             self._get_item(node, 'class'), self.defined_classes, _ignore_class)
 
     def visit_FunctionDef(self, node):
         for decorator in node.decorator_list:
             if getattr(decorator, 'id', None) == 'property':
-                self._define_item(
+                self._define(
                     self._get_item(node, 'property'), self.defined_props)
                 break
         else:
             # Function is not a property.
-            self._define_item(
+            self._define(
                 self._get_item(node, 'function'),
                 self.defined_funcs,
                 _ignore_function)
