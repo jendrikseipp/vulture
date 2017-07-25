@@ -407,9 +407,13 @@ analyzes all contained *.py files.
     version = "vulture {0}".format(__version__)
     parser = optparse.OptionParser(usage=usage, version=version)
     parser.add_option(
-        '--exclude', action='callback', callback=csv,
+        '--exclude', action='callback', callback=csv, metavar='PATTERN',
         type='string', default=[],
-        help='Comma-separated list of paths to ignore (e.g. .svn,external)')
+        help=(
+            'Comma-separated list of paths to ignore (e.g.,'
+            ' *settings.py,docs/*.py). PATTERNs can contain globbing'
+            ' characters (*, ?, [, ]). Treat PATTERNs without globbing'
+            ' characters as *PATTERN*.'))
     parser.add_option(
         "--sort-by-size", action="store_true",
         help="Sort unused functions and classes by their lines of code")
