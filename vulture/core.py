@@ -97,6 +97,9 @@ def _ignore_variable(filename, varname):
 
 
 class Item(object):
+    """
+    Hold the name, type and location of defined code.
+    """
     def __init__(self, name, typ, filename, lineno, size=1):
         self.name = name
         self.typ = typ
@@ -278,18 +281,6 @@ class Vulture(ast.NodeVisitor):
     def unused_attrs(self):
         return _get_unused_items(self.defined_attrs, self.used_attrs)
 
-    def _get_item(self, node, typ):
-        """
-        Return a lighter representation of the AST node ``node`` for
-        later reporting purposes.
-        """
-        name = getattr(node, 'name', None)  # ast.ClassDef and ast.FunctionDef
-        attr = getattr(node, 'attr', None)  # ast.Attribute
-        assert bool(name) ^ bool(attr), (typ, dir(node))
-        size = lines.count_lines(node) if self.sort_by_size else 1
-        label = name or attr
-        return Item(label, typ, self.filename, node.lineno, size)
-
     def _log(self, *args):
         if self.verbose:
             print(*args)
@@ -302,21 +293,21 @@ class Vulture(ast.NodeVisitor):
             name = name_and_alias.name.partition('.')[0]
             alias = name_and_alias.asname
             self._define(
-                Item(alias or name, 'import', self.filename, node.lineno),
-                self.defined_imports,
-                _ignore_import)
+                self.defined_imports, alias or name, node.lineno,
+                ignore=_ignore_import)
             if alias is not None:
                 self.used_names.add(name_and_alias.name)
 
-    def _define(self, item, collection, ignore=None):
-        if ignore and ignore(self.filename, item.name):
-            self._log('Ignoring {0.typ} {0.name} due to its name'.format(item))
+    def _define(self, collection, name, lineno, size=1, ignore=None):
+        typ = collection.typ
+        if ignore and ignore(self.filename, name):
+            self._log('Ignoring {typ} "{name}"'.format(**locals()))
         else:
-            collection.append(item)
+            collection.append(
+                Item(name, typ, self.filename, lineno, size=size))
 
     def _define_variable(self, name, lineno):
-        item = Item(name, 'variable', self.filename, lineno)
-        self._define(item, self.defined_vars, _ignore_variable)
+        self._define(self.defined_vars, name, lineno, ignore=_ignore_variable)
 
     def visit_alias(self, node):
         """
@@ -331,26 +322,29 @@ class Vulture(ast.NodeVisitor):
 
     def visit_Attribute(self, node):
         if isinstance(node.ctx, ast.Store):
-            self._define(self._get_item(node, 'attribute'), self.defined_attrs)
+            size = lines.count_lines(node) if self.sort_by_size else 1
+            self._define(self.defined_attrs, node.attr, node.lineno, size=size)
         elif isinstance(node.ctx, ast.Load):
             self.used_attrs.add(node.attr)
 
     def visit_ClassDef(self, node):
+        size = lines.count_lines(node) if self.sort_by_size else 1
         self._define(
-            self._get_item(node, 'class'), self.defined_classes, _ignore_class)
+            self.defined_classes, node.name, node.lineno,
+            size=size, ignore=_ignore_class)
 
     def visit_FunctionDef(self, node):
+        size = lines.count_lines(node) if self.sort_by_size else 1
         for decorator in node.decorator_list:
             if getattr(decorator, 'id', None) == 'property':
                 self._define(
-                    self._get_item(node, 'property'), self.defined_props)
+                    self.defined_props, node.name, node.lineno, size=size)
                 break
         else:
             # Function is not a property.
             self._define(
-                self._get_item(node, 'function'),
-                self.defined_funcs,
-                _ignore_function)
+                self.defined_funcs, node.name, node.lineno, size=size,
+                ignore=_ignore_function)
 
         # Detect *args and **kwargs parameters. Python 3 recognizes them
         # in visit_Name. For Python 2 we use this workaround. We can't
