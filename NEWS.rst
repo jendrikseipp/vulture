@@ -1,7 +1,7 @@
 News
 ====
 
-0.20 (unreleased)
+0.20 (2017-07-26)
 -----------------
 * Report unused tuple assignments as dead code.
 * Report attribute names that have the same names as variables as dead code.
@@ -10,7 +10,7 @@ News
 * Rename Vulture.used_vars to Vulture.used_names.
 * Use function for determining which imports to ignore.
 * Only try to import each whitelist file once.
-* Store used names and used attributes as plain strings in sets instead of lists.
+* Store used names and used attributes in sets instead of lists.
 * Fix estimating the size of code containing ellipses (...).
 * Refactor and simplify code.
 
