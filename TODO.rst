@@ -7,7 +7,6 @@ TODOs
 * Parse all variable names in new format strings (vars with special formatting, etc.).
   Use string.Formatter.parse for this.
 * Once we drop Python 2.6 compatibility use argparse instead of optparse.
-* Extend whitelist files.
 * Only count lines for unused code (by storing the node in Item), then
   always list the number of lines in the output.
 * Estimate size for all types of code.
