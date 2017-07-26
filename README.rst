@@ -1,17 +1,17 @@
-vulture - Find dead code
+Vulture - Find dead code
 ========================
 
 .. image:: https://travis-ci.org/jendrikseipp/vulture.svg?branch=master
    :target: https://travis-ci.org/jendrikseipp/vulture
 
 Vulture finds unused code in Python programs. This is useful for
-cleaning up and finding errors in large code bases. If you run vulture
+cleaning up and finding errors in large code bases. If you run Vulture
 on both your library and test suite you can find untested code.
 
-Due to Python's dynamic nature, static code analyzers like vulture are
-likely to miss some dead code. Also, code that is only called
-implicitly may be reported as unused. Nonetheless, vulture can be a
-very helpful tool for higher code quality.
+Due to Python's dynamic nature, static code analyzers like Vulture are
+likely to miss some dead code. Also, code that is only called implicitly
+may be reported as unused. Nonetheless, Vulture can be a very helpful
+tool for higher code quality.
 
 
 Features
@@ -45,9 +45,9 @@ Usage
   $ vulture myscript.py mywhitelist.py
 
 The provided arguments may be Python files or directories. For each
-directory vulture analyzes all contained `*.py` files.
+directory Vulture analyzes all contained `*.py` files.
 
-After you have found and deleted dead code, run vulture again, because
+After you have found and deleted dead code, run Vulture again, because
 it may discover more dead code.
 
 **Handling false positives**
@@ -72,7 +72,7 @@ only on object names.
 Sort by size
 ------------
 
-When using the ``--sort-by-size`` option, vulture sorts unused classes
+When using the ``--sort-by-size`` option, Vulture sorts unused classes
 and functions by their lines of code. This helps developers prioritize
 where to look for dead code first.
 
@@ -80,7 +80,7 @@ where to look for dead code first.
 Similar programs
 ----------------
 
-* vulture can be used together with *pyflakes*
+* Vulture can be used together with *pyflakes*
 * The *coverage* module can find unused code more reliably, but requires
   all branches of the code to actually be run.
 
