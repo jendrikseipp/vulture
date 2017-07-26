@@ -26,6 +26,7 @@ git commit -am "Update version number to ${VERSION} for release."
 git tag -a "v$VERSION" -m "v$VERSION" HEAD
 
 python setup.py sdist upload
+python setup.py bdist_wheel upload
 
 git push
 git push --tags
