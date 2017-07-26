@@ -2,11 +2,15 @@ version: 1.0.{build}
 
 install:
 - cmd: pip install tox
+- cmd: pip install -U pip setuptools
+- cmd: pip install wheel
 
 build_script:
-- cmd: pip install .
+- cmd: python setup.py bdist_wheel
+- cmd: pip install --use-wheel --no-index --find-links=dist/ vulture
 
 test_script:
+- cmd: vulture vulture/ tests/
 - cmd: tox
 
 matrix:
