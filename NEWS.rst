@@ -1,10 +1,11 @@
 News
 ====
 
-0.21 (unreleased)
+0.21 (2917-07-26)
 -----------------
 * If an unused item is defined multiple times, report it multiple times.
 * Make size estimates for function calls more accurate.
+* Create wheel files for Vulture (thanks @RJ722).
 
 
 0.20 (2017-07-26)
