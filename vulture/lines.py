@@ -16,7 +16,11 @@ def _get_last_child_with_lineno(node):
 
     """
     ignored_fields = set(['ctx', 'decorator_list', 'names', 'returns'])
-    for name in reversed(node._fields):
+    fields = node._fields
+    # The fields of ast.Call are in the wrong order.
+    if isinstance(node, ast.Call):
+        fields = ('func', 'args', 'starargs', 'keywords', 'kwargs')
+    for name in reversed(fields):
         if name in ignored_fields:
             continue
 
@@ -61,20 +65,28 @@ def count_lines(node):
     """
     Estimate the number of lines of the given AST node.
 
-    The estimate is based on the line number of the last descendent of
+    The estimate is based on the line number of the last descendant of
     `node` that has a lineno attribute. Therefore, it underestimates the
     size of code ending with, e.g., multiline strings and comments.
 
-    Note: A simpler and mor accurate (but probably also slower) strategy
-    would be to use ast.walk() to traverse all descendents of node and
-    just record the highest line number seen:
-
-    max_lineno = max(getattr(node, 'lineno', -1) for node in ast.walk(node))
-
-    This code is 1.6 times slower than the current code on the Python
-    subset of tensorflow. It reports the same sizes for all test cases.
-    We can revisit this once we only compute line numbers for unused
-    code.
-
     """
     return _get_last_line_number(node) - node.lineno + 1
+
+
+#  def count_lines_slow(node):
+#      """
+#      A simpler and possibly more accurate (but also slower) version of
+#      count_lines().
+#
+#      It traverses all descendants of node and records the highest line
+#      number seen.
+#
+#      This code is 1.6 times slower than count_lines() on the Python
+#      subset of tensorflow. It reports the same sizes for all test cases
+#      and the functions and classes in tensorflow. We can think about
+#      using the simpler version once we only compute line numbers for
+#      unused code.
+#
+#      """
+#      max_lineno = max(getattr(node, 'lineno', -1) for node in ast.walk(node))
+#      return max_lineno - node.lineno + 1

@@ -4,6 +4,7 @@ News
 0.21 (unreleased)
 -----------------
 * If an unused item is defined multiple times, report it multiple times.
+* Make size estimates for function calls more accurate.
 
 
 0.20 (2017-07-26)

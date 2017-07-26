@@ -294,6 +294,16 @@ class Foo:
         check_size(example, 3)
 
 
+def test_size_starargs():
+    example = """
+class Foo:
+    def foo():
+        bar(*a,
+            b=c)
+"""
+    check_size(example, 4)
+
+
 @skip_if_not_has_async
 def test_size_async_function_def():
     example = """
