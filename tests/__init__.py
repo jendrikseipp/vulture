@@ -4,4 +4,6 @@ def check(items_or_names, expected_names):
         assert items_or_names == set(expected_names)
     else:
         # items_or_names is a list of Item objects.
-        assert set(item.name for item in items_or_names) == set(expected_names)
+        names = sorted(item.name for item in items_or_names)
+        expected_names = sorted(expected_names)
+        assert names == expected_names

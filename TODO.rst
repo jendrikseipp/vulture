@@ -11,7 +11,6 @@ TODOs
 * Distribute and test vulture wheel file.
 * Only count lines for unused code (by storing the node in Item), then
   always list the number of lines in the output.
-* If an unused item is defined multiple times, report it multiple times.
 * Estimate size for all types of code.
   * Use Assign instead of Name AST nodes for estimating the size of assignments.
 * Support Python 3.5 async/await (#20).

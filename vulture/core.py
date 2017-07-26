@@ -107,14 +107,17 @@ class Item(object):
         self.lineno = lineno
         self.size = size
 
+    def _tuple(self):
+        return (self.filename, self.lineno, self.name)
+
     def __repr__(self):
         return repr(self.name)
 
     def __eq__(self, other):
-        return self.name == other.name
+        return self._tuple() == other._tuple()
 
     def __hash__(self):
-        return hash(self.name)
+        return hash(self._tuple())
 
 
 class Vulture(ast.NodeVisitor):

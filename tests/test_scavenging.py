@@ -91,7 +91,7 @@ foo.bar = 2
     check(v.defined_funcs, [])
     check(v.defined_attrs, ['bar', 'bar'])
     check(v.used_attrs, [])
-    check(v.unused_attrs, ['bar'])
+    check(v.unused_attrs, ['bar', 'bar'])
 
 
 def test_ignored_attributes(v):
@@ -431,7 +431,7 @@ a = False
 """)
     check(v.defined_vars, ['a'] * 5)
     check(v.used_names, ['b'])
-    check(v.unused_vars, ['a'])
+    check(v.unused_vars, ['a'] * 5)
 
 
 def test_unused_args(v):
@@ -489,3 +489,13 @@ def test_encoding2(v):
 pass
 """)
     assert True
+
+
+def test_multiple_definition(v):
+    v.scan("""\
+a = 1
+a = 2
+""")
+    check(v.defined_vars, ['a', 'a'])
+    check(v.used_names, [])
+    check(v.unused_vars, ['a', 'a'])
