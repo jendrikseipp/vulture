@@ -1,7 +1,12 @@
 News
 ====
 
-0.21 (2917-07-26)
+0.22 (unreleased)
+-----------------
+* Extend ast whitelist.
+
+
+0.21 (2017-07-26)
 -----------------
 * If an unused item is defined multiple times, report it multiple times.
 * Make size estimates for function calls more accurate.
