@@ -3,6 +3,7 @@ News
 
 0.22 (unreleased)
 -----------------
+* Parse all variable names in new format strings.
 * Extend ast whitelist.
 
 

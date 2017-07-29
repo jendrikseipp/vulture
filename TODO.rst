@@ -4,8 +4,6 @@ TODOs
 * Detect unreachable code à la `if False:` (try to evaluate condition).
 * Detect dead code after return statements (check if there are AST nodes
   after an ast.Return node in the same list of AST nodes).
-* Parse all variable names in new format strings (vars with special formatting, etc.).
-  Use string.Formatter.parse for this.
 * Once we drop Python 2.6 compatibility use argparse instead of optparse.
 * Only count lines for unused code (by storing the node in Item), then
   always list the number of lines in the output.

@@ -32,6 +32,7 @@ import optparse
 import os
 import pkgutil
 import re
+import string
 import sys
 
 from vulture import lines
@@ -44,7 +45,7 @@ ENCODING_REGEX = re.compile(
     r"^[ \t\v]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+).*?$", flags=re.M)
 
 # Parse variable names in template strings.
-FORMAT_STRING_PATTERNS = [re.compile(r'\%\((\w+)\)'), re.compile(r'{(\w+)}')]
+FORMAT_STRING_PATTERNS = [re.compile(r'\%\((\w+)\)')]
 
 IGNORED_VARIABLE_NAMES = set(['object', 'self'])
 # True and False are NameConstants since Python 3.4.
@@ -372,14 +373,20 @@ class Vulture(ast.NodeVisitor):
 
     def visit_Str(self, node):
         """
-        Variables may appear in format strings:
+        Parse variable names in format strings:
 
         '%(my_var)s' % locals()
         '{my_var}'.format(**locals())
 
         """
+        # Old format strings.
         for pattern in FORMAT_STRING_PATTERNS:
             self.used_names |= set(pattern.findall(node.s))
+
+        # New format strings.
+        for _, field_name, _, _ in string.Formatter().parse(node.s):
+            if field_name and field_name:
+                self.used_names.add(field_name)
 
     def visit(self, node):
         method = 'visit_' + node.__class__.__name__
