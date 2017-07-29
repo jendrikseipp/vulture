@@ -2,8 +2,8 @@ TODOs
 =====
 
 * Detect unreachable code à la `if False:` (try to evaluate condition).
-* Detect dead code after return statements (when visiting a function
-  definition, check if there are AST nodes after a return AST node).
+* Detect dead code after return statements (check if there are AST nodes
+  after an ast.Return node in the same list of AST nodes).
 * Parse all variable names in new format strings (vars with special formatting, etc.).
   Use string.Formatter.parse for this.
 * Once we drop Python 2.6 compatibility use argparse instead of optparse.

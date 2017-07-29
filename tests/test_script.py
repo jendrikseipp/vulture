@@ -64,4 +64,8 @@ def test_version():
 
 
 def test_module():
-    assert call_vulture(['vulture']) == 0
+    assert call_vulture(['vulture/']) == 0
+
+
+def test_sort_by_size():
+    assert call_vulture(['vulture/', '--sort-by-size']) == 0

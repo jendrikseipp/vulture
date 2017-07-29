@@ -68,4 +68,3 @@ whitelist_node_visitor.visit_arg
 whitelist_node_visitor.visit_arguments
 whitelist_node_visitor.visit_comprehension
 whitelist_node_visitor.visit_keyword
-
