@@ -1,12 +1,4 @@
-import pytest
-from vulture import Vulture
-
-from . import check
-
-
-@pytest.fixture
-def v():
-    return Vulture(verbose=True)
+from . import check, v
 
 
 def test_import_star(v):

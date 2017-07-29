@@ -1,3 +1,11 @@
+import pytest
+from vulture import Vulture
+
+@pytest.fixture
+def v():
+    return Vulture(verbose=True)
+
+
 def check(items_or_names, expected_names):
     if isinstance(items_or_names, set):
         # items_or_names is a set of strings.
