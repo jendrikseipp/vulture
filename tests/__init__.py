@@ -1,6 +1,7 @@
 import pytest
 from vulture import Vulture
 
+
 @pytest.fixture
 def v():
     return Vulture(verbose=True)

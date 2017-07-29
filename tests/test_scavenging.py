@@ -1,4 +1,5 @@
 from . import check, v
+assert v  # Silence pyflakes.
 
 
 def test_function_object1(v):

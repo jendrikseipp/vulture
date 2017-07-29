@@ -1,4 +1,5 @@
 from . import v
+assert v  # Silence pyflakes.
 
 
 def test_syntax_error(v):
