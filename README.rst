@@ -58,6 +58,12 @@ Python modules and packages in ``vulture/whitelists/`` (pull requests
 are welcome). If you want to ignore a whole file or directory, use the
 ``--exclude`` parameter (e.g., ``-exclude *settings.py,docs/``).
 
+**Marking unused variables**
+
+There are situations where you can't just remove unused variables, e.g.,
+in tuple assignments or function signatures. Vulture will ignore these
+variables if they start with an underscore (e.g., ``_x, y = get_pos()``).
+
 
 How does it work?
 -----------------
