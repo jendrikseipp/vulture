@@ -15,3 +15,9 @@ def test_new_format_string(v):
 def test_new_format_string_access(v):
     v.scan("'{a.b}, {c.d.e} {f[g]} {h[i][j]}'.format(**locals())")
     check(v.used_names, ['a', 'c', 'f', 'h', 'locals'])
+
+
+def test_new_format_string_attributes(v):
+    v.scan("'{a.b}, {c.d.e} {f[g]} {h[i][j].k}'.format(**locals())")
+    check(v.used_names, ['a', 'c', 'f', 'h', 'locals'])
+    check(v.used_attrs, ['b', 'd', 'e', 'k', 'format'])

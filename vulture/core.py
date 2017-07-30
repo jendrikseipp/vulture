@@ -386,10 +386,11 @@ class Vulture(ast.NodeVisitor):
         # New format strings.
         for _, field_name, _, _ in string.Formatter().parse(node.s):
             if field_name:
-                # a.b[c].d -> a
-                identifier_regex = re.compile('[a-zA-Z_][a-zA-Z0-9_]*')
-                name = identifier_regex.match(field_name).group(0)
-                self.used_names.add(name)
+                # Remove brackets and contents: "a[0][b].c[d].e" -> "a.c.e".
+                # "a.b.c" -> name = "a", attributes = ["b", "c"]
+                name_and_attrs = re.sub(r'\[\w*\]', '', field_name).split('.')
+                self.used_names.add(name_and_attrs[0])
+                self.used_attrs |= set(name_and_attrs[1:])
 
     def visit(self, node):
         method = 'visit_' + node.__class__.__name__
