@@ -11,6 +11,7 @@ TODOs
   Item for computing the size on demand. Then always list the number of
   lines in the output.
 * Support Python 3.5 async/await (#20).
+* Add confidence values to Items and ``--min-confidence`` flag.
 
 
 Non-TODOs
