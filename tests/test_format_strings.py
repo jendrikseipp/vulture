@@ -27,3 +27,10 @@ def test_new_format_string_numbers(v):
     v.scan("'{0.b}, {0.d.e} {0[1]} {0[1][1].k}'.format('foo')")
     check(v.used_names, [])
     check(v.used_attrs, ['b', 'd', 'e', 'k', 'format'])
+
+
+def test_incorrect_format_string(v):
+    v.scan('"{"')
+    v.scan('"{!-a:}"')
+    check(v.used_names, [])
+    check(v.used_attrs, [])
