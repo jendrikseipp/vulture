@@ -44,9 +44,6 @@ __version__ = '0.21'
 ENCODING_REGEX = re.compile(
     r"^[ \t\v]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+).*?$", flags=re.M)
 
-# Parse variable names in template strings.
-FORMAT_STRING_PATTERNS = [re.compile(r'\%\((\w+)\)')]
-
 IGNORED_VARIABLE_NAMES = set(['object', 'self'])
 # True and False are NameConstants since Python 3.4.
 if sys.version_info < (3, 4):
@@ -380,8 +377,7 @@ class Vulture(ast.NodeVisitor):
 
         """
         # Old format strings.
-        for pattern in FORMAT_STRING_PATTERNS:
-            self.used_names |= set(pattern.findall(node.s))
+        self.used_names |= set(re.findall(r'\%\((\w+)\)', node.s))
 
         def is_identifier(s):
             return bool(re.match(r'[a-zA-Z_][a-zA-Z0-9_]*', s))
