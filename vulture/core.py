@@ -241,9 +241,12 @@ class Vulture(ast.NodeVisitor):
         Print ordered list of Item objects to stdout.
         """
         for item in self.get_unused_code():
-            line_format = 'line' if item.size == 1 else 'lines'
-            size_report = (' ({0:d} {1})'.format(item.size, line_format)
-                           if self.sort_by_size else '')
+            if self.sort_by_size:
+                line_format = 'line' if item.size == 1 else 'lines'
+                size_report = ' ({0:d} {1})'.format(item.size, line_format)
+            else:
+                size_report = ''
+
             print("{0}:{1:d}: Unused {2} '{3}'{4}".format(
                 utils.format_path(item.filename), item.lineno, item.typ,
                 item.name, size_report))
