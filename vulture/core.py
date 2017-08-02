@@ -98,12 +98,14 @@ class Item(object):
     """
     Hold the name, type and location of defined code.
     """
-    def __init__(self, name, typ, filename, lineno, size=1):
+    def __init__(self, name, typ, filename, lineno, size=1, message=''):
         self.name = name
         self.typ = typ
         self.filename = filename
         self.lineno = lineno
         self.size = size
+        self.message = (message if message else
+                        "Unused {typ} '{name}'".format(**locals()))
 
     def _tuple(self):
         return (self.filename, self.lineno, self.name)
@@ -142,7 +144,7 @@ class Vulture(ast.NodeVisitor):
         self.defined_imports = get_list('import')
         self.defined_props = get_list('property')
         self.defined_vars = get_list('variable')
-        self.code_after_return = get_list('code after return')
+        self.unreachable_code = get_list('unreachable code')
 
         self.used_attrs = get_set('attribute')
         self.used_names = get_set('name')
@@ -222,7 +224,7 @@ class Vulture(ast.NodeVisitor):
                 module_string = module_data.decode("utf-8")
                 self.scan(module_string, filename=path)
 
-    def get_dead_code(self):
+    def get_unused_code(self):
         """
         Return ordered list of unused Item objects.
         """
@@ -232,29 +234,25 @@ class Vulture(ast.NodeVisitor):
         def by_name(item):
             return (item.filename.lower(), item.lineno)
 
-        unused_code = (self.unused_attrs + self.unused_classes +
-                       self.unused_funcs + self.unused_imports +
-                       self.unused_props + self.unused_vars)
-        unreachable_code = self.code_after_return
-
-        return sorted(unused_code + unreachable_code,
-                      key=by_size if self.sort_by_size else by_name)
+        return sorted(
+                self.unused_attrs + self.unused_classes + self.unused_funcs +
+                self.unused_imports + self.unused_props + self.unused_vars +
+                self.unreachable_code, key=by_size if self.sort_by_size
+                else by_name)
 
     def report(self):
         """
         Print ordered list of Item objects to stdout.
         """
-        for item in self.get_dead_code():
+        for item in self.get_unused_code():
             if self.sort_by_size:
                 line_format = 'line' if item.size == 1 else 'lines'
                 size_report = ' ({0:d} {1})'.format(item.size, line_format)
             else:
                 size_report = ''
-            name_report = ("'{0}'".format(item.name) if item.name != ''
-                           else "")
-            print("{0}:{1:d}: Unused {2} {3}{4}".format(
-                utils.format_path(item.filename), item.lineno, item.typ,
-                name_report, size_report))
+            print("{0}:{1:d}: {2}{3}".format(
+                utils.format_path(item.filename), item.lineno, item.message,
+                size_report))
             self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
 
@@ -307,13 +305,15 @@ class Vulture(ast.NodeVisitor):
             if alias is not None:
                 self.used_names.add(name_and_alias.name)
 
-    def _define(self, collection, name, lineno, size=1, ignore=None):
+    def _define(self, collection, name, lineno, size=1, message='',
+                ignore=None):
         typ = collection.typ
         if ignore and ignore(self.filename, name):
             self._log('Ignoring {typ} "{name}"'.format(**locals()))
         else:
             collection.append(
-                Item(name, typ, self.filename, lineno, size=size))
+                Item(name, typ, self.filename, lineno, size=size,
+                     message=message))
 
     def _define_variable(self, name, lineno):
         self._define(self.defined_vars, name, lineno, ignore=_ignore_variable)
@@ -420,27 +420,31 @@ class Vulture(ast.NodeVisitor):
             visitor(node)
         return self.generic_visit(node)
 
-    def _handle_ast_list(self, ast_list, parent_node):
+    def _handle_ast_list(self, ast_list):
+        """
+        Iterates over the given list of ast nodes and finds unreachable code,
+        like any code after return statemnts.
+        """
         for index, node in enumerate(ast_list):
             if isinstance(node, ast.Return):
                 try:
                     first_unreachable_node = ast_list[index + 1]
                 except IndexError:
-                    pass
-                else:
-                    self._define(
-                        self.code_after_return,
-                        '',
-                        first_unreachable_node.lineno,
-                        size=(
-                            lines._get_last_line_number(ast_list[-1]) -
-                            first_unreachable_node.lineno + 1))
+                    continue
+                self._define(
+                    self.unreachable_code,
+                    'return',
+                    first_unreachable_node.lineno,
+                    size=(
+                        lines._get_last_line_number(ast_list[-1]) -
+                        first_unreachable_node.lineno + 1),
+                    message='Unreachable code after return statement')
 
     def generic_visit(self, node):
         """Called if no explicit visitor function exists for a node."""
-        for field, value in ast.iter_fields(node):
+        for _, value in ast.iter_fields(node):
             if isinstance(value, list):
-                self._handle_ast_list(value, node)
+                self._handle_ast_list(value)
                 for item in value:
                     if isinstance(item, ast.AST):
                         self.visit(item)
