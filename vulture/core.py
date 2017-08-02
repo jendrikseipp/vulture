@@ -142,7 +142,7 @@ class Vulture(ast.NodeVisitor):
         self.defined_imports = get_list('import')
         self.defined_props = get_list('property')
         self.defined_vars = get_list('variable')
-        self.code_after_return = get_list('code_after_return')
+        self.code_after_return = get_list('code after return')
 
         self.used_attrs = get_set('attribute')
         self.used_names = get_set('name')
@@ -244,16 +244,17 @@ class Vulture(ast.NodeVisitor):
         """
         Print ordered list of Item objects to stdout.
         """
-        for item in self.get_unused_code():
+        for item in self.get_dead_code():
             if self.sort_by_size:
                 line_format = 'line' if item.size == 1 else 'lines'
                 size_report = ' ({0:d} {1})'.format(item.size, line_format)
             else:
                 size_report = ''
-
-            print("{0}:{1:d}: Unused {2} '{3}'{4}".format(
+            name_report = ("'{0}'".format(item.name) if item.name != ''
+                           else "")
+            print("{0}:{1:d}: Unused {2} {3}{4}".format(
                 utils.format_path(item.filename), item.lineno, item.typ,
-                item.name, size_report))
+                name_report, size_report))
             self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
 
@@ -361,11 +362,6 @@ class Vulture(ast.NodeVisitor):
             if param and isinstance(param, str):
                 self._define_variable(param, node.lineno)
 
-        for unreachable_node in utils.return_nodes_after_return(node):
-            setattr(unreachable_node, 'name', getattr(node, 'name', None))
-            self.code_after_return.append(self._get_item(unreachable_node,
-                                          'code after return'))
-
     def visit_Import(self, node):
         self._add_aliases(node)
 
@@ -423,6 +419,33 @@ class Vulture(ast.NodeVisitor):
         if visitor:
             visitor(node)
         return self.generic_visit(node)
+
+    def _handle_ast_list(self, ast_list, parent_node):
+        for index, node in enumerate(ast_list):
+            if isinstance(node, ast.Return):
+                try:
+                    first_unreachable_node = ast_list[index + 1]
+                except IndexError:
+                    pass
+                else:
+                    self._define(
+                        self.code_after_return,
+                        '',
+                        first_unreachable_node.lineno,
+                        size=(
+                            lines._get_last_line_number(ast_list[-1]) -
+                            first_unreachable_node.lineno + 1))
+
+    def generic_visit(self, node):
+        """Called if no explicit visitor function exists for a node."""
+        for field, value in ast.iter_fields(node):
+            if isinstance(value, list):
+                self._handle_ast_list(value, node)
+                for item in value:
+                    if isinstance(item, ast.AST):
+                        self.visit(item)
+            elif isinstance(value, ast.AST):
+                self.visit(value)
 
 
 def _parse_args():
