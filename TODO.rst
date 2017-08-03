@@ -3,13 +3,14 @@ TODOs
 
 * Detect unreachable code à la ``if False:`` (try to evaluate condition).
   * Later more AST nodes: If, IfExp, While, Assert.
-* Detect dead code after return statements (check if there are AST nodes
-  after an ast.Return node in the same list of AST nodes). Generalize
-  this for ``break``, ``continue`` and ``raise``.
+* Detect unreachable code after ``break``, ``continue`` and ``raise`` statements.
 * Once we drop Python 2.6 compatibility use argparse instead of optparse.
 * Always report number of lines? Increases runtime by a factor of ~1.08.
 * Support Python 3.5 async/await (#20).
 * Add confidence values to Items and ``--min-confidence`` flag.
+* Test count_lines() by computing it for all nodes in a big Python project
+  and comparing the results to count_lines_slow(). Always do this comparison
+  in verbose mode.
 
 
 Non-TODOs
