@@ -37,7 +37,7 @@ def _get_last_child_with_lineno(node):
     return None
 
 
-def _get_last_line_number(node):
+def get_last_line_number(node):
     """Estimate last line number of the given AST node.
 
     When traversing the tree, we may see a mix of nodes with line
@@ -70,7 +70,7 @@ def count_lines(node):
     size of code ending with, e.g., multiline strings and comments.
 
     """
-    return _get_last_line_number(node) - node.lineno + 1
+    return get_last_line_number(node) - node.lineno + 1
 
 
 #  def count_lines_slow(node):

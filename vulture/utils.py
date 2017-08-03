@@ -1,4 +1,3 @@
-import ast
 import codecs
 import os
 import tokenize
@@ -36,17 +35,6 @@ def read_file(filename):
             return f.read()
     except UnicodeDecodeError as err:
         raise VultureInputException(err)
-
-
-def return_nodes_after_return(tree):
-    try:
-        for i, node in enumerate(tree.body, 0):
-            if isinstance(node, ast.Return):
-                return tree.body[i+1:]
-    except AttributeError:
-        return []
-    else:
-        return return_nodes_after_return(node)
 
 
 class LoggingList(list):

@@ -104,8 +104,7 @@ class Item(object):
         self.filename = filename
         self.lineno = lineno
         self.size = size
-        self.message = (message if message else
-                        "Unused {typ} '{name}'".format(**locals()))
+        self.message = message or "Unused {typ} '{name}'".format(**locals())
 
     def _tuple(self):
         return (self.filename, self.lineno, self.name)
@@ -144,7 +143,7 @@ class Vulture(ast.NodeVisitor):
         self.defined_imports = get_list('import')
         self.defined_props = get_list('property')
         self.defined_vars = get_list('variable')
-        self.unreachable_code = get_list('unreachable code')
+        self.unreachable_code = get_list('unreachable_code')
 
         self.used_attrs = get_set('attribute')
         self.used_names = get_set('name')
@@ -235,10 +234,10 @@ class Vulture(ast.NodeVisitor):
             return (item.filename.lower(), item.lineno)
 
         return sorted(
-                self.unused_attrs + self.unused_classes + self.unused_funcs +
-                self.unused_imports + self.unused_props + self.unused_vars +
-                self.unreachable_code, key=by_size if self.sort_by_size
-                else by_name)
+            self.unused_attrs + self.unused_classes + self.unused_funcs +
+            self.unused_imports + self.unused_props + self.unused_vars +
+            self.unreachable_code, key=by_size if self.sort_by_size
+            else by_name)
 
     def report(self):
         """
@@ -250,6 +249,7 @@ class Vulture(ast.NodeVisitor):
                 size_report = ' ({0:d} {1})'.format(item.size, line_format)
             else:
                 size_report = ''
+
             print("{0}:{1:d}: {2}{3}".format(
                 utils.format_path(item.filename), item.lineno, item.message,
                 size_report))
@@ -422,8 +422,7 @@ class Vulture(ast.NodeVisitor):
 
     def _handle_ast_list(self, ast_list):
         """
-        Iterates over the given list of ast nodes and finds unreachable code,
-        like any code after return statemnts.
+        Find unreachable nodes in the given sequence of ast nodes.
         """
         for index, node in enumerate(ast_list):
             if isinstance(node, ast.Return):
@@ -435,10 +434,10 @@ class Vulture(ast.NodeVisitor):
                     self.unreachable_code,
                     'return',
                     first_unreachable_node.lineno,
-                    size=(
-                        lines._get_last_line_number(ast_list[-1]) -
-                        first_unreachable_node.lineno + 1),
-                    message='Unreachable code after return statement')
+                    size=lines.get_last_line_number(ast_list[-1]) -
+                    first_unreachable_node.lineno + 1,
+                    message='unreachable code after return statement')
+                return
 
     def generic_visit(self, node):
         """Called if no explicit visitor function exists for a node."""
