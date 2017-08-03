@@ -68,10 +68,10 @@ def foo():
 def test_recursive_functions(v):
     v.scan("""\
 def foo(a):
-    if a==1:
+    if a == 1:
         return 1
     else:
-        return foo(a-1)
+        return foo(a - 1)
         print("This line is never executed")
 """)
     check_unreachable(v, 6, 1, 'return')

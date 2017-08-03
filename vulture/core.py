@@ -104,7 +104,7 @@ class Item(object):
         self.filename = filename
         self.lineno = lineno
         self.size = size
-        self.message = message or "Unused {typ} '{name}'".format(**locals())
+        self.message = message or "unused {typ} '{name}'".format(**locals())
 
     def _tuple(self):
         return (self.filename, self.lineno, self.name)
