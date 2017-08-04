@@ -106,7 +106,7 @@ def foo():
     check_unreachable(v, 4, 1, 'return')
 
 
-def test_raise_assignemnt(v):
+def test_raise_assignment(v):
     v.scan("""\
 def foo():
     raise ValueError
@@ -137,15 +137,6 @@ def foo():
     return
 """)
     check_unreachable(v, 4, 2, 'return')
-
-
-def test_return_comment_only(v):
-    v.scan("""\
-def foo():
-    return None
-    # foo does nothing
-""")
-    assert v.unreachable_code == []
 
 
 def test_return_comment_and_code(v):
@@ -191,15 +182,6 @@ def foo():
     check_unreachable(v, 8, 1, 'raise')
 
 
-def test_raise_with_comment_only(v):
-    v.scan("""\
-def foo():
-    raise
-    # A comment
-""")
-    assert v.unreachable_code == []
-
-
 def test_raise_with_comment_and_code(v):
     v.scan("""\
 def foo():
@@ -228,20 +210,7 @@ def test_continue_one_liner(v):
 def foo():
     for i in range(1, 10):
         if i == 5: continue
-        print(1/i)
-""")
-    assert v.unreachable_code == []
-
-
-def test_continue_with_comment_only(v):
-    v.scan("""\
-def foo():
-    if True:
-        print("Something")
-    else:
-        a = 1
-        continue
-        # A comment
+        print(1 / i)
 """)
     assert v.unreachable_code == []
 
@@ -300,18 +269,6 @@ def foo():
     for i in range(10):
         if i == 3: break
         print(i)
-""")
-    assert v.unreachable_code == []
-
-
-def test_break_with_comment_only(v):
-    v.scan("""\
-def foo():
-    while True:
-        break
-        # Poor Comment
-    else:
-        pass
 """)
     assert v.unreachable_code == []
 
