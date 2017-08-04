@@ -37,6 +37,24 @@ def _get_last_child_with_lineno(node):
     return None
 
 
+def _get_last_line_number_slow(node):
+    """
+    A simpler and possibly more accurate (but also slower) version of
+    get_last_line_number().
+
+    It traverses all descendants of node and records the highest line
+    number seen.
+
+    This code is 1.6 times slower than count_lines() on the Python
+    subset of tensorflow. It reports the same sizes for all test cases
+    and the functions and classes in tensorflow. We can think about
+    using the simpler version once we only compute line numbers for
+    unused code.
+
+    """
+    return max(getattr(node, 'lineno', -1) for node in ast.walk(node))
+
+
 def get_last_line_number(node):
     """Estimate last line number of the given AST node.
 
@@ -61,7 +79,7 @@ def get_last_line_number(node):
         node = last_child
 
 
-def count_lines(node):
+def count_lines(node, verbose=False):
     """
     Estimate the number of lines of the given AST node.
 
@@ -70,23 +88,7 @@ def count_lines(node):
     size of code ending with, e.g., multiline strings and comments.
 
     """
-    return get_last_line_number(node) - node.lineno + 1
-
-
-#  def count_lines_slow(node):
-#      """
-#      A simpler and possibly more accurate (but also slower) version of
-#      count_lines().
-#
-#      It traverses all descendants of node and records the highest line
-#      number seen.
-#
-#      This code is 1.6 times slower than count_lines() on the Python
-#      subset of tensorflow. It reports the same sizes for all test cases
-#      and the functions and classes in tensorflow. We can think about
-#      using the simpler version once we only compute line numbers for
-#      unused code.
-#
-#      """
-#      max_lineno = max(getattr(node, 'lineno', -1) for node in ast.walk(node))
-#      return max_lineno - node.lineno + 1
+    last_lineno = get_last_line_number(node)
+    if verbose:
+        assert _get_last_line_number_slow(node) == last_lineno
+    return last_lineno - node.lineno + 1
