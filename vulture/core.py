@@ -38,7 +38,7 @@ import sys
 from vulture import lines
 from vulture import utils
 
-__version__ = '0.21'
+__version__ = '0.22'
 
 # The ast module in Python 2 trips over "coding" cookies, so strip them.
 ENCODING_REGEX = re.compile(
