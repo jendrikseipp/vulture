@@ -425,14 +425,15 @@ class Vulture(ast.NodeVisitor):
         Find unreachable nodes in the given sequence of ast nodes.
         """
         for index, node in enumerate(ast_list):
-            if isinstance(node, ast.Return):
+            if isinstance(node, (ast.Break, ast.Continue, ast.Raise,
+                                 ast.Return)):
                 try:
                     first_unreachable_node = ast_list[index + 1]
                 except IndexError:
                     continue
                 self._define(
                     self.unreachable_code,
-                    'return',
+                    node.__class__.__name__.lower(),
                     first_unreachable_node.lineno,
                     size=lines.get_last_line_number(ast_list[-1]) -
                     first_unreachable_node.lineno + 1,
