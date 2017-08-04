@@ -304,6 +304,17 @@ class Foo:
     check_size(example, 4)
 
 
+# The code is too greedy and moves down to the slice which has no line
+# numbers. If we took b or c into account, the line count would be correct.
+def test_size_assign():
+    example = """
+class Foo:
+    bar = foo(a,
+              b)[c,:]
+"""
+    check_size(example, 2)
+
+
 @skip_if_not_has_async
 def test_size_async_function_def():
     example = """
