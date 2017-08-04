@@ -1,7 +1,6 @@
 TODOs
 =====
 
-* Detect unreachable code after ``break``, ``continue`` and ``raise`` statements.
 * Add confidence values to Items and ``--min-confidence`` flag.
 * Detect unreachable code à la ``while False:`` (by implementing
   ``Vulture.visit_While(self, node)`` and evaluating ``node.test`` with

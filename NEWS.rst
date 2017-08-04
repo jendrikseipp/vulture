@@ -1,9 +1,10 @@
 News
 ====
 
-0.22 (unreleased)
+0.22 (2017-08-04)
 -----------------
-* Detect unreachable code after ``return`` statements `` (thanks @RJ722).
+* Detect unreachable code after ``return``, ``break``, ``continue`` and
+  ``raise`` (thanks @RJ722).
 * Parse all variable and attribute names in new format strings.
 * Extend ast whitelist.
 
