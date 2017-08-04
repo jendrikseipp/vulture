@@ -12,9 +12,6 @@ TODOs
 * Detect unreachable code for ``ast.IfExp``.
 * Detect unreachable code for ``ast.Assert``.
 * Support Python 3.5 async/await (#20).
-* Test count_lines() by computing it for all nodes in a big Python project
-  and comparing the results to count_lines_slow(). Always do this comparison
-  in verbose mode.
 * Update README file.
 * Once we drop Python 2.6 compatibility use argparse instead of optparse.
 

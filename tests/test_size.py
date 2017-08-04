@@ -18,7 +18,7 @@ def check_size(example, size):
     tree = ast.parse(example)
     for node in tree.body:
         if isinstance(node, ast.ClassDef) and node.name == 'Foo':
-            assert count_lines(node) == size
+            assert count_lines(node, verbose=True) == size
             break
     else:
         assert False, 'Failed to find top-level class "Foo" in code'
@@ -304,13 +304,13 @@ class Foo:
     check_size(example, 4)
 
 
-# The code is too greedy and moves down to the slice which has no line
-# numbers. If we took b or c into account, the line count would be correct.
+# If we add a line break between a and b, the code is too greedy and moves
+# down to the slice which has no line numbers. If we took b or c into
+# account, the line count would be correct.
 def test_size_assign():
     example = """
 class Foo:
-    bar = foo(a,
-              b)[c,:]
+    bar = foo(a, b)[c,:]
 """
     check_size(example, 2)
 

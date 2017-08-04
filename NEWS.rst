@@ -1,6 +1,11 @@
 News
 ====
 
+0.22 (unreleased)
+-----------------
+* Tests: compare ``count_lines()`` to ``count_lines_slow()``.
+
+
 0.22 (2017-08-04)
 -----------------
 * Detect unreachable code after ``return``, ``break``, ``continue`` and
