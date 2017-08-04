@@ -1,7 +1,10 @@
 TODOs
 =====
 
-* Detect unreachable code à la ``if False:`` (try to evaluate condition).
+* Detect unreachable code à la ``if False:`` (by implementing
+  ``Vulture.visit_If(self, node)`` and evaluating ``node.test`` with
+  ``ast.literal_eval``).
+  * Later detect unreachable ``else`` clauses by detecting ``if True:``.
   * Later more AST nodes: If, IfExp, While, Assert.
 * Detect unreachable code after ``break``, ``continue`` and ``raise`` statements.
 * Once we drop Python 2.6 compatibility use argparse instead of optparse.

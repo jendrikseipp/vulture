@@ -3,7 +3,7 @@ News
 
 0.22 (unreleased)
 -----------------
-* Detect unreachable code after ``return`` statements.
+* Detect unreachable code after ``return`` statements `` (thanks @RJ722).
 * Parse all variable and attribute names in new format strings.
 * Extend ast whitelist.
 
