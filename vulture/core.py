@@ -40,6 +40,11 @@ from vulture import utils
 
 __version__ = '0.22'
 
+CONFIDENCE_MAP = {
+    'unreachable_code': 1,
+    'import': 0.9
+}
+
 # The ast module in Python 2 trips over "coding" cookies, so strip them.
 ENCODING_REGEX = re.compile(
     r"^[ \t\v]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+).*?$", flags=re.M)
@@ -105,6 +110,7 @@ class Item(object):
         self.lineno = lineno
         self.size = size
         self.message = message or "unused {typ} '{name}'".format(**locals())
+        self.confidence = CONFIDENCE_MAP.get(typ, 0.6)
 
     def _tuple(self):
         return (self.filename, self.lineno, self.name)
@@ -250,9 +256,9 @@ class Vulture(ast.NodeVisitor):
             else:
                 size_report = ''
 
-            print("{0}:{1:d}: {2}{3}".format(
+            print("{0}:{1:d}: {2}{3} (sureness: {4})".format(
                 utils.format_path(item.filename), item.lineno, item.message,
-                size_report))
+                size_report, item.confidence))
             self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
 
