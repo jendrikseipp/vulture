@@ -3,15 +3,16 @@ TODOs
 
 * Add confidence values to Items and ``--min-confidence`` flag.
 * Detect unreachable code à la ``while False:`` (by implementing
-  ``Vulture.visit_While(self, node)`` and evaluating ``node.test`` with
-  ``ast.literal_eval``).
+  ``Vulture.visit_While(self, node)``.
 * Detect unreachable code à la ``if False:`` (by implementing
-  ``Vulture.visit_If(self, node)`` and evaluating ``node.test`` with
-  ``ast.literal_eval``).
+  ``Vulture.visit_If(self, node)``.
   * Detect unreachable ``else`` clauses by detecting ``if True:``.
 * Detect unreachable code for ``ast.IfExp``.
 * Detect unreachable code for ``ast.Assert``.
 * Support Python 3.5 async/await (#20).
+* Detect superfluous expressions like ``a <= b``, ``42``,  ``foo and bar``
+  occuring outside of a statement.
+* Pass relevant options directly to ``scavenge()`` and ``report()``.
 * Update README file.
 * Once we drop Python 2.6 compatibility use argparse instead of optparse.
 
