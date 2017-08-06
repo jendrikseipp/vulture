@@ -431,13 +431,15 @@ class Vulture(ast.NodeVisitor):
                     first_unreachable_node = ast_list[index + 1]
                 except IndexError:
                     continue
+                class_name = node.__class__.__name__.lower()
                 self._define(
                     self.unreachable_code,
-                    node.__class__.__name__.lower(),
+                    class_name,
                     first_unreachable_node.lineno,
                     size=lines.get_last_line_number(ast_list[-1]) -
                     first_unreachable_node.lineno + 1,
-                    message='unreachable code after return statement')
+                    message="unreachable code after '{class_name}'".format(
+                        **locals()))
                 return
 
     def generic_visit(self, node):
