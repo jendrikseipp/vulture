@@ -127,9 +127,12 @@ class Item(object):
 
 class Vulture(ast.NodeVisitor):
     """Find dead code."""
-    def __init__(self, exclude=None, verbose=False, sort_by_size=False):
+    def __init__(self, exclude=None, verbose=False, sort_by_size=False,
+                 min_confidence=0.5):
         self.exclude = []
         self.sort_by_size = sort_by_size
+        self.min_confidence = float(min_confidence or 0.5)
+
         for pattern in exclude or []:
             if not any(char in pattern for char in ['*', '?', '[']):
                 pattern = '*{0}*'.format(pattern)
@@ -250,16 +253,18 @@ class Vulture(ast.NodeVisitor):
         Print ordered list of Item objects to stdout.
         """
         for item in self.get_unused_code():
-            if self.sort_by_size:
-                line_format = 'line' if item.size == 1 else 'lines'
-                size_report = ' ({0:d} {1})'.format(item.size, line_format)
-            else:
-                size_report = ''
+            item.confidence >= self.min_confidence
+            if item.confidence >= self.min_confidence:
+                if self.sort_by_size:
+                    line_format = 'line' if item.size == 1 else 'lines'
+                    size_report = ' ({0:d} {1})'.format(item.size, line_format)
+                else:
+                    size_report = ''
 
-            print("{0}:{1:d}: {2}{3} (sureness: {4})".format(
-                utils.format_path(item.filename), item.lineno, item.message,
-                size_report, item.confidence))
-            self.found_dead_code_or_error = True
+                print("{0}:{1:d}: {2}{3} (sureness: {4})".format(
+                    utils.format_path(item.filename), item.lineno,
+                    item.message, size_report, item.confidence))
+                self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
 
     @property
@@ -483,6 +488,12 @@ analyzes all contained *.py files.
         "--sort-by-size", action="store_true",
         help="Sort unused functions and classes by their lines of code")
     parser.add_option('-v', '--verbose', action='store_true')
+    parser.add_option(
+        '--min-confidence', action='store',
+        help=(
+            'Only report cases of unused code, confidence values for which'
+            'are greater than the given value.'
+            ' Confidence values range between 0 and 1.'))
     options, args = parser.parse_args()
     return options, args
 
@@ -490,7 +501,8 @@ analyzes all contained *.py files.
 def main():
     options, args = _parse_args()
     vulture = Vulture(exclude=options.exclude, verbose=options.verbose,
-                      sort_by_size=options.sort_by_size)
+                      sort_by_size=options.sort_by_size,
+                      min_confidence=options.min_confidence)
     vulture.scavenge(args)
     sys.exit(vulture.report())
 
