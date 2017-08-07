@@ -40,10 +40,7 @@ from vulture import utils
 
 __version__ = '0.22'
 
-CONFIDENCE_MAP = {
-    'unreachable_code': 1,
-    'import': 0.9
-}
+DEFAULT_CONFIDENCE = 60
 
 # The ast module in Python 2 trips over "coding" cookies, so strip them.
 ENCODING_REGEX = re.compile(
@@ -103,14 +100,15 @@ class Item(object):
     """
     Hold the name, type and location of defined code.
     """
-    def __init__(self, name, typ, filename, lineno, size=1, message=''):
+    def __init__(self, name, typ, filename, lineno, size=1, message='',
+                 confidence=0):
         self.name = name
         self.typ = typ
         self.filename = filename
         self.lineno = lineno
         self.size = size
         self.message = message or "unused {typ} '{name}'".format(**locals())
-        self.confidence = CONFIDENCE_MAP.get(typ, 0.6)
+        self.confidence = confidence or DEFAULT_CONFIDENCE
 
     def _tuple(self):
         return (self.filename, self.lineno, self.name)
@@ -128,10 +126,13 @@ class Item(object):
 class Vulture(ast.NodeVisitor):
     """Find dead code."""
     def __init__(self, exclude=None, verbose=False, sort_by_size=False,
-                 min_confidence=0.5):
+                 min_confidence=0):
         self.exclude = []
         self.sort_by_size = sort_by_size
-        self.min_confidence = float(min_confidence or 0.5)
+        self.min_confidence = float(min_confidence or 0)
+        if not (0 <= self.min_confidence <= 100):
+            raise ValueError('Value of min_confidence must be between'
+                             ' 0 and 100.')
 
         for pattern in exclude or []:
             if not any(char in pattern for char in ['*', '?', '[']):
@@ -242,29 +243,32 @@ class Vulture(ast.NodeVisitor):
         def by_name(item):
             return (item.filename.lower(), item.lineno)
 
-        return sorted(
-            self.unused_attrs + self.unused_classes + self.unused_funcs +
-            self.unused_imports + self.unused_props + self.unused_vars +
-            self.unreachable_code, key=by_size if self.sort_by_size
-            else by_name)
+        unused_code = (self.unused_attrs + self.unused_classes +
+                       self.unused_funcs + self.unused_imports +
+                       self.unused_props + self.unused_vars +
+                       self.unreachable_code)
+
+        confidently_unused = [obj for obj in unused_code
+                              if (obj.confidence >= self.min_confidence)]
+
+        return sorted(confidently_unused, key=by_size if self.sort_by_size
+                      else by_name)
 
     def report(self):
         """
         Print ordered list of Item objects to stdout.
         """
         for item in self.get_unused_code():
-            item.confidence >= self.min_confidence
-            if item.confidence >= self.min_confidence:
-                if self.sort_by_size:
-                    line_format = 'line' if item.size == 1 else 'lines'
-                    size_report = ' ({0:d} {1})'.format(item.size, line_format)
-                else:
-                    size_report = ''
+            if self.sort_by_size:
+                line_format = 'line' if item.size == 1 else 'lines'
+                size_report = ', {0:d} {1}'.format(item.size, line_format)
+            else:
+                size_report = ''
 
-                print("{0}:{1:d}: {2}{3} (sureness: {4})".format(
-                    utils.format_path(item.filename), item.lineno,
-                    item.message, size_report, item.confidence))
-                self.found_dead_code_or_error = True
+            print("{0}:{1:d}: {2} ({4} % confidence, {3})".format(
+                utils.format_path(item.filename), item.lineno,
+                item.message, size_report, item.confidence))
+            self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
 
     @property
@@ -312,22 +316,23 @@ class Vulture(ast.NodeVisitor):
             alias = name_and_alias.asname
             self._define(
                 self.defined_imports, alias or name, node.lineno,
-                ignore=_ignore_import)
+                ignore=_ignore_import, confidence=90)
             if alias is not None:
                 self.used_names.add(name_and_alias.name)
 
     def _define(self, collection, name, lineno, size=1, message='',
-                ignore=None):
+                ignore=None, confidence=DEFAULT_CONFIDENCE):
         typ = collection.typ
         if ignore and ignore(self.filename, name):
             self._log('Ignoring {typ} "{name}"'.format(**locals()))
         else:
             collection.append(
                 Item(name, typ, self.filename, lineno, size=size,
-                     message=message))
+                     message=message, confidence=confidence))
 
-    def _define_variable(self, name, lineno):
-        self._define(self.defined_vars, name, lineno, ignore=_ignore_variable)
+    def _define_variable(self, name, lineno, confidence=DEFAULT_CONFIDENCE):
+        self._define(self.defined_vars, name, lineno, ignore=_ignore_variable,
+                     confidence=confidence)
 
     def visit_alias(self, node):
         """
@@ -338,7 +343,8 @@ class Vulture(ast.NodeVisitor):
 
     def visit_arg(self, node):
         """Function argument. Python 3 only. Has lineno since Python 3.4"""
-        self._define_variable(node.arg, getattr(node, 'lineno', -1))
+        self._define_variable(node.arg, getattr(node, 'lineno', -1),
+                              confidence=100)
 
     def visit_Attribute(self, node):
         if isinstance(node.ctx, ast.Store):
@@ -371,7 +377,7 @@ class Vulture(ast.NodeVisitor):
         # use visit_arguments, because its node has no lineno.
         for param in [node.args.vararg, node.args.kwarg]:
             if param and isinstance(param, str):
-                self._define_variable(param, node.lineno)
+                self._define_variable(param, node.lineno, 100)
 
     def visit_Import(self, node):
         self._add_aliases(node)
@@ -450,7 +456,8 @@ class Vulture(ast.NodeVisitor):
                     size=lines.get_last_line_number(ast_list[-1]) -
                     first_unreachable_node.lineno + 1,
                     message="unreachable code after '{class_name}'".format(
-                        **locals()))
+                        **locals()),
+                    confidence=100)
                 return
 
     def generic_visit(self, node):
@@ -491,9 +498,8 @@ analyzes all contained *.py files.
     parser.add_option(
         '--min-confidence', action='store',
         help=(
-            'Only report cases of unused code, confidence values for which'
-            'are greater than the given value.'
-            ' Confidence values range between 0 and 1.'))
+            'Minimum confidence (between 0 and 100) for code to be'
+            ' reported as unused.'))
     options, args = parser.parse_args()
     return options, args
 

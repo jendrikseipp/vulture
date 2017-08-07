@@ -7,7 +7,7 @@ def test_confidence_import(v):
 import foo
 a = 1
 """)
-    assert v.unused_imports[0].confidence == 0.9
+    assert v.unused_imports[0].confidence == 90
 
 
 def test_confidence_unreachable(v):
@@ -18,7 +18,7 @@ def foo():
 
 foo()
 """)
-    assert v.unreachable_code[0].confidence == 1
+    assert v.unreachable_code[0].confidence == 100
 
 
 def test_confidence_others(v):
@@ -38,8 +38,8 @@ class Foo:
         pass
 
 """)
-    assert v.unused_funcs[0].confidence == 0.6
-    assert v.unused_classes[0].confidence == 0.6
-    assert v.unused_vars[0].confidence == 0.6
-    assert v.unused_props[0].confidence == 0.6
-    assert v.unused_attrs[0].confidence == 0.6
+    assert v.unused_funcs[0].confidence == 60
+    assert v.unused_classes[0].confidence == 60
+    assert v.unused_vars[0].confidence == 60
+    assert v.unused_props[0].confidence == 60
+    assert v.unused_attrs[0].confidence == 60
