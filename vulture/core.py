@@ -101,14 +101,14 @@ class Item(object):
     Hold the name, type and location of defined code.
     """
     def __init__(self, name, typ, filename, lineno, size=1, message='',
-                 confidence=0):
+                 confidence=DEFAULT_CONFIDENCE):
         self.name = name
         self.typ = typ
         self.filename = filename
         self.lineno = lineno
         self.size = size
         self.message = message or "unused {typ} '{name}'".format(**locals())
-        self.confidence = confidence or DEFAULT_CONFIDENCE
+        self.confidence = confidence
 
     def _tuple(self):
         return (self.filename, self.lineno, self.name)
@@ -127,12 +127,13 @@ class Vulture(ast.NodeVisitor):
     """Find dead code."""
     def __init__(self, exclude=None, verbose=False, sort_by_size=False,
                  min_confidence=0):
-        self.exclude = []
-        self.sort_by_size = sort_by_size
-        self.min_confidence = float(min_confidence or 0)
-        if not (0 <= self.min_confidence <= 100):
+        min_confidence = float(min_confidence or 0)  # Handle None
+        if not 0 <= min_confidence <= 100:
             raise ValueError('Value of min_confidence must be between'
                              ' 0 and 100.')
+        self.exclude = []
+        self.sort_by_size = sort_by_size
+        self.min_confidence = min_confidence
 
         for pattern in exclude or []:
             if not any(char in pattern for char in ['*', '?', '[']):
@@ -249,10 +250,10 @@ class Vulture(ast.NodeVisitor):
                        self.unreachable_code)
 
         confidently_unused = [obj for obj in unused_code
-                              if (obj.confidence >= self.min_confidence)]
+                              if obj.confidence >= self.min_confidence]
 
-        return sorted(confidently_unused, key=by_size if self.sort_by_size
-                      else by_name)
+        return sorted(confidently_unused,
+                      key=by_size if self.sort_by_size else by_name)
 
     def report(self):
         """
@@ -265,9 +266,9 @@ class Vulture(ast.NodeVisitor):
             else:
                 size_report = ''
 
-            print("{0}:{1:d}: {2} ({4} % confidence, {3})".format(
+            print("{0}:{1:d}: {2} ({3}% confidence, {4})".format(
                 utils.format_path(item.filename), item.lineno,
-                item.message, size_report, item.confidence))
+                item.message, item.confidence, size_report))
             self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
 
@@ -377,7 +378,7 @@ class Vulture(ast.NodeVisitor):
         # use visit_arguments, because its node has no lineno.
         for param in [node.args.vararg, node.args.kwarg]:
             if param and isinstance(param, str):
-                self._define_variable(param, node.lineno, 100)
+                self._define_variable(param, node.lineno, confidence=100)
 
     def visit_Import(self, node):
         self._add_aliases(node)
@@ -496,8 +497,7 @@ analyzes all contained *.py files.
         help="Sort unused functions and classes by their lines of code")
     parser.add_option('-v', '--verbose', action='store_true')
     parser.add_option(
-        '--min-confidence', action='store',
-        help=(
+        '--min-confidence', action='store', help=(
             'Minimum confidence (between 0 and 100) for code to be'
             ' reported as unused.'))
     options, args = parser.parse_args()
