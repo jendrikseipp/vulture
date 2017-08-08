@@ -1,22 +1,24 @@
-from vulture import Vulture
+from vulture import core
 
 from . import skip_if_python_2
 from . import skip_if_python_3
 
+dc = core.DEFAULT_CONFIDENCE
 
-def check_min_confidence(code, min_conf, linenos, confidences):
-    v = Vulture(verbose=True, min_confidence=min_conf)
+
+def check_min_confidence(code, min_conf, tests):
+    v = core.Vulture(verbose=True, min_confidence=min_conf)
     v.scan(code)
-    for i, unused_item in enumerate(v.get_unused_code()):
-        assert unused_item.lineno == linenos[i]
-        assert unused_item.confidence == confidences[i]
+    for item, (lineno, confidence) in zip(v.get_unused_code(), tests):
+        assert item.lineno == lineno
+        assert item.confidence == confidence
 
 
 def test_confidence_import():
     code = """\
 import foo
 """
-    check_min_confidence(code, 50, [1], [90])
+    check_min_confidence(code, 50, [(1, 90)])
 
 
 def test_confidence_unreachable():
@@ -27,8 +29,8 @@ def foo():
 
 foo()
 """
-    check_min_confidence(code, 50, [3], [100])
-    check_min_confidence(code, 100, [3], [100])
+    check_min_confidence(code, 50, [(3, 100)])
+    check_min_confidence(code, 100, [(3, 100)])
 
 
 @skip_if_python_3
@@ -39,9 +41,9 @@ def foo(a):
 
 foo(5)
 """
-    check_min_confidence(code, 100, [], [])
-    check_min_confidence(code, 60, [1, 2], [60, 60])
-    check_min_confidence(code, 50, [1, 2], [60, 60])
+    check_min_confidence(code, 100, [])
+    check_min_confidence(code, dc, [(1, dc), (2, dc)])
+    check_min_confidence(code, 50, [(1, dc), (2, dc)])
 
 
 @skip_if_python_2
@@ -52,8 +54,8 @@ def foo(a):
 
 foo(5)
 """
-    check_min_confidence(code, 100, [1], [100])
-    check_min_confidence(code, 60, [1, 2], [100, 60])
+    check_min_confidence(code, 100, [(1, 100)])
+    check_min_confidence(code, dc, [(1, 100), (2, dc)])
 
 
 def test_confidence_class():
@@ -61,7 +63,7 @@ def test_confidence_class():
 class Foo:
     pass
 """
-    check_min_confidence(code, 50, [1], [60])
+    check_min_confidence(code, 50, [(1, dc)])
 
 
 def test_confidence_attr():
@@ -71,7 +73,7 @@ class Foo:
 
 Foo()
 """
-    check_min_confidence(code, 50, [2], [60])
+    check_min_confidence(code, 50, [(2, dc)])
 
 
 def test_confidence_props():
@@ -83,5 +85,5 @@ class Foo:
 
 Foo()
 """
-    check_min_confidence(code, 50, [2], [60])
-    check_min_confidence(code, 100, [], [])
+    check_min_confidence(code, 50, [(2, dc)])
+    check_min_confidence(code, 100, [])

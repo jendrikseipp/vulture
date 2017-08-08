@@ -127,10 +127,8 @@ class Vulture(ast.NodeVisitor):
     """Find dead code."""
     def __init__(self, exclude=None, verbose=False, sort_by_size=False,
                  min_confidence=0):
-        min_confidence = float(min_confidence or 0)  # Handle None
         if not 0 <= min_confidence <= 100:
-            raise ValueError('Value of min_confidence must be between'
-                             ' 0 and 100.')
+            raise ValueError('min_confidence must be between 0 and 100.')
         self.exclude = []
         self.sort_by_size = sort_by_size
         self.min_confidence = min_confidence
@@ -266,7 +264,7 @@ class Vulture(ast.NodeVisitor):
             else:
                 size_report = ''
 
-            print("{0}:{1:d}: {2} ({3}% confidence, {4})".format(
+            print("{0}:{1:d}: {2} ({3}% confidence{4})".format(
                 utils.format_path(item.filename), item.lineno,
                 item.message, item.confidence, size_report))
             self.found_dead_code_or_error = True
@@ -317,12 +315,12 @@ class Vulture(ast.NodeVisitor):
             alias = name_and_alias.asname
             self._define(
                 self.defined_imports, alias or name, node.lineno,
-                ignore=_ignore_import, confidence=90)
+                confidence=90, ignore=_ignore_import)
             if alias is not None:
                 self.used_names.add(name_and_alias.name)
 
     def _define(self, collection, name, lineno, size=1, message='',
-                ignore=None, confidence=DEFAULT_CONFIDENCE):
+                confidence=DEFAULT_CONFIDENCE, ignore=None):
         typ = collection.typ
         if ignore and ignore(self.filename, name):
             self._log('Ignoring {typ} "{name}"'.format(**locals()))
@@ -332,8 +330,8 @@ class Vulture(ast.NodeVisitor):
                      message=message, confidence=confidence))
 
     def _define_variable(self, name, lineno, confidence=DEFAULT_CONFIDENCE):
-        self._define(self.defined_vars, name, lineno, ignore=_ignore_variable,
-                     confidence=confidence)
+        self._define(self.defined_vars, name, lineno, confidence=confidence,
+                     ignore=_ignore_variable)
 
     def visit_alias(self, node):
         """
@@ -497,7 +495,7 @@ analyzes all contained *.py files.
         help="Sort unused functions and classes by their lines of code")
     parser.add_option('-v', '--verbose', action='store_true')
     parser.add_option(
-        '--min-confidence', action='store', help=(
+        '--min-confidence', action='store', type='int', default=0, help=(
             'Minimum confidence (between 0 and 100) for code to be'
             ' reported as unused.'))
     options, args = parser.parse_args()
