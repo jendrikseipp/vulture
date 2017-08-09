@@ -5,12 +5,11 @@ from vulture import core
 dc = core.DEFAULT_CONFIDENCE
 
 
-def check_min_confidence(code, min_confidence, expected_dict={}, **expected):
+def check_min_confidence(code, min_confidence, expected):
     v = core.Vulture(verbose=True, min_confidence=min_confidence)
     v.scan(code)
     detected = dict((item.name, item.confidence)
                     for item in v.get_unused_code())
-    expected = expected_dict or expected
     assert detected == expected
 
 
@@ -18,7 +17,7 @@ def test_confidence_import():
     code = """\
 import foo
 """
-    check_min_confidence(code, 50, foo=90)
+    check_min_confidence(code, 50, {'foo': 90})
 
 
 def test_confidence_unreachable():
@@ -41,11 +40,12 @@ def foo(a):
 foo(5)
 """
     if sys.version_info < (3, 0):
-        check_min_confidence(code, 50, a=dc, b=dc)
-        check_min_confidence(code, dc, a=dc, b=dc)
-    if sys.version_info > (3, 0):
-        check_min_confidence(code, 50, a=100, b=dc)
-        check_min_confidence(code, dc, a=100, b=dc)
+        check_min_confidence(code, 50, {'a': dc, 'b': dc})
+        check_min_confidence(code, dc, {'a': dc, 'b': dc})
+        check_min_confidence(code, 100, {})
+    else:  # Python 3
+        check_min_confidence(code, 50, {'a': 100, 'b': dc})
+        check_min_confidence(code, dc, {'a': 100, 'b': dc})
 
 
 def test_confidence_class():
@@ -53,12 +53,12 @@ def test_confidence_class():
 class Foo:
     pass
 """
-    check_min_confidence(code, 50, Foo=dc)
+    check_min_confidence(code, 50, {'Foo': dc})
 
 
 def test_confidence_attr():
     code = "A.b = 'something'"
-    check_min_confidence(code, 50, b=dc)
+    check_min_confidence(code, 50, {'b': dc})
 
 
 def test_confidence_props():
@@ -70,5 +70,5 @@ class Foo:
 
 Foo()
 """
-    check_min_confidence(code, 50, some_prop=dc)
-    check_min_confidence(code, 100)
+    check_min_confidence(code, 50, {'some_prop': dc})
+    check_min_confidence(code, 100, {})
