@@ -1,5 +1,13 @@
+import ast
 import pytest
+
 from vulture import Vulture
+
+
+def skip_if_not_has_async(function):
+    if not hasattr(ast, 'AsyncFunctionDef'):
+        pytest.mark.skip(
+            function, reason="needs async support (added in Python 3.5)")
 
 
 @pytest.fixture

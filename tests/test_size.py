@@ -1,17 +1,9 @@
 import ast
 import sys
 
-import pytest
-
 from vulture.lines import count_lines
 
-HAS_ASYNC = hasattr(ast, 'AsyncFunctionDef')
-
-
-def skip_if_not_has_async(function):
-    if not HAS_ASYNC:
-        pytest.mark.skip(
-            function, reason="needs async support (added in Python 3.5)")
+from . import skip_if_not_has_async
 
 
 def check_size(example, size):
