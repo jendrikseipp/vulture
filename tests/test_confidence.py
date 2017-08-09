@@ -41,12 +41,14 @@ def foo(a):
 foo(5)
 """
     if sys.version_info < (3, 0):
+        # Python 2
         check_min_confidence(code, 50, {'a': dc, 'b': dc})
         check_min_confidence(code, dc, {'a': dc, 'b': dc})
         check_min_confidence(code, 100, {})
-    else:  # Python 3
+    else:
+        # Python 3
         check_min_confidence(code, 50, {'a': 100, 'b': dc})
-        check_min_confidence(code, dc, {'a': dc, 'b': dc})
+        check_min_confidence(code, dc, {'a': 100, 'b': dc})
         check_min_confidence(code, 100, {'a': 100})
 
 
