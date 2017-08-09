@@ -1,8 +1,9 @@
 News
 ====
 
-0.22 (unreleased)
+0.23 (unreleased)
 -----------------
+* Add ``--min-confidence`` flag (thanks @RJ722).
 * Tests: compare ``count_lines()`` to ``count_lines_slow()``.
 
 

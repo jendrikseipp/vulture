@@ -1,7 +1,7 @@
 import ast
-import pytest
 
-from vulture import Vulture
+import pytest
+from vulture import core
 
 
 def skip_if_not_has_async(function):
@@ -12,7 +12,7 @@ def skip_if_not_has_async(function):
 
 @pytest.fixture
 def v():
-    return Vulture(verbose=True)
+    return core.Vulture(verbose=True)
 
 
 def check(items_or_names, expected_names):

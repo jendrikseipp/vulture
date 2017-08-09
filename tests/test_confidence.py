@@ -18,6 +18,7 @@ def test_confidence_import():
 import foo
 """
     check_min_confidence(code, 50, {'foo': 90})
+    check_min_confidence(code, 100, {})
 
 
 def test_confidence_unreachable():
@@ -45,7 +46,8 @@ foo(5)
         check_min_confidence(code, 100, {})
     else:  # Python 3
         check_min_confidence(code, 50, {'a': 100, 'b': dc})
-        check_min_confidence(code, dc, {'a': 100, 'b': dc})
+        check_min_confidence(code, dc, {'a': dc, 'b': dc})
+        check_min_confidence(code, 100, {'a': 100})
 
 
 def test_confidence_class():
@@ -54,11 +56,13 @@ class Foo:
     pass
 """
     check_min_confidence(code, 50, {'Foo': dc})
+    check_min_confidence(code, 100, {})
 
 
 def test_confidence_attr():
     code = "A.b = 'something'"
     check_min_confidence(code, 50, {'b': dc})
+    check_min_confidence(code, 100, {})
 
 
 def test_confidence_props():
