@@ -21,7 +21,7 @@ Features
 * lightweight: only one module
 * tested: tests itself and has complete test coverage
 * complements pyflakes and has the same output syntax
-* sorts unused classes and functions by size with `--sort-by-size`
+* sorts unused classes and functions by size with ``--sort-by-size``
 * supports Python 2.6, 2.7 and 3.x
 
 
@@ -41,8 +41,9 @@ Usage
 
   $ vulture myscript.py  # or
   $ python3 -m vulture myscript.py
-  $ vulture myscript.py mypackage1/ mypackage2/
-  $ vulture myscript.py mywhitelist.py
+  $ vulture myscript.py mypackage/
+  $ vulture myscript.py mywhitelist.py  # Put false-positives in whitelist.
+  $ vulture myscript.py --min-confidence 100  # Only report 100% dead code.
 
 The provided arguments may be Python files or directories. For each
 directory Vulture analyzes all contained `*.py` files.
@@ -63,6 +64,12 @@ are welcome). If you want to ignore a whole file or directory, use the
 There are situations where you can't just remove unused variables, e.g.,
 in tuple assignments or function signatures. Vulture will ignore these
 variables if they start with an underscore (e.g., ``_x, y = get_pos()``).
+
+**Minimum confidence**
+
+You can use the ``--min-confidence`` flag to set the minimum confidence
+for code to be reported as unused. Use ``--min-confidence 100`` to only
+report code that is guaranteed to be unused within the analyzed files.
 
 
 How does it work?
