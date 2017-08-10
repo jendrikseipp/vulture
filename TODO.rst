@@ -1,7 +1,6 @@
 TODOs
 =====
 
-* Add confidence values to Items and ``--min-confidence`` flag.
 * Detect unreachable code à la ``while False:`` (by implementing
   ``Vulture.visit_While(self, node)``.
 * Detect unreachable code à la ``if False:`` (by implementing
