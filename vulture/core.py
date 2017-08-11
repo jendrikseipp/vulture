@@ -96,6 +96,20 @@ def _ignore_variable(filename, varname):
         _is_special_name(varname))
 
 
+def condition_is_unsatisfiable(condition):
+    """
+    Checks if the given condition is unsatisfiable 
+    """
+    try:
+        cond = condition if isinstance(condition, ast.Expression) else ast.Expression(condition)
+        test = compile(cond, filename="<string>", mode='eval')
+        satisfiable = bool(eval(test, {}, {}))
+    except (NameError, ValueError):
+        return False
+    else:
+        return not satisfiable
+
+
 class Item(object):
     """
     Hold the name, type and location of defined code.
@@ -378,6 +392,15 @@ class Vulture(ast.NodeVisitor):
             if param and isinstance(param, str):
                 self._define_variable(param, node.lineno, confidence=100)
 
+
+    def visit_If(self, node):
+        if condition_is_unsatisfiable(node.test):
+            self._define(self.unreachable_code, 'if', node.lineno,
+                size=lines.count_lines(node),
+                message="unsatisfiable 'if' condition",
+                confidence=DEFAULT_CONFIDENCE)
+
+
     def visit_Import(self, node):
         self._add_aliases(node)
 
@@ -424,6 +447,15 @@ class Vulture(ast.NodeVisitor):
             for attr in name_and_attrs[1:]:
                 if is_identifier(attr):
                     self.used_attrs.add(attr)
+
+
+    def visit_While(self, node):
+        if condition_is_unsatisfiable(node.test):
+            self._define(self.unreachable_code, 'while', node.lineno,
+                size=lines.count_lines(node),
+                message="unsatisfiable 'while' condition",
+                confidence=DEFAULT_CONFIDENCE)
+
 
     def visit(self, node):
         method = 'visit_' + node.__class__.__name__
