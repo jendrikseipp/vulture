@@ -1,6 +1,11 @@
 News
 ====
 
+0.24 (unreleased)
+-----------------
+* Handle null bytes in source code.
+
+
 0.23 (2017-08-10)
 -----------------
 * Add ``--min-confidence`` flag (thanks @RJ722).

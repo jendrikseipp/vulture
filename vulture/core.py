@@ -173,6 +173,12 @@ class Vulture(ast.NodeVisitor):
                 utils.format_path(filename), err.lineno, err.msg, text),
                 file=sys.stderr)
             self.found_dead_code_or_error = True
+        except (TypeError, ValueError) as err:
+            # Python < 3.5 raises TypeError and Python >= 3.5 raises
+            # ValueError if source contains null bytes.
+            print('{0}: invalid source code "{1}"'.format(
+                utils.format_path(filename), err), file=sys.stderr)
+            self.found_dead_code_or_error = True
         else:
             self.visit(node)
 
