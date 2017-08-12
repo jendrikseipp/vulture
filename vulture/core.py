@@ -384,6 +384,14 @@ class Vulture(ast.NodeVisitor):
             if param and isinstance(param, str):
                 self._define_variable(param, node.lineno, confidence=100)
 
+    def visit_If(self, node):
+        if utils.condition_is_unsatisfiable(node.test):
+            self._define(self.unreachable_code, 'if', node.lineno,
+                         size=lines.count_lines(node) if self.sort_by_size
+                         else 1,
+                         message="unsatisfiable 'if' condition",
+                         confidence=100)
+
     def visit_Import(self, node):
         self._add_aliases(node)
 

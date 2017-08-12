@@ -48,3 +48,13 @@ def func():
 func()
 """)
     check_unreachable(v, 2, 2, 'while')
+
+
+def test_if(v):
+    v.scan("""\
+def foo():
+    if 0 and False:
+        pass
+foo()
+""")
+    check_unreachable(v, 2, 2, 'if')
