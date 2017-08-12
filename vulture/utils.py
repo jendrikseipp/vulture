@@ -1,10 +1,4 @@
 import ast
-try:
-    # Python 3
-    import builtins
-except ImportError:
-    # Python 2
-    import __builtin__ as builtins
 import codecs
 import os
 import tokenize
