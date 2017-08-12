@@ -19,18 +19,20 @@ class VultureInputException(Exception):
 
 def condition_is_unsatisfiable(condition):
     """
-    Try to evaluate the given condition. Return true, if the evaluation
-    doesn't need the values of any variables and evaluates to False.
+    Try to safely evaluate the given condition. Return true, if the
+    evaluation succeeds and the condition evaluates to False.
+
+    The evaluation will only succeed if the condition exclusively
+    consists of Python literals. We could use eval() to catch more
+    cases. However, this function is not safe for arbitrary Python code.
+    Even after overwriting the "__builtins__" dictionary, the original
+    dictionary can be restored
+    (https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html).
+
     """
-    safe_builtins = dict((key, value) for key, value in vars(builtins).items()
-                         if not (key.startswith('__') and key.endswith('__'))
-                         and key not in set(['input', 'raw_input']))
-    if not isinstance(condition, ast.Expression):
-        condition = ast.Expression(condition)
-    test = compile(condition, filename="<string>", mode='eval')
     try:
-        satisfiable = bool(eval(test, {'__builtins__': safe_builtins}, {}))
-    except (AttributeError, NameError, TypeError, ValueError):
+        satisfiable = bool(ast.literal_eval(condition))
+    except ValueError:
         return False
     else:
         return not satisfiable

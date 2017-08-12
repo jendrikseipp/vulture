@@ -13,10 +13,8 @@ def check_condition(code, unsatisfiable=True):
 
 def test_false():
     check_condition('False')
-
-
-def test_none():
     check_condition('None')
+    check_condition("0")
 
 
 def test_empty():
@@ -25,31 +23,21 @@ def test_empty():
     check_condition("{}")
 
 
-def test_zero():
-    check_condition("1 - 1")
-    check_condition("0")
-
-
 def test_true():
     check_condition("True", unsatisfiable=False)
     check_condition("1", unsatisfiable=False)
 
 
-def test_multiple_conditions():
-    check_condition("False and 1")
-    check_condition("False and foo")  # Lazy evaluation prevents NameError
-
-
-def test_hasattr():
-    check_condition("hasattr(str, 'foo')")
-
-
 def test_errors():
-    check_condition("foo", unsatisfiable=False)  # raises NameError
-    check_condition("foo and False", unsatisfiable=False)  # raises NameError
-    check_condition('chr(-1)', unsatisfiable=False)  # raises ValueError
-    check_condition('getattr(True, "foo")', False)  # raises AttributeError
-    check_condition('isinstance(True, True)', False)  # raises TypeError
+    check_condition("False and 1", unsatisfiable=False)
+    check_condition("False and foo", unsatisfiable=False)
+    check_condition("foo", False)
+    check_condition("foo and False", False)
+    check_condition('chr(-1)', False)
+    check_condition('getattr(True, "foo")', False)
+    check_condition('isinstance(True, True)', False)
+    check_condition('__name__ == "__main__"', False)
+    check_condition("hasattr(str, 'foo')", False)
 
 
 def test_while(v):
