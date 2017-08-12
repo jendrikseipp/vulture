@@ -1,4 +1,10 @@
 import ast
+try:
+    # Python 3
+    import builtins
+except ImportError:
+    # Python 2
+    import __builtin__ as builtins
 import codecs
 import os
 import tokenize
@@ -16,9 +22,7 @@ def condition_is_unsatisfiable(condition):
     Try to evaluate the given condition. Return true, if the evaluation
     doesn't need the values of any variables and evaluates to False.
     """
-    builtins = (vars(__builtins__) if hasattr(__builtins__, '__dict__') else
-                __builtins__)
-    safe_builtins = dict((key, value) for key, value in builtins.items()
+    safe_builtins = dict((key, value) for key, value in vars(builtins).items()
                          if not (key.startswith('__') and key.endswith('__'))
                          and key not in set(['input', 'raw_input']))
     if not isinstance(condition, ast.Expression):
@@ -26,7 +30,7 @@ def condition_is_unsatisfiable(condition):
     test = compile(condition, filename="<string>", mode='eval')
     try:
         satisfiable = bool(eval(test, {'__builtins__': safe_builtins}, {}))
-    except (NameError, ValueError, TypeError, AttributeError):
+    except (AttributeError, NameError, TypeError, ValueError):
         return False
     else:
         return not satisfiable

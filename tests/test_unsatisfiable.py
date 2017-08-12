@@ -1,7 +1,7 @@
 import ast
 
-from .test_unreachable import check_unreachable
 from vulture import utils
+from . import check_unreachable
 from . import v
 assert v  # Silence pyflakes
 
@@ -37,7 +37,7 @@ def test_true():
 
 def test_multiple_conditions():
     check_condition("False and 1")
-    check_condition("False and foo")  # should not raise ValueError
+    check_condition("False and foo")  # Lazy evaluation prevents NameError
 
 
 def test_hasattr():
@@ -59,4 +59,4 @@ def func():
         pass
 func()
 """)
-    check_unreachable(v, 2, 1, 'while')
+    check_unreachable(v, 2, 2, 'while')
