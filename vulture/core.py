@@ -431,6 +431,14 @@ class Vulture(ast.NodeVisitor):
                 if is_identifier(attr):
                     self.used_attrs.add(attr)
 
+    def visit_While(self, node):
+        if utils.condition_is_unsatisfiable(node.test):
+            self._define(self.unreachable_code, 'while', node.lineno,
+                         size=lines.count_lines(node) if self.sort_by_size
+                         else 1,
+                         message="unsatisfiable 'while' condition",
+                         confidence=100)
+
     def visit(self, node):
         method = 'visit_' + node.__class__.__name__
         visitor = getattr(self, method, None)

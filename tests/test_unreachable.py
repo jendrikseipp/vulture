@@ -221,7 +221,7 @@ def foo():
     a = 0
     if True:
         foo()
-        if False:
+        if bar():
             a = 2
             continue
             # This is unreachable
