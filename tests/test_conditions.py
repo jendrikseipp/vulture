@@ -1,8 +1,9 @@
 import ast
-import pytest
 import sys
 
+import pytest
 from vulture import utils
+
 from . import check_unreachable
 from . import v
 assert v  # Silence pyflakes
@@ -35,16 +36,17 @@ def test_true():
 
 
 def test_errors():
-    conditions = ['foo',
-                  'foo and False',
-                  '__name__ == "__main__"',
-                  'False and 1',
-                  'False and foo',
-                  'chr(-1)',
-                  'getattr(True, "foo")',
-                  'hasattr(str, "foo")',
-                  'isinstance(True, True)',
-                  'not False']
+    conditions = [
+        'foo',
+        'foo and False',
+        '__name__ == "__main__"',
+        'False and 1',
+        'False and foo',
+        'chr(-1)',
+        'getattr(True, "foo")',
+        'hasattr(str, "foo")',
+        'isinstance(True, True)',
+        'not False']
     for condition in conditions:
         with pytest.raises(ValueError) as e:
             check_condition(condition, False)
@@ -73,7 +75,7 @@ def test_if_false(v):
 if False:
     pass
 """)
-    check_unreachable(v, 1, 2, 'if-False')
+    check_unreachable(v, 1, 2, 'if')
 
 
 def test_elif_false(v):
@@ -83,7 +85,7 @@ if bar():
 elif False:
     print("Unreachable")
 """)
-    check_unreachable(v, 3, 2, 'if-False')
+    check_unreachable(v, 3, 2, 'if')
 
 
 def test_nested_if_statements_false(v):
@@ -101,7 +103,7 @@ if foo():
 else:
     pass
 """)
-    check_unreachable(v, 4, 3, 'if-False')
+    check_unreachable(v, 4, 3, 'if')
 
 
 def test_if_false_same_line(v):
@@ -109,7 +111,7 @@ def test_if_false_same_line(v):
 if False: a = 1
 else: c = 3
 """)
-    check_unreachable(v, 1, 1, 'if-False')
+    check_unreachable(v, 1, 1, 'if')
 
 
 def test_if_true(v):
@@ -122,7 +124,7 @@ else:
     d = 3
 """)
     # For simplicity, we don't report the "else" line as dead code.
-    check_unreachable(v, 5, 2, 'if-True')
+    check_unreachable(v, 5, 2, 'else')
 
 
 def test_if_true_same_line(v):
@@ -133,7 +135,7 @@ if True:
 else: c = 3
 d = 3
 """)
-    check_unreachable(v, 4, 1, 'if-True')
+    check_unreachable(v, 4, 1, 'else')
 
 
 def test_nested_if_statements_true(v):
@@ -142,17 +144,15 @@ if foo():
     if bar():
         pass
     elif True:
-        print("Reachable code starts")
         if something():
             pass
         else:
-            print("Reachable code ends")
+            pass
     elif something_else():
-        print("I am unreachable")
+        print("foo")
     else:
-        print("Unreachable")
-        print("Else Block")
+        print("bar")
 else:
     pass
 """)
-    check_unreachable(v, 10, 5, 'if-True')
+    check_unreachable(v, 9, 4, 'else')

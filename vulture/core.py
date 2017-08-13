@@ -392,9 +392,9 @@ class Vulture(ast.NodeVisitor):
                         else_body[0].lineno + 1)
             else:
                 size = 1
-            self._define(self.unreachable_code, 'if-True', else_body[0].lineno,
+            self._define(self.unreachable_code, 'else', else_body[0].lineno,
                          size=size,
-                         message="'if' condition always evaluates to True",
+                         message="unreachable 'else' block",
                          confidence=100)
         elif utils.condition_is_always_false(node.test):
             if self.sort_by_size:
@@ -402,7 +402,7 @@ class Vulture(ast.NodeVisitor):
                         node.lineno + 1)
             else:
                 size = 1
-            self._define(self.unreachable_code, 'if-False', node.lineno,
+            self._define(self.unreachable_code, 'if', node.lineno,
                          size=size,
                          message="unsatisfiable 'if' condition",
                          confidence=100)

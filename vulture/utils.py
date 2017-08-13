@@ -27,9 +27,9 @@ def condition_is_always_false(condition):
 
 def _evaluate_condition(condition):
     """
-    Try to safely evaluate the given condition. Return true or false if the
-    if the given condition is always true or false respectively.
-    Raise `ValueError` if the condition cannot be evaluated safely.
+    Try to safely evaluate the given condition. Return True or False if
+    the if the given condition is always True or False, respectively.
+    Raise ``ValueError`` if the condition cannot be evaluated safely.
 
     The evaluation will only succeed if the condition exclusively
     consists of Python literals. We could use eval() to catch more
