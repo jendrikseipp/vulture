@@ -93,6 +93,7 @@ if foo():
         pass
     elif False:
         print("Unreachable")
+        pass
     elif something():
         print("Reachable")
     else:
@@ -100,7 +101,39 @@ if foo():
 else:
     pass
 """)
-    check_unreachable(v, 4, 2, 'if-False')
+    check_unreachable(v, 4, 3, 'if-False')
+
+
+def test_if_false_same_line(v):
+    v.scan("""\
+if False: a = 1
+else: c = 3
+""")
+    check_unreachable(v, 1, 1, 'if-False')
+
+
+def test_if_true(v):
+    v.scan("""\
+if True:
+    a = 1
+    b = 2
+else:
+    c = 3
+    d = 3
+""")
+    # For simplicity, we don't report the "else" line as dead code.
+    check_unreachable(v, 5, 2, 'if-True')
+
+
+def test_if_true_same_line(v):
+    v.scan("""\
+if True:
+    a = 1
+    b = 2
+else: c = 3
+d = 3
+""")
+    check_unreachable(v, 4, 1, 'if-True')
 
 
 def test_nested_if_statements_true(v):

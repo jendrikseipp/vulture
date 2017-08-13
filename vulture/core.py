@@ -385,18 +385,23 @@ class Vulture(ast.NodeVisitor):
                 self._define_variable(param, node.lineno, confidence=100)
 
     def visit_If(self, node):
-        else_body = (getattr(node, 'orelse')[0] if getattr(node, 'orelse')
-                     else None)
+        else_body = getattr(node, 'orelse')
         if utils.condition_is_always_true(node.test) and else_body:
-            self._define(self.unreachable_code, 'if-True', else_body.lineno,
-                         size=lines.count_lines(else_body)
-                         if self.sort_by_size else 1,
+            if self.sort_by_size:
+                size = (lines.get_last_line_number(else_body[-1]) -
+                        else_body[0].lineno + 1)
+            else:
+                size = 1
+            self._define(self.unreachable_code, 'if-True', else_body[0].lineno,
+                         size=size,
                          message="'if' condition always evaluates to True",
                          confidence=100)
         elif utils.condition_is_always_false(node.test):
-            size = ((lines.count_lines(node) - lines.count_lines(else_body)
-                     if else_body else lines.count_lines(node))
-                    if self.sort_by_size else 1)
+            if self.sort_by_size:
+                size = (lines.get_last_line_number(node.body[-1]) -
+                        node.lineno + 1)
+            else:
+                size = 1
             self._define(self.unreachable_code, 'if-False', node.lineno,
                          size=size,
                          message="unsatisfiable 'if' condition",
