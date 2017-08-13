@@ -11,10 +11,25 @@ class VultureInputException(Exception):
     pass
 
 
-def condition_is_unsatisfiable(condition):
+def condition_is_always_true(condition):
+    try:
+        return _evaluate_condition(condition)
+    except ValueError:
+        return False
+
+
+def condition_is_always_false(condition):
+    try:
+        return not _evaluate_condition(condition)
+    except ValueError:
+        return False
+
+
+def _evaluate_condition(condition):
     """
-    Try to safely evaluate the given condition. Return true, if the
-    evaluation succeeds and the condition evaluates to False.
+    Try to safely evaluate the given condition. Return True or False if
+    the if the given condition is always True or False, respectively.
+    Raise ``ValueError`` if the condition cannot be evaluated safely.
 
     The evaluation will only succeed if the condition exclusively
     consists of Python literals. We could use eval() to catch more
@@ -25,11 +40,11 @@ def condition_is_unsatisfiable(condition):
 
     """
     try:
-        satisfiable = bool(ast.literal_eval(condition))
+        result = bool(ast.literal_eval(condition))
     except ValueError:
-        return False
+        raise ValueError("Condition cannot be evaluated")
     else:
-        return not satisfiable
+        return result
 
 
 def format_path(path):

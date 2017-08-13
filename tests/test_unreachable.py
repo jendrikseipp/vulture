@@ -219,7 +219,7 @@ def test_continue_nested_loops(v):
     v.scan("""\
 def foo():
     a = 0
-    if True:
+    if something():
         foo()
         if bar():
             a = 2

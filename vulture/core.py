@@ -384,6 +384,29 @@ class Vulture(ast.NodeVisitor):
             if param and isinstance(param, str):
                 self._define_variable(param, node.lineno, confidence=100)
 
+    def visit_If(self, node):
+        else_body = getattr(node, 'orelse')
+        if utils.condition_is_always_true(node.test) and else_body:
+            if self.sort_by_size:
+                size = (lines.get_last_line_number(else_body[-1]) -
+                        else_body[0].lineno + 1)
+            else:
+                size = 1
+            self._define(self.unreachable_code, 'else', else_body[0].lineno,
+                         size=size,
+                         message="unreachable 'else' block",
+                         confidence=100)
+        elif utils.condition_is_always_false(node.test):
+            if self.sort_by_size:
+                size = (lines.get_last_line_number(node.body[-1]) -
+                        node.lineno + 1)
+            else:
+                size = 1
+            self._define(self.unreachable_code, 'if', node.lineno,
+                         size=size,
+                         message="unsatisfiable 'if' condition",
+                         confidence=100)
+
     def visit_Import(self, node):
         self._add_aliases(node)
 
@@ -432,7 +455,7 @@ class Vulture(ast.NodeVisitor):
                     self.used_attrs.add(attr)
 
     def visit_While(self, node):
-        if utils.condition_is_unsatisfiable(node.test):
+        if utils.condition_is_always_false(node.test):
             self._define(self.unreachable_code, 'while', node.lineno,
                          size=lines.count_lines(node) if self.sort_by_size
                          else 1,
