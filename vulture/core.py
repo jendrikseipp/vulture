@@ -385,12 +385,21 @@ class Vulture(ast.NodeVisitor):
                 self._define_variable(param, node.lineno, confidence=100)
 
     def visit_If(self, node):
-        if utils.condition_is_unsatisfiable(node.test):
-            self._define(self.unreachable_code, 'if', node.lineno,
-                         size=lines.count_lines(node) if self.sort_by_size
-                         else 1,
-                         message="unsatisfiable 'if' condition",
-                         confidence=100)
+        try:
+            if utils.evaluate_condition(node.test):
+                self._define(self.unreachable_code, 'if', node.lineno,
+                             size=lines.count_lines(node) if self.sort_by_size
+                             else 1,
+                             message="'if' condition always evaluates to True",
+                             confidence=100)
+            else:
+                self._define(self.unreachable_code, 'if', node.lineno,
+                             size=lines.count_lines(node) if self.sort_by_size
+                             else 1,
+                             message="unsatisfiable 'if' condition",
+                             confidence=100)
+        except ValueError:
+            pass
 
     def visit_Import(self, node):
         self._add_aliases(node)
@@ -440,12 +449,15 @@ class Vulture(ast.NodeVisitor):
                     self.used_attrs.add(attr)
 
     def visit_While(self, node):
-        if utils.condition_is_unsatisfiable(node.test):
-            self._define(self.unreachable_code, 'while', node.lineno,
-                         size=lines.count_lines(node) if self.sort_by_size
-                         else 1,
-                         message="unsatisfiable 'while' condition",
-                         confidence=100)
+        try:
+            if not utils.evaluate_condition(node.test):
+                self._define(self.unreachable_code, 'while', node.lineno,
+                             size=lines.count_lines(node) if self.sort_by_size
+                             else 1,
+                             message="unsatisfiable 'while' condition",
+                             confidence=100)
+        except ValueError:
+            pass
 
     def visit(self, node):
         method = 'visit_' + node.__class__.__name__

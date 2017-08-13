@@ -11,7 +11,7 @@ class VultureInputException(Exception):
     pass
 
 
-def condition_is_unsatisfiable(condition):
+def evaluate_condition(condition):
     """
     Try to safely evaluate the given condition. Return true, if the
     evaluation succeeds and the condition evaluates to False.
@@ -25,11 +25,11 @@ def condition_is_unsatisfiable(condition):
 
     """
     try:
-        satisfiable = bool(ast.literal_eval(condition))
+        result = bool(ast.literal_eval(condition))
     except ValueError:
-        return False
+        raise ValueError("Condition cannot be evaluated")
     else:
-        return not satisfiable
+        return result
 
 
 def format_path(path):
