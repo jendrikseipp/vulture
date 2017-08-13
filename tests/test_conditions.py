@@ -17,7 +17,6 @@ def test_false():
     check_condition('False', False)
     check_condition('None', False)
     check_condition("0", False)
-    check_condition("0", False)
     if sys.version_info > (3, 0):
         check_condition("1 - 1", False)
 
@@ -113,14 +112,19 @@ if foo():
     if bar():
         pass
     elif True:
-        print("Unreachable")
-    elif something():
-        pass
+        print("Reachable code starts")
+        if something():
+            pass
+        else:
+            print("Reachable code ends")
+    elif something_else():
+        print("I am unreachable")
     else:
+        print("Unreachable")
         print("Else Block")
 else:
     pass
 """)
     print(v.unreachable_code[0].lineno)
     print(v.unreachable_code[0].size)
-    check_unreachable(v, 6, 4, 'if-True')
+    check_unreachable(v, 10, 5, 'if-True')

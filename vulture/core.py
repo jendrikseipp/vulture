@@ -387,14 +387,13 @@ class Vulture(ast.NodeVisitor):
     def visit_If(self, node):
         try:
             if utils.evaluate_condition(node.test):
-                dead_node = getattr(node, 'orelse')
-                if dead_node:
-                    first_dead_node = dead_node[0]
-                    last_dead_node = dead_node[-1]
+                orelse = getattr(node, 'orelse')
+                if orelse:
+                    orelse = orelse[0]
                     message = "'if' condition always evaluates to True"
                     self._define(self.unreachable_code, 'if-True',
-                                 first_dead_node.lineno,
-                                 size=lines.count_lines(last_dead_node)
+                                 orelse.lineno,
+                                 size=lines.count_lines(orelse)
                                  if self.sort_by_size else 1,
                                  message=message, confidence=100)
             else:
