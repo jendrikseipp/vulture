@@ -3,7 +3,8 @@ News
 
 0.24 (unreleased)
 -----------------
-* Detect unsatisfiable while-conditions (thanks @RJ722).
+* Detect unsatisfiable ``while``-conditions (thanks @RJ722).
+* Detect unsatisfiable ``if``- and ``else``-conditions (thanks @RJ722).
 * Handle null bytes in source code.
 
 
