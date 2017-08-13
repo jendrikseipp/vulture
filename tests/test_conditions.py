@@ -10,7 +10,7 @@ assert v  # Silence pyflakes
 
 def check_condition(code, result):
     condition = ast.parse(code, mode='eval')
-    assert utils.evaluate_condition(condition) == result
+    assert utils._evaluate_condition(condition) == result
 
 
 def test_false():
@@ -73,7 +73,6 @@ def test_if_false(v):
 if False:
     pass
 """)
-    print(v.unreachable_code[0])
     check_unreachable(v, 1, 2, 'if-False')
 
 
@@ -84,7 +83,6 @@ if bar():
 elif False:
     print("Unreachable")
 """)
-    print(v.unreachable_code[0])
     check_unreachable(v, 3, 2, 'if-False')
 
 
@@ -102,7 +100,6 @@ if foo():
 else:
     pass
 """)
-    print(v.unreachable_code[0].size)
     check_unreachable(v, 4, 2, 'if-False')
 
 
@@ -125,6 +122,4 @@ if foo():
 else:
     pass
 """)
-    print(v.unreachable_code[0].lineno)
-    print(v.unreachable_code[0].size)
     check_unreachable(v, 10, 5, 'if-True')

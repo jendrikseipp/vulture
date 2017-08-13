@@ -11,7 +11,21 @@ class VultureInputException(Exception):
     pass
 
 
-def evaluate_condition(condition):
+def condition_is_always_true(condition):
+    try:
+        return _evaluate_condition(condition)
+    except ValueError:
+        return False
+
+
+def condition_is_always_false(condition):
+    try:
+        return not _evaluate_condition(condition)
+    except ValueError:
+        return False
+
+
+def _evaluate_condition(condition):
     """
     Try to safely evaluate the given condition. Return true or false if the
     if the given condition is always true or false respectively.

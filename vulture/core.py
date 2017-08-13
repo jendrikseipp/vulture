@@ -385,30 +385,22 @@ class Vulture(ast.NodeVisitor):
                 self._define_variable(param, node.lineno, confidence=100)
 
     def visit_If(self, node):
-        try:
-            if utils.evaluate_condition(node.test):
-                orelse = getattr(node, 'orelse')
-                if orelse:
-                    orelse = orelse[0]
-                    message = "'if' condition always evaluates to True"
-                    self._define(self.unreachable_code, 'if-True',
-                                 orelse.lineno,
-                                 size=lines.count_lines(orelse)
-                                 if self.sort_by_size else 1,
-                                 message=message, confidence=100)
-            else:
-                orelse = getattr(node, 'orelse')
-                first_reachable_node = orelse[0] if orelse else None
-                size = ((lines.count_lines(node) -
-                         lines.count_lines(first_reachable_node)
-                         if first_reachable_node else lines.count_lines(node))
-                        if self.sort_by_size else 1)
-                self._define(self.unreachable_code, 'if-False', node.lineno,
-                             size=size,
-                             message="unsatisfiable 'if' condition",
-                             confidence=100)
-        except ValueError:
-            pass
+        else_body = (getattr(node, 'orelse')[0] if getattr(node, 'orelse')
+                     else None)
+        if utils.condition_is_always_true(node.test) and else_body:
+            self._define(self.unreachable_code, 'if-True', else_body.lineno,
+                         size=lines.count_lines(else_body)
+                         if self.sort_by_size else 1,
+                         message="'if' condition always evaluates to True",
+                         confidence=100)
+        elif utils.condition_is_always_false(node.test):
+            size = ((lines.count_lines(node) - lines.count_lines(else_body)
+                     if else_body else lines.count_lines(node))
+                    if self.sort_by_size else 1)
+            self._define(self.unreachable_code, 'if-False', node.lineno,
+                         size=size,
+                         message="unsatisfiable 'if' condition",
+                         confidence=100)
 
     def visit_Import(self, node):
         self._add_aliases(node)
@@ -458,15 +450,12 @@ class Vulture(ast.NodeVisitor):
                     self.used_attrs.add(attr)
 
     def visit_While(self, node):
-        try:
-            if not utils.evaluate_condition(node.test):
-                self._define(self.unreachable_code, 'while', node.lineno,
-                             size=lines.count_lines(node) if self.sort_by_size
-                             else 1,
-                             message="unsatisfiable 'while' condition",
-                             confidence=100)
-        except ValueError:
-            pass
+        if utils.condition_is_always_false(node.test):
+            self._define(self.unreachable_code, 'while', node.lineno,
+                         size=lines.count_lines(node) if self.sort_by_size
+                         else 1,
+                         message="unsatisfiable 'while' condition",
+                         confidence=100)
 
     def visit(self, node):
         method = 'visit_' + node.__class__.__name__
