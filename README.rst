@@ -78,16 +78,20 @@ How does it work?
 Vulture uses the ``ast`` module to build abstract syntax trees for all
 given files. While traversing all syntax trees it records the names of
 defined and used objects. Afterwards, it reports the objects which have
-been defined, but not used. This analysis ignores scopes and focuses
-only on object names.
+been defined, but not used. This analysis ignores scopes and only takes
+object names into account.
+
+Vulture also detects unreachable code by looking for code after
+``return``, ``break``, ``continue`` and ``raise`` statements, and by
+searching for unsatisfiable ``if``- and ``while``-conditions.
 
 
 Sort by size
 ------------
 
-When using the ``--sort-by-size`` option, Vulture sorts unused classes
-and functions by their lines of code. This helps developers prioritize
-where to look for dead code first.
+When using the ``--sort-by-size`` option, Vulture sorts unused code by
+its number of lines. This helps developers prioritize where to look for
+dead code first.
 
 
 Similar programs
