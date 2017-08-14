@@ -1,7 +1,7 @@
 News
 ====
 
-0.24 (unreleased)
+0.24 (2017-08-14)
 -----------------
 * Detect unsatisfiable ``while``-conditions (thanks @RJ722).
 * Detect unsatisfiable ``if``- and ``else``-conditions (thanks @RJ722).
