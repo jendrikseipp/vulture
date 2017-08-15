@@ -3,8 +3,11 @@ TODOs
 
 * Support Python 3.5 async/await (#20).
 * Pass relevant options directly to ``scavenge()`` and ``report()``.
-* Compute sizes on demand.
+* Always report number of lines. Increases runtime by a factor of ~1.08,
+  but simplifies code and keeps memory usage stable.
 * Update README file.
+* Add option (``--make-whitelist``) to write whitelist file in the following format:
+  myfunc  # foo.py:42: unused function 'myfunc'
 * Once we drop Python 2.6 compatibility use argparse instead of optparse.
 
 
@@ -19,7 +22,8 @@ Non-TODOs
 * Only count lines for unused code by storing a function ``get_size`` in
   Item for computing the size on demand. This is 1.5 times as slow as computing
   no sizes.
-* Always report number of lines. Increases runtime by a factor of ~1.08.
+* Compute sizes on demand. Storing nodes increases memory usage from
+  ~120 MiB to ~580 MiB for tensorflow's Python code.
 * Detect unreachable code for ``ast.IfExp`` (rarely used, even more rarely "unused").
 * Detect unreachable code for ``ast.Assert`` (``assert False`` is common idiom
   for aborting rogue code).
