@@ -5,6 +5,7 @@ News
 -----------------
 * Detect unsatisfiable statements containing ``and``, ``or`` and ``not``.
 * Use filenames and line numbers as tie-breakers when sorting by size.
+* Store first and last line numbers in Item objects.
 
 
 0.24 (2017-08-14)

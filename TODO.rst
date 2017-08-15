@@ -3,8 +3,6 @@ TODOs
 
 * Support Python 3.5 async/await (#20).
 * Pass relevant options directly to ``scavenge()`` and ``report()``.
-* Always report number of lines. Increases runtime by a factor of ~1.08,
-  but simplifies code and keeps memory usage stable.
 * Update README file.
 * Add option (``--make-whitelist``) to write whitelist file in the following format:
   myfunc  # foo.py:42: unused function 'myfunc'
