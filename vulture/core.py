@@ -131,11 +131,7 @@ class Item(object):
 
 class Vulture(ast.NodeVisitor):
     """Find dead code."""
-    def __init__(self, verbose=False, min_confidence=0):
-        if not 0 <= min_confidence <= 100:
-            raise ValueError('min_confidence must be between 0 and 100.')
-        self.min_confidence = min_confidence
-
+    def __init__(self, verbose=False):
         self.verbose = verbose
 
         def get_list(typ):
@@ -243,10 +239,13 @@ class Vulture(ast.NodeVisitor):
                 module_string = module_data.decode("utf-8")
                 self.scan(module_string, filename=path)
 
-    def get_unused_code(self, sort_by_size=False):
+    def get_unused_code(self, min_confidence=0, sort_by_size=False):
         """
         Return ordered list of unused Item objects.
         """
+        if not 0 <= min_confidence <= 100:
+            raise ValueError('min_confidence must be between 0 and 100.')
+
         def by_name(item):
             return (item.filename.lower(), item.first_lineno)
 
@@ -259,16 +258,17 @@ class Vulture(ast.NodeVisitor):
                        self.unreachable_code)
 
         confidently_unused = [obj for obj in unused_code
-                              if obj.confidence >= self.min_confidence]
+                              if obj.confidence >= min_confidence]
 
         return sorted(confidently_unused,
                       key=by_size if sort_by_size else by_name)
 
-    def report(self, sort_by_size=False):
+    def report(self, min_confidence=0, sort_by_size=False):
         """
         Print ordered list of Item objects to stdout.
         """
-        for item in self.get_unused_code(sort_by_size=sort_by_size):
+        for item in self.get_unused_code(
+                min_confidence=min_confidence, sort_by_size=sort_by_size):
             if sort_by_size:
                 line_format = 'line' if item.size == 1 else 'lines'
                 size_report = ', {0:d} {1}'.format(item.size, line_format)
@@ -533,10 +533,11 @@ analyzes all contained *.py files.
 
 def main():
     options, args = _parse_args()
-    vulture = Vulture(verbose=options.verbose,
-                      min_confidence=options.min_confidence)
+    vulture = Vulture(verbose=options.verbose)
     vulture.scavenge(args, exclude=options.exclude)
-    sys.exit(vulture.report(sort_by_size=options.sort_by_size))
+    sys.exit(vulture.report(
+        min_confidence=options.min_confidence,
+        sort_by_size=options.sort_by_size))
 
 
 # Only useful for Python 2.6 which doesn't support "python -m vulture".
