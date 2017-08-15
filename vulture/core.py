@@ -100,7 +100,7 @@ class Item(object):
     """
     Hold the name, type and location of defined code.
     """
-    def __init__(self, name, typ, filename, lineno, size=1, message='',
+    def __init__(self, name, typ, filename, lineno, size, message='',
                  confidence=DEFAULT_CONFIDENCE):
         self.name = name
         self.typ = typ
@@ -332,7 +332,7 @@ class Vulture(ast.NodeVisitor):
             self._log('Ignoring {typ} "{name}"'.format(**locals()))
         else:
             collection.append(
-                Item(name, typ, self.filename, lineno, size=size,
+                Item(name, typ, self.filename, lineno, size,
                      message=message, confidence=confidence))
 
     def _define_variable(self, name, lineno, confidence=DEFAULT_CONFIDENCE):
@@ -353,28 +353,27 @@ class Vulture(ast.NodeVisitor):
 
     def visit_Attribute(self, node):
         if isinstance(node.ctx, ast.Store):
-            size = lines.count_lines(node) if self.sort_by_size else 1
-            self._define(self.defined_attrs, node.attr, node.lineno, size=size)
+            size = lines.count_lines(node)
+            self._define(self.defined_attrs, node.attr, node.lineno, size)
         elif isinstance(node.ctx, ast.Load):
             self.used_attrs.add(node.attr)
 
     def visit_ClassDef(self, node):
-        size = lines.count_lines(node) if self.sort_by_size else 1
         self._define(
             self.defined_classes, node.name, node.lineno,
-            size=size, ignore=_ignore_class)
+            lines.count_lines(node), ignore=_ignore_class)
 
     def visit_FunctionDef(self, node):
-        size = lines.count_lines(node) if self.sort_by_size else 1
+        size = lines.count_lines(node)
         for decorator in node.decorator_list:
             if getattr(decorator, 'id', None) == 'property':
                 self._define(
-                    self.defined_props, node.name, node.lineno, size=size)
+                    self.defined_props, node.name, node.lineno, size)
                 break
         else:
             # Function is not a property.
             self._define(
-                self.defined_funcs, node.name, node.lineno, size=size,
+                self.defined_funcs, node.name, node.lineno, size,
                 ignore=_ignore_function)
 
         # Detect *args and **kwargs parameters. Python 3 recognizes them
@@ -387,23 +386,17 @@ class Vulture(ast.NodeVisitor):
     def visit_If(self, node):
         else_body = getattr(node, 'orelse')
         if utils.condition_is_always_true(node.test) and else_body:
-            if self.sort_by_size:
-                size = (lines.get_last_line_number(else_body[-1]) -
-                        else_body[0].lineno + 1)
-            else:
-                size = 1
+            size = (lines.get_last_line_number(else_body[-1]) -
+                    else_body[0].lineno + 1)
             self._define(self.unreachable_code, 'else', else_body[0].lineno,
-                         size=size,
+                         size,
                          message="unreachable 'else' block",
                          confidence=100)
         elif utils.condition_is_always_false(node.test):
-            if self.sort_by_size:
-                size = (lines.get_last_line_number(node.body[-1]) -
-                        node.lineno + 1)
-            else:
-                size = 1
+            size = (lines.get_last_line_number(node.body[-1]) -
+                    node.lineno + 1)
             self._define(self.unreachable_code, 'if', node.lineno,
-                         size=size,
+                         size,
                          message="unsatisfiable 'if' condition",
                          confidence=100)
 
@@ -457,8 +450,7 @@ class Vulture(ast.NodeVisitor):
     def visit_While(self, node):
         if utils.condition_is_always_false(node.test):
             self._define(self.unreachable_code, 'while', node.lineno,
-                         size=lines.count_lines(node) if self.sort_by_size
-                         else 1,
+                         lines.count_lines(node),
                          message="unsatisfiable 'while' condition",
                          confidence=100)
 
@@ -489,8 +481,8 @@ class Vulture(ast.NodeVisitor):
                     self.unreachable_code,
                     class_name,
                     first_unreachable_node.lineno,
-                    size=lines.get_last_line_number(ast_list[-1]) -
-                    first_unreachable_node.lineno + 1,
+                    lines.get_last_line_number(ast_list[-1]) -
+                        first_unreachable_node.lineno + 1,
                     message="unreachable code after '{class_name}'".format(
                         **locals()),
                     confidence=100)
