@@ -31,4 +31,4 @@ def skip_if_not_has_async(function):
 
 @pytest.fixture
 def v():
-    return core.Vulture(verbose=True, sort_by_size=True)
+    return core.Vulture(verbose=True)
