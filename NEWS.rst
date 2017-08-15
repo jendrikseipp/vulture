@@ -1,7 +1,7 @@
 News
 ====
 
-0.25 (unreleased)
+0.25 (2017-08-15)
 -----------------
 * Detect unsatisfiable statements containing ``and``, ``or`` and ``not``.
 * Use filenames and line numbers as tie-breakers when sorting by size.
