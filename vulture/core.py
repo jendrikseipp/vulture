@@ -131,18 +131,11 @@ class Item(object):
 
 class Vulture(ast.NodeVisitor):
     """Find dead code."""
-    def __init__(self, exclude=None, verbose=False, sort_by_size=False,
-                 min_confidence=0):
+    def __init__(self, verbose=False, sort_by_size=False, min_confidence=0):
         if not 0 <= min_confidence <= 100:
             raise ValueError('min_confidence must be between 0 and 100.')
-        self.exclude = []
         self.sort_by_size = sort_by_size
         self.min_confidence = min_confidence
-
-        for pattern in exclude or []:
-            if not any(char in pattern for char in ['*', '?', '[']):
-                pattern = '*{0}*'.format(pattern)
-            self.exclude.append(pattern)
 
         self.verbose = verbose
 
@@ -206,12 +199,19 @@ class Vulture(ast.NodeVisitor):
                 sys.exit('Error: {0} could not be found.'.format(path))
         return modules
 
-    def scavenge(self, paths):
-        def exclude(name):
-            return any(fnmatchcase(name, pattern) for pattern in self.exclude)
+    def scavenge(self, paths, exclude=None):
+        def prepare_pattern(pattern):
+            if not any(char in pattern for char in ['*', '?', '[']):
+                pattern = '*{pattern}*'.format(**locals())
+            return pattern
+
+        exclude = [prepare_pattern(pattern) for pattern in (exclude or [])]
+
+        def exclude_file(name):
+            return any(fnmatchcase(name, pattern) for pattern in exclude)
 
         for module in self._get_modules(paths):
-            if exclude(module):
+            if exclude_file(module):
                 self._log('Excluded:', module)
                 continue
 
@@ -230,7 +230,7 @@ class Vulture(ast.NodeVisitor):
         unique_imports = set(item.name for item in self.defined_imports)
         for import_name in unique_imports:
             path = os.path.join('whitelists', import_name) + '.py'
-            if exclude(path):
+            if exclude_file(path):
                 self._log('Excluded whitelist:', path)
             else:
                 try:
@@ -534,10 +534,10 @@ analyzes all contained *.py files.
 
 def main():
     options, args = _parse_args()
-    vulture = Vulture(exclude=options.exclude, verbose=options.verbose,
+    vulture = Vulture(verbose=options.verbose,
                       sort_by_size=options.sort_by_size,
                       min_confidence=options.min_confidence)
-    vulture.scavenge(args)
+    vulture.scavenge(args, exclude=options.exclude)
     sys.exit(vulture.report())
 
 
