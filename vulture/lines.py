@@ -92,3 +92,10 @@ def count_lines(node, verbose=False):
     if verbose:
         assert _get_last_line_number_slow(node) == last_lineno
     return last_lineno - node.lineno + 1
+
+
+def get_lineno_and_size(first_node, last_node=None):
+    last_node = last_node or first_node
+    last_lineno = get_last_line_number(last_node)
+    size = last_lineno - first_node.lineno + 1
+    return (first_node.lineno, size)

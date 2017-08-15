@@ -386,19 +386,17 @@ class Vulture(ast.NodeVisitor):
     def visit_If(self, node):
         else_body = getattr(node, 'orelse')
         if utils.condition_is_always_true(node.test) and else_body:
-            size = (lines.get_last_line_number(else_body[-1]) -
-                    else_body[0].lineno + 1)
-            self._define(self.unreachable_code, 'else', else_body[0].lineno,
-                         size,
-                         message="unreachable 'else' block",
-                         confidence=100)
+            self._define(
+                self.unreachable_code, 'else',
+                *lines.get_lineno_and_size(else_body[0], else_body[-1]),
+                message="unreachable 'else' block",
+                confidence=100)
         elif utils.condition_is_always_false(node.test):
-            size = (lines.get_last_line_number(node.body[-1]) -
-                    node.lineno + 1)
-            self._define(self.unreachable_code, 'if', node.lineno,
-                         size,
-                         message="unsatisfiable 'if' condition",
-                         confidence=100)
+            self._define(
+                self.unreachable_code, 'if',
+                *lines.get_lineno_and_size(node, node.body[-1]),
+                message="unsatisfiable 'if' condition",
+                confidence=100)
 
     def visit_Import(self, node):
         self._add_aliases(node)
@@ -449,8 +447,8 @@ class Vulture(ast.NodeVisitor):
 
     def visit_While(self, node):
         if utils.condition_is_always_false(node.test):
-            self._define(self.unreachable_code, 'while', node.lineno,
-                         lines.count_lines(node),
+            self._define(self.unreachable_code, 'while',
+                         *lines.get_lineno_and_size(node),
                          message="unsatisfiable 'while' condition",
                          confidence=100)
 
@@ -480,9 +478,8 @@ class Vulture(ast.NodeVisitor):
                 self._define(
                     self.unreachable_code,
                     class_name,
-                    first_unreachable_node.lineno,
-                    lines.get_last_line_number(ast_list[-1]) -
-                        first_unreachable_node.lineno + 1,
+                    *lines.get_lineno_and_size(
+                        first_unreachable_node, ast_list[-1]),
                     message="unreachable code after '{class_name}'".format(
                         **locals()),
                     confidence=100)
