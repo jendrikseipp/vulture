@@ -100,18 +100,24 @@ class Item(object):
     """
     Hold the name, type and location of defined code.
     """
-    def __init__(self, name, typ, filename, lineno, size, message='',
+    def __init__(self, name, typ, filename, first_lineno, last_lineno,
+                 message='',
                  confidence=DEFAULT_CONFIDENCE):
         self.name = name
         self.typ = typ
         self.filename = filename
-        self.lineno = lineno
-        self.size = size
+        self.first_lineno = first_lineno
+        self.last_lineno = last_lineno
         self.message = message or "unused {typ} '{name}'".format(**locals())
         self.confidence = confidence
 
+    @property
+    def size(self):
+        assert self.last_lineno >= self.first_lineno
+        return self.last_lineno - self.first_lineno + 1
+
     def _tuple(self):
-        return (self.filename, self.lineno, self.name)
+        return (self.filename, self.first_lineno, self.name)
 
     def __repr__(self):
         return repr(self.name)
@@ -243,7 +249,7 @@ class Vulture(ast.NodeVisitor):
         Return ordered list of unused Item objects.
         """
         def by_name(item):
-            return (item.filename.lower(), item.lineno)
+            return (item.filename.lower(), item.first_lineno)
 
         def by_size(item):
             return (item.size,) + by_name(item)
@@ -271,7 +277,7 @@ class Vulture(ast.NodeVisitor):
                 size_report = ''
 
             print("{0}:{1:d}: {2} ({3}% confidence{4})".format(
-                utils.format_path(item.filename), item.lineno,
+                utils.format_path(item.filename), item.first_lineno,
                 item.message, item.confidence, size_report))
             self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
@@ -320,23 +326,27 @@ class Vulture(ast.NodeVisitor):
             name = name_and_alias.name.partition('.')[0]
             alias = name_and_alias.asname
             self._define(
-                self.defined_imports, alias or name, node.lineno,
+                self.defined_imports, alias or name, node,
                 confidence=90, ignore=_ignore_import)
             if alias is not None:
                 self.used_names.add(name_and_alias.name)
 
-    def _define(self, collection, name, lineno, size=1, message='',
-                confidence=DEFAULT_CONFIDENCE, ignore=None):
+    def _define(self, collection, name, first_node, last_node=None,
+                message='', confidence=DEFAULT_CONFIDENCE, ignore=None):
+        last_node = last_node or first_node
         typ = collection.typ
         if ignore and ignore(self.filename, name):
             self._log('Ignoring {typ} "{name}"'.format(**locals()))
         else:
+            # Function arguments have lineno attribute since Python 3.4.
+            first_lineno = getattr(first_node, 'lineno', -1)
+            last_lineno = lines.get_last_line_number(last_node)
             collection.append(
-                Item(name, typ, self.filename, lineno, size,
+                Item(name, typ, self.filename, first_lineno, last_lineno,
                      message=message, confidence=confidence))
 
-    def _define_variable(self, name, lineno, confidence=DEFAULT_CONFIDENCE):
-        self._define(self.defined_vars, name, lineno, confidence=confidence,
+    def _define_variable(self, name, node, confidence=DEFAULT_CONFIDENCE):
+        self._define(self.defined_vars, name, node, confidence=confidence,
                      ignore=_ignore_variable)
 
     def visit_alias(self, node):
@@ -348,32 +358,27 @@ class Vulture(ast.NodeVisitor):
 
     def visit_arg(self, node):
         """Function argument. Python 3 only. Has lineno since Python 3.4"""
-        self._define_variable(node.arg, getattr(node, 'lineno', -1),
-                              confidence=100)
+        self._define_variable(node.arg, node, confidence=100)
 
     def visit_Attribute(self, node):
         if isinstance(node.ctx, ast.Store):
-            size = lines.count_lines(node)
-            self._define(self.defined_attrs, node.attr, node.lineno, size)
+            self._define(self.defined_attrs, node.attr, node)
         elif isinstance(node.ctx, ast.Load):
             self.used_attrs.add(node.attr)
 
     def visit_ClassDef(self, node):
         self._define(
-            self.defined_classes, node.name, node.lineno,
-            lines.count_lines(node), ignore=_ignore_class)
+            self.defined_classes, node.name, node, ignore=_ignore_class)
 
     def visit_FunctionDef(self, node):
-        size = lines.count_lines(node)
         for decorator in node.decorator_list:
             if getattr(decorator, 'id', None) == 'property':
-                self._define(
-                    self.defined_props, node.name, node.lineno, size)
+                self._define(self.defined_props, node.name, node)
                 break
         else:
             # Function is not a property.
             self._define(
-                self.defined_funcs, node.name, node.lineno, size,
+                self.defined_funcs, node.name, node,
                 ignore=_ignore_function)
 
         # Detect *args and **kwargs parameters. Python 3 recognizes them
@@ -381,20 +386,20 @@ class Vulture(ast.NodeVisitor):
         # use visit_arguments, because its node has no lineno.
         for param in [node.args.vararg, node.args.kwarg]:
             if param and isinstance(param, str):
-                self._define_variable(param, node.lineno, confidence=100)
+                self._define_variable(param, node, confidence=100)
 
     def visit_If(self, node):
         else_body = getattr(node, 'orelse')
         if utils.condition_is_always_true(node.test) and else_body:
             self._define(
-                self.unreachable_code, 'else',
-                *lines.get_lineno_and_size(else_body[0], else_body[-1]),
+                self.unreachable_code, 'else', else_body[0],
+                last_node=else_body[-1],
                 message="unreachable 'else' block",
                 confidence=100)
         elif utils.condition_is_always_false(node.test):
             self._define(
-                self.unreachable_code, 'if',
-                *lines.get_lineno_and_size(node, node.body[-1]),
+                self.unreachable_code, 'if', node,
+                last_node=node.body[-1],
                 message="unsatisfiable 'if' condition",
                 confidence=100)
 
@@ -410,7 +415,7 @@ class Vulture(ast.NodeVisitor):
                 node.id not in IGNORED_VARIABLE_NAMES):
             self.used_names.add(node.id)
         elif isinstance(node.ctx, (ast.Param, ast.Store)):
-            self._define_variable(node.id, node.lineno)
+            self._define_variable(node.id, node)
 
     def visit_Str(self, node):
         """
@@ -447,8 +452,7 @@ class Vulture(ast.NodeVisitor):
 
     def visit_While(self, node):
         if utils.condition_is_always_false(node.test):
-            self._define(self.unreachable_code, 'while',
-                         *lines.get_lineno_and_size(node),
+            self._define(self.unreachable_code, 'while', node,
                          message="unsatisfiable 'while' condition",
                          confidence=100)
 
@@ -478,8 +482,8 @@ class Vulture(ast.NodeVisitor):
                 self._define(
                     self.unreachable_code,
                     class_name,
-                    *lines.get_lineno_and_size(
-                        first_unreachable_node, ast_list[-1]),
+                    first_unreachable_node,
+                    last_node=ast_list[-1],
                     message="unreachable code after '{class_name}'".format(
                         **locals()),
                     confidence=100)

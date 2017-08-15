@@ -18,7 +18,7 @@ def check(items_or_names, expected_names):
 def check_unreachable(v, lineno, size, name):
     assert len(v.unreachable_code) == 1
     item = v.unreachable_code[0]
-    assert item.lineno == lineno
+    assert item.first_lineno == lineno
     assert item.size == size
     assert item.name == name
 

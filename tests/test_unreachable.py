@@ -1,13 +1,6 @@
+from . import check_unreachable
 from . import v
 assert v  # Silence pyflakes
-
-
-def check_unreachable(v, lineno, size, name):
-    assert len(v.unreachable_code) == 1
-    item = v.unreachable_code[0]
-    assert item.lineno == lineno
-    assert item.size == size
-    assert item.name == name
 
 
 def test_return_assignment(v):

@@ -37,26 +37,12 @@ def _get_last_child_with_lineno(node):
     return None
 
 
-def _get_last_line_number_slow(node):
-    """
-    A simpler and possibly more accurate (but also slower) version of
-    get_last_line_number().
-
-    It traverses all descendants of node and records the highest line
-    number seen.
-
-    This code is 1.6 times slower than count_lines() on the Python
-    subset of tensorflow. It reports the same sizes for all test cases
-    and the functions and classes in tensorflow. We can think about
-    using the simpler version once we only compute line numbers for
-    unused code.
-
-    """
-    return max(getattr(node, 'lineno', -1) for node in ast.walk(node))
-
-
 def get_last_line_number(node):
     """Estimate last line number of the given AST node.
+
+    The estimate is based on the line number of the last descendant of
+    `node` that has a lineno attribute. Therefore, it underestimates the
+    size of code ending with, e.g., multiline strings and comments.
 
     When traversing the tree, we may see a mix of nodes with line
     numbers and nodes without line numbers. We therefore, store the
@@ -77,25 +63,3 @@ def get_last_line_number(node):
             except AttributeError:
                 pass
         node = last_child
-
-
-def count_lines(node, verbose=False):
-    """
-    Estimate the number of lines of the given AST node.
-
-    The estimate is based on the line number of the last descendant of
-    `node` that has a lineno attribute. Therefore, it underestimates the
-    size of code ending with, e.g., multiline strings and comments.
-
-    """
-    last_lineno = get_last_line_number(node)
-    if verbose:
-        assert _get_last_line_number_slow(node) == last_lineno
-    return last_lineno - node.lineno + 1
-
-
-def get_lineno_and_size(first_node, last_node=None):
-    last_node = last_node or first_node
-    last_lineno = get_last_line_number(last_node)
-    size = last_lineno - first_node.lineno + 1
-    return (first_node.lineno, size)
