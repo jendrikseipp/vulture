@@ -2,8 +2,7 @@ TODOs
 =====
 
 * Support Python 3.5 async/await (#20).
-* Pass relevant options directly to ``scavenge()`` and ``report()``.
-* Update README file.
+* Add example output to README file.
 * Add option (``--make-whitelist``) to write whitelist file in the following format:
   myfunc  # foo.py:42: unused function 'myfunc'
 * Once we drop Python 2.6 compatibility use argparse instead of optparse.
