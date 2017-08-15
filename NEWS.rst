@@ -4,6 +4,7 @@ News
 0.25 (unreleased)
 -----------------
 * Detect unsatisfiable statements containing ``and``, ``or`` and ``not``.
+* Use filenames and line numbers as tie-breakers when sorting by size.
 
 
 0.24 (2017-08-14)

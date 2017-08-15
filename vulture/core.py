@@ -242,11 +242,11 @@ class Vulture(ast.NodeVisitor):
         """
         Return ordered list of unused Item objects.
         """
-        def by_size(item):
-            return item.size
-
         def by_name(item):
             return (item.filename.lower(), item.lineno)
+
+        def by_size(item):
+            return (item.size,) + by_name(item)
 
         unused_code = (self.unused_attrs + self.unused_classes +
                        self.unused_funcs + self.unused_imports +
