@@ -1,6 +1,11 @@
 News
 ====
 
+0.25 (unreleased)
+-----------------
+* Detect unsatisfiable statements containing ``and``, ``or`` and ``not``.
+
+
 0.24 (2017-08-14)
 -----------------
 * Detect unsatisfiable ``while``-conditions (thanks @RJ722).

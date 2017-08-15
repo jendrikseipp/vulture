@@ -11,40 +11,41 @@ class VultureInputException(Exception):
     pass
 
 
-def condition_is_always_true(condition):
-    try:
-        return _evaluate_condition(condition)
-    except ValueError:
-        return False
-
-
-def condition_is_always_false(condition):
-    try:
-        return not _evaluate_condition(condition)
-    except ValueError:
-        return False
-
-
-def _evaluate_condition(condition):
+def _safe_eval(node, default):
     """
-    Try to safely evaluate the given condition. Return True or False if
-    the if the given condition is always True or False, respectively.
-    Raise ``ValueError`` if the condition cannot be evaluated safely.
+    Safely evaluate the Boolean expression under the given AST node.
 
-    The evaluation will only succeed if the condition exclusively
-    consists of Python literals. We could use eval() to catch more
-    cases. However, this function is not safe for arbitrary Python code.
-    Even after overwriting the "__builtins__" dictionary, the original
-    dictionary can be restored
+    Substitute `default` for all sub-expressions that cannot be
+    evaluated (because variables or functions are undefined).
+
+    We could use eval() to evaluate more sub-expressions. However, this
+    function is not safe for arbitrary Python code. Even after
+    overwriting the "__builtins__" dictionary, the original dictionary
+    can be restored
     (https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html).
 
     """
-    try:
-        result = bool(ast.literal_eval(condition))
-    except ValueError:
-        raise ValueError("Condition cannot be evaluated")
+    if isinstance(node, ast.BoolOp):
+        results = [_safe_eval(value, default) for value in node.values]
+        if isinstance(node.op, ast.And):
+            return all(results)
+        else:
+            return any(results)
+    elif isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
+        return not _safe_eval(node.operand, not default)
     else:
-        return result
+        try:
+            return ast.literal_eval(node)
+        except ValueError:
+            return default
+
+
+def condition_is_always_false(condition):
+    return not _safe_eval(condition, True)
+
+
+def condition_is_always_true(condition):
+    return _safe_eval(condition, False)
 
 
 def format_path(path):

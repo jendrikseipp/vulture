@@ -1,7 +1,6 @@
 import ast
 import sys
 
-import pytest
 from vulture import utils
 
 from . import check_unreachable
@@ -10,8 +9,11 @@ assert v  # Silence pyflakes
 
 
 def check_condition(code, result):
-    condition = ast.parse(code, mode='eval')
-    assert utils._evaluate_condition(condition) == result
+    condition = ast.parse(code, mode='eval').body
+    if result:
+        assert utils.condition_is_always_true(condition)
+    else:
+        assert utils.condition_is_always_false(condition)
 
 
 def test_false():
@@ -35,22 +37,43 @@ def test_true():
     check_condition("{'a': 1, 'b': 2}", True)
 
 
+def test_complex_conditions():
+    conditions = [
+        ('foo and False', True, False),
+        ('foo or False', False, False),
+        ('foo and True', False, False),
+        ('foo or True', False, True),
+        ('False and foo', True, False),
+        ('False and 1', True, False),
+        ('not False', False, True),
+        ('not True', True, False),
+        ('not foo', False, False),
+        ('foo and (False or [])', True, False),
+        ('(foo and bar) or {"a": 1}', False, True),
+    ]
+    for condition, always_false, always_true in conditions:
+        condition = ast.parse(condition, mode='eval').body
+        assert not (always_false and always_true)
+        assert utils.condition_is_always_false(condition) == always_false
+        assert utils.condition_is_always_true(condition) == always_true
+
+
 def test_errors():
     conditions = [
         'foo',
-        'foo and False',
         '__name__ == "__main__"',
-        'False and 1',
-        'False and foo',
         'chr(-1)',
         'getattr(True, "foo")',
         'hasattr(str, "foo")',
         'isinstance(True, True)',
-        'not False']
+        'globals()',
+        'locals()',
+        '().__class__',
+    ]
     for condition in conditions:
-        with pytest.raises(ValueError) as e:
-            check_condition(condition, False)
-        assert e.match("Condition cannot be evaluated")
+        condition = ast.parse(condition, mode='eval').body
+        assert not utils.condition_is_always_false(condition)
+        assert not utils.condition_is_always_true(condition)
 
 
 def test_while(v):

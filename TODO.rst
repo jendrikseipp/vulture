@@ -2,9 +2,8 @@ TODOs
 =====
 
 * Support Python 3.5 async/await (#20).
-* Detect ``if not True``.
-* Detect ``if False and foo`` and ``if True or bar``.
 * Pass relevant options directly to ``scavenge()`` and ``report()``.
+* Compute sizes on demand.
 * Update README file.
 * Once we drop Python 2.6 compatibility use argparse instead of optparse.
 
