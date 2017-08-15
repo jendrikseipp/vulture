@@ -337,9 +337,12 @@ class Vulture(ast.NodeVisitor):
         if ignore and ignore(self.filename, name):
             self._log('Ignoring {typ} "{name}"'.format(**locals()))
         else:
-            # Function arguments have lineno attribute since Python 3.4.
-            first_lineno = getattr(first_node, 'lineno', -1)
-            last_lineno = lines.get_last_line_number(last_node)
+            try:
+                first_lineno = first_node.lineno
+                last_lineno = lines.get_last_line_number(last_node)
+            except AttributeError:
+                # ast.arg has lineno attribute since Python 3.4.
+                first_lineno = last_lineno = -1
             collection.append(
                 Item(name, typ, self.filename, first_lineno, last_lineno,
                      message=message, confidence=confidence))
