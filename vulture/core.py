@@ -362,6 +362,9 @@ class Vulture(ast.NodeVisitor):
         """Function argument. Python 3 only. Has lineno since Python 3.4"""
         self._define_variable(node.arg, node, confidence=100)
 
+    def visit_AsyncFunctionDef(self, node):
+        return self.visit_FunctionDef(node)
+
     def visit_Attribute(self, node):
         if isinstance(node.ctx, ast.Store):
             self._define(self.defined_attrs, node.attr, node)

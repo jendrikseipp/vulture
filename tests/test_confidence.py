@@ -1,6 +1,7 @@
 import sys
 
 from vulture import core
+from . import skip_if_not_has_async
 
 dc = core.DEFAULT_CONFIDENCE
 
@@ -79,3 +80,16 @@ Foo()
 """
     check_min_confidence(code, 50, {'some_prop': dc})
     check_min_confidence(code, 100, {})
+
+
+@skip_if_not_has_async
+def test_confidence_async_def():
+    code = """\
+async def foo():
+    if bar():
+        pass
+    else:
+        print("Else")
+"""
+    check_min_confidence(code, 50, {'foo': dc})
+    check_min_confidence(code, 75, {})

@@ -1,4 +1,4 @@
-from . import check, v
+from . import check, skip_if_not_has_async, v
 assert v  # Silence pyflakes.
 
 
@@ -56,6 +56,29 @@ b = foo(5)
 """)
     check(v.unused_funcs, [])
     check(v.defined_funcs, ['foo'])
+
+
+@skip_if_not_has_async
+def test_async_function(v):
+    v.scan("""\
+async def foo():
+    pass
+""")
+    check(v.defined_funcs, ['foo'])
+    check(v.unused_funcs, ['foo'])
+
+
+@skip_if_not_has_async
+def test_async_method(v):
+    v.scan("""\
+class Foo:
+    async def bar(self):
+        pass
+""")
+    check(v.defined_classes, ['Foo'])
+    check(v.defined_funcs, ['bar'])
+    check(v.unused_classes, ['Foo'])
+    check(v.unused_funcs, ['bar'])
 
 
 def test_function_and_method1(v):
@@ -356,6 +379,32 @@ class OtherClass:
     check(v.unused_attrs, [])
     check(v.unused_classes, ['OtherClass'])
     check(v.unused_funcs, ['other_func'])
+
+
+@skip_if_not_has_async
+def test_async_function_name_in_test_file(v):
+    v.scan("""\
+async def test_func():
+    pass
+
+async def other_func():
+    pass
+""", filename='test_function_names.py')
+    check(v.defined_funcs, ['other_func'])
+    check(v.unused_funcs, ['other_func'])
+
+
+@skip_if_not_has_async
+def test_async_function_name_in_normal_file(v):
+    v.scan("""\
+async def test_func():
+    pass
+
+async def other_func():
+    pass
+""", filename='test_function_names.py')
+    check(v.defined_funcs, ['test_func', 'other_func'])
+    check(v.unused_funcs, ['other_func', 'test_func'])
 
 
 def test_function_names_in_normal_file(v):
