@@ -1,6 +1,11 @@
 News
 ====
 
+0.26 (unreleased)
+-----------------
+* Detect ``async`` function definitions (thanks @RJ722).
+
+
 0.25 (2017-08-15)
 -----------------
 * Detect unsatisfiable statements containing ``and``, ``or`` and ``not``.

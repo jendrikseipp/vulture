@@ -1,9 +1,11 @@
 TODOs
 =====
 
-* Support Python 3.5 async/await (#20).
 * Add example output to README file.
-* Add option (``--make-whitelist``) to write whitelist file in the following format:
+* Move report() and _get_modules() out of Vulture class.
+* Add Item.get_report() method.
+* Maybe: add option (``--make-whitelist``) to write whitelist file in the
+  following format:
   myfunc  # foo.py:42: unused function 'myfunc'
 * Once we drop Python 2.6 compatibility use argparse instead of optparse.
 
