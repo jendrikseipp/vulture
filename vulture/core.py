@@ -38,7 +38,7 @@ import sys
 from vulture import lines
 from vulture import utils
 
-__version__ = '0.25'
+__version__ = '0.26'
 
 DEFAULT_CONFIDENCE = 60
 
