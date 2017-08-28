@@ -1,9 +1,11 @@
 News
 ====
 
-0.26 (unreleased)
+0.26 (2017-08-28)
 -----------------
 * Detect ``async`` function definitions (thanks @RJ722).
+* Add ``Item.get_report()`` method (thanks @RJ722).
+* Move method for finding Python modules out of Vulture class.
 
 
 0.25 (2017-08-15)

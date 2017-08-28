@@ -2,8 +2,6 @@ TODOs
 =====
 
 * Add example output to README file.
-* Move report() and _get_modules() out of Vulture class.
-* Add Item.get_report() method.
 * Maybe: add option (``--make-whitelist``) to write whitelist file in the
   following format:
   myfunc  # foo.py:42: unused function 'myfunc'
