@@ -279,7 +279,7 @@ class Vulture(ast.NodeVisitor):
         """
         for item in self.get_unused_code(
                 min_confidence=min_confidence, sort_by_size=sort_by_size):
-            print(item.get_report(sort_by_size))
+            print(item.get_report(add_size=sort_by_size))
             self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
 
