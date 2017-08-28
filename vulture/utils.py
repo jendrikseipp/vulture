@@ -1,6 +1,7 @@
 import ast
 import codecs
 import os
+import sys
 import tokenize
 
 # Encoding to use when converting input files to unicode.
@@ -53,6 +54,25 @@ def format_path(path):
         return path
     relpath = os.path.relpath(path)
     return relpath if not relpath.startswith('..') else path
+
+
+def get_modules(paths, toplevel=True):
+    """Take files from the command line even if they don't end with .py."""
+    modules = []
+    for path in paths:
+        path = os.path.abspath(path)
+        if toplevel and path.endswith('.pyc'):
+            sys.exit('.pyc files are not supported: {0}'.format(path))
+        if os.path.isfile(path) and (path.endswith('.py') or toplevel):
+            modules.append(path)
+        elif os.path.isdir(path):
+            subpaths = [
+                os.path.join(path, filename)
+                for filename in sorted(os.listdir(path))]
+            modules.extend(get_modules(subpaths, toplevel=False))
+        elif toplevel:
+            sys.exit('Error: {0} could not be found.'.format(path))
+    return modules
 
 
 def read_file(filename):

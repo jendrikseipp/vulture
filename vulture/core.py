@@ -29,7 +29,7 @@ from __future__ import print_function
 import ast
 from fnmatch import fnmatchcase
 import optparse
-import os
+import os.path
 import pkgutil
 import re
 import string
@@ -186,24 +186,6 @@ class Vulture(ast.NodeVisitor):
         else:
             self.visit(node)
 
-    def _get_modules(self, paths, toplevel=True):
-        """Take files from the command line even if they don't end with .py."""
-        modules = []
-        for path in paths:
-            path = os.path.abspath(path)
-            if toplevel and path.endswith('.pyc'):
-                sys.exit('.pyc files are not supported: {0}'.format(path))
-            if os.path.isfile(path) and (path.endswith('.py') or toplevel):
-                modules.append(path)
-            elif os.path.isdir(path):
-                subpaths = [
-                    os.path.join(path, filename)
-                    for filename in sorted(os.listdir(path))]
-                modules.extend(self._get_modules(subpaths, toplevel=False))
-            elif toplevel:
-                sys.exit('Error: {0} could not be found.'.format(path))
-        return modules
-
     def scavenge(self, paths, exclude=None):
         def prepare_pattern(pattern):
             if not any(char in pattern for char in ['*', '?', '[']):
@@ -215,7 +197,7 @@ class Vulture(ast.NodeVisitor):
         def exclude_file(name):
             return any(fnmatchcase(name, pattern) for pattern in exclude)
 
-        for module in self._get_modules(paths):
+        for module in utils.get_modules(paths):
             if exclude_file(module):
                 self._log('Excluded:', module)
                 continue
