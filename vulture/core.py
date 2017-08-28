@@ -116,6 +116,16 @@ class Item(object):
         assert self.last_lineno >= self.first_lineno
         return self.last_lineno - self.first_lineno + 1
 
+    def get_report(self, add_size=False):
+        if add_size:
+            line_format = 'line' if self.size == 1 else 'lines'
+            size_report = ', {0:d} {1}'.format(self.size, line_format)
+        else:
+            size_report = ''
+        return "{0}:{1:d}: {2} ({3}% confidence{4})".format(
+                utils.format_path(self.filename), self.first_lineno,
+                self.message, self.confidence, size_report)
+
     def _tuple(self):
         return (self.filename, self.first_lineno, self.name)
 
@@ -269,15 +279,7 @@ class Vulture(ast.NodeVisitor):
         """
         for item in self.get_unused_code(
                 min_confidence=min_confidence, sort_by_size=sort_by_size):
-            if sort_by_size:
-                line_format = 'line' if item.size == 1 else 'lines'
-                size_report = ', {0:d} {1}'.format(item.size, line_format)
-            else:
-                size_report = ''
-
-            print("{0}:{1:d}: {2} ({3}% confidence{4})".format(
-                utils.format_path(item.filename), item.first_lineno,
-                item.message, item.confidence, size_report))
+            print(item.get_report(sort_by_size))
             self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
 
