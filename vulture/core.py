@@ -302,10 +302,14 @@ class Vulture(ast.NodeVisitor):
             print(*args)
 
     def _add_aliases(self, node):
+        """
+        We delegate to this method instead of using visit_alias() to have
+        access to line numbers and to filter imports from __future__.
+        """
         assert isinstance(node, (ast.Import, ast.ImportFrom))
         for name_and_alias in node.names:
             # Store only top-level module name ("os.path" -> "os").
-            # We can't detect when "os.path" is used.
+            # We can't easily detect when "os.path" is used.
             name = name_and_alias.name.partition('.')[0]
             alias = name_and_alias.asname
             self._define(
@@ -334,13 +338,6 @@ class Vulture(ast.NodeVisitor):
     def _define_variable(self, name, node, confidence=DEFAULT_CONFIDENCE):
         self._define(self.defined_vars, name, node, confidence=confidence,
                      ignore=_ignore_variable)
-
-    def visit_alias(self, node):
-        """
-        Use the methods below for imports to have access to line numbers
-        and to filter imports from __future__.
-        """
-        pass
 
     def visit_arg(self, node):
         """Function argument. Python 3 only. Has lineno since Python 3.4"""
