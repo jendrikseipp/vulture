@@ -1,5 +1,7 @@
 language: python
 python:
+- pypy
+- pypy3
 - '2.6'
 - '2.7'
 - '3.3'
@@ -7,8 +9,6 @@ python:
 - '3.5'
 - '3.6'
 - 3.7-dev
-- pypy
-- pypy3
 
 matrix:
   fast_finish: true
