@@ -1,7 +1,7 @@
 Vulture - Find dead code
 ========================
 
-.. image:: https://travis-ci.org/jendrikseipp/vulture.svg?branch=master&label=Linux%20build
+.. image:: https://travis-ci.org/jendrikseipp/vulture.svg?branch=master
    :target: https://travis-ci.org/jendrikseipp/vulture
    :alt: Travis CI build status (Linux)
 
