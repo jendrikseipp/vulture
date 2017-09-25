@@ -8,6 +8,7 @@ python:
 - '3.6'
 - 3.7-dev
 - pypy2.7-5.8.0
+- pypy3
 
 matrix:
   fast_finish: true
