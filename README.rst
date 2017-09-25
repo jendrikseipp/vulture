@@ -5,7 +5,7 @@ Vulture - Find dead code
    :target: https://travis-ci.org/jendrikseipp/vulture
    :alt: Travis CI build status (Linux)
 
-.. image:: https://img.shields.io/appveyor/ci/jendrikseipp96693/vulture/master.svg?label=Windows%20build
+.. image:: https://ci.appveyor.com/api/projects/status/github/jendrikseipp/vulture?svg=true
    :target: https://ci.appveyor.com/project/jendrikseipp96693/vulture
    :alt: AppVeyor CI build status (Windows)
 
