@@ -3,6 +3,11 @@ Vulture - Find dead code
 
 .. image:: https://travis-ci.org/jendrikseipp/vulture.svg?branch=master
    :target: https://travis-ci.org/jendrikseipp/vulture
+   :alt: Travis CI build status (Linux)
+
+.. image:: https://ci.appveyor.com/api/projects/status/github/jendrikseipp/vulture?svg=true
+   :target: https://ci.appveyor.com/project/jendrikseipp96693/vulture
+   :alt: AppVeyor CI build status (Windows)
 
 Vulture finds unused code in Python programs. This is useful for
 cleaning up and finding errors in large code bases. If you run Vulture
