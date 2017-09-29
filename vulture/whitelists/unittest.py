@@ -9,3 +9,8 @@ whitelist_test_case.run
 whitelist_test_case.skipTest
 whitelist_test_case.subTest
 whitelist_test_case.debug
+
+# unittest.mock
+whitelist_mock = Whitelist()
+whitelist_mock.return_value
+whitelist_mock.side_effect

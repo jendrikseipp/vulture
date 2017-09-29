@@ -1,6 +1,11 @@
 News
 ====
 
+0.27 (unreleased)
+-----------------
+* Whitelist Mock.return_value and Mock.side_effect in unittest.mock module.
+
+
 0.26 (2017-08-28)
 -----------------
 * Detect ``async`` function definitions (thanks @RJ722).
