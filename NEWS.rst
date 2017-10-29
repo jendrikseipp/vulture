@@ -3,6 +3,7 @@ News
 
 0.27 (unreleased)
 -----------------
+* Report ``while(True): ... else: ...`` as unreachable (thanks @RJ722).
 * Whitelist Mock.return_value and Mock.side_effect in unittest.mock module.
 
 
