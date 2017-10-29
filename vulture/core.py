@@ -318,6 +318,22 @@ class Vulture(ast.NodeVisitor):
             if alias is not None:
                 self.used_names.add(name_and_alias.name)
 
+    def _handle_conditional_node(self, node, name):
+        if utils.condition_is_always_false(node.test):
+            self._define(
+                self.unreachable_code, name, node,
+                last_node=node.body[-1],
+                message="unsatisfiable '{name}' condition".format(**locals()),
+                confidence=100)
+        else:
+            else_body = getattr(node, 'orelse')
+            if utils.condition_is_always_true(node.test) and else_body:
+                self._define(
+                    self.unreachable_code, 'else', else_body[0],
+                    last_node=else_body[-1],
+                    message="unreachable 'else' block",
+                    confidence=100)
+
     def _define(self, collection, name, first_node, last_node=None,
                 message='', confidence=DEFAULT_CONFIDENCE, ignore=None):
         last_node = last_node or first_node
@@ -375,20 +391,7 @@ class Vulture(ast.NodeVisitor):
                 self._define_variable(param, node, confidence=100)
 
     def visit_If(self, node):
-        if utils.condition_is_always_false(node.test):
-            self._define(
-                self.unreachable_code, 'if', node,
-                last_node=node.body[-1],
-                message="unsatisfiable 'if' condition",
-                confidence=100)
-        else:
-            else_body = getattr(node, 'orelse')
-            if utils.condition_is_always_true(node.test) and else_body:
-                self._define(
-                    self.unreachable_code, 'else', else_body[0],
-                    last_node=else_body[-1],
-                    message="unreachable 'else' block",
-                    confidence=100)
+        self._handle_conditional_node(node, 'if')
 
     def visit_Import(self, node):
         self._add_aliases(node)
@@ -438,18 +441,7 @@ class Vulture(ast.NodeVisitor):
                     self.used_attrs.add(attr)
 
     def visit_While(self, node):
-        if utils.condition_is_always_false(node.test):
-            self._define(self.unreachable_code, 'while', node,
-                         message="unsatisfiable 'while' condition",
-                         confidence=100)
-        else:
-            else_body = getattr(node, 'orelse')
-            if utils.condition_is_always_true(node.test) and else_body:
-                self._define(
-                    self.unreachable_code, 'else', else_body[0],
-                    last_node=else_body[-1],
-                    message="unreachable 'else' block",
-                    confidence=100)
+        self._handle_conditional_node(node, 'while')
 
     def visit(self, node):
         method = 'visit_' + node.__class__.__name__
