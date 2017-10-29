@@ -437,17 +437,18 @@ class Vulture(ast.NodeVisitor):
                     self.used_attrs.add(attr)
 
     def visit_While(self, node):
-        else_body = getattr(node, 'orelse')
-        if utils.condition_is_always_true(node.test) and else_body:
-            self._define(
-                self.unreachable_code, 'else', else_body[0],
-                last_node=else_body[-1],
-                message="unreachable 'else' block",
-                confidence=100)
         if utils.condition_is_always_false(node.test):
             self._define(self.unreachable_code, 'while', node,
                          message="unsatisfiable 'while' condition",
                          confidence=100)
+        else:
+            else_body = getattr(node, 'orelse')
+            if utils.condition_is_always_true(node.test) and else_body:
+                self._define(
+                    self.unreachable_code, 'else', else_body[0],
+                    last_node=else_body[-1],
+                    message="unreachable 'else' block",
+                    confidence=100)
 
     def visit(self, node):
         method = 'visit_' + node.__class__.__name__
