@@ -274,3 +274,13 @@ while True:
     print("Hello")
 """)
     check_unreachable(v, 4, 1, 'break')
+
+
+def test_while_true_else(v):
+    v.scan("""\
+while True:
+    print("I won't stop")
+else:
+    print("I won't run")
+""")
+    check_unreachable(v, 4, 1, 'else')
