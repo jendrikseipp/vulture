@@ -375,19 +375,20 @@ class Vulture(ast.NodeVisitor):
                 self._define_variable(param, node, confidence=100)
 
     def visit_If(self, node):
-        else_body = getattr(node, 'orelse')
-        if utils.condition_is_always_true(node.test) and else_body:
-            self._define(
-                self.unreachable_code, 'else', else_body[0],
-                last_node=else_body[-1],
-                message="unreachable 'else' block",
-                confidence=100)
-        elif utils.condition_is_always_false(node.test):
+        if utils.condition_is_always_false(node.test):
             self._define(
                 self.unreachable_code, 'if', node,
                 last_node=node.body[-1],
                 message="unsatisfiable 'if' condition",
                 confidence=100)
+        else:
+            else_body = getattr(node, 'orelse')
+            if utils.condition_is_always_true(node.test) and else_body:
+                self._define(
+                    self.unreachable_code, 'else', else_body[0],
+                    last_node=else_body[-1],
+                    message="unreachable 'else' block",
+                    confidence=100)
 
     def visit_Import(self, node):
         self._add_aliases(node)
