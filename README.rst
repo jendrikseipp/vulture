@@ -112,5 +112,6 @@ Participate
 Please visit https://github.com/jendrikseipp/vulture to report any
 issues or to make pull requests.
 
+* Contributing guide: `CONTRIBUTING.rst <https://github.com/jendrikseipp/vulture/blob/master/CONTRIBUTING.rst>`_
 * Changelog: `NEWS.rst <https://github.com/jendrikseipp/vulture/blob/master/NEWS.rst>`_
 * Roadmap: `TODO.rst <https://github.com/jendrikseipp/vulture/blob/master/TODO.rst>`_
