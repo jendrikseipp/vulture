@@ -526,8 +526,3 @@ def main():
     sys.exit(vulture.report(
         min_confidence=options.min_confidence,
         sort_by_size=options.sort_by_size))
-
-
-# Only useful for Python 2.6 which doesn't support "python -m vulture".
-if __name__ == '__main__':
-    main()
