@@ -1,6 +1,7 @@
 TODOs
 =====
 
+* Fix AppVeyor build.
 * Add example output to README file.
 * Detect that body of ``if foo:`` is unreachable if foo is only assigned "false" values.
 * Maybe: add option (``--make-whitelist``) to write whitelist file in the
