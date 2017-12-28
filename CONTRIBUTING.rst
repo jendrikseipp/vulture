@@ -134,7 +134,7 @@ your previous commit (using ``git commit --amend``, and then ``git push -f`` to
 force push your changes).
 
 Feedback
-++++++++
+~~~~~~~~
 
 Take reviewer feedback positively, it’s unlikely for a PR to be merged on 
 first attempt -- but don’t worry that’s just how it works. It helps keep 
