@@ -2,9 +2,7 @@ language: python
 python:
 - pypy
 - pypy3
-- '2.6'
 - '2.7'
-- '3.3'
 - '3.4'
 - '3.5'
 - '3.6'
@@ -21,6 +19,4 @@ install:
 script:
   # Run the installed version of vulture on local code.
   - vulture vulture/ tests/
-  - tox -e cleanup,py,docs
-  # flake8 doesn't support Python 2.6
-  - if [[ $TRAVIS_PYTHON_VERSION != 2.6 ]]; then tox -e style; fi
+  - tox -e cleanup,py,docs,style
