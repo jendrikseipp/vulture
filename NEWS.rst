@@ -5,6 +5,7 @@ News
 -----------------
 * Report ``while(True): ... else: ...`` as unreachable (thanks @RJ722).
 * Whitelist Mock.return_value and Mock.side_effect in unittest.mock module.
+* Drop support for Python 2.6 and 3.3.
 
 
 0.26 (2017-08-28)
