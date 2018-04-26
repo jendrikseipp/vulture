@@ -5,7 +5,7 @@ install:
 
 build_script:
 - cmd: python setup.py bdist_wheel
-- cmd: python -m pip install --only-binary --no-index --find-links=dist/ vulture
+- cmd: python -m pip install --only-binary --no-index --ignore-installed --find-links=dist/ vulture
 
 test_script:
 - cmd: vulture vulture/ tests/
