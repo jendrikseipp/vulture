@@ -5,7 +5,10 @@ install:
 
 build_script:
 - cmd: python setup.py bdist_wheel
-- cmd: python -m pip install --use-wheel --no-index --find-links=dist/ vulture
+- cmd: pip --version
+- cmd: python -m pip --version
+- cmd: python3 -m pip --version
+- cmd: python3 -m pip install --use-wheel --no-index --find-links=dist/ vulture
 
 test_script:
 - cmd: vulture vulture/ tests/
