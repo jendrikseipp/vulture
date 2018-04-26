@@ -71,7 +71,7 @@ def _is_test_file(filename):
 
 
 def _ignore_class(filename, class_name):
-        return _is_test_file(filename) and 'Test' in class_name
+    return _is_test_file(filename) and 'Test' in class_name
 
 
 def _ignore_import(_filename, import_name):
