@@ -1,11 +1,10 @@
 TODOs
 =====
 
-* Add example output to README file.
-* Detect that body of ``if foo:`` is unreachable if foo is only assigned "false" values.
-* Maybe: add option (``--make-whitelist``) to write whitelist file in the
-  following format:
-  myfunc  # foo.py:42: unused function 'myfunc'
+* Write tracer script for generating whitelists (#109).
+* Write script for turning SIP files into whitelists (#8).
+* Add PyQT whitelist to Vulture repo.
+* Add example file contents and Vulture output to README file.
 * Use argparse instead of optparse.
 
 
@@ -27,6 +26,12 @@ Non-TODOs
   for aborting rogue code).
 * Detect superfluous expressions like ``a <= b``, ``42``,  ``foo and bar``
   occuring outside of a statement (hard to detect if code is unneeded).
+* Detect that body of ``if foo:`` is unreachable if foo is only assigned "false" values
+  (complicated: e.g., foo = []; foo.append(1); if foo: ...).
+* Add option (``--make-whitelist``) to write whitelist file in the
+  following format:
+  myfunc  # foo.py:42: unused function 'myfunc'
+  (tracer script from #109 is better)
 
 
 Notes
