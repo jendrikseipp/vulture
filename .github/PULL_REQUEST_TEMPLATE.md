@@ -13,5 +13,6 @@
 - [ ] My code follows the code style of this project.
 - [ ] My change requires a change to the documentation in the README file.
 - [ ] I have updated the documentation accordingly.
+- [ ] I have added an entry in NEWS.rst.
 - [ ] I have added tests to cover my changes.
 - [ ] All new and existing tests passed.
