@@ -32,9 +32,3 @@ Non-TODOs
   following format:
   myfunc  # foo.py:42: unused function 'myfunc'
   (tracer script from #109 is better)
-
-
-Notes
-=====
-
-* Use astroid if we ever want to support scopes.
