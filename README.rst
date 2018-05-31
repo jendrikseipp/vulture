@@ -101,90 +101,58 @@ dead code first.
 Examples
 --------
 
-**Analysis**
-
 Consider the following Python script (``dead_code.py``):
 
 .. code:: python
 
     import os
 
-    class Hello:
-        """
-        An unused class.
-        """
-
-        def false_positive_method():
-            """
-            A function which is vital for your application to function, but
-            Vulture reports it as unused.
-            """
-            pass
+    class Greeter:
+        def greet(self):
+            print("Hi")
 
     def hello_world():
-        message = "Hello World"
-        print("Hello World")
+        message = "Hello, world!"
+        greeter = Greeter()
+        greet_func = getattr(greeter, "greet")
+        greet_func()
 
-    def main():
+    if __name__ == "__main__":
         hello_world()
 
-    if __name__ == '__main__':
-        main()
-
-Analysing this file with Vulture as easy as running the following command::
+Calling ::
 
     vulture dead_code.py
 
-The following output shall be observed::
+results in the following output::
 
     dead_code.py:1: unused import 'os' (90% confidence)
-    dead_code.py:3: unused class 'Hello' (60% confidence)
-    dead_code.py:8: unused function 'false_positive_method' (60% confidence)
-    dead_code.py:16: unused variable 'message' (60% confidence)
-
-Similarly, to analyse and detect dead code in multiple files, say
-``program1.py``, ``program2.py`` and ``program3.py``, the following
-command should suffice::
-
-    vulture program1.py program2.py program3.py
-
-Alternatively, Vulture can also recursively look up all the ``.py``
-files in a directory (say ``my-awesome=lib``) using the command::
-
-    vulture my-awesome-lib/
+    dead_code.py:4: unused function 'greet' (60% confidence)
+    dead_code.py:8: unused variable 'message' (60% confidence)
+    
+Vulture correctly reports "os" and "message" as unused, but it fails to
+detect that "greet" is actually used. The recommended method to deal with 
+false positives like this is to create a whitelist Python file.
 
 **Preparing whitelists**
 
-The recommended method to deal with false positives in Vulture is to
-create mock objects of the code being reported as unused. Vulture already
-ships ``vulture.whitelist_utils.Whitelist`` for this purpose and thus the
-task of creating whitelists boils down to adding attributes to an instance
-of ``Whitelist`` object whose name matches exactly with the name of dead
-code (unused variables, functions, etc.).
-
-For example, in the program above, to prevent Vulture from reporting the
-``false_positive_method`` and ``Hello`` as unused, the following whitelist
-may be used:
+In a whitelist we simulate the usage of variables, attributes, etc.
+For example, for the program above, a whitelist could look as follows:
 
 .. code:: python
-
+    
     # whitelist_dead_code.py
-    from vulture.whitelist_utils import Whitelist
+    from dead_code import Greeter
+    Greeter.greet
 
-    whitelist = Whitelist()
-
-    whitelist.Hello
-    whitelist.false_positive_method
-
-Run vulture using the following command::
+Passing both the original program and the whitelist to Vulture ::
 
     vulture dead_code.py whitelist_dead_code.py
 
-As expected, Vulture no more reports ``false_positive_method`` and ``Hello``
-as unused::
-
-    dead_code.py:2: unused import 'os' (90% confidence)
-    dead_code.py:16: unused variable 'message' (60% confidence)
+makes Vulture ignore the "greet" method::
+    
+    dead_code.py:1: unused import 'os' (90% confidence)
+    dead_code.py:8: unused variable 'message' (60% confidence)
 
 
 Similar programs
