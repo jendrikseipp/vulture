@@ -7,3 +7,4 @@ vulture.egg-info/
 .cache/
 .coverage
 .tox/
+.pytest_cache/
