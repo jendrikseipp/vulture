@@ -4,6 +4,7 @@ News
 0.27 (2018-06-05)
 -----------------
 * Report ``while (True): ... else: ...`` as unreachable (thanks @RJ722).
+* Use ``argparse`` instead of ``optparse``.
 * Whitelist Mock.return_value and Mock.side_effect in unittest.mock module.
 * Drop support for Python 2.6 and 3.3.
 * Improve documentation and test coverage (thanks @RJ722).

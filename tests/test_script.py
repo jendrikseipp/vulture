@@ -50,3 +50,14 @@ def test_min_confidence():
     assert call_vulture([
         'vulture/core.py', '--exclude', 'whitelists',
         '--min-confidence', '100']) == 0
+
+
+def test_exclude():
+    def mix_path(filenames):
+        return ",".join(
+            [os.path.join('vulture', filename) for filename in filenames])
+    assert call_vulture([
+        'vulture/', '--exclude', mix_path(['core.py', 'utils.py'])]) == 1
+    assert call_vulture([
+        'vulture/', '--exclude',
+        mix_path(['core.py', 'utils.py', 'lines.py'])]) == 0
