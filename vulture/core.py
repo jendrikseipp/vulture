@@ -100,6 +100,7 @@ class Item(object):
     """
     Hold the name, type and location of defined code.
     """
+
     def __init__(self, name, typ, filename, first_lineno, last_lineno,
                  message='',
                  confidence=DEFAULT_CONFIDENCE):
@@ -123,8 +124,8 @@ class Item(object):
         else:
             size_report = ''
         return "{0}:{1:d}: {2} ({3}% confidence{4})".format(
-                utils.format_path(self.filename), self.first_lineno,
-                self.message, self.confidence, size_report)
+            utils.format_path(self.filename), self.first_lineno,
+            self.message, self.confidence, size_report)
 
     def _tuple(self):
         return (self.filename, self.first_lineno, self.name)
@@ -141,6 +142,7 @@ class Item(object):
 
 class Vulture(ast.NodeVisitor):
     """Find dead code."""
+
     def __init__(self, verbose=False):
         self.verbose = verbose
 
