@@ -1,7 +1,7 @@
 TODOs
 =====
 
-* Write tracer script for generating whitelists (#109).
+* Uuse coverage.py to detect false-positives (#109).
 * Write script for turning SIP files into whitelists (#8).
 * Add PyQT whitelist to Vulture repo.
 * Use argparse instead of optparse.
