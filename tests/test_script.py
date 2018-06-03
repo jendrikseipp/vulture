@@ -9,11 +9,8 @@ WHITELISTS = glob.glob(os.path.join(REPO, 'vulture', 'whitelists', '*.py'))
 
 
 def call_vulture(args, **kwargs):
-    core = 'vulture'
-    if sys.version_info < (2, 7):
-        core = 'vulture.core'
     return subprocess.call(
-        [sys.executable, '-m', core] + args, cwd=REPO, **kwargs)
+        [sys.executable, '-m', 'vulture'] + args, cwd=REPO, **kwargs)
 
 
 def test_module_with_explicit_whitelists():
