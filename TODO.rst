@@ -4,7 +4,6 @@ TODOs
 * Write tracer script for generating whitelists (#109).
 * Write script for turning SIP files into whitelists (#8).
 * Add PyQT whitelist to Vulture repo.
-* Add example file contents and Vulture output to README file.
 * Use argparse instead of optparse.
 
 
