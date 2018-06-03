@@ -20,7 +20,9 @@ def test_false():
     check_condition('False', False)
     check_condition('None', False)
     check_condition("0", False)
-    if sys.version_info > (3, 0):
+    # Only Python 3.0-3.6 allows addition and subtraction in ast.literal_eval.
+    # (see https://bugs.python.org/issue31778)
+    if (3, 0) <= sys.version_info < (3, 7):
         check_condition("1 - 1", False)
 
 
