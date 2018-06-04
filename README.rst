@@ -155,21 +155,19 @@ makes Vulture ignore the "greet" method::
     dead_code.py:8: unused variable 'message' (60% confidence)
 
 
-Exit Codes
+Exit codes
 ----------
 
 +-----------+---------------------------------------------------------------+
-| Exit Code |                          Description                          |
+| Exit code |                          Description                          |
 +===========+===============================================================+
-|     0     | Vulture executes successfully and no dead code is found.      |
+|     0     | No dead code found                                            |
 +-----------+---------------------------------------------------------------+
-|     1     | Vulture executes successfully and dead code is found.         |
+|     1     | Dead code found                                               |
 +-----------+---------------------------------------------------------------+
-|     1     | Vulture could not execute successfully either because the     |
-|           | specified file wasn't found or the source was corrupt (Syntax |
-|           | errors, non UTF-8 encoding, contains null bytes).             |
+|     1     | Invalid input (file missing, syntax error, wrong encoding)    |
 +-----------+---------------------------------------------------------------+
-|     2     | Invalid command line arguments.                               |
+|     2     | Invalid command line arguments                                |
 +-----------+---------------------------------------------------------------+
 
 
