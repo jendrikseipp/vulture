@@ -129,9 +129,9 @@ results in the following output::
     dead_code.py:1: unused import 'os' (90% confidence)
     dead_code.py:4: unused function 'greet' (60% confidence)
     dead_code.py:8: unused variable 'message' (60% confidence)
-    
+
 Vulture correctly reports "os" and "message" as unused, but it fails to
-detect that "greet" is actually used. The recommended method to deal with 
+detect that "greet" is actually used. The recommended method to deal with
 false positives like this is to create a whitelist Python file.
 
 **Preparing whitelists**
@@ -140,7 +140,7 @@ In a whitelist we simulate the usage of variables, attributes, etc.
 For example, for the program above, a whitelist could look as follows:
 
 .. code:: python
-    
+
     # whitelist_dead_code.py
     from dead_code import Greeter
     Greeter.greet
@@ -150,9 +150,25 @@ Passing both the original program and the whitelist to Vulture ::
     vulture dead_code.py whitelist_dead_code.py
 
 makes Vulture ignore the "greet" method::
-    
+
     dead_code.py:1: unused import 'os' (90% confidence)
     dead_code.py:8: unused variable 'message' (60% confidence)
+
+
+Exit codes
+----------
+
++-----------+---------------------------------------------------------------+
+| Exit code |                          Description                          |
++===========+===============================================================+
+|     0     | No dead code found                                            |
++-----------+---------------------------------------------------------------+
+|     1     | Dead code found                                               |
++-----------+---------------------------------------------------------------+
+|     1     | Invalid input (file missing, syntax error, wrong encoding)    |
++-----------+---------------------------------------------------------------+
+|     2     | Invalid command line arguments                                |
++-----------+---------------------------------------------------------------+
 
 
 Similar programs
