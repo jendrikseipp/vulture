@@ -6,9 +6,7 @@ def test_item_repr(v):
     v.scan("""\
 import os
 
-
-message = "Foo Bar"
-
+message = "foobar"
 
 class Foo:
     def bar():
