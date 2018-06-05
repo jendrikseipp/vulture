@@ -26,9 +26,9 @@
 
 from __future__ import print_function
 
+import argparse
 import ast
 from fnmatch import fnmatchcase
-import optparse
 import os.path
 import pkgutil
 import re
@@ -491,40 +491,36 @@ class Vulture(ast.NodeVisitor):
 
 
 def _parse_args():
-    def csv(option, _, value, parser):
-        setattr(parser.values, option.dest, value.split(','))
-    usage = """\
-usage: %prog [options] PATH [PATH ...]
-
-Paths may be Python files or directories. For each directory vulture
-analyzes all contained *.py files.
-"""
+    def csv(exclude):
+        return exclude.split(',')
+    usage = "%(prog)s [options] PATH [PATH ...]"
     version = "vulture {0}".format(__version__)
-    parser = optparse.OptionParser(usage=usage, version=version)
-    parser.add_option(
-        '--exclude', action='callback', callback=csv, metavar='PATTERN',
-        type='string', default=[],
-        help=(
-            'Comma-separated list of paths to ignore (e.g.,'
-            ' *settings.py,docs/*.py). PATTERNs can contain globbing'
-            ' characters (*, ?, [, ]). Treat PATTERNs without globbing'
-            ' characters as *PATTERN*.'))
-    parser.add_option(
-        "--sort-by-size", action="store_true",
-        help="Sort unused functions and classes by their lines of code")
-    parser.add_option('-v', '--verbose', action='store_true')
-    parser.add_option(
-        '--min-confidence', action='store', type='int', default=0, help=(
-            'Minimum confidence (between 0 and 100) for code to be'
-            ' reported as unused.'))
-    options, args = parser.parse_args()
-    return options, args
+    parser = argparse.ArgumentParser(prog='vulture', usage=usage)
+    parser.add_argument(
+        'paths', action='store', nargs='+', metavar='PATH', help='Paths'
+        ' may be Python files or directories. For each directory'
+        ' Vulture analyzes all contained *.py files.')
+    parser.add_argument(
+        '--exclude', metavar='PATTERN', type=csv, help='Comma-separated list'
+        ' of paths to ignore (e.g., *settings.py,docs/*.py). PATTERNs can'
+        ' contain globbing characters (*, ?, [, ]). Treat PATTERNs without'
+        ' globbing characters as *PATTERN*.')
+    parser.add_argument(
+        '--min-confidence', action='store', type=int, default=0, help='Minimum'
+        ' confidence (between 0 and 100) for code to be'
+        ' reported as unused.')
+    parser.add_argument(
+        "--sort-by-size", action="store_true", help='Sort'
+        ' unused functions and classes by their lines of code')
+    parser.add_argument('-v', '--verbose', action='store_true')
+    parser.add_argument('--version', action='version', version=version)
+    return parser.parse_args()
 
 
 def main():
-    options, args = _parse_args()
-    vulture = Vulture(verbose=options.verbose)
-    vulture.scavenge(args, exclude=options.exclude)
+    args = _parse_args()
+    vulture = Vulture(verbose=args.verbose)
+    vulture.scavenge(args.paths, exclude=args.exclude)
     sys.exit(vulture.report(
-        min_confidence=options.min_confidence,
-        sort_by_size=options.sort_by_size))
+        min_confidence=args.min_confidence,
+        sort_by_size=args.sort_by_size))
