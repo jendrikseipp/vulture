@@ -493,25 +493,27 @@ class Vulture(ast.NodeVisitor):
 def _parse_args():
     def csv(exclude):
         return exclude.split(',')
+
     usage = "%(prog)s [options] PATH [PATH ...]"
     version = "vulture {0}".format(__version__)
     parser = argparse.ArgumentParser(prog='vulture', usage=usage)
     parser.add_argument(
-        'paths', action='store', nargs='+', metavar='PATH', help='Paths'
-        ' may be Python files or directories. For each directory'
+        'paths', nargs='+', metavar='PATH',
+        help='Paths may be Python files or directories. For each directory'
         ' Vulture analyzes all contained *.py files.')
     parser.add_argument(
-        '--exclude', metavar='PATTERN', type=csv, help='Comma-separated list'
-        ' of paths to ignore (e.g., *settings.py,docs/*.py). PATTERNs can'
-        ' contain globbing characters (*, ?, [, ]). Treat PATTERNs without'
-        ' globbing characters as *PATTERN*.')
+        '--exclude', metavar='PATTERN', type=csv,
+        help='Comma-separated list of paths to ignore (e.g.,'
+        ' *settings.py,docs/*.py). PATTERNs can contain globbing characters'
+        ' (*, ?, [, ]). Treat PATTERNs without globbing characters as'
+        ' *PATTERN*.')
     parser.add_argument(
-        '--min-confidence', action='store', type=int, default=0, help='Minimum'
-        ' confidence (between 0 and 100) for code to be'
+        '--min-confidence', type=int, default=0,
+        help='Minimum confidence (between 0 and 100) for code to be'
         ' reported as unused.')
     parser.add_argument(
-        "--sort-by-size", action="store_true", help='Sort'
-        ' unused functions and classes by their lines of code')
+        "--sort-by-size", action="store_true",
+        help='Sort unused functions and classes by their lines of code')
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('--version', action='version', version=version)
     return parser.parse_args()

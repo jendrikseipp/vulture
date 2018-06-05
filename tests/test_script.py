@@ -53,11 +53,11 @@ def test_min_confidence():
 
 
 def test_exclude():
-    def mix_path(filenames):
-        return ",".join(
-            [os.path.join('vulture', filename) for filename in filenames])
-    assert call_vulture([
-        'vulture/', '--exclude', mix_path(['core.py', 'utils.py'])]) == 1
-    assert call_vulture([
-        'vulture/', '--exclude',
-        mix_path(['core.py', 'utils.py', 'lines.py'])]) == 0
+    def get_csv(paths):
+        return ",".join(os.path.join('vulture', path) for path in paths)
+
+    def call_vulture_with_excludes(excludes):
+        return call_vulture(['vulture/', '--exclude', get_csv(excludes)])
+
+    assert call_vulture_with_excludes(['core.py', 'utils.py']) == 1
+    assert call_vulture_with_excludes(['core.py', 'utils.py', 'lines.py']) == 0
