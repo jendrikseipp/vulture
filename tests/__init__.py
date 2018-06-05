@@ -1,7 +1,13 @@
 import ast
+import glob
+import os.path
 
 import pytest
 from vulture import core
+
+DIR = os.path.dirname(os.path.abspath(__file__))
+REPO = os.path.dirname(DIR)
+WHITELISTS = glob.glob(os.path.join(REPO, 'vulture', 'whitelists', '*.py'))
 
 
 def check(items_or_names, expected_names):

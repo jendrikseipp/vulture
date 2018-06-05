@@ -1,11 +1,7 @@
-import glob
-import os.path
 import subprocess
 import sys
 
-DIR = os.path.dirname(os.path.abspath(__file__))
-REPO = os.path.dirname(DIR)
-WHITELISTS = glob.glob(os.path.join(REPO, 'vulture', 'whitelists', '*.py'))
+from . import REPO, WHITELISTS
 
 
 def call_vulture(args, **kwargs):
