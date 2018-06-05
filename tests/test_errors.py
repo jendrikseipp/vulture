@@ -1,4 +1,4 @@
-from codecs import BOM_UTF16_LE
+import codecs
 import os
 
 import pytest
@@ -27,10 +27,6 @@ def foo():
 
 
 def test_non_utf8_encoding(v):
-    def _write_bom_encoded_utf_16_le(f, content):
-        f.write(BOM_UTF16_LE)
-        f.write(content.encode('utf_16_le'))
-        f.flush()  # Ensure that the file is actually written to disk.
     code = """\
 def foo():
     pass
@@ -38,7 +34,8 @@ def foo():
 foo()
 """
     with open('non-utf8.py', 'wb') as f:
-        _write_bom_encoded_utf_16_le(f, code)
-        v.scavenge([f.name])
+        f.write(codecs.BOM_UTF16_LE)
+        f.write(code.encode('utf_16_le'))
+    v.scavenge([f.name])
     os.remove(f.name)
     assert v.found_dead_code_or_error
