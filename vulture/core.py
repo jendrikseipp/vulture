@@ -228,8 +228,6 @@ class Vulture(ast.NodeVisitor):
                 except IOError:
                     # Most imported modules don't have a whitelist.
                     continue
-                if module_data is None:
-                    sys.exit('Error: Please use "python -m vulture".')
                 module_string = module_data.decode("utf-8")
                 self.scan(module_string, filename=path)
 
