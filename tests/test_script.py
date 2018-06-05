@@ -43,7 +43,7 @@ def test_pyc():
 
 
 def test_sort_by_size():
-    assert call_vulture(['vulture/', '--sort-by-size']) == 0
+    assert call_vulture(['vulture/utils.py', '--sort-by-size']) == 1
 
 
 def test_min_confidence():
