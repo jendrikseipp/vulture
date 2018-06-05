@@ -341,12 +341,8 @@ class Vulture(ast.NodeVisitor):
         if ignore and ignore(self.filename, name):
             self._log('Ignoring {typ} "{name}"'.format(**locals()))
         else:
-            # ast.arg has lineno attribute since Python 3.4.
-            try:
-                first_lineno = first_node.lineno
-                last_lineno = lines.get_last_line_number(last_node)
-            except AttributeError:
-                first_lineno = last_lineno = -1
+            first_lineno = first_node.lineno
+            last_lineno = lines.get_last_line_number(last_node)
             collection.append(
                 Item(name, typ, self.filename, first_lineno, last_lineno,
                      message=message, confidence=confidence))
@@ -356,7 +352,11 @@ class Vulture(ast.NodeVisitor):
                      ignore=_ignore_variable)
 
     def visit_arg(self, node):
-        """Function argument. Python 3 only."""
+        """Function argument.
+
+        ast.arg was added in Python 3.0.
+        ast.arg.lineno was added in Python 3.4.
+        """
         self._define_variable(node.arg, node, confidence=100)
 
     def visit_AsyncFunctionDef(self, node):
