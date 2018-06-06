@@ -9,6 +9,10 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(DIR)
 WHITELISTS = glob.glob(os.path.join(REPO, 'vulture', 'whitelists', '*.py'))
 
+skip_if_not_has_async = pytest.mark.skipif(
+    not hasattr(ast, 'AsyncFunctionDef'),
+    reason="needs async support (added in Python 3.5)")
+
 
 def check(items_or_names, expected_names):
     if isinstance(items_or_names, set):
@@ -27,12 +31,6 @@ def check_unreachable(v, lineno, size, name):
     assert item.first_lineno == lineno
     assert item.size == size
     assert item.name == name
-
-
-def skip_if_not_has_async(function):
-    if not hasattr(ast, 'AsyncFunctionDef'):
-        pytest.mark.skip(
-            function, reason="needs async support (added in Python 3.5)")
 
 
 @pytest.fixture

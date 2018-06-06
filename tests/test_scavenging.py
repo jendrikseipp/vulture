@@ -402,7 +402,7 @@ async def test_func():
 
 async def other_func():
     pass
-""", filename='test_function_names.py')
+""", filename='function_names.py')
     check(v.defined_funcs, ['test_func', 'other_func'])
     check(v.unused_funcs, ['other_func', 'test_func'])
 
