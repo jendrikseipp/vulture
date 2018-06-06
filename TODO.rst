@@ -1,9 +1,9 @@
 TODOs
 =====
 
-* Uuse coverage.py to detect false-positives (#109).
+* Use coverage.py to detect false-positives (#109).
 * Write script for turning SIP files into whitelists (#8).
-* Add PyQT whitelist to Vulture repo.
+* Add PyQT whitelist to Vulture repo?
 
 
 Non-TODOs
