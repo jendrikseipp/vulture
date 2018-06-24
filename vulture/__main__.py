@@ -1,3 +1,3 @@
-from .core import main
+from vulture.core import main
 
 main()
