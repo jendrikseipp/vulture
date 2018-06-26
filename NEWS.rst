@@ -1,6 +1,12 @@
 News
 ====
 
+0.28 (unreleased)
+=================
+
+* Single source package version.
+
+
 0.27 (2018-06-05)
 -----------------
 * Report ``while (True): ... else: ...`` as unreachable (thanks @RJ722).
