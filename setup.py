@@ -1,28 +1,27 @@
 #! /usr/bin/env python
 
 import codecs
-import os
+import os.path
 import re
 import sys
 
 import setuptools
 from setuptools.command.test import test as TestCommand
 
-here = os.path.abspath(os.path.dirname(__file__))
-
 
 def read(*parts):
-    with codecs.open(os.path.join(here, *parts), 'r') as fp:
-        return fp.read()
+    here = os.path.abspath(os.path.dirname(__file__))
+    with codecs.open(os.path.join(here, *parts), 'r') as f:
+        return f.read()
 
 
-def find_version(*file_paths):
-    version_file = read(*file_paths)
+def find_version(*file_parts):
+    version_file = read(*file_parts)
     version_match = re.search(
-        r"^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M)
+        r"^__version__ = ['\"]([^'\"]*)['\"]$", version_file, re.M)
     if version_match:
         return version_match.group(1)
-    raise RuntimeError("Unable to find version string.")
+    raise RuntimeError('Unable to find version string.')
 
 
 class PyTest(TestCommand):
