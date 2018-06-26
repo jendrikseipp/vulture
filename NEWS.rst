@@ -2,9 +2,8 @@ News
 ====
 
 0.28 (unreleased)
-=================
-
-* Single source package version.
+-----------------
+* Don't import any Vulture modules in setup.py.
 
 
 0.27 (2018-06-05)
