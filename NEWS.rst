@@ -1,6 +1,11 @@
 News
 ====
 
+0.28 (unreleased)
+-----------------
+* Don't import any Vulture modules in setup.py.
+
+
 0.27 (2018-06-05)
 -----------------
 * Report ``while (True): ... else: ...`` as unreachable (thanks @RJ722).

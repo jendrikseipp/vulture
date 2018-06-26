@@ -1,11 +1,27 @@
 #! /usr/bin/env python
 
+import codecs
+import os.path
+import re
 import sys
 
 import setuptools
 from setuptools.command.test import test as TestCommand
 
-from vulture import __version__
+
+def read(*parts):
+    here = os.path.abspath(os.path.dirname(__file__))
+    with codecs.open(os.path.join(here, *parts), 'r') as f:
+        return f.read()
+
+
+def find_version(*file_parts):
+    version_file = read(*file_parts)
+    version_match = re.search(
+        r"^__version__ = ['\"]([^'\"]*)['\"]$", version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError('Unable to find version string.')
 
 
 class PyTest(TestCommand):
@@ -24,7 +40,7 @@ class PyTest(TestCommand):
 
 setuptools.setup(
     name='vulture',
-    version=__version__,
+    version=find_version('vulture', 'core.py'),
     description='Find dead code',
     long_description='\n\n'.join(
         [open('README.rst').read(), open('NEWS.rst').read()]),
