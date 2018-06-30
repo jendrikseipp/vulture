@@ -260,7 +260,7 @@ class Vulture(ast.NodeVisitor):
                 min_confidence=min_confidence, sort_by_size=sort_by_size):
             if item.typ in ('function', 'class', 'property', 'variable',
                             'attribute'):
-                print("{} # unused {} ({}:{:d})".format(
+                print("{}  # unused {} ({}:{:d})".format(
                     item.name, item.typ, utils.format_path(item.filename),
                     item.first_lineno))
                 self.found_dead_code_or_error = True

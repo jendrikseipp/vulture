@@ -87,9 +87,9 @@ class Foo:
         pass
 """
     expected = """\
-foo # unused function ({filename}:1)
-Foo # unused class ({filename}:4)
-bar # unused function ({filename}:5)
+foo  # unused function ({filename}:1)
+Foo  # unused class ({filename}:4)
+bar  # unused function ({filename}:5)
 """
     check_report(code, expected, make_whitelist=True)
 
@@ -103,9 +103,9 @@ def test_make_whitelist_min_conf(check_report):
 
 def test_make_whitelist_sort_size(check_report):
     make_whitelist_sort_size = """\
-foobar # unused variable ({filename}:11)
-bar # unused function ({filename}:10)
-Foo # unused class ({filename}:3)
+foobar  # unused variable ({filename}:11)
+bar  # unused function ({filename}:10)
+Foo  # unused class ({filename}:3)
 """
     check_report(
         mock_code, make_whitelist_sort_size, sort_by_size=True,
@@ -123,9 +123,9 @@ def test_sort_size_min_conf(check_report):
 
 def test_make_whitelist_sort_size_min_conf(check_report):
     make_whitelist_sort_size_min_conf_60 = """\
-foobar # unused variable ({filename}:11)
-bar # unused function ({filename}:10)
-Foo # unused class ({filename}:3)
+foobar  # unused variable ({filename}:11)
+bar  # unused function ({filename}:10)
+Foo  # unused class ({filename}:3)
 """
     check_report(
         mock_code, make_whitelist_sort_size_min_conf_60, min_confidence=60,
