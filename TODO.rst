@@ -26,7 +26,3 @@ Non-TODOs
   occuring outside of a statement (hard to detect if code is unneeded).
 * Detect that body of ``if foo:`` is unreachable if foo is only assigned "false" values
   (complicated: e.g., foo = []; foo.append(1); if foo: ...).
-* Add option (``--make-whitelist``) to write whitelist file in the
-  following format:
-  myfunc  # foo.py:42: unused function 'myfunc'
-  (tracer script from #109 is better)
