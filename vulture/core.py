@@ -117,7 +117,11 @@ class Item(object):
         assert self.last_lineno >= self.first_lineno
         return self.last_lineno - self.first_lineno + 1
 
-    def get_report(self, add_size=False):
+    def get_report(self, add_size=False, make_whitelist=False):
+        if make_whitelist:
+            return "{0} # unused {1} ({2}:{3:d})".format(
+                self.name, self.typ, utils.format_path(self.filename),
+                self.first_lineno)
         if add_size:
             line_format = 'line' if self.size == 1 else 'lines'
             size_report = ', {0:d} {1}'.format(self.size, line_format)
@@ -255,13 +259,15 @@ class Vulture(ast.NodeVisitor):
         return sorted(confidently_unused,
                       key=by_size if sort_by_size else by_name)
 
-    def report(self, min_confidence=0, sort_by_size=False):
+    def report(self, min_confidence=0, sort_by_size=False,
+               make_whitelist=False):
         """
         Print ordered list of Item objects to stdout.
         """
         for item in self.get_unused_code(
                 min_confidence=min_confidence, sort_by_size=sort_by_size):
-            print(item.get_report(add_size=sort_by_size))
+            print(item.get_report(
+                add_size=sort_by_size, make_whitelist=make_whitelist))
             self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
 
@@ -506,6 +512,9 @@ def _parse_args():
         ' (*, ?, [, ]). Treat PATTERNs without globbing characters as'
         ' *PATTERN*.')
     parser.add_argument(
+            '--make-whitelist', action='store_true', help='Report output in'
+            ' such a format that it can be directly be used as a whitelist.')
+    parser.add_argument(
         '--min-confidence', type=int, default=0,
         help='Minimum confidence (between 0 and 100) for code to be'
         ' reported as unused.')
@@ -523,4 +532,5 @@ def main():
     vulture.scavenge(args.paths, exclude=args.exclude)
     sys.exit(vulture.report(
         min_confidence=args.min_confidence,
-        sort_by_size=args.sort_by_size))
+        sort_by_size=args.sort_by_size,
+        make_whitelist=args.make_whitelist))

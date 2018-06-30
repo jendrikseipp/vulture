@@ -58,3 +58,8 @@ def test_exclude():
 
     assert call_vulture_with_excludes(['core.py', 'utils.py']) == 1
     assert call_vulture_with_excludes(['core.py', 'utils.py', 'lines.py']) == 0
+
+
+def test_make_whitelist():
+    assert call_vulture(
+            ['vulture/', '--make-whitelist', '--exclude', 'whitelists']) == 1
