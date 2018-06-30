@@ -119,7 +119,9 @@ class Item(object):
 
     def get_report(self, add_size=False, make_whitelist=False):
         if make_whitelist:
-            return "{0} # unused {1} ({2}:{3:d})".format(
+            if self.typ in ('unreachable_code', 'import'):
+                return ''
+            return "{0} # unused {1} ({2}:{3:d})\n".format(
                 self.name, self.typ, utils.format_path(self.filename),
                 self.first_lineno)
         if add_size:
@@ -127,7 +129,7 @@ class Item(object):
             size_report = ', {0:d} {1}'.format(self.size, line_format)
         else:
             size_report = ''
-        return "{0}:{1:d}: {2} ({3}% confidence{4})".format(
+        return "{0}:{1:d}: {2} ({3}% confidence{4})\n".format(
             utils.format_path(self.filename), self.first_lineno,
             self.message, self.confidence, size_report)
 
@@ -267,7 +269,7 @@ class Vulture(ast.NodeVisitor):
         for item in self.get_unused_code(
                 min_confidence=min_confidence, sort_by_size=sort_by_size):
             print(item.get_report(
-                add_size=sort_by_size, make_whitelist=make_whitelist))
+                add_size=sort_by_size, make_whitelist=make_whitelist), end='')
             self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
 
