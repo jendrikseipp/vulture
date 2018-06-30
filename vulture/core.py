@@ -118,18 +118,12 @@ class Item(object):
         return self.last_lineno - self.first_lineno + 1
 
     def get_report(self, add_size=False, make_whitelist=False):
-        if make_whitelist:
-            if self.typ in ('unreachable_code', 'import'):
-                return ''
-            return "{0} # unused {1} ({2}:{3:d})\n".format(
-                self.name, self.typ, utils.format_path(self.filename),
-                self.first_lineno)
         if add_size:
             line_format = 'line' if self.size == 1 else 'lines'
             size_report = ', {0:d} {1}'.format(self.size, line_format)
         else:
             size_report = ''
-        return "{0}:{1:d}: {2} ({3}% confidence{4})\n".format(
+        return "{0}:{1:d}: {2} ({3}% confidence{4})".format(
             utils.format_path(self.filename), self.first_lineno,
             self.message, self.confidence, size_report)
 
@@ -261,15 +255,24 @@ class Vulture(ast.NodeVisitor):
         return sorted(confidently_unused,
                       key=by_size if sort_by_size else by_name)
 
-    def report(self, min_confidence=0, sort_by_size=False,
-               make_whitelist=False):
+    def make_whitelist(self, min_confidence=0, sort_by_size=False):
+        for item in self.get_unused_code(
+                min_confidence=min_confidence, sort_by_size=sort_by_size):
+            self.found_dead_code_or_error = True
+            if item.typ in ('unreachable_code', 'import'):
+                continue
+            print("{0} # unused {1} ({2}:{3:d})".format(
+                item.name, item.typ, utils.format_path(item.filename),
+                item.first_lineno))
+        return self.found_dead_code_or_error
+
+    def report(self, min_confidence=0, sort_by_size=False):
         """
         Print ordered list of Item objects to stdout.
         """
         for item in self.get_unused_code(
                 min_confidence=min_confidence, sort_by_size=sort_by_size):
-            print(item.get_report(
-                add_size=sort_by_size, make_whitelist=make_whitelist), end='')
+            print(item.get_report(add_size=sort_by_size))
             self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
 
@@ -532,7 +535,10 @@ def main():
     args = _parse_args()
     vulture = Vulture(verbose=args.verbose)
     vulture.scavenge(args.paths, exclude=args.exclude)
+    if args.make_whitelist:
+        sys.exit(vulture.make_whitelist(
+            min_confidence=args.min_confidence,
+            sort_by_size=args.sort_by_size))
     sys.exit(vulture.report(
         min_confidence=args.min_confidence,
-        sort_by_size=args.sort_by_size,
-        make_whitelist=args.make_whitelist))
+        sort_by_size=args.sort_by_size))
