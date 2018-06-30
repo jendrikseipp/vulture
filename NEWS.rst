@@ -3,8 +3,9 @@ News
 
 0.28 (unreleased)
 -----------------
-* Don't import any Vulture modules in setup.py.
+* Don't import any Vulture modules in setup.py (thanks @RJ722).
 * Add ``*-test.py`` to recognized test file patterns.
+* Add ``failureException``, ``longMessage`` and ``maxDiff`` to ``unittest`` whitelist.
 
 
 0.27 (2018-06-05)

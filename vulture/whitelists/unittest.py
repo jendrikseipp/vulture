@@ -9,6 +9,9 @@ whitelist_test_case.run
 whitelist_test_case.skipTest
 whitelist_test_case.subTest
 whitelist_test_case.debug
+whitelist_test_case.failureException
+whitelist_test_case.longMessage
+whitelist_test_case.maxDiff
 
 # unittest.mock
 whitelist_mock = Whitelist()
