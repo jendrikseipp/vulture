@@ -1,8 +1,7 @@
-from whitelist_utils import Whitelist
+import argparse
 
-whitelist_argparser = Whitelist()
-whitelist_argparser.epilog
+parser = argparse.ArgumentParser()
+parser.epilog
 
-whitelist_help_formatter = Whitelist()
-whitelist_help_formatter._fill_text
-whitelist_help_formatter._get_help_string
+argparse.ArgumentDefaultsHelpFormatter._fill_text
+argparse.ArgumentDefaultsHelpFormatter._get_help_string
