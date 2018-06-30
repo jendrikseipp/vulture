@@ -1,22 +1,21 @@
-import unittest
+from unittest import TestCase, mock
 
-from whitelist_utils import Whitelist
-
-unittest.TestCase.setUp
-unittest.TestCase.tearDown
-unittest.TestCase.setUpClass
-unittest.TestCase.tearDownClass
-unittest.TestCase.run
-unittest.TestCase.skipTest
-unittest.TestCase.debug
-unittest.TestCase.failureException
-unittest.TestCase.longMessage
-unittest.TestCase.maxDiff
-if hasattr(unittest.TestCase, 'subTest'):
+TestCase.setUp
+TestCase.tearDown
+TestCase.setUpClass
+TestCase.tearDownClass
+TestCase.run
+TestCase.skipTest
+TestCase.debug
+TestCase.failureException
+TestCase.longMessage
+TestCase.maxDiff
+try:
     # new in Python 3.4
-    unittest.TestCase.subTest
+    TestCase.subTest
+except AttributeError:
+    pass
 
 # unittest.mock
-whitelist_mock = Whitelist()
-whitelist_mock.return_value
-whitelist_mock.side_effect
+mock.Mock.return_value
+mock.Mock.side_effect
