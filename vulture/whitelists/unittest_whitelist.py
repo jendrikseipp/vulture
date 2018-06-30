@@ -1,4 +1,4 @@
-from unittest import TestCase, mock
+from unittest import TestCase
 
 TestCase.setUp
 TestCase.tearDown
@@ -16,6 +16,10 @@ try:
 except AttributeError:
     pass
 
-# unittest.mock
-mock.Mock.return_value
-mock.Mock.side_effect
+try:
+    from unittest import mock
+    # unittest.mock was introduced in Python 3.3
+    mock.Mock.return_value
+    mock.Mock.side_effect
+except ImportError:
+    pass
