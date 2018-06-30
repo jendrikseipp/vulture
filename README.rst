@@ -51,6 +51,7 @@ Usage
   $ vulture myscript.py mypackage/
   $ vulture myscript.py mywhitelist.py  # Put false-positives in whitelist.
   $ vulture myscript.py --min-confidence 100  # Only report 100% dead code.
+  $ vulture myscript.py --make-whitelist  # Report in whitelist ready format.
 
 The provided arguments may be Python files or directories. For each
 directory Vulture analyzes all contained `*.py` files.
