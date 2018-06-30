@@ -258,12 +258,12 @@ class Vulture(ast.NodeVisitor):
     def make_whitelist(self, min_confidence=0, sort_by_size=False):
         for item in self.get_unused_code(
                 min_confidence=min_confidence, sort_by_size=sort_by_size):
-            self.found_dead_code_or_error = True
-            if item.typ in ('unreachable_code', 'import'):
-                continue
-            print("{0} # unused {1} ({2}:{3:d})".format(
-                item.name, item.typ, utils.format_path(item.filename),
-                item.first_lineno))
+            if item.typ in ('function', 'class', 'property', 'variable',
+                            'attribute'):
+                print("{} # unused {} ({}:{:d})".format(
+                    item.name, item.typ, utils.format_path(item.filename),
+                    item.first_lineno))
+                self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
 
     def report(self, min_confidence=0, sort_by_size=False):
@@ -517,8 +517,9 @@ def _parse_args():
         ' (*, ?, [, ]). Treat PATTERNs without globbing characters as'
         ' *PATTERN*.')
     parser.add_argument(
-            '--make-whitelist', action='store_true', help='Report unused code'
-            ' in a format that can be added to a whitelist module.')
+            '--make-whitelist', action='store_true',
+            help='Report unused code in a format that can be added to a'
+            ' whitelist module.')
     parser.add_argument(
         '--min-confidence', type=int, default=0,
         help='Minimum confidence (between 0 and 100) for code to be'
@@ -535,10 +536,8 @@ def main():
     args = _parse_args()
     vulture = Vulture(verbose=args.verbose)
     vulture.scavenge(args.paths, exclude=args.exclude)
-    if args.make_whitelist:
-        sys.exit(vulture.make_whitelist(
-            min_confidence=args.min_confidence,
-            sort_by_size=args.sort_by_size))
-    sys.exit(vulture.report(
+    report_func = (vulture.make_whitelist if args.make_whitelist
+                   else vulture.report)
+    sys.exit(report_func(
         min_confidence=args.min_confidence,
         sort_by_size=args.sort_by_size))
