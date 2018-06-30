@@ -117,7 +117,7 @@ class Item(object):
         assert self.last_lineno >= self.first_lineno
         return self.last_lineno - self.first_lineno + 1
 
-    def get_report(self, add_size=False, make_whitelist=False):
+    def get_report(self, add_size=False):
         if add_size:
             line_format = 'line' if self.size == 1 else 'lines'
             size_report = ', {0:d} {1}'.format(self.size, line_format)
@@ -517,8 +517,8 @@ def _parse_args():
         ' (*, ?, [, ]). Treat PATTERNs without globbing characters as'
         ' *PATTERN*.')
     parser.add_argument(
-            '--make-whitelist', action='store_true', help='Report output in'
-            ' such a format that it can be directly be used as a whitelist.')
+            '--make-whitelist', action='store_true', help='Report unused code'
+            ' in a format that can be added to a whitelist module.')
     parser.add_argument(
         '--min-confidence', type=int, default=0,
         help='Minimum confidence (between 0 and 100) for code to be'
