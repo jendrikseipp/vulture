@@ -67,7 +67,7 @@ def _is_test_file(filename):
     name = os.path.basename(filename)
     return any(
         fnmatchcase(name, pattern)
-        for pattern in ['test*.py', '*_test.py'])
+        for pattern in ['test*.py', '*_test.py', '*-test.py'])
 
 
 def _ignore_class(filename, class_name):

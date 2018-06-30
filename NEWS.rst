@@ -4,6 +4,7 @@ News
 0.28 (unreleased)
 -----------------
 * Don't import any Vulture modules in setup.py.
+* Add ``*-test.py`` to recognized test file patterns.
 
 
 0.27 (2018-06-05)
