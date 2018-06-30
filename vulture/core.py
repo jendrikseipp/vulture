@@ -218,7 +218,7 @@ class Vulture(ast.NodeVisitor):
 
         unique_imports = set(item.name for item in self.defined_imports)
         for import_name in unique_imports:
-            path = os.path.join('whitelists', import_name) + '.py'
+            path = os.path.join('whitelists', import_name) + '_whitelist.py'
             if exclude_file(path):
                 self._log('Excluded whitelist:', path)
             else:
