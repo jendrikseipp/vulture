@@ -102,6 +102,15 @@ its number of lines. This helps developers prioritize where to look for
 dead code first.
 
 
+Make whitelist
+--------------
+
+When ``--make-whitelist`` is enabled, Vulture reports output in a format such
+that it is ready to serve as a whitelist. Use it when you've ensured that
+the unsed code has already been removed and Vulture is only reporting false
+positives.
+
+
 Examples
 --------
 
