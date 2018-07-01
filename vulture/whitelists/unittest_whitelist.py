@@ -17,9 +17,10 @@ except AttributeError:
     pass
 
 try:
-    from unittest import mock
     # unittest.mock was introduced in Python 3.3
-    mock.Mock.return_value
-    mock.Mock.side_effect
+    from unittest import mock
 except ImportError:
     pass
+else:
+    mock.Mock.return_value
+    mock.Mock.side_effect
