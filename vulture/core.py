@@ -258,8 +258,7 @@ class Vulture(ast.NodeVisitor):
     def make_whitelist(self, min_confidence=0, sort_by_size=False):
         for item in self.get_unused_code(
                 min_confidence=min_confidence, sort_by_size=sort_by_size):
-            if item.typ in ('function', 'class', 'property', 'variable',
-                            'attribute'):
+            if item.typ in ('function', 'class', 'variable'):
                 print("{}  # unused {} ({}:{:d})".format(
                     item.name, item.typ, utils.format_path(item.filename),
                     item.first_lineno))

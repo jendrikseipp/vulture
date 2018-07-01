@@ -1,6 +1,8 @@
 import ast
 import glob
 import os.path
+import subprocess
+import sys
 
 import pytest
 from vulture import core
@@ -14,15 +16,20 @@ skip_if_not_has_async = pytest.mark.skipif(
     reason="needs async support (added in Python 3.5)")
 
 
+def call_vulture(args, **kwargs):
+    return subprocess.call(
+        [sys.executable, '-m', 'vulture'] + args, cwd=REPO, **kwargs)
+
+
 def check(items_or_names, expected_names):
-    if isinstance(items_or_names, set):
-        # items_or_names is a set of strings.
-        assert items_or_names == set(expected_names)
-    else:
-        # items_or_names is a list of Item objects.
+    try:
+        # items_or_names is a collection of Item objects.
         names = sorted(item.name for item in items_or_names)
         expected_names = sorted(expected_names)
         assert names == expected_names
+    except AttributeError:
+        # items_or_names is a set of strings.
+        assert items_or_names == set(expected_names)
 
 
 def check_unreachable(v, lineno, size, name):
