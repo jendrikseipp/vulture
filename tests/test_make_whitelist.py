@@ -59,7 +59,7 @@ class Foo:
     def bar(self):
         pass
 """
-    check_whitelist(code, 1)
+    check_whitelist(code)
 
 
 def test_unreachable_code(check_whitelist):

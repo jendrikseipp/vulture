@@ -25,11 +25,12 @@ def check(items_or_names, expected_names):
     try:
         # items_or_names is a collection of Item objects.
         names = sorted(item.name for item in items_or_names)
-        expected_names = sorted(expected_names)
-        assert names == expected_names
     except AttributeError:
         # items_or_names is a set of strings.
         assert items_or_names == set(expected_names)
+    else:
+        expected_names = sorted(expected_names)
+        assert names == expected_names
 
 
 def check_unreachable(v, lineno, size, name):

@@ -58,3 +58,4 @@ def test_exclude():
 def test_make_whitelist():
     assert call_vulture(
             ['vulture/', '--make-whitelist', '--exclude', 'whitelists']) == 1
+    assert call_vulture(['vulture/', '--make-whitelist']) == 0

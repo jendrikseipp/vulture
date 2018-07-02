@@ -256,12 +256,25 @@ class Vulture(ast.NodeVisitor):
                       key=by_size if sort_by_size else by_name)
 
     def make_whitelist(self, min_confidence=0, sort_by_size=False):
-        for item in self.get_unused_code(
-                min_confidence=min_confidence, sort_by_size=sort_by_size):
-            if item.typ in ('function', 'class', 'variable'):
-                print("{}  # unused {} ({}:{:d})".format(
+        unused_code = self.get_unused_code(
+                min_confidence=min_confidence, sort_by_size=sort_by_size)
+        if any(item.typ in ('attribute', 'property') for item in unused_code):
+            print("""\
+class VultureMock:
+    def __init__(self, _):
+        pass
+
+_ = VultureMock()
+""")
+        for item in unused_code:
+            message = "{}  # unused {} ({}:{:d})".format(
                     item.name, item.typ, utils.format_path(item.filename),
-                    item.first_lineno))
+                    item.first_lineno)
+            if item.typ in ('attribute', 'property'):
+                print('_.' + message)
+                self.found_dead_code_or_error = True
+            elif item.typ in ('function', 'class', 'variable'):
+                print(message)
                 self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
 
