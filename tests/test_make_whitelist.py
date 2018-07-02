@@ -5,7 +5,7 @@ assert v  # silence pyflakes
 
 
 @pytest.fixture
-def check_whitelist(v, tmpdir, capsys):
+def check_whitelist(v, capsys):
     def examine(code, results_before, results_after):
         v.scan(code)
         check(v.get_unused_code(), results_before)
