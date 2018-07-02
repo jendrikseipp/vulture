@@ -258,22 +258,14 @@ class Vulture(ast.NodeVisitor):
     def make_whitelist(self, min_confidence=0, sort_by_size=False):
         unused_code = self.get_unused_code(
                 min_confidence=min_confidence, sort_by_size=sort_by_size)
-        if any(item.typ in ('attribute', 'property') for item in unused_code):
-            print("""\
-class VultureMock:
-    def __getattr__(self, _):
-        pass
-
-_ = VultureMock()
-""")
         for item in unused_code:
             message = "{}  # unused {} ({}:{:d})".format(
                     item.name, item.typ, utils.format_path(item.filename),
                     item.first_lineno)
-            if item.typ in ('attribute', 'property'):
+            if item.typ in ['attribute', 'property']:
                 print('_.' + message)
                 self.found_dead_code_or_error = True
-            elif item.typ in ('function', 'class', 'variable', 'import'):
+            elif item.typ in ['function', 'class', 'variable', 'import']:
                 print(message)
                 self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
