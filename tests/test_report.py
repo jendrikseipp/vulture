@@ -71,7 +71,7 @@ def test_sort_by_size(check_report):
 def test_make_whitelist(check_report):
     expected = """\
 class VultureMock:
-    def __init__(self, _):
+    def __getattr__(self, _):
         pass
 
 _ = VultureMock()

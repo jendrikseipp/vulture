@@ -261,7 +261,7 @@ class Vulture(ast.NodeVisitor):
         if any(item.typ in ('attribute', 'property') for item in unused_code):
             print("""\
 class VultureMock:
-    def __init__(self, _):
+    def __getattr__(self, _):
         pass
 
 _ = VultureMock()

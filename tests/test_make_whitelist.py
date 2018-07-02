@@ -1,22 +1,19 @@
 import pytest
 
-from . import call_vulture, v
+from . import check, v
 assert v  # silence pyflakes
 
 
 @pytest.fixture
 def check_whitelist(v, tmpdir, capsys):
-    def examine(code, expected_out=0, min_confidence=0, sort_by_size=False):
-        filename = str(tmpdir.join('myscript.py'))
-        whitelist = str(tmpdir.join('whitelist.py'))
-        with open(filename, 'w') as f:
-            f.write(code)
-        v.scavenge([filename])
-        capsys.readouterr().out
-        v.make_whitelist(min_confidence, sort_by_size)
-        with open(whitelist, 'w') as f:
-            f.write(capsys.readouterr().out)
-        assert call_vulture([filename, whitelist]) == expected_out
+    def examine(code, results_before, results_after):
+        v.scan(code)
+        check(v.get_unused_code(), results_before)
+        capsys.readouterr()  # Clear captured text
+        v.make_whitelist()
+        whitelist = capsys.readouterr().out
+        v.scan(whitelist)
+        check(v.get_unused_code(), results_after)
     return examine
 
 
@@ -25,7 +22,7 @@ def test_unused_function(check_whitelist):
 def func():
     pass
 """
-    check_whitelist(code)
+    check_whitelist(code, ['func'], [])
 
 
 def test_unused_class(check_whitelist):
@@ -34,7 +31,7 @@ class Foo:
     def __init__(self):
         pass
 """
-    check_whitelist(code)
+    check_whitelist(code, ['Foo'], [])
 
 
 def test_unused_variables(check_whitelist):
@@ -42,14 +39,14 @@ def test_unused_variables(check_whitelist):
 foo = 'unused'
 bar = 'variable'
 """
-    check_whitelist(code)
+    check_whitelist(code, ['foo', 'bar'], [])
 
 
 def test_unused_import(check_whitelist):
     code = """\
 import this
 """
-    check_whitelist(code, 1)
+    check_whitelist(code, ['this'], ['this'])
 
 
 def test_unused_attribute(check_whitelist):
@@ -59,7 +56,7 @@ class Foo:
     def bar(self):
         pass
 """
-    check_whitelist(code)
+    check_whitelist(code, ['Foo', 'bar'], [])
 
 
 def test_unreachable_code(check_whitelist):
@@ -68,4 +65,4 @@ def foo():
     return "Foo Bar"
     print("Hello")
 """
-    check_whitelist(code, 1)
+    check_whitelist(code, ['foo', 'return'], ['return'])
