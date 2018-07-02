@@ -273,7 +273,7 @@ _ = VultureMock()
             if item.typ in ('attribute', 'property'):
                 print('_.' + message)
                 self.found_dead_code_or_error = True
-            elif item.typ in ('function', 'class', 'variable'):
+            elif item.typ in ('function', 'class', 'variable', 'import'):
                 print(message)
                 self.found_dead_code_or_error = True
         return self.found_dead_code_or_error

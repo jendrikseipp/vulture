@@ -44,9 +44,12 @@ bar = 'variable'
 
 def test_unused_import(check_whitelist):
     code = """\
-import this
+import xyz
+import foo as bar
+from abc import iou
+from lorem import ipsum as dolor
 """
-    check_whitelist(code, ['this'], ['this'])
+    check_whitelist(code, ['xyz', 'bar', 'iou', 'dolor'], [])
 
 
 def test_unused_attribute(check_whitelist):

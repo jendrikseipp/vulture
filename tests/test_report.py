@@ -76,6 +76,7 @@ class VultureMock:
 
 _ = VultureMock()
 
+foo  # unused import ({filename}:1)
 Foo  # unused class ({filename}:3)
 bar  # unused function ({filename}:10)
 _.foobar  # unused attribute ({filename}:11)
