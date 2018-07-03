@@ -22,15 +22,12 @@ def call_vulture(args, **kwargs):
 
 
 def check(items_or_names, expected_names):
+    """items_or_names must be a collection of Items or a set of strings."""
     try:
-        # items_or_names is a collection of Item objects.
-        names = sorted(item.name for item in items_or_names)
+        assert (sorted(item.name for item in items_or_names) ==
+                sorted(expected_names))
     except AttributeError:
-        # items_or_names is a set of strings.
         assert items_or_names == set(expected_names)
-    else:
-        expected_names = sorted(expected_names)
-        assert names == expected_names
 
 
 def check_unreachable(v, lineno, size, name):
