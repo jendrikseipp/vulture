@@ -64,7 +64,7 @@ You can add used code that is reported as unused to a Python module and
 add it to the list of scanned paths. We collect whitelists for common
 Python modules and packages in ``vulture/whitelists/`` (pull requests
 are welcome). If you want to ignore a whole file or directory, use the
-``--exclude`` parameter (e.g., ``-exclude *settings.py,docs/``).
+``--exclude`` parameter (e.g., ``--exclude *settings.py,docs/``).
 
 **Marking unused variables**
 
