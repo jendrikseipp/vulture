@@ -62,10 +62,12 @@ it may discover more dead code.
 **Handling false positives**
 
 You can add used code that is reported as unused to a Python module and
-add it to the list of scanned paths. We collect whitelists for common
-Python modules and packages in ``vulture/whitelists/`` (pull requests
-are welcome). If you want to ignore a whole file or directory, use the
-``--exclude`` parameter (e.g., ``--exclude *settings.py,docs/``).
+add it to the list of scanned paths. To obtain such a whitelist
+automatically, pass ``--make-whitelist`` to Vulture. We collect
+whitelists for common Python modules and packages in
+``vulture/whitelists/`` (pull requests are welcome). If you want to
+ignore a whole file or directory, use the ``--exclude`` parameter (e.g.,
+``--exclude *settings.py,docs/``).
 
 **Marking unused variables**
 
@@ -101,14 +103,6 @@ When using the ``--sort-by-size`` option, Vulture sorts unused code by
 its number of lines. This helps developers prioritize where to look for
 dead code first.
 
-
-Make whitelist
---------------
-
-When ``--make-whitelist`` is enabled, Vulture reports output in a format such
-that it is ready to serve as a whitelist. Use it when you've ensured that
-the unsed code has already been removed and Vulture is only reporting false
-positives.
 
 
 Examples
@@ -149,14 +143,17 @@ false positives like this is to create a whitelist Python file.
 
 **Preparing whitelists**
 
-In a whitelist we simulate the usage of variables, attributes, etc.
-For example, for the program above, a whitelist could look as follows:
+In a whitelist we simulate the usage of variables, attributes, etc. For
+the program above, a whitelist could look as follows:
 
 .. code:: python
 
     # whitelist_dead_code.py
     from dead_code import Greeter
     Greeter.greet
+
+Alternatively, you can pass ``--make-whitelist`` to Vulture and obtain
+an automatically generated whitelist.
 
 Passing both the original program and the whitelist to Vulture ::
 
