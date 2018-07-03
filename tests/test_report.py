@@ -23,14 +23,12 @@ class Foo:
 
 
 @pytest.fixture
-def check_report(v, capsys, tmpdir):
+def check_report(v, capsys):
     def test_report(code, expected,  make_whitelist=False):
-        filename = str(tmpdir.join('foo.py'))
-        with open(filename, 'w') as f:
-            f.write(code)
-        v.scavenge([filename])
-        capsys.readouterr()
+        filename = 'foo.py'
+        v.scan(code, filename=filename)
         report_func = v.make_whitelist if make_whitelist else v.report
+        capsys.readouterr()
         report_func()
         assert capsys.readouterr().out == expected.format(filename=filename)
     return test_report
