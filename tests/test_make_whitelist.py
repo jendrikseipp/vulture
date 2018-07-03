@@ -55,6 +55,15 @@ from lorem import ipsum as dolor
 def test_unused_attribute(check_whitelist):
     code = """\
 class Foo:
+    def bar(self):
+        self.foobar = 'unused attr'
+"""
+    check_whitelist(code, ['Foo', 'bar', 'foobar'], [])
+
+
+def test_unused_property(check_whitelist):
+    code = """\
+class Foo:
     @property
     def bar(self):
         pass
