@@ -2,12 +2,7 @@ import os.path
 import subprocess
 import sys
 
-from . import REPO, WHITELISTS
-
-
-def call_vulture(args, **kwargs):
-    return subprocess.call(
-        [sys.executable, '-m', 'vulture'] + args, cwd=REPO, **kwargs)
+from . import call_vulture, REPO, WHITELISTS
 
 
 def test_module_with_explicit_whitelists():
@@ -58,3 +53,9 @@ def test_exclude():
 
     assert call_vulture_with_excludes(['core.py', 'utils.py']) == 1
     assert call_vulture_with_excludes(['core.py', 'utils.py', 'lines.py']) == 0
+
+
+def test_make_whitelist():
+    assert call_vulture(
+            ['vulture/', '--make-whitelist', '--exclude', 'whitelists']) == 1
+    assert call_vulture(['vulture/', '--make-whitelist']) == 0

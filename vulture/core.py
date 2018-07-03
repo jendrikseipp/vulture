@@ -255,6 +255,17 @@ class Vulture(ast.NodeVisitor):
         return sorted(confidently_unused,
                       key=by_size if sort_by_size else by_name)
 
+    def make_whitelist(self, min_confidence=0, sort_by_size=False):
+        for item in self.get_unused_code(
+                min_confidence=min_confidence, sort_by_size=sort_by_size):
+            if item.typ != 'unreachable_code':
+                prefix = '_.' if item.typ in ['attribute', 'property'] else ''
+                print("{}{}  # unused {} ({}:{:d})".format(
+                        prefix, item.name, item.typ,
+                        utils.format_path(item.filename), item.first_lineno))
+                self.found_dead_code_or_error = True
+        return self.found_dead_code_or_error
+
     def report(self, min_confidence=0, sort_by_size=False):
         """
         Print ordered list of Item objects to stdout.
@@ -506,6 +517,10 @@ def _parse_args():
         ' (*, ?, [, ]). Treat PATTERNs without globbing characters as'
         ' *PATTERN*.')
     parser.add_argument(
+            '--make-whitelist', action='store_true',
+            help='Report unused code in a format that can be added to a'
+            ' whitelist module.')
+    parser.add_argument(
         '--min-confidence', type=int, default=0,
         help='Minimum confidence (between 0 and 100) for code to be'
         ' reported as unused.')
@@ -521,6 +536,8 @@ def main():
     args = _parse_args()
     vulture = Vulture(verbose=args.verbose)
     vulture.scavenge(args.paths, exclude=args.exclude)
-    sys.exit(vulture.report(
+    report_func = (vulture.make_whitelist if args.make_whitelist
+                   else vulture.report)
+    sys.exit(report_func(
         min_confidence=args.min_confidence,
         sort_by_size=args.sort_by_size))

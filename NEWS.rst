@@ -3,10 +3,11 @@ News
 
 0.28 (unreleased)
 -----------------
+* Add ``--make-whitelist`` flag for reporting output in whitelist format (thanks @RJ722).
 * Don't import any Vulture modules in setup.py (thanks @RJ722).
 * Add ``*-test.py`` to recognized test file patterns.
 * Add ``failureException``, ``longMessage`` and ``maxDiff`` to ``unittest`` whitelist.
-* Refer to actual objects rather than their mocks in default whitelists.
+* Refer to actual objects rather than their mocks in default whitelists (thanks @RJ722).
 
 
 0.27 (2018-06-05)

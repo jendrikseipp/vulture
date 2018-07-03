@@ -51,6 +51,7 @@ Usage
   $ vulture myscript.py mypackage/
   $ vulture myscript.py mywhitelist.py  # Put false-positives in whitelist.
   $ vulture myscript.py --min-confidence 100  # Only report 100% dead code.
+  $ vulture myscript.py --make-whitelist  # Report in whitelist format.
 
 The provided arguments may be Python files or directories. For each
 directory Vulture analyzes all contained `*.py` files.
@@ -99,6 +100,15 @@ Sort by size
 When using the ``--sort-by-size`` option, Vulture sorts unused code by
 its number of lines. This helps developers prioritize where to look for
 dead code first.
+
+
+Make whitelist
+--------------
+
+When ``--make-whitelist`` is enabled, Vulture reports output in a format such
+that it is ready to serve as a whitelist. Use it when you've ensured that
+the unsed code has already been removed and Vulture is only reporting false
+positives.
 
 
 Examples
