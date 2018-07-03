@@ -49,9 +49,7 @@ Usage
   $ vulture myscript.py  # or
   $ python3 -m vulture myscript.py
   $ vulture myscript.py mypackage/
-  $ vulture myscript.py mywhitelist.py  # Put false-positives in whitelist.
   $ vulture myscript.py --min-confidence 100  # Only report 100% dead code.
-  $ vulture myscript.py --make-whitelist  # Report in whitelist format.
 
 The provided arguments may be Python files or directories. For each
 directory Vulture analyzes all contained `*.py` files.
@@ -63,8 +61,12 @@ it may discover more dead code.
 
 You can add used code that is reported as unused to a Python module and
 add it to the list of scanned paths. To obtain such a whitelist
-automatically, pass ``--make-whitelist`` to Vulture. We collect
-whitelists for common Python modules and packages in
+automatically, pass ``--make-whitelist`` to Vulture. ::
+
+  $ vulture mydir --make-whitelist > whitelist.py
+  $ vulture mydir whitelist.py
+
+We collect whitelists for common Python modules and packages in
 ``vulture/whitelists/`` (pull requests are welcome). If you want to
 ignore a whole file or directory, use the ``--exclude`` parameter (e.g.,
 ``--exclude *settings.py,docs/``).
