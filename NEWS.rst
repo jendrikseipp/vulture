@@ -5,6 +5,7 @@ News
 -----------------
 * Add ``--make-whitelist`` flag for reporting output in whitelist format (thanks @RJ722).
 * Don't import any Vulture modules in setup.py (thanks @RJ722).
+* Ignore case of ``--exclude`` arguments on Windows.
 * Add ``*-test.py`` to recognized test file patterns.
 * Add ``failureException``, ``longMessage`` and ``maxDiff`` to ``unittest`` whitelist.
 * Refer to actual objects rather than their mocks in default whitelists (thanks @RJ722).

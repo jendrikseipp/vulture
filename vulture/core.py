@@ -28,7 +28,7 @@ from __future__ import print_function
 
 import argparse
 import ast
-from fnmatch import fnmatchcase
+from fnmatch import fnmatch
 import os.path
 import pkgutil
 import re
@@ -64,9 +64,8 @@ def _is_special_name(name):
 
 
 def _is_test_file(filename):
-    name = os.path.basename(filename)
     return any(
-        fnmatchcase(name, pattern)
+        fnmatch(os.path.basename(filename), pattern)
         for pattern in ['test*.py', '*_test.py', '*-test.py'])
 
 
@@ -197,7 +196,7 @@ class Vulture(ast.NodeVisitor):
         exclude = [prepare_pattern(pattern) for pattern in (exclude or [])]
 
         def exclude_file(name):
-            return any(fnmatchcase(name, pattern) for pattern in exclude)
+            return any(fnmatch(name, pattern) for pattern in exclude)
 
         for module in utils.get_modules(paths):
             if exclude_file(module):
