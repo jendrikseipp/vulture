@@ -1,4 +1,4 @@
-import os.path
+import posixpath
 from xml.etree import ElementTree as ET
 
 from vulture import utils
@@ -6,14 +6,14 @@ from vulture import utils
 
 def parse_coverage_xml(xml):
     with open(xml) as f:
-        tree = ET.parse(f)
-    return tree
+        return ET.fromstring(f.read().lower())
 
 
 def detect_used_funcs(v, xml):
     tree = parse_coverage_xml(xml)
     for item in v.unused_funcs:
-        filename = os.path.normcase(utils.format_path(item.filename))
+        filename = posixpath.join(*utils.format_path(
+            item.filename).lower().split('\\'))
         xpath = ('./packages/package/classes/class/[@filename="{}"]'
                  '/lines/line[@hits="1"]'.format(filename))
         lines_hit = [int(
