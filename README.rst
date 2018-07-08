@@ -30,6 +30,7 @@ Features
 * complements pyflakes and has the same output syntax
 * sorts unused classes and functions by size with ``--sort-by-size``
 * supports Python 2.7 and Python >= 3.4
+* dynamic analysis for reducing false positives with ``--coverage-xml``
 
 
 Installation
@@ -50,6 +51,7 @@ Usage
   $ python3 -m vulture myscript.py
   $ vulture myscript.py mypackage/
   $ vulture myscript.py --min-confidence 100  # Only report 100% dead code.
+  $ vulture myscript.py --coverage-xml coverage.xml  # Ignores false positives.
 
 The provided arguments may be Python files or directories. For each
 directory Vulture analyzes all contained `*.py` files.
@@ -70,6 +72,15 @@ We collect whitelists for common Python modules and packages in
 ``vulture/whitelists/`` (pull requests are welcome). If you want to
 ignore a whole file or directory, use the ``--exclude`` parameter (e.g.,
 ``--exclude *settings.py,docs/``).
+
+**Using results from coverage to detect false positives**
+
+Running coverage on your program can detect which parts of the code base are
+being executed and Vulture can use this report to automatically ignore false
+positives using the following command::
+
+    $ coverage run myprogram.py && coverage.xml  # Prepare the XML report.
+    $ vulture myprogram.py --coverage-xml coverage.xml
 
 **Marking unused variables**
 
@@ -142,6 +153,23 @@ results in the following output::
 Vulture correctly reports "os" and "message" as unused, but it fails to
 detect that "greet" is actually used. The recommended method to deal with
 false positives like this is to create a whitelist Python file.
+
+**Ignoring false positives using coverage.xml**
+
+After preparing a XML report by running the following command::
+
+    $ coverage run dead_code.py & coverage xml
+
+Now, pass the ``coverage.xml`` created in the previous step as an argument to
+vulture using the following command::
+
+    $ vulture dead_code.py --coverage-xml coverage.xml
+
+This lets Vulture automatically ignore the function ``greet`` because it is
+marked as used in the ``coverage.xml``::
+
+    dead_code.py:1: unused import 'os' (90% confidence)
+    dead_code.py:8: unused variable 'message' (60% confidence)
 
 **Preparing whitelists**
 
