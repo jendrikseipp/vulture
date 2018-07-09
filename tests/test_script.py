@@ -5,6 +5,11 @@ import sys
 from . import call_vulture, REPO, WHITELISTS
 
 
+def call_coverage(args, **kwargs):
+    return subprocess.call(
+            [sys.executable, '-m', 'coverage'] + args, cwd=REPO, **kwargs)
+
+
 def test_module_with_explicit_whitelists():
     assert call_vulture(['vulture/'] + WHITELISTS) == 0
 
@@ -52,10 +57,26 @@ def test_exclude():
         return call_vulture(['vulture/', '--exclude', get_csv(excludes)])
 
     assert call_vulture_with_excludes(['core.py', 'utils.py']) == 1
-    assert call_vulture_with_excludes(['core.py', 'utils.py', 'lines.py']) == 0
+    assert call_vulture_with_excludes(
+            ['core.py', 'utils.py', 'lines.py', 'coverage_xml.py']) == 0
 
 
 def test_make_whitelist():
     assert call_vulture(
             ['vulture/', '--make-whitelist', '--exclude', 'whitelists']) == 1
     assert call_vulture(['vulture/', '--make-whitelist']) == 0
+
+
+def test_coverage_xml(tmpdir):
+    xml = str(tmpdir.join("coverage.xml"))
+    tmp_whitelist = str(tmpdir.join("tmp_whitelist.py"))
+    call_coverage(["run", "-m", "vulture", "vulture/", "tests/"])
+    call_coverage(["xml", "-o", xml])
+    with open(tmp_whitelist, 'w') as f:
+        f.write("""\
+visit_arg  # ast.arg was added in Python 3.0.
+visit_AsyncFunctionDef  # no async function used in Vulture.
+""")
+    assert call_vulture(
+        ['vulture/', 'tests/', tmp_whitelist, '--exclude', 'whitelists',
+         '--coverage-xml', xml]) == 0

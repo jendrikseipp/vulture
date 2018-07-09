@@ -37,6 +37,7 @@ import sys
 
 from vulture import lines
 from vulture import utils
+from vulture import coverage_xml
 
 __version__ = '0.28'
 
@@ -230,7 +231,8 @@ class Vulture(ast.NodeVisitor):
                 module_string = module_data.decode("utf-8")
                 self.scan(module_string, filename=path)
 
-    def get_unused_code(self, min_confidence=0, sort_by_size=False):
+    def get_unused_code(self, min_confidence=0, sort_by_size=False,
+                        xml_report=None):
         """
         Return ordered list of unused Item objects.
         """
@@ -248,15 +250,20 @@ class Vulture(ast.NodeVisitor):
                        self.unused_props + self.unused_vars +
                        self.unreachable_code)
 
+        unused_code = set(unused_code) - coverage_xml.used_funcs(
+                self, xml_report) if xml_report else unused_code
+
         confidently_unused = [obj for obj in unused_code
                               if obj.confidence >= min_confidence]
 
         return sorted(confidently_unused,
                       key=by_size if sort_by_size else by_name)
 
-    def make_whitelist(self, min_confidence=0, sort_by_size=False):
+    def make_whitelist(self, min_confidence=0, sort_by_size=False,
+                       xml_report=None):
         for item in self.get_unused_code(
-                min_confidence=min_confidence, sort_by_size=sort_by_size):
+                min_confidence=min_confidence, sort_by_size=sort_by_size,
+                xml_report=xml_report):
             if item.typ != 'unreachable_code':
                 prefix = '_.' if item.typ in ['attribute', 'property'] else ''
                 print("{}{}  # unused {} ({}:{:d})".format(
@@ -265,12 +272,13 @@ class Vulture(ast.NodeVisitor):
                 self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
 
-    def report(self, min_confidence=0, sort_by_size=False):
+    def report(self, min_confidence=0, sort_by_size=False, xml_report=None):
         """
         Print ordered list of Item objects to stdout.
         """
         for item in self.get_unused_code(
-                min_confidence=min_confidence, sort_by_size=sort_by_size):
+                min_confidence=min_confidence, sort_by_size=sort_by_size,
+                xml_report=xml_report):
             print(item.get_report(add_size=sort_by_size))
             self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
@@ -510,6 +518,11 @@ def _parse_args():
         help='Paths may be Python files or directories. For each directory'
         ' Vulture analyzes all contained *.py files.')
     parser.add_argument(
+        '--coverage-xml',
+        help='Path to coverage.py XML report. Using this option allows Vulture'
+        ' to automatically ignore code which Vulture considers as unused, but'
+        ' which is marked as used in the XML file.')
+    parser.add_argument(
         '--exclude', metavar='PATTERN', type=csv,
         help='Comma-separated list of paths to ignore (e.g.,'
         ' *settings.py,docs/*.py). PATTERNs can contain globbing characters'
@@ -539,4 +552,5 @@ def main():
                    else vulture.report)
     sys.exit(report_func(
         min_confidence=args.min_confidence,
-        sort_by_size=args.sort_by_size))
+        sort_by_size=args.sort_by_size,
+        xml_report=args.coverage_xml))

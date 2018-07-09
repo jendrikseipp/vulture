@@ -1,6 +1,11 @@
 News
 ====
 
+0.29 (unreleased)
+-----------------
+* Add ``--coverage-xml`` flag for ignoring code marked as used in coverage's XML report.
+
+
 0.28 (2018-07-05)
 -----------------
 * Add ``--make-whitelist`` flag for reporting output in whitelist format (thanks @RJ722).
