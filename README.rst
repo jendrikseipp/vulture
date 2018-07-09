@@ -77,7 +77,7 @@ ignore a whole file or directory, use the ``--exclude`` parameter (e.g.,
 
 Running coverage on your program can detect which parts of the code base are
 being executed and Vulture can use this report to automatically ignore false
-positives using the following command::
+positives using the following commands::
 
     $ coverage run myprogram.py && coverage.xml  # Prepare the XML report.
     $ vulture myprogram.py --coverage-xml coverage.xml
@@ -156,7 +156,8 @@ false positives like this is to create a whitelist Python file.
 
 **Ignoring false positives using coverage.xml**
 
-After preparing a XML report by running the following command::
+The first step would be to prepare a XML report by running the following
+command::
 
     $ coverage run dead_code.py & coverage xml
 
