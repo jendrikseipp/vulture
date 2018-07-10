@@ -51,6 +51,8 @@ IGNORED_VARIABLE_NAMES = set(['object', 'self'])
 if sys.version_info < (3, 4):
     IGNORED_VARIABLE_NAMES |= set(['True', 'False'])
 
+UNSAFE_IGNORE_NAMES = ['property']
+
 
 def _get_unused_items(defined_items, used_names):
     unused_items = [item for item in set(defined_items)
@@ -142,7 +144,12 @@ class Item(object):
 class Vulture(ast.NodeVisitor):
     """Find dead code."""
 
-    def __init__(self, verbose=False):
+    def __init__(self, verbose=False, ignore_names=[]):
+        for name in ignore_names:
+            if any(fnmatchcase(unsafe_name, name)
+                    for unsafe_name in UNSAFE_IGNORE_NAMES):
+                raise ValueError(
+                        'It is not safe to ignore the name "{}".'.format(name))
         self.verbose = verbose
 
         def get_list(typ):
@@ -161,6 +168,8 @@ class Vulture(ast.NodeVisitor):
 
         self.used_attrs = get_set('attribute')
         self.used_names = get_set('name')
+
+        self.ignore_names = ignore_names
 
         self.filename = ''
         self.code = []
@@ -275,6 +284,9 @@ class Vulture(ast.NodeVisitor):
             self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
 
+    def ignored(self, name):
+        return any(fnmatchcase(name, pattern) for pattern in self.ignore_names)
+
     @property
     def unused_classes(self):
         return _get_unused_items(
@@ -373,22 +385,41 @@ class Vulture(ast.NodeVisitor):
         return self.visit_FunctionDef(node)
 
     def visit_Attribute(self, node):
+        if self.ignored(node.attr):
+            self._log('Ignoring Attribute "{}" (ignored name)'.format(
+                node.attr))
+            return
         if isinstance(node.ctx, ast.Store):
             self._define(self.defined_attrs, node.attr, node)
         elif isinstance(node.ctx, ast.Load):
             self.used_attrs.add(node.attr)
 
     def visit_ClassDef(self, node):
+        if self.ignored(node.name):
+            self._log('Ignoring class "{}" (ignored name)'.format(node.name))
+            return
         self._define(
             self.defined_classes, node.name, node, ignore=_ignore_class)
 
     def visit_FunctionDef(self, node):
         for decorator in node.decorator_list:
-            if getattr(decorator, 'id', None) == 'property':
+            n = decorator.func if isinstance(
+                decorator, ast.Call) else decorator
+            name = n.attr if isinstance(n, ast.Attribute) else n.id
+            if self.ignored(name):
+                self._log(
+                    'Ignoring function "{}" (ignored decorator: "{}")'.format(
+                        node.name, name))
+                break
+            elif name == 'property':
                 self._define(self.defined_props, node.name, node)
                 break
         else:
             # Function is not a property.
+            if self.ignored(node.name):
+                self._log('Ignoring function "{}" (ignored name)'.format(
+                    node.name))
+                return
             self._define(
                 self.defined_funcs, node.name, node,
                 ignore=_ignore_function)
@@ -516,6 +547,11 @@ def _parse_args():
         ' (*, ?, [, ]). Treat PATTERNs without globbing characters as'
         ' *PATTERN*.')
     parser.add_argument(
+            '--ignore-names', metavar='NAME', type=csv, default=[],
+            help='Comma-seperated list of names to ignore (e.g.,'
+            ' app.route). Arguments may contain globbing characters (*, ?,'
+            ' [abc], [^abc])')
+    parser.add_argument(
             '--make-whitelist', action='store_true',
             help='Report unused code in a format that can be added to a'
             ' whitelist module.')
@@ -533,7 +569,7 @@ def _parse_args():
 
 def main():
     args = _parse_args()
-    vulture = Vulture(verbose=args.verbose)
+    vulture = Vulture(verbose=args.verbose, ignore_names=args.ignore_names)
     vulture.scavenge(args.paths, exclude=args.exclude)
     report_func = (vulture.make_whitelist if args.make_whitelist
                    else vulture.report)
