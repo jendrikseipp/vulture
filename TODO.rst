@@ -1,9 +1,7 @@
 TODOs
 =====
 
-* Use coverage.py to detect false-positives (#109).
-* Write script for turning SIP files into whitelists (#8).
-* Add PyQT whitelist to Vulture repo?
+* Add --ignore-names option.
 
 
 Non-TODOs
@@ -26,3 +24,4 @@ Non-TODOs
   occuring outside of a statement (hard to detect if code is unneeded).
 * Detect that body of ``if foo:`` is unreachable if foo is only assigned "false" values
   (complicated: e.g., foo = []; foo.append(1); if foo: ...).
+* Use coverage.py to detect false-positives (#109). Workflow too complicated.
