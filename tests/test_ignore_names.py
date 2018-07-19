@@ -28,6 +28,16 @@ funny = True
 
 def test_function(check_ignore):
     code = """\
+def foo():
+    pass
+def foo_ignored():
+    pass
+"""
+    check_ignore(code, ['foo_ignored'], ['foo'])
+
+
+def test_function_glob(check_ignore):
+    code = """\
 def foo_one():
     pass
 def foo_two():
@@ -47,6 +57,16 @@ class Foo:
         pass
 """
     check_ignore(code, ['Foo'], [])
+
+
+def test_property(check_ignore):
+    code = """\
+class Foo:
+    @property
+    def some_property(self, a):
+        return a
+"""
+    check_ignore(code, ['Foo', 'property'], ['some_property'])
 
 
 def test_attribute(check_ignore):
