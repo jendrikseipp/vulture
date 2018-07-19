@@ -65,8 +65,12 @@ class Foo:
     @property
     def some_property(self, a):
         return a
+
+    @property
+    def foo_bar(self):
+        return 'bar'
 """
-    check_ignore(code, ['Foo', 'property'], ['some_property'])
+    check_ignore(code, ['Foo', 'property'], ['some_property', 'foo_bar'])
 
 
 def test_attribute(check_ignore):
