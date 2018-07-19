@@ -51,8 +51,6 @@ IGNORED_VARIABLE_NAMES = set(['object', 'self'])
 if sys.version_info < (3, 4):
     IGNORED_VARIABLE_NAMES |= set(['True', 'False'])
 
-UNSAFE_IGNORE_NAMES = ['property']
-
 
 def _get_unused_items(defined_items, used_names):
     unused_items = [item for item in set(defined_items)
@@ -380,41 +378,26 @@ class Vulture(ast.NodeVisitor):
         return self.visit_FunctionDef(node)
 
     def visit_Attribute(self, node):
-        if self.ignored(node.attr):
-            self._log('Ignoring Attribute "{}" (ignored name)'.format(
-                node.attr))
-            return
         if isinstance(node.ctx, ast.Store):
             self._define(self.defined_attrs, node.attr, node)
         elif isinstance(node.ctx, ast.Load):
             self.used_attrs.add(node.attr)
 
     def visit_ClassDef(self, node):
-        if self.ignored(node.name):
-            self._log('Ignoring class "{}" (ignored name)'.format(node.name))
-            return
         self._define(
             self.defined_classes, node.name, node, ignore=_ignore_class)
 
     def visit_FunctionDef(self, node):
         for decorator in node.decorator_list:
-            n = decorator.func if isinstance(
+            decorator = decorator.func if isinstance(
                 decorator, ast.Call) else decorator
-            name = n.attr if isinstance(n, ast.Attribute) else n.id
-            if self.ignored(name):
-                self._log(
-                    'Ignoring function "{}" (ignored decorator: "{}")'.format(
-                        node.name, name))
-                break
-            elif name == 'property':
+            name = decorator.attr if isinstance(
+                decorator, ast.Attribute) else decorator.id
+            if name == 'property':
                 self._define(self.defined_props, node.name, node)
                 break
         else:
             # Function is not a property.
-            if self.ignored(node.name):
-                self._log('Ignoring function "{}" (ignored name)'.format(
-                    node.name))
-                return
             self._define(
                 self.defined_funcs, node.name, node,
                 ignore=_ignore_function)
