@@ -14,7 +14,7 @@ def check_ignore():
     return examine
 
 
-def test_vars(check_ignore):
+def test_var(check_ignore):
     code = """\
 foo = 1
 bar = 2
@@ -24,17 +24,7 @@ funny = True
     check_ignore(code, ['f*', 'bar'], ['three'])
 
 
-def test_ignore_function(check_ignore):
-    code = """\
-def foo():
-    pass
-def foo_ignored():
-    pass
-"""
-    check_ignore(code, ['foo_ignored'], ['foo'])
-
-
-def test_function_glob(check_ignore):
+def test_function(check_ignore):
     code = """\
 def foo_one():
     pass
@@ -48,7 +38,7 @@ def bar():
     check_ignore(code, ['foo*'], ['bar'])
 
 
-def test_class_ignored(check_ignore):
+def test_class(check_ignore):
     code = """\
 class Foo:
     def __init__(self):

@@ -1,6 +1,11 @@
 News
 ====
 
+0.29 (unreleased)
+-----------------
+* Add ``--ignore-names`` flag for ignoring names matching the given glob pattern.
+
+
 0.28 (2018-07-05)
 -----------------
 * Add ``--make-whitelist`` flag for reporting output in whitelist format (thanks @RJ722).
