@@ -71,6 +71,13 @@ We collect whitelists for common Python modules and packages in
 ignore a whole file or directory, use the ``--exclude`` parameter (e.g.,
 ``--exclude *settings.py,docs/``).
 
+**Ignoring certain results**
+
+You can use the ``--ignore-names`` option to prevent Vulture from reporting
+item whose names follow a certain regex (for eg. ``[abc]``). Please note
+that for functions, the names of decorators are also matched against the
+given regular expression(s).
+
 **Marking unused variables**
 
 There are situations where you can't just remove unused variables, e.g.,
