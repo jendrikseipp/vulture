@@ -81,3 +81,33 @@ class Foo:
         self.attr_bar = attr_bar
 """
     check_ignore(code, ['foo', '*_foo'], ['Foo', 'attr_bar'])
+
+
+def test_decorated_functions(check_ignore):
+    code = """\
+def decor():
+    return help
+
+class FooBar:
+    def foobar(self):
+        return help
+
+    @property
+    def prop_one(self):
+        pass
+
+f = FooBar()
+
+@decor()
+def bar():
+    pass
+
+@f.foobar
+def foo():
+    pass
+
+@f.foobar()
+def barfoo():
+    pass
+"""
+    check_ignore(code, ['decor', 'foobar'], ['prop_one'])
