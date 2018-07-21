@@ -16,12 +16,14 @@ def check_ignore():
 
 def test_var(check_ignore):
     code = """\
-foo = 1
+fio = 1
+fao = 2
 bar = 2
-three = 3
+ftobar = 3
+baz = 10000
 funny = True
 """
-    check_ignore(code, ['f*', 'bar'], ['three'])
+    check_ignore(code, ['f?o*', 'ba[rz]'], ['funny'])
 
 
 def test_function(check_ignore):
@@ -68,4 +70,34 @@ class Foo:
         self.attr_foo = attr_foo
         self.attr_bar = attr_bar
 """
-    check_ignore(code, ['*_foo'], ['Foo', 'attr_bar'])
+    check_ignore(code, ['foo', '*_foo'], ['Foo', 'attr_bar'])
+
+
+def test_decorated_functions(check_ignore):
+    code = """\
+def decor():
+    return help
+
+class FooBar:
+    def foobar(self):
+        return help
+
+    @property
+    def prop_one(self):
+        pass
+
+f = FooBar()
+
+@decor()
+def bar():
+    pass
+
+@f.foobar
+def foo():
+    pass
+
+@f.foobar()
+def barfoo():
+    pass
+"""
+    check_ignore(code, ['decor', 'foobar'], ['prop_one'])
