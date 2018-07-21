@@ -389,12 +389,19 @@ class Vulture(ast.NodeVisitor):
 
     def visit_FunctionDef(self, node):
         for decorator in node.decorator_list:
-            decorator = decorator.func if isinstance(
-                decorator, ast.Call) else decorator
-            name = decorator.attr if isinstance(
-                decorator, ast.Attribute) else decorator.id
+            if isinstance(decorator, ast.Call):
+                decorator = decorator.func
+            if isinstance(decorator, ast.Attribute):
+                name = decorator.attr
+            else:
+                name = decorator.id
             if name == 'property':
                 self._define(self.defined_props, node.name, node)
+                break
+            elif self._ignore_name(name):
+                self._log(
+                    'Ignoring function "{}" (decorator whitelisted)'.format(
+                        node.name))
                 break
         else:
             # Function is not a property.
