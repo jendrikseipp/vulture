@@ -3,7 +3,7 @@ News
 
 0.29 (unreleased)
 -----------------
-* Add ``--ignore-names`` flag for ignoring names matching the given glob pattern.
+* Add ``--ignore-names`` flag for ignoring names matching the given glob patterns.
 
 
 0.28 (2018-07-05)

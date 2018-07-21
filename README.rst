@@ -71,12 +71,19 @@ We collect whitelists for common Python modules and packages in
 ignore a whole file or directory, use the ``--exclude`` parameter (e.g.,
 ``--exclude *settings.py,docs/``).
 
-**Ignoring certain results**
+**Ignoring names**
 
-You can use the ``--ignore-names`` option to prevent Vulture from reporting
-item whose names follow a certain regex (for eg. ``[abc]``). Please note
-that for functions, the names of decorators are also matched against the
-given regular expression(s).
+You can use ``--ignore-names foo*,ba[rz]`` to let Vulture ignore all names
+starting with foo and the names ``bar`` and ``baz``. The ``--ignore-names``
+option also checks decorator names. This is helpful for example in Flask
+projects, where you can use ``--ignore-names app.route`` to ignore all
+functions with the ``@app.route`` decorator.
+
+We recommend using whitelists instead of ``--ignore-names`` whenever
+possible, since whitelists are automatically checked for syntactic
+correctness when passed to Vulture and sometimes you can even pass
+them to your Python interpreter and let it check that all whitelisted
+code actually still exists in your project.
 
 **Marking unused variables**
 
