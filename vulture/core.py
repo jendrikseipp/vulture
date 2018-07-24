@@ -509,32 +509,32 @@ def _parse_args():
 
     usage = "%(prog)s [options] PATH [PATH ...]"
     version = "vulture {0}".format(__version__)
+    glob_help = 'Patterns may contain glob wildcards (*, ?, [abc], [!abc]).'
     parser = argparse.ArgumentParser(prog='vulture', usage=usage)
     parser.add_argument(
         'paths', nargs='+', metavar='PATH',
         help='Paths may be Python files or directories. For each directory'
         ' Vulture analyzes all contained *.py files.')
     parser.add_argument(
-        '--exclude', metavar='PATTERN', type=csv,
+        '--exclude', metavar='PATTERNS', type=csv,
         help='Comma-separated list of paths to ignore (e.g.,'
-        ' *settings.py,docs/*.py). PATTERNs can contain globbing characters'
-        ' (*, ?, [, ]). Treat PATTERNs without globbing characters as'
-        ' *PATTERN*.')
+        ' "*settings.py,docs/*.py"). {glob_help} A PATTERN without globbing'
+        ' characters is treated as *PATTERN*.'.format(**locals()))
     parser.add_argument(
-            '--ignore-names', metavar='PATTERN', type=csv, default=None,
-            help='Comma-separated list of names to ignore. Arguments may'
-            ' contain globbing characters (*, ?, [abc], [^abc]).')
+        '--ignore-names', metavar='PATTERNS', type=csv, default=None,
+        help='Comma-separated list of names to ignore (e.g., "visit_*,do_*").'
+        ' {glob_help}'.format(**locals()))
     parser.add_argument(
-            '--make-whitelist', action='store_true',
-            help='Report unused code in a format that can be added to a'
-            ' whitelist module.')
+        '--make-whitelist', action='store_true',
+        help='Report unused code in a format that can be added to a'
+        ' whitelist module.')
     parser.add_argument(
         '--min-confidence', type=int, default=0,
         help='Minimum confidence (between 0 and 100) for code to be'
         ' reported as unused.')
     parser.add_argument(
         "--sort-by-size", action="store_true",
-        help='Sort unused functions and classes by their lines of code')
+        help='Sort unused functions and classes by their lines of code.')
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('--version', action='version', version=version)
     return parser.parse_args()
