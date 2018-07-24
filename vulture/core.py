@@ -525,10 +525,6 @@ def _parse_args():
         help='Comma-separated list of names to ignore (e.g., "visit_*,do_*").'
         ' {glob_help}'.format(**locals()))
     parser.add_argument(
-        '--make-whitelist', action='store_true',
-        help='Report unused code in a format that can be added to a'
-        ' whitelist module.')
-    parser.add_argument(
         '--min-confidence', type=int, default=0,
         help='Minimum confidence (between 0 and 100) for code to be'
         ' reported as unused.')
