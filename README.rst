@@ -74,7 +74,7 @@ ignore a whole file or directory, use the ``--exclude`` parameter (e.g.,
 **Ignoring names**
 
 You can use ``--ignore-names foo*,ba[rz]`` to let Vulture ignore all names
-starting with foo and the names ``bar`` and ``baz``.
+starting with ``foo`` and the names ``bar`` and ``baz``.
 
 We recommend using whitelists instead of ``--ignore-names`` whenever
 possible, since whitelists are automatically checked for syntactic
