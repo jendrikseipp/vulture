@@ -75,9 +75,10 @@ ignore a whole file or directory, use the ``--exclude`` parameter (e.g.,
 
 You can use ``--ignore-names foo*,ba[rz]`` to let Vulture ignore all names
 starting with ``foo`` and the names ``bar`` and ``baz``. The ``--ignore-names``
-option also checks decorator names. This is helpful for example in Flask
-projects, where you can use ``--ignore-names app.route`` to ignore all
-functions with the ``@app.route`` decorator.
+option if started with a ``@`` symbol checks for functions decorated with the
+given decorator. This is helpful for example in Flask projects, where you can
+use ``--ignore-names "@app.route"`` to ignore all functions with the
+``@app.route`` decorator.
 
 We recommend using whitelists instead of ``--ignore-names`` whenever
 possible, since whitelists are automatically checked for syntactic
