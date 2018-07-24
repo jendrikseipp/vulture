@@ -49,20 +49,6 @@ class Foo:
     check_ignore(code, ['Foo'], [])
 
 
-def test_property(check_ignore):
-    code = """\
-class Foo:
-    @property
-    def some_property(self, a):
-        return a
-
-    @property
-    def foo_bar(self):
-        return 'bar'
-"""
-    check_ignore(code, ['Foo', 'property'], ['some_property', 'foo_bar'])
-
-
 def test_attribute(check_ignore):
     code = """\
 class Foo:
@@ -71,33 +57,3 @@ class Foo:
         self.attr_bar = attr_bar
 """
     check_ignore(code, ['foo', '*_foo'], ['Foo', 'attr_bar'])
-
-
-def test_decorated_functions(check_ignore):
-    code = """\
-def decor():
-    return help
-
-class FooBar:
-    def foobar(self):
-        return help
-
-    @property
-    def prop_one(self):
-        pass
-
-f = FooBar()
-
-@decor()
-def bar():
-    pass
-
-@f.foobar
-def foo():
-    pass
-
-@f.foobar()
-def barfoo():
-    pass
-"""
-    check_ignore(code, ['decor', 'foobar'], ['prop_one'])
