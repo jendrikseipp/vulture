@@ -522,9 +522,8 @@ def _parse_args():
         ' *PATTERN*.')
     parser.add_argument(
             '--ignore-names', metavar='PATTERN', type=csv, default=None,
-            help='Comma-seperated list of names to ignore (e.g.,'
-            ' app.route). Arguments may contain globbing characters (*, ?,'
-            ' [abc], [^abc]).')
+            help='Comma-seperated list of names to ignore. Arguments may'
+            ' contain globbing characters (*, ?, [abc], [^abc]).')
     parser.add_argument(
             '--make-whitelist', action='store_true',
             help='Report unused code in a format that can be added to a'
