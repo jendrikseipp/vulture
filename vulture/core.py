@@ -28,7 +28,7 @@ from __future__ import print_function
 
 import argparse
 import ast
-from fnmatch import fnmatch
+from fnmatch import fnmatch, fnmatchcase
 import os.path
 import pkgutil
 import re
@@ -142,7 +142,7 @@ class Item(object):
 class Vulture(ast.NodeVisitor):
     """Find dead code."""
 
-    def __init__(self, verbose=False):
+    def __init__(self, verbose=False, ignore_names=None):
         self.verbose = verbose
 
         def get_list(typ):
@@ -161,6 +161,8 @@ class Vulture(ast.NodeVisitor):
 
         self.used_attrs = get_set('attribute')
         self.used_names = get_set('name')
+
+        self.ignore_names = ignore_names or []
 
         self.filename = ''
         self.code = []
@@ -275,6 +277,9 @@ class Vulture(ast.NodeVisitor):
             self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
 
+    def _ignore_name(self, name):
+        return any(fnmatchcase(name, pattern) for pattern in self.ignore_names)
+
     @property
     def unused_classes(self):
         return _get_unused_items(
@@ -348,7 +353,7 @@ class Vulture(ast.NodeVisitor):
                 message='', confidence=DEFAULT_CONFIDENCE, ignore=None):
         last_node = last_node or first_node
         typ = collection.typ
-        if ignore and ignore(self.filename, name):
+        if (ignore and ignore(self.filename, name)) or self._ignore_name(name):
             self._log('Ignoring {typ} "{name}"'.format(**locals()))
         else:
             first_lineno = first_node.lineno
@@ -516,6 +521,10 @@ def _parse_args():
         ' (*, ?, [, ]). Treat PATTERNs without globbing characters as'
         ' *PATTERN*.')
     parser.add_argument(
+            '--ignore-names', metavar='PATTERN', type=csv, default=None,
+            help='Comma-separated list of names to ignore. Arguments may'
+            ' contain globbing characters (*, ?, [abc], [^abc]).')
+    parser.add_argument(
             '--make-whitelist', action='store_true',
             help='Report unused code in a format that can be added to a'
             ' whitelist module.')
@@ -533,7 +542,7 @@ def _parse_args():
 
 def main():
     args = _parse_args()
-    vulture = Vulture(verbose=args.verbose)
+    vulture = Vulture(verbose=args.verbose, ignore_names=args.ignore_names)
     vulture.scavenge(args.paths, exclude=args.exclude)
     report_func = (vulture.make_whitelist if args.make_whitelist
                    else vulture.report)
