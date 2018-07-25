@@ -28,16 +28,6 @@ funny = True
 
 def test_function(check_ignore):
     code = """\
-def foo():
-    pass
-def foo_ignored():
-    pass
-"""
-    check_ignore(code, ['foo_ignored'], ['foo'])
-
-
-def test_function_glob(check_ignore):
-    code = """\
 def foo_one():
     pass
 def foo_two():
