@@ -7,8 +7,10 @@ from . import check
 
 @pytest.fixture
 def check_ignore():
-    def examine(code, ignore_names, expected):
-        v = core.Vulture(verbose=True, ignore_names=ignore_names)
+    def examine(code, expected, ignore_names=[], ignore_decorators=[]):
+        v = core.Vulture(
+                verbose=True, ignore_names=ignore_names,
+                ignore_decorators=ignore_decorators)
         v.scan(code)
         check(v.get_unused_code(), expected)
     return examine
@@ -23,7 +25,7 @@ ftobar = 3
 baz = 10000
 funny = True
 """
-    check_ignore(code, ['f?o*', 'ba[rz]'], ['funny'])
+    check_ignore(code, ['funny'], ['f?o*', 'ba[rz]'])
 
 
 def test_function(check_ignore):
@@ -37,7 +39,7 @@ def foo():
 def bar():
     pass
 """
-    check_ignore(code, ['foo*'], ['bar'])
+    check_ignore(code, ['bar'], ['foo*'])
 
 
 def test_class(check_ignore):
@@ -46,7 +48,7 @@ class Foo:
     def __init__(self):
         pass
 """
-    check_ignore(code, ['Foo'], [])
+    check_ignore(code, [], ['Foo'])
 
 
 def test_property(check_ignore):
@@ -60,7 +62,7 @@ class Foo:
     def foo_bar(self):
         return 'bar'
 """
-    check_ignore(code, ['Foo', '@property'], ['some_property', 'foo_bar'])
+    check_ignore(code, ['some_property', 'foo_bar'], ['Foo'], ['property'])
 
 
 def test_attribute(check_ignore):
@@ -70,7 +72,7 @@ class Foo:
         self.attr_foo = attr_foo
         self.attr_bar = attr_bar
 """
-    check_ignore(code, ['foo', '*_foo'], ['Foo', 'attr_bar'])
+    check_ignore(code, ['Foo', 'attr_bar'], ['foo', '*_foo'])
 
 
 def test_decorated_functions(check_ignore):
@@ -100,4 +102,4 @@ def foo():
 def barfoo():
     pass
 """
-    check_ignore(code, ['@decor', '@f.foobar'], ['prop_one'])
+    check_ignore(code, ['prop_one'], [], ['decor', 'f.foobar'])
