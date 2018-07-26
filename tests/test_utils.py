@@ -2,6 +2,7 @@ import ast
 
 import pytest
 
+from . import skip_if_not_has_async
 from vulture import utils
 
 
@@ -41,6 +42,7 @@ def bar():
     check_get_decorator_name(code, ['xyz'])
 
 
+@skip_if_not_has_async
 def test_get_decorator_name_async(check_get_decorator_name):
     code = """\
 @foo.bar.route('/foobar')

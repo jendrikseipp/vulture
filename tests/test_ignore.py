@@ -2,7 +2,7 @@ import pytest
 
 from vulture import core
 
-from . import check
+from . import check, skip_if_not_has_async
 
 
 @pytest.fixture
@@ -37,6 +37,17 @@ def foo_two():
 def foo():
     pass
 def bar():
+    pass
+"""
+    check_ignore(code, ['bar'], ['foo*'])
+
+
+@skip_if_not_has_async
+def test_async_function(check_ignore):
+    code = """\
+async def foobar():
+    pass
+async def bar():
     pass
 """
     check_ignore(code, ['bar'], ['foo*'])
@@ -106,3 +117,18 @@ def barfoo():
 """
     check_ignore(code, ['prop_one'], [], ['decor', 'f.foobar'])
     check_ignore(code, ['prop_one'], [], ['@decor', '@f.foobar'])
+
+
+@skip_if_not_has_async
+def test_decorated_async_functions(check_ignore):
+    code = """\
+@app.route('something')
+@foobar
+async def async_function():
+    pass
+
+@a.b.c
+async def foo():
+    pass
+"""
+    check_ignore(code, ['foo'], [], ['@app.route', '@a.b'])
