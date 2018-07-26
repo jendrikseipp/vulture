@@ -16,6 +16,7 @@ def check_get_decorater_name():
 
         node_visitor = ast.NodeVisitor()
         node_visitor.visit_FunctionDef = visit_FunctionDef
+        node_visitor.visit_AsyncFunctionDef = visit_FunctionDef
         node_visitor.visit(ast.parse(code))
         assert expected_names == decorator_names
     return check
@@ -37,6 +38,15 @@ def bar():
     pass
 """
     check_get_decorater_name(code, ['xyz'])
+
+
+def test_get_decorator_name_async(check_get_decorater_name):
+    code = """\
+@foo.bar.route('/foobar')
+async def async_function(request):
+    print(reques)
+"""
+    check_get_decorater_name(code, ['foo.bar.route'])
 
 
 def test_get_decorator_name_multiple_attrs(check_get_decorater_name):
