@@ -21,22 +21,37 @@ def check_get_decorater_name():
     return check
 
 
-def test_get_decorator_name(check_get_decorater_name):
+def test_get_decorator_name_simple(check_get_decorater_name):
     code = """\
 @foobar
 def hoo():
     pass
+"""
+    check_get_decorater_name(code, ['foobar'])
 
+
+def test_get_decorator_name_call(check_get_decorater_name):
+    code = """\
 @xyz()
 def bar():
     pass
+"""
+    check_get_decorater_name(code, ['xyz'])
 
+
+def test_get_decorator_name_multiple_attrs(check_get_decorater_name):
+    code = """\
 @x.y.z
 def doo():
     pass
+"""
+    check_get_decorater_name(code, ['x.y.z'])
 
+
+def test_get_decorator_name_multiple_attrs_called(check_get_decorater_name):
+    code = """\
 @a.b.c.d.foo("Foo and Bar")
 def hoofoo():
     pass
 """
-    check_get_decorater_name(code, ['foobar', 'xyz', 'x.y.z', 'a.b.c.d.foo'])
+    check_get_decorater_name(code, ['a.b.c.d.foo'])

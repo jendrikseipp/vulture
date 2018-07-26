@@ -57,15 +57,15 @@ def format_path(path):
 
 
 def get_decorator_name(decorator):
-    name = ''
+    parts = []
     if isinstance(decorator, ast.Call):
         decorator = decorator.func
     while isinstance(decorator, ast.Attribute):
-        name = decorator.attr + ('.' + name if name else '')
+        parts.append(decorator.attr)
         decorator = decorator.value
-    else:
-        name = decorator.id + ('.' + name if name else '')
-    return name
+    parts.append(decorator.id)
+    parts.reverse()
+    return ".".join(parts)
 
 
 def get_modules(paths, toplevel=True):

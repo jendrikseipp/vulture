@@ -354,11 +354,10 @@ class Vulture(ast.NodeVisitor):
 
     def _define(self, collection, name, first_node, last_node=None,
                 message='', confidence=DEFAULT_CONFIDENCE, ignore=None):
-        def _ignore_name(name):
-            return _match(name, self.ignore_names)
         last_node = last_node or first_node
         typ = collection.typ
-        if (ignore and ignore(self.filename, name)) or _ignore_name(name):
+        if (ignore and ignore(self.filename, name)) or _match(
+                name, self.ignore_names):
             self._log('Ignoring {typ} "{name}"'.format(**locals()))
         else:
             first_lineno = first_node.lineno
@@ -393,14 +392,12 @@ class Vulture(ast.NodeVisitor):
             self.defined_classes, node.name, node, ignore=_ignore_class)
 
     def visit_FunctionDef(self, node):
-        def _ignore_decorator(name):
-            return _match(name, self.ignore_decorators)
         for decorator in node.decorator_list:
             name = utils.get_decorator_name(decorator)
             if name == 'property':
                 self._define(self.defined_props, node.name, node)
                 break
-            elif _ignore_decorator(name):
+            elif _match(name, self.ignore_decorators):
                 self._log(
                     'Ignoring function "{}" (decorator whitelisted)'.format(
                         node.name))
