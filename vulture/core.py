@@ -170,8 +170,7 @@ class Vulture(ast.NodeVisitor):
         self.ignore_names = ignore_names or []
         self.ignore_decorators = ignore_decorators or []
         self.ignore_decorators = [
-            decor[1:] if decor.startswith('@') else decor
-            for decor in self.ignore_decorators]
+            decorator.lstrip('@') for decorator in self.ignore_decorators]
 
         self.filename = ''
         self.code = []
