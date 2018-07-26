@@ -98,8 +98,11 @@ def bar():
 def foo():
     pass
 
+@bar
+@foo
 @f.foobar()
 def barfoo():
     pass
 """
     check_ignore(code, ['prop_one'], [], ['decor', 'f.foobar'])
+    check_ignore(code, ['prop_one'], [], ['@decor', '@f.foobar'])

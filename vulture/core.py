@@ -169,6 +169,9 @@ class Vulture(ast.NodeVisitor):
 
         self.ignore_names = ignore_names or []
         self.ignore_decorators = ignore_decorators or []
+        self.ignore_decorators = [
+            decor[1:] if decor.startswith('@') else decor
+            for decor in self.ignore_decorators]
 
         self.filename = ''
         self.code = []
@@ -388,8 +391,15 @@ class Vulture(ast.NodeVisitor):
             self.used_attrs.add(node.attr)
 
     def visit_ClassDef(self, node):
-        self._define(
-            self.defined_classes, node.name, node, ignore=_ignore_class)
+        for decorator in node.decorator_list:
+            if _match(utils.get_decorator_name(decorator),
+                      self.ignore_decorators):
+                self._log('Ignoring class "{}" (decorator whitelisted)'.format(
+                    node.name))
+                break
+        else:
+            self._define(
+                self.defined_classes, node.name, node, ignore=_ignore_class)
 
     def visit_FunctionDef(self, node):
         for decorator in node.decorator_list:
@@ -532,8 +542,8 @@ def _parse_args():
         ' characters is treated as *PATTERN*.'.format(**locals()))
     parser.add_argument(
         '--ignore-decorators', metavar='PATTERNS', type=csv,
-        help='Comma-separated list of decorators - The functions using these'
-        ' decorators are ignored (e.g., "app.route").'
+        help='Comma-separated list of decorators. Functions and classes using'
+        ' these decorators are ignored (e.g., "@app.route").'
         ' {glob_help}'.format(**locals()))
     parser.add_argument(
         '--ignore-names', metavar='PATTERNS', type=csv, default=None,
