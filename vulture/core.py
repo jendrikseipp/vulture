@@ -401,16 +401,15 @@ class Vulture(ast.NodeVisitor):
                 self.defined_classes, node.name, node, ignore=_ignore_class)
 
     def visit_FunctionDef(self, node):
-        for decorator in node.decorator_list:
-            name = utils.get_decorator_name(decorator)
-            if _match(name, self.ignore_decorators):
-                self._log(
-                    'Ignoring {} "{}" (decorator whitelisted)'.format(
-                        name if name == 'property' else 'function', node.name))
-                break
-            elif name == 'property':
-                self._define(self.defined_props, node.name, node)
-                break
+        decorator_names = [utils.get_decorator_name(
+            decorator) for decorator in node.decorator_list]
+        typ = 'property' if 'property' in decorator_names else 'function'
+        if any(_match(name, self.ignore_decorators)
+               for name in decorator_names):
+            self._log('Ignoring {} "{}" (decorator whitelisted)'.format(
+                    typ, node.name))
+        elif typ == 'property':
+            self._define(self.defined_props, node.name, node)
         else:
             # Function is not a property.
             self._define(
@@ -542,7 +541,7 @@ def _parse_args():
     parser.add_argument(
         '--ignore-decorators', metavar='PATTERNS', type=csv,
         help='Comma-separated list of decorators. Functions and classes using'
-        ' these decorators are ignored (e.g., "@app.route").'
+        ' these decorators are ignored (e.g., "@app.route,@require_*").'
         ' {glob_help}'.format(**locals()))
     parser.add_argument(
         '--ignore-names', metavar='PATTERNS', type=csv, default=None,
