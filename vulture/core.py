@@ -403,13 +403,13 @@ class Vulture(ast.NodeVisitor):
     def visit_FunctionDef(self, node):
         for decorator in node.decorator_list:
             name = utils.get_decorator_name(decorator)
-            if name == 'property':
-                self._define(self.defined_props, node.name, node)
-                break
-            elif _match(name, self.ignore_decorators):
+            if _match(name, self.ignore_decorators):
                 self._log(
-                    'Ignoring function "{}" (decorator whitelisted)'.format(
-                        node.name))
+                    'Ignoring {} "{}" (decorator whitelisted)'.format(
+                        name if name == 'property' else 'function', node.name))
+                break
+            elif name == 'property':
+                self._define(self.defined_props, node.name, node)
                 break
         else:
             # Function is not a property.

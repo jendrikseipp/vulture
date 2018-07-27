@@ -65,10 +65,12 @@ class Foo:
         return a
 
     @property
+    @bar
     def foo_bar(self):
         return 'bar'
 """
-    check_ignore(code, ['some_property', 'foo_bar'], ['Foo'], ['property'])
+    check_ignore(code, [], ['Foo'], ['@property'])
+    check_ignore(code, ['some_property', 'foo_bar'], ['Foo'], [])
 
 
 def test_attribute():
@@ -138,5 +140,17 @@ def foo():
 """
     check_ignore(code, [], [], ['@bar'])
     check_ignore(code, ['foo'], [], ['@baz'])
-    check_ignore(code, ['foo'], [], ['property'])
-    check_ignore(code, ['foo'], [], ['@property'])
+    check_ignore(code, [], [], ['property'])
+    check_ignore(code, [], [], ['@property'])
+
+
+def test_decorated_class():
+    code = """\
+@barfoo
+@foo.bar('foo')
+class Bar:
+    def __init__(self):
+        pass
+"""
+    check_ignore(code, ['Bar'], [], [])
+    check_ignore(code, [], [], ['@bar*'])
