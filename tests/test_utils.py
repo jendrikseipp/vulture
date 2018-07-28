@@ -4,7 +4,7 @@ from . import skip_if_not_has_async
 from vulture import utils
 
 
-def check(code, expected_names):
+def check_decorator_names(code, expected_names):
     decorator_names = []
 
     def visit_FunctionDef(node):
@@ -25,7 +25,7 @@ def test_get_decorator_name_simple():
 def hoo():
     pass
 """
-    check(code, ['foobar'])
+    check_decorator_names(code, ['foobar'])
 
 
 def test_get_decorator_name_call():
@@ -34,7 +34,7 @@ def test_get_decorator_name_call():
 def bar():
     pass
 """
-    check(code, ['xyz'])
+    check_decorator_names(code, ['xyz'])
 
 
 @skip_if_not_has_async
@@ -44,7 +44,7 @@ def test_get_decorator_name_async():
 async def async_function(request):
     print(reques)
 """
-    check(code, ['foo.bar.route'])
+    check_decorator_names(code, ['foo.bar.route'])
 
 
 def test_get_decorator_name_multiple_attrs():
@@ -53,7 +53,7 @@ def test_get_decorator_name_multiple_attrs():
 def doo():
     pass
 """
-    check(code, ['x.y.z'])
+    check_decorator_names(code, ['x.y.z'])
 
 
 def test_get_decorator_name_multiple_attrs_called():
@@ -62,7 +62,7 @@ def test_get_decorator_name_multiple_attrs_called():
 def hoofoo():
     pass
 """
-    check(code, ['a.b.c.d.foo'])
+    check_decorator_names(code, ['a.b.c.d.foo'])
 
 
 def test_get_decorator_name_multiple_decorators():
@@ -73,7 +73,7 @@ def test_get_decorator_name_multiple_decorators():
 def func():
     pass
 """
-    check(code, ['foo', 'bar', 'x.y.z.a'])
+    check_decorator_names(code, ['foo', 'bar', 'x.y.z.a'])
 
 
 def test_get_decorator_name_class():
@@ -83,4 +83,4 @@ def test_get_decorator_name_class():
 class Foo:
     pass
 """
-    check(code, ['foo', 'bar.yz'])
+    check_decorator_names(code, ['foo', 'bar.yz'])
