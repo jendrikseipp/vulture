@@ -4,9 +4,8 @@ from . import check, skip_if_not_has_async
 
 
 def check_ignore(code, ignore_names, ignore_decorators, expected):
-    v = core.Vulture(
-            verbose=True, ignore_names=ignore_names,
-            ignore_decorators=ignore_decorators)
+    v = core.Vulture(verbose=True, ignore_names=ignore_names,
+                     ignore_decorators=ignore_decorators)
     v.scan(code)
     check(v.get_unused_code(), expected)
 
@@ -55,6 +54,18 @@ class Foo:
         pass
 """
     check_ignore(code, ['Foo'], [], [])
+
+
+def test_class_ignore():
+    code = """\
+@bar
+class Foo:
+    pass
+
+class Bar:
+    pass
+"""
+    check_ignore(code, [], [], ['Foo', 'Bar'])
 
 
 def test_property():
@@ -112,8 +123,8 @@ def foo():
 def barfoo():
     pass
 """
-    check_ignore(code, [], ['decor', 'f.foobar'], ['prop_one'])
-    check_ignore(code, [], ['@decor', '@f.foobar'], ['prop_one'])
+    check_ignore(code, [], ['@decor', '*@f.foobar'], ['prop_one'])
+    check_ignore(code, [], ['*decor', '@*f.foobar'], ['prop_one'])
 
 
 @skip_if_not_has_async
@@ -140,7 +151,6 @@ def foo():
 """
     check_ignore(code, [], ['@bar'], [])
     check_ignore(code, [], ['@baz'], ['foo'])
-    check_ignore(code, [], ['property'], [])
     check_ignore(code, [], ['@property'], [])
 
 
@@ -153,7 +163,7 @@ def foo():
 """
     check_ignore(code, [], ['@bar'], [])
     check_ignore(code, [], ['@property'], [])
-    check_ignore(code, [], ['property'], [])
+    check_ignore(code, [], ['@b*r'], [])
     check_ignore(code, [], ['@barfoo'], ['foo'])
 
 

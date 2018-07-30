@@ -169,8 +169,6 @@ class Vulture(ast.NodeVisitor):
 
         self.ignore_names = ignore_names or []
         self.ignore_decorators = ignore_decorators or []
-        self.ignore_decorators = [
-            decorator.lstrip('@') for decorator in self.ignore_decorators]
 
         self.filename = ''
         self.code = []
@@ -403,7 +401,7 @@ class Vulture(ast.NodeVisitor):
     def visit_FunctionDef(self, node):
         decorator_names = [utils.get_decorator_name(
             decorator) for decorator in node.decorator_list]
-        typ = 'property' if 'property' in decorator_names else 'function'
+        typ = 'property' if '@property' in decorator_names else 'function'
         if any(_match(name, self.ignore_decorators)
                for name in decorator_names):
             self._log('Ignoring {} "{}" (decorator whitelisted)'.format(

@@ -64,7 +64,7 @@ def get_decorator_name(decorator):
         parts.append(decorator.attr)
         decorator = decorator.value
     parts.append(decorator.id)
-    return '.'.join(reversed(parts))
+    return '@' + '.'.join(reversed(parts))
 
 
 def get_modules(paths, toplevel=True):
