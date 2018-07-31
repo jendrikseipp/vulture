@@ -74,13 +74,17 @@ ignore a whole file or directory, use the ``--exclude`` parameter (e.g.,
 **Ignoring names**
 
 You can use ``--ignore-names foo*,ba[rz]`` to let Vulture ignore all names
-starting with ``foo`` and the names ``bar`` and ``baz``.
+starting with ``foo`` and the names ``bar`` and ``baz``. Additionally, the
+``--ignore-decorators`` option can be used to ignore functions decorated
+with the given decorator. This is helpful for example in Flask projects,
+where you can use ``--ignore-decorators "@app.route"`` to ignore all functions
+with the ``@app.route`` decorator.
 
-We recommend using whitelists instead of ``--ignore-names`` whenever
-possible, since whitelists are automatically checked for syntactic
-correctness when passed to Vulture and sometimes you can even pass
-them to your Python interpreter and let it check that all whitelisted
-code actually still exists in your project.
+We recommend using whitelists instead of ``--ignore-names`` or
+``--ignore-decorators`` whenever possible, since whitelists are automatically
+checked for syntactic correctness when passed to Vulture and often you can
+even pass them to your Python interpreter and let it check that all
+whitelisted code actually still exists in your project.
 
 **Marking unused variables**
 

@@ -63,6 +63,10 @@ def _is_special_name(name):
     return name.startswith('__') and name.endswith('__')
 
 
+def _match(name, patterns):
+    return any(fnmatchcase(name, pattern) for pattern in patterns)
+
+
 def _is_test_file(filename):
     return any(
         fnmatch(os.path.basename(filename), pattern)
@@ -142,7 +146,8 @@ class Item(object):
 class Vulture(ast.NodeVisitor):
     """Find dead code."""
 
-    def __init__(self, verbose=False, ignore_names=None):
+    def __init__(self, verbose=False, ignore_names=None,
+                 ignore_decorators=None):
         self.verbose = verbose
 
         def get_list(typ):
@@ -163,6 +168,7 @@ class Vulture(ast.NodeVisitor):
         self.used_names = get_set('name')
 
         self.ignore_names = ignore_names or []
+        self.ignore_decorators = ignore_decorators or []
 
         self.filename = ''
         self.code = []
@@ -277,9 +283,6 @@ class Vulture(ast.NodeVisitor):
             self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
 
-    def _ignore_name(self, name):
-        return any(fnmatchcase(name, pattern) for pattern in self.ignore_names)
-
     @property
     def unused_classes(self):
         return _get_unused_items(
@@ -353,7 +356,8 @@ class Vulture(ast.NodeVisitor):
                 message='', confidence=DEFAULT_CONFIDENCE, ignore=None):
         last_node = last_node or first_node
         typ = collection.typ
-        if (ignore and ignore(self.filename, name)) or self._ignore_name(name):
+        if (ignore and ignore(self.filename, name)) or _match(
+                name, self.ignore_names):
             self._log('Ignoring {typ} "{name}"'.format(**locals()))
         else:
             first_lineno = first_node.lineno
@@ -384,14 +388,26 @@ class Vulture(ast.NodeVisitor):
             self.used_attrs.add(node.attr)
 
     def visit_ClassDef(self, node):
-        self._define(
-            self.defined_classes, node.name, node, ignore=_ignore_class)
+        for decorator in node.decorator_list:
+            if _match(utils.get_decorator_name(decorator),
+                      self.ignore_decorators):
+                self._log('Ignoring class "{}" (decorator whitelisted)'.format(
+                    node.name))
+                break
+        else:
+            self._define(
+                self.defined_classes, node.name, node, ignore=_ignore_class)
 
     def visit_FunctionDef(self, node):
-        for decorator in node.decorator_list:
-            if getattr(decorator, 'id', None) == 'property':
-                self._define(self.defined_props, node.name, node)
-                break
+        decorator_names = [utils.get_decorator_name(
+            decorator) for decorator in node.decorator_list]
+        typ = 'property' if '@property' in decorator_names else 'function'
+        if any(_match(name, self.ignore_decorators)
+               for name in decorator_names):
+            self._log('Ignoring {} "{}" (decorator whitelisted)'.format(
+                    typ, node.name))
+        elif typ == 'property':
+            self._define(self.defined_props, node.name, node)
         else:
             # Function is not a property.
             self._define(
@@ -521,6 +537,11 @@ def _parse_args():
         ' "*settings.py,docs/*.py"). {glob_help} A PATTERN without globbing'
         ' characters is treated as *PATTERN*.'.format(**locals()))
     parser.add_argument(
+        '--ignore-decorators', metavar='PATTERNS', type=csv,
+        help='Comma-separated list of decorators. Functions and classes using'
+        ' these decorators are ignored (e.g., "@app.route,@require_*").'
+        ' {glob_help}'.format(**locals()))
+    parser.add_argument(
         '--ignore-names', metavar='PATTERNS', type=csv, default=None,
         help='Comma-separated list of names to ignore (e.g., "visit_*,do_*").'
         ' {glob_help}'.format(**locals()))
@@ -542,7 +563,8 @@ def _parse_args():
 
 def main():
     args = _parse_args()
-    vulture = Vulture(verbose=args.verbose, ignore_names=args.ignore_names)
+    vulture = Vulture(verbose=args.verbose, ignore_names=args.ignore_names,
+                      ignore_decorators=args.ignore_decorators)
     vulture.scavenge(args.paths, exclude=args.exclude)
     report_func = (vulture.make_whitelist if args.make_whitelist
                    else vulture.report)

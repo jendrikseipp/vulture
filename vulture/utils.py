@@ -56,6 +56,17 @@ def format_path(path):
     return relpath if not relpath.startswith('..') else path
 
 
+def get_decorator_name(decorator):
+    if isinstance(decorator, ast.Call):
+        decorator = decorator.func
+    parts = []
+    while isinstance(decorator, ast.Attribute):
+        parts.append(decorator.attr)
+        decorator = decorator.value
+    parts.append(decorator.id)
+    return '@' + '.'.join(reversed(parts))
+
+
 def get_modules(paths, toplevel=True):
     """Take files from the command line even if they don't end with .py."""
     modules = []
