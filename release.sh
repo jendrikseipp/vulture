@@ -6,12 +6,14 @@ VERSION="$1"
 
 tox
 
+# Check that NEWS file is up-to-date.
+grep "$VERSION" NEWS.rst || echo "Version $VERSION missing in NEWS file."
+
 # Check for uncommited changes.
 set +e
 git diff --quiet && git diff --cached --quiet
 retcode=$?
 set -e
-
 if [[ $retcode != 0 ]]; then
     echo "There are uncommited changes:"
     git status
