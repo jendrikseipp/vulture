@@ -1,7 +1,7 @@
 News
 ====
 
-0.29 (unreleased)
+0.29 (2018-07-31)
 -----------------
 * Add ``--ignore-names`` flag for ignoring names matching the given glob patterns.
 
