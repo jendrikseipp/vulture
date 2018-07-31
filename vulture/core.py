@@ -534,8 +534,8 @@ def _parse_args():
     parser.add_argument(
         '--exclude', metavar='PATTERNS', type=csv,
         help='Comma-separated list of paths to ignore (e.g.,'
-        ' "*settings.py,docs/*.py"). {glob_help} A PATTERN without globbing'
-        ' characters is treated as *PATTERN*.'.format(**locals()))
+        ' "*settings.py,docs/*.py"). {glob_help} A PATTERN without glob'
+        ' wildcards is treated as *PATTERN*.'.format(**locals()))
     parser.add_argument(
         '--ignore-decorators', metavar='PATTERNS', type=csv,
         help='Comma-separated list of decorators. Functions and classes using'
