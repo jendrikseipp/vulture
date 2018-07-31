@@ -1,9 +1,14 @@
 News
 ====
 
+0.30 (unreleased)
+-----------------
+* Add ``--ignore-decorators`` flag (thanks @RJ722).
+
+
 0.29 (2018-07-31)
 -----------------
-* Add ``--ignore-names`` flag for ignoring names matching the given glob patterns.
+* Add ``--ignore-names`` flag for ignoring names matching the given glob patterns (thanks @RJ722).
 
 
 0.28 (2018-07-05)
