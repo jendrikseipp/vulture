@@ -130,6 +130,14 @@ class Item(object):
             utils.format_path(self.filename), self.first_lineno,
             self.message, self.confidence, size_report)
 
+    def get_whitelist_string(self):
+        if self.typ != 'unreachable_code':
+            prefix = '_.' if self.typ in ['attribute', 'property'] else ''
+            return "{}{}  # unused {} ({}:{:d})".format(
+                    prefix, self.name, self.typ,
+                    utils.format_path(self.filename), self.first_lineno)
+        return ''
+
     def _tuple(self):
         return (self.filename, self.first_lineno, self.name)
 
@@ -262,24 +270,16 @@ class Vulture(ast.NodeVisitor):
         return sorted(confidently_unused,
                       key=by_size if sort_by_size else by_name)
 
-    def make_whitelist(self, min_confidence=0, sort_by_size=False):
-        for item in self.get_unused_code(
-                min_confidence=min_confidence, sort_by_size=sort_by_size):
-            if item.typ != 'unreachable_code':
-                prefix = '_.' if item.typ in ['attribute', 'property'] else ''
-                print("{}{}  # unused {} ({}:{:d})".format(
-                        prefix, item.name, item.typ,
-                        utils.format_path(item.filename), item.first_lineno))
-                self.found_dead_code_or_error = True
-        return self.found_dead_code_or_error
-
-    def report(self, min_confidence=0, sort_by_size=False):
+    def report(self, min_confidence=0, sort_by_size=False,
+               make_whitelist=False):
         """
         Print ordered list of Item objects to stdout.
         """
         for item in self.get_unused_code(
                 min_confidence=min_confidence, sort_by_size=sort_by_size):
-            print(item.get_report(add_size=sort_by_size))
+            report = (item.get_whitelist_string() if make_whitelist
+                      else item.get_report(add_size=sort_by_size))
+            print(report)
             self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
 
@@ -566,8 +566,7 @@ def main():
     vulture = Vulture(verbose=args.verbose, ignore_names=args.ignore_names,
                       ignore_decorators=args.ignore_decorators)
     vulture.scavenge(args.paths, exclude=args.exclude)
-    report_func = (vulture.make_whitelist if args.make_whitelist
-                   else vulture.report)
-    sys.exit(report_func(
+    sys.exit(vulture.report(
         min_confidence=args.min_confidence,
-        sort_by_size=args.sort_by_size))
+        sort_by_size=args.sort_by_size,
+        make_whitelist=args.make_whitelist))

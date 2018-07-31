@@ -5,14 +5,13 @@ assert v  # silence pyflakes
 
 
 @pytest.fixture
-def check_whitelist(v, capsys):
+def check_whitelist(v):
     def examine(code, results_before, results_after):
         v.scan(code)
         check(v.get_unused_code(), results_before)
-        capsys.readouterr()  # Clear captured text
-        v.make_whitelist()
-        whitelist = capsys.readouterr().out
-        v.scan(whitelist)
+        whitelist = [item.get_whitelist_string() for item in v.get_unused_code()]
+        for whitelist_string in whitelist:
+            v.scan(whitelist_string)
         check(v.get_unused_code(), results_after)
     return examine
 
