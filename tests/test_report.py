@@ -53,7 +53,7 @@ Foo  # unused class ({filename}:3)
 bar  # unused function ({filename}:7)
 _.foobar  # unused attribute ({filename}:8)
 foobar  # unused variable ({filename}:9)
-# unreachable code after 'return' in file {filename} at line 11
+# unreachable code after 'return' ({filename}:11)
 _.myprop  # unused property ({filename}:13)
 """
     check_report(mock_code, expected, make_whitelist=True)

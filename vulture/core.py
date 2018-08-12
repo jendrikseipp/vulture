@@ -131,14 +131,14 @@ class Item(object):
             self.message, self.confidence, size_report)
 
     def get_whitelist_string(self):
+        filename = utils.format_path(self.filename)
         if self.typ == 'unreachable_code':
-            return ('# {message} in file {filename} at line'
-                    ' {first_lineno}'.format(**self.__dict__))
+            return ('# {} ({}:{})'.format(
+                self.message, filename, self.first_lineno))
         else:
             prefix = '_.' if self.typ in ['attribute', 'property'] else ''
             return "{}{}  # unused {} ({}:{:d})".format(
-                    prefix, self.name, self.typ,
-                    utils.format_path(self.filename), self.first_lineno)
+                    prefix, self.name, self.typ, filename, self.first_lineno)
 
     def _tuple(self):
         return (self.filename, self.first_lineno, self.name)
