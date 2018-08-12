@@ -27,9 +27,8 @@ def check_report(v, capsys):
     def test_report(code, expected,  make_whitelist=False):
         filename = 'foo.py'
         v.scan(code, filename=filename)
-        report_func = v.make_whitelist if make_whitelist else v.report
         capsys.readouterr()
-        report_func()
+        v.report(make_whitelist=make_whitelist)
         assert capsys.readouterr().out == expected.format(filename=filename)
     return test_report
 
@@ -54,6 +53,7 @@ Foo  # unused class ({filename}:3)
 bar  # unused function ({filename}:7)
 _.foobar  # unused attribute ({filename}:8)
 foobar  # unused variable ({filename}:9)
+# unreachable code after 'return' in file {filename} at line 11
 _.myprop  # unused property ({filename}:13)
 """
     check_report(mock_code, expected, make_whitelist=True)

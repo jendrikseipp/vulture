@@ -131,12 +131,14 @@ class Item(object):
             self.message, self.confidence, size_report)
 
     def get_whitelist_string(self):
-        if self.typ != 'unreachable_code':
+        if self.typ == 'unreachable_code':
+            return ('# {message} in file {filename} at line'
+                    ' {first_lineno}'.format(**self.__dict__))
+        else:
             prefix = '_.' if self.typ in ['attribute', 'property'] else ''
             return "{}{}  # unused {} ({}:{:d})".format(
                     prefix, self.name, self.typ,
                     utils.format_path(self.filename), self.first_lineno)
-        return ''
 
     def _tuple(self):
         return (self.filename, self.first_lineno, self.name)
@@ -277,9 +279,8 @@ class Vulture(ast.NodeVisitor):
         """
         for item in self.get_unused_code(
                 min_confidence=min_confidence, sort_by_size=sort_by_size):
-            report = (item.get_whitelist_string() if make_whitelist
-                      else item.get_report(add_size=sort_by_size))
-            print(report)
+            print(item.get_whitelist_string() if make_whitelist
+                  else item.get_report(add_size=sort_by_size))
             self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
 
