@@ -1,8 +1,6 @@
 TODOs
 =====
 
-* Add --ignore-names option.
-
 
 Non-TODOs
 =========
