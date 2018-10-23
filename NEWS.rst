@@ -1,7 +1,7 @@
 News
 ====
 
-1.0 (unreleased)
+1.0 (2018-10-23)
 ----------------
 * Add ``--ignore-decorators`` flag (thanks @RJ722).
 * Add whitelist for ``threading`` module (thanks @andrewhalle).
