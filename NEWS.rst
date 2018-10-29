@@ -1,6 +1,11 @@
 News
 ====
 
+1.1 (unreleased)
+----------------
+* Add ``sys.excepthook`` to ``sys`` whitelist.
+
+
 1.0 (2018-10-23)
 ----------------
 * Add ``--ignore-decorators`` flag (thanks @RJ722).
