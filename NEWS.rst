@@ -5,6 +5,7 @@ News
 ----------------
 * Add ``sys.excepthook`` to ``sys`` whitelist.
 * Add whitelist for ``ctypes`` module.
+* Add test to check that ``typing`` module imports are marked as used
 
 
 1.0 (2018-10-23)
