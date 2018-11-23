@@ -547,28 +547,35 @@ a = 2
     check(v.unused_vars, ['a', 'a'])
 
 
-@pytest.mark.skipif(sys.version_info < (3, 6),
-                    reason="requires python3.6 or higher")
-def test_typing_module(v):
+@pytest.mark.skipif(sys.version_info < (3, 5),
+                    reason="requires Python 3.5+")
+def test_arg_type_annotation(v):
     v.scan("""\
-from typing import Iterable, List
-
-x: List[int] = [1]
+from typing import Iterable
 
 def f(n: int) -> Iterable[int]:
-    i = 0
-    while i < n:
-        yield i
-        i += 1
+    yield n
+""")
+
+    check(v.unused_vars, [])
+    check(v.unused_funcs, ['f'])
+    check(v.unused_imports, [])
+
+
+@pytest.mark.skipif(sys.version_info < (3, 6),
+                    reason="requires Python 3.6+")
+def test_var_type_annotation(v):
+    v.scan("""\
+from typing import List
+
+x: List[int] = [1]
 """)
 
     check(v.unused_vars, ['x'])
     check(v.unused_funcs, ['f'])
-    check(v.used_names, ['Iterable', 'n', 'i', 'int', 'List'])
+    check(v.unused_imports, [])
 
 
-@pytest.mark.skipif(sys.version_info < (3, 6),
-                    reason="requires python3.6 or higher")
 def test_type_hint_comments(v):
     v.scan("""\
 import typing
