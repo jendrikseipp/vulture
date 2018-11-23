@@ -572,7 +572,7 @@ x: List[int] = [1]
 """)
 
     check(v.unused_vars, ['x'])
-    check(v.unused_funcs, ['f'])
+    check(v.unused_funcs, [])
     check(v.unused_imports, [])
 
 
