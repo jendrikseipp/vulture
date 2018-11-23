@@ -1,3 +1,7 @@
+import sys
+
+import pytest
+
 from . import check, skip_if_not_has_async, v
 assert v  # Silence pyflakes.
 
@@ -541,3 +545,41 @@ a = 2
     check(v.defined_vars, ['a', 'a'])
     check(v.used_names, [])
     check(v.unused_vars, ['a', 'a'])
+
+
+@pytest.mark.skipif(sys.version_info < (3, 6),
+                    reason="requires python3.6 or higher")
+def test_typing_module(v):
+    v.scan("""\
+from typing import Iterable, List
+
+x: List[int] = [1]
+
+def f(n: int) -> Iterable[int]:
+    i = 0
+    while i < n:
+        yield i
+        i += 1
+""")
+
+    check(v.unused_vars, ['x'])
+    check(v.unused_funcs, ['f'])
+    check(v.used_names, ['Iterable', 'n', 'i', 'int', 'List'])
+
+
+@pytest.mark.skipif(sys.version_info < (3, 6),
+                    reason="requires python3.6 or higher")
+def test_type_hint_comments(v):
+    v.scan("""\
+import typing
+
+if typing.TYPE_CHECKING:
+    from typing import List, Text
+
+def foo(foo_li):
+    # type: (List[Text]) -> None
+    for bar in foo_li:
+        bar.xyz()
+""")
+
+    check(v.unused_imports, ['List', 'Text'])
