@@ -1,9 +1,8 @@
-#! /usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # vulture - Find dead code.
 #
-# Copyright (c) 2012-2018 Jendrik Seipp (jendrikseipp@gmail.com)
+# Copyright (c) 2012-2019 Jendrik Seipp (jendrikseipp@gmail.com)
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
