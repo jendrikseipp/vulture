@@ -102,6 +102,8 @@ class Item(object):
     """
     Hold the name, type and location of defined code.
     """
+    __slots__ = ('name', 'typ', 'filename', 'first_lineno',
+                 'last_lineno', 'message', 'confidence')
 
     def __init__(self, name, typ, filename, first_lineno, last_lineno,
                  message='',
