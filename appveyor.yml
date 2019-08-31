@@ -10,8 +10,6 @@ environment:
     PYTHON: "C:\\Python36-x64"
   - TOXENV: py37
     PYTHON: "C:\\Python37-x64"
-  - TOXENV: docs
-  - TOXENV: style
 
 install:
 - cmd: python -m pip install -U pip setuptools tox virtualenv wheel
@@ -23,7 +21,7 @@ build_script:
 test_script:
 - cmd: vulture vulture/ tests/
 - cmd: python -m vulture vulture/ tests/
-- cmd: tox
+- cmd: tox -e py,docs,style
 
 matrix:
   fast_finish: true
