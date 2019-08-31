@@ -1,6 +1,8 @@
 TODOs
 =====
 
+* Use end_lineno and end_col_offset attributes when running Python 3.8+.
+
 
 Non-TODOs
 =========
