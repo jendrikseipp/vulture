@@ -21,7 +21,7 @@ install:
   - python setup.py bdist_wheel
   - "pip install --only-binary=:all: ./dist/vulture-*.whl"
 script:
-  # Run the installed version of vulture on local code.
+  # Run the installed version of Vulture on local code.
   - vulture vulture/ tests/
   - tox -e cleanup,py,docs,style
 after_success:
