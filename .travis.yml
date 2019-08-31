@@ -2,20 +2,16 @@ language: python
 
 matrix:
   include:
-  - python: pypy
-  - python: pypy3
-  - python: '2.7'
-  - python: '3.5'
-  - python: '3.6'
-  - python: '3.7'
-    dist: xenial
-    sudo: true
-  - python: 3.8-dev
-    dist: xenial
-    sudo: true
+  - python: "pypy"
+  - python: "pypy3"
+  - python: "2.7"
+  - python: "3.5"
+  - python: "3.6"
+  - python: "3.7"
+  - python: "3.8-dev"
   fast_finish: true
   allow_failures:
-  - python: 3.8-dev
+  - python: "3.8-dev"
 install:
   - pip install tox coveralls
   - python setup.py bdist_wheel
