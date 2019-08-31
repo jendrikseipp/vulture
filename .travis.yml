@@ -13,12 +13,13 @@ matrix:
   allow_failures:
   - python: "3.8-dev"
 install:
-  - pip install tox coveralls
+  - pip install coveralls tox
   - python setup.py bdist_wheel
   - "pip install --only-binary=:all: ./dist/vulture-*.whl"
 script:
-  # Run the installed version of Vulture on local code.
+  - python --version
   - vulture vulture/ tests/
+  - python -m vulture vulture/ tests/
   - tox -e py,docs,style
 after_success:
   - coveralls

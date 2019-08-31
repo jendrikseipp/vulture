@@ -19,6 +19,7 @@ build_script:
 - cmd: python -m pip install --only-binary --no-index --ignore-installed --find-links=dist/ vulture
 
 test_script:
+- cmd: python --version
 - cmd: vulture vulture/ tests/
 - cmd: python -m vulture vulture/ tests/
 - cmd: tox -e py,docs,style
