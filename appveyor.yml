@@ -15,7 +15,7 @@ environment:
   - TOXENV: style
 
 install:
-- cmd: python -m pip install -U pip setuptools tox wheel virtualenv
+- cmd: python -m pip install -U pip setuptools tox virtualenv wheel
 
 build_script:
 - cmd: python setup.py bdist_wheel
