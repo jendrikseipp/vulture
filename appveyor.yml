@@ -2,8 +2,6 @@ version: 1.0.{build}
 
 environment:
   matrix:
-  - TOXENV: cleanup
-  - TOXENV: docs
   - TOXENV: py27
     PYTHON: "C:\\Python27-x64"
   - TOXENV: py35
@@ -12,6 +10,7 @@ environment:
     PYTHON: "C:\\Python36-x64"
   - TOXENV: py37
     PYTHON: "C:\\Python37-x64"
+  - TOXENV: docs
   - TOXENV: style
 
 install:

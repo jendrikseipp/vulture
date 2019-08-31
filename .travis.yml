@@ -19,6 +19,6 @@ install:
 script:
   # Run the installed version of Vulture on local code.
   - vulture vulture/ tests/
-  - tox -e cleanup,py,docs,style
+  - tox -e py,docs,style
 after_success:
   - coveralls
