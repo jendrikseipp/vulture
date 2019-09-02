@@ -3,26 +3,25 @@ version: 1.0.{build}
 environment:
   matrix:
   - TOXENV: py27
-    PYTHON: "C:\\Python27-x64"
+    PYTHON: C:\Python27-x64\python.exe
   - TOXENV: py35
-    PYTHON: "C:\\Python35-x64"
+    PYTHON: C:\Python35-x64\python.exe
   - TOXENV: py36
-    PYTHON: "C:\\Python36-x64"
+    PYTHON: C:\Python36-x64\python.exe
   - TOXENV: py37
-    PYTHON: "C:\\Python37-x64"
+    PYTHON: C:\Python37-x64\python.exe
 
 install:
-- cmd: python -m pip install -U pip setuptools tox virtualenv wheel
+- cmd: "%PYTHON% -m pip install -U pip setuptools tox virtualenv wheel"
 
 build_script:
-- cmd: python setup.py bdist_wheel
-- cmd: python -m pip install --only-binary --no-index --ignore-installed --find-links=dist/ vulture
+- cmd: "%PYTHON% setup.py bdist_wheel"
+- cmd: "%PYTHON% -m pip install --only-binary --no-index --ignore-installed --find-links=dist/ vulture"
 
 test_script:
-- cmd: python --version
-- cmd: vulture vulture/ tests/
-- cmd: python -m vulture vulture/ tests/
-- cmd: tox -e py,docs,style
+- cmd: "%PYTHON% --version"
+- cmd: "%PYTHON% -m vulture vulture/ tests/"
+- cmd: "%PYTHON% -m tox -e py,docs,style"
 
 matrix:
-  fast_finish: true
+  fast_finish: false
