@@ -520,23 +520,6 @@ def foo(*bar):
     check(v.unused_vars, ['bar'])
 
 
-def test_encoding1(v):
-    v.scan(u"""\
-# -*- coding: utf-8 -*-
-pass
-""")
-    assert True
-
-
-def test_encoding2(v):
-    v.scan(u"""\
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
-pass
-""")
-    assert True
-
-
 def test_multiple_definition(v):
     v.scan("""\
 a = 1
