@@ -221,7 +221,7 @@ class Vulture(ast.NodeVisitor):
             self._log('Scanning:', module)
             try:
                 module_string = utils.read_file(module)
-            except utils.VultureInputException as err:
+            except utils.VultureInputException as err:  # noqa: F841
                 print(
                     'Error: Could not read file {module} - {err}\n'
                     'Try to change the encoding to UTF-8.'.format(**locals()),
