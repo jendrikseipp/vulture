@@ -342,7 +342,7 @@ class Vulture(ast.NodeVisitor):
                 message="unsatisfiable '{name}' condition".format(**locals()),
                 confidence=100)
         else:
-            else_body = getattr(node, 'orelse')
+            else_body = node.orelse
             if utils.condition_is_always_true(node.test) and else_body:
                 self._define(
                     self.unreachable_code, 'else', else_body[0],

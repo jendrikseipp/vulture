@@ -36,7 +36,7 @@ def check_size(example, size):
             assert count_lines(node) == size
             break
     else:
-        assert False, 'Failed to find top-level class "Foo" in code'
+        raise AssertionError('Failed to find top-level class "Foo" in code')
 
 
 def test_size_basic():
