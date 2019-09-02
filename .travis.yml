@@ -18,7 +18,6 @@ install:
   - "pip install --only-binary=:all: ./dist/vulture-*.whl"
 script:
   - python --version
-  - tox --version
   - vulture vulture/ tests/
   - python -m vulture vulture/ tests/
   - tox -e py,docs,style
