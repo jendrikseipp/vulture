@@ -5,8 +5,9 @@ import re
 import sys
 import tokenize
 
-# Encoding to use when converting input files to unicode.
-ENCODING = 'utf-8'
+# Encoding to use when converting input files to unicode. Python 2 trips
+# over the BOM, so we use "utf-8-sig" which drops the BOM.
+ENCODING = 'utf-8-sig'
 
 # The ast module in Python 2 trips over "coding" cookies, so strip them.
 ENCODING_REGEX = re.compile(
