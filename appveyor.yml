@@ -3,13 +3,13 @@ version: 1.0.{build}
 environment:
   matrix:
   - TOXENV: py27
-    PYTHON: "C:\\Python27-x64"
+    PYTHON: "C:\Python27-x64\python.exe"
   - TOXENV: py35
-    PYTHON: "C:\\Python35-x64"
+    PYTHON: "C:\Python35-x64\python.exe"
   - TOXENV: py36
-    PYTHON: "C:\\Python36-x64"
+    PYTHON: "C:\Python36-x64\python.exe"
   - TOXENV: py37
-    PYTHON: "C:\\Python37-x64"
+    PYTHON: "C:\Python37-x64\python.exe"
 
 install:
 - cmd: "%PYTHON% -m pip install -U pip setuptools tox virtualenv wheel"
