@@ -5,6 +5,7 @@ import subprocess
 import sys
 
 import pytest
+
 from vulture import core
 
 DIR = os.path.dirname(os.path.abspath(__file__))

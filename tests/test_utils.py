@@ -1,7 +1,8 @@
 import ast
 
-from . import skip_if_not_has_async
 from vulture import utils
+
+from . import skip_if_not_has_async
 
 
 def check_decorator_names(code, expected_names):
