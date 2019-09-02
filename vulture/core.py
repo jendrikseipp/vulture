@@ -41,10 +41,6 @@ __version__ = '1.0'
 
 DEFAULT_CONFIDENCE = 60
 
-# The ast module in Python 2 trips over "coding" cookies, so strip them.
-ENCODING_REGEX = re.compile(
-    r"^[ \t\v]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+).*?$", flags=re.M)
-
 IGNORED_VARIABLE_NAMES = set(['object', 'self'])
 # True and False are NameConstants since Python 3.4.
 if sys.version_info < (3, 4):
@@ -186,7 +182,7 @@ class Vulture(ast.NodeVisitor):
         self.found_dead_code_or_error = False
 
     def scan(self, code, filename=''):
-        code = ENCODING_REGEX.sub("", code, count=1)
+        code = utils.sanitize_code(code)
         self.code = code.splitlines()
         self.filename = filename
         try:
