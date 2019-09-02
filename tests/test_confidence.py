@@ -9,9 +9,9 @@ dc = core.DEFAULT_CONFIDENCE
 def check_min_confidence(code, min_confidence, expected):
     v = core.Vulture(verbose=True)
     v.scan(code)
-    detected = dict(
-        (item.name, item.confidence)
-        for item in v.get_unused_code(min_confidence=min_confidence))
+    detected = {
+        item.name: item.confidence
+        for item in v.get_unused_code(min_confidence=min_confidence)}
     assert detected == expected
 
 

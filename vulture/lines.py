@@ -15,7 +15,7 @@ def _get_last_child_with_lineno(node):
     list of nodes, we return the last one.
 
     """
-    ignored_fields = set(['ctx', 'decorator_list', 'names', 'returns'])
+    ignored_fields = {'ctx', 'decorator_list', 'names', 'returns'}
     fields = node._fields
     # The fields of ast.Call are in the wrong order.
     if isinstance(node, ast.Call):

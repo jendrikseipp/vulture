@@ -41,10 +41,10 @@ __version__ = '1.0'
 
 DEFAULT_CONFIDENCE = 60
 
-IGNORED_VARIABLE_NAMES = set(['object', 'self'])
+IGNORED_VARIABLE_NAMES = {'object', 'self'}
 # True and False are NameConstants since Python 3.4.
 if sys.version_info < (3, 4):
-    IGNORED_VARIABLE_NAMES |= set(['True', 'False'])
+    IGNORED_VARIABLE_NAMES |= {'True', 'False'}
 
 
 def _get_unused_items(defined_items, used_names):
@@ -230,7 +230,7 @@ class Vulture(ast.NodeVisitor):
             else:
                 self.scan(module_string, filename=module)
 
-        unique_imports = set(item.name for item in self.defined_imports)
+        unique_imports = {item.name for item in self.defined_imports}
         for import_name in unique_imports:
             path = os.path.join('whitelists', import_name) + '_whitelist.py'
             if exclude_file(path):
