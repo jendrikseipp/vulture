@@ -1,6 +1,11 @@
 News
 ====
 
+1.2 (unreleased)
+----------------
+* Fix tests for Python 3.8 (#166).
+
+
 1.1 (2019-09-23)
 ----------------
 * Add ``sys.excepthook`` to ``sys`` whitelist.

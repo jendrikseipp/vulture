@@ -78,7 +78,10 @@ class Foo(object):
         else:
             pass
 """
-    check_size(example, 11)
+    size = 11
+    if sys.version_info >= (3, 8):
+        size = 10
+    check_size(example, size)
 
 
 def test_size_while():
