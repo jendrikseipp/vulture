@@ -5,7 +5,7 @@ News
 ----------------
 * Add ``sys.excepthook`` to ``sys`` whitelist.
 * Add whitelist for ``ctypes`` module.
-* Check that Python 3.6 type-annotations are parsed and type comments are ignored (thanks @kx-chen).
+* Check that type annotations are parsed and type comments are ignored (thanks @kx-chen).
 * Support checking files with BOM under Python 2.7 (#170).
 
 
