@@ -1,7 +1,7 @@
 News
 ====
 
-1.1 (unreleased)
+1.1 (2019-09-23)
 ----------------
 * Add ``sys.excepthook`` to ``sys`` whitelist.
 * Add whitelist for ``ctypes`` module.
