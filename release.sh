@@ -30,8 +30,8 @@ sed -i -e "s/__version__ = '.*'/__version__ = '$VERSION'/" vulture/core.py
 git commit -am "Update version number to ${VERSION} for release."
 git tag -a "v$VERSION" -m "v$VERSION" HEAD
 
-python setup.py sdist bdist_wheel
-twine upload dist/vulture-${VERSION}.tar.gz dist/vulture-${VERSION}-py2.py3-none-any.whl
+python3 setup.py sdist bdist_wheel --universal
+python3 -m twine upload dist/vulture-${VERSION}.tar.gz dist/vulture-${VERSION}-py2.py3-none-any.whl
 
 git push
 git push --tags
