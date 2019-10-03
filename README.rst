@@ -205,9 +205,13 @@ Exit codes
 Similar programs
 ----------------
 
-* Vulture can be used together with *pyflakes*
-* The *coverage* module can find unused code more reliably, but requires
-  all branches of the code to actually be run.
+* Vulture can be used together with
+  `pyflakes <https://pypi.org/project/pyflakes/>`_.
+* The `coverage <https://pypi.org/project/coverage/>`_ module can find unused
+  code more reliably, but requires all branches of the code to actually be run.
+* `uncalled <https://pypi.org/project/uncalled/>`_ is also a similar command
+  line tool, which allows for a regular expression backed search mechanism,
+  rather than having to parse the AST, for finding dead code.
 
 
 Participate
