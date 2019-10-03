@@ -205,13 +205,13 @@ Exit codes
 Similar programs
 ----------------
 
-* Vulture can be used together with
-  `pyflakes <https://pypi.org/project/pyflakes/>`_.
-* The `coverage <https://pypi.org/project/coverage/>`_ module can find unused
-  code more reliably, but requires all branches of the code to actually be run.
-* `uncalled <https://pypi.org/project/uncalled/>`_ is also a similar command
-  line tool, which allows for a regular expression backed search mechanism,
-  rather than having to parse the AST, for finding dead code.
+* `pyflakes <https://pypi.org/project/pyflakes/>`_ finds unused imports and 
+  unused local variables (in addition to many other programmatic errors).
+* `coverage <https://pypi.org/project/coverage/>`_ finds unused
+  code more reliably than Vulture, but requires all branches of the code to 
+  actually be run.
+* `uncalled <https://pypi.org/project/uncalled/>`_ finds dead code by using 
+  the abstract syntax tree (like Vulture), regular expressions, or both.
 
 
 Participate
