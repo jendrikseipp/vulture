@@ -17,6 +17,7 @@ whitelist_node_visitor.visit_Bytes
 whitelist_node_visitor.visit_Call
 whitelist_node_visitor.visit_ClassDef
 whitelist_node_visitor.visit_Compare
+whitelist_node_visitor.visit_Constant
 whitelist_node_visitor.visit_Delete
 whitelist_node_visitor.visit_Dict
 whitelist_node_visitor.visit_DictComp
