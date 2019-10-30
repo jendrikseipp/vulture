@@ -1,16 +1,11 @@
 #! /bin/bash
 
-set -euo pipefail
+set -exuo pipefail
 
 VERSION="$1"
 
 # Check dependencies.
-twine -h
-
-tox
-
-# Check that NEWS file is up-to-date.
-grep "$VERSION" NEWS.rst || echo "Version $VERSION missing in NEWS file."
+twine -h > /dev/null
 
 # Check for uncommited changes.
 set +e
@@ -24,6 +19,11 @@ if [[ $retcode != 0 ]]; then
 fi
 
 git pull
+
+# Check that NEWS file is up-to-date.
+grep "$VERSION" NEWS.rst || (echo "Version $VERSION missing in NEWS file." && exit 1)
+
+tox
 
 # Bump version.
 sed -i -e "s/__version__ = '.*'/__version__ = '$VERSION'/" vulture/core.py
