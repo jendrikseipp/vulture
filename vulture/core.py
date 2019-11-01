@@ -350,6 +350,39 @@ class Vulture(ast.NodeVisitor):
                     message="unreachable 'else' block",
                     confidence=100)
 
+    def _handle_string(self, s):
+        """
+        Parse variable names in format strings:
+
+        '%(my_var)s' % locals()
+        '{my_var}'.format(**locals())
+
+        """
+        # Old format strings.
+        self.used_names |= set(re.findall(r'\%\((\w+)\)', s))
+
+        def is_identifier(name):
+            return bool(re.match(r'[a-zA-Z_][a-zA-Z0-9_]*', name))
+
+        # New format strings.
+        parser = string.Formatter()
+        try:
+            names = [name for _, name, _, _ in parser.parse(s) if name]
+        except ValueError:
+            # Invalid format string.
+            names = []
+
+        for field_name in names:
+            # Remove brackets and contents: "a[0][b].c[d].e" -> "a.c.e".
+            # "a.b.c" -> name = "a", attributes = ["b", "c"]
+            name_and_attrs = re.sub(r'\[\w*\]', '', field_name).split('.')
+            name = name_and_attrs[0]
+            if is_identifier(name):
+                self.used_names.add(name)
+            for attr in name_and_attrs[1:]:
+                if is_identifier(attr):
+                    self.used_attrs.add(attr)
+
     def _define(self, collection, name, first_node, last_node=None,
                 message='', confidence=DEFAULT_CONFIDENCE, ignore=None):
         last_node = last_node or first_node
@@ -436,38 +469,13 @@ class Vulture(ast.NodeVisitor):
         elif isinstance(node.ctx, (ast.Param, ast.Store)):
             self._define_variable(node.id, node)
 
-    def visit_Str(self, node):
-        """
-        Parse variable names in format strings:
-
-        '%(my_var)s' % locals()
-        '{my_var}'.format(**locals())
-
-        """
-        # Old format strings.
-        self.used_names |= set(re.findall(r'\%\((\w+)\)', node.s))
-
-        def is_identifier(s):
-            return bool(re.match(r'[a-zA-Z_][a-zA-Z0-9_]*', s))
-
-        # New format strings.
-        parser = string.Formatter()
-        try:
-            names = [name for _, name, _, _ in parser.parse(node.s) if name]
-        except ValueError:
-            # Invalid format string.
-            names = []
-
-        for field_name in names:
-            # Remove brackets and contents: "a[0][b].c[d].e" -> "a.c.e".
-            # "a.b.c" -> name = "a", attributes = ["b", "c"]
-            name_and_attrs = re.sub(r'\[\w*\]', '', field_name).split('.')
-            name = name_and_attrs[0]
-            if is_identifier(name):
-                self.used_names.add(name)
-            for attr in name_and_attrs[1:]:
-                if is_identifier(attr):
-                    self.used_attrs.add(attr)
+    if sys.version_info < (3, 8):
+        def visit_Str(self, node):
+            self._handle_string(node.s)
+    else:
+        def visit_Constant(self, node):
+            if isinstance(node.value, str):
+                self._handle_string(node.value)
 
     def visit_While(self, node):
         self._handle_conditional_node(node, 'while')
