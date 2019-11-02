@@ -1,3 +1,7 @@
+import sys
+
+import pytest
+
 from . import check, v
 assert v  # Silence pyflakes.
 
@@ -10,6 +14,14 @@ def test_old_format_string(v):
 def test_new_format_string(v):
     v.scan("'{a}, {b:0d} {c:<30} {d:.2%}'.format(**locals())")
     check(v.used_names, ['a', 'b', 'c', 'd', 'locals'])
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 6),
+    reason="needs f-string support (added in Python 3.6)")
+def test_f_string(v):
+    v.scan("f'{a}, {b:0d} {c:<30} {d:.2%}'")
+    check(v.used_names, ['a', 'b', 'c', 'd'])
 
 
 def test_new_format_string_access(v):

@@ -2,7 +2,6 @@ TODOs
 =====
 
 * Detect unused variables in assignment expressions under Python 3.8+.
-* Scan f-strings under Python 3.8+.
 * Use end_lineno and end_col_offset attributes when running Python 3.8+.
 
 
