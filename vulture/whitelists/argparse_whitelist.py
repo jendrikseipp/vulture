@@ -1,7 +1,6 @@
 import argparse
 
-_ = argparse.ArgumentParser()
-_.epilog
+argparse.ArgumentParser().epilog
 
-argparse.ArgumentDefaultsHelpFormatter._fill_text
-argparse.ArgumentDefaultsHelpFormatter._get_help_string
+argparse.ArgumentDefaultsHelpFormatter('prog')._fill_text
+argparse.ArgumentDefaultsHelpFormatter('prog')._get_help_string
