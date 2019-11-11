@@ -20,8 +20,12 @@ def test_new_format_string(v):
     sys.version_info < (3, 6),
     reason="needs f-string support (added in Python 3.6)")
 def test_f_string(v):
-    v.scan("f'{a}, {b:0d} {c:<30} {d:.2%}'")
-    check(v.used_names, ['a', 'b', 'c', 'd'])
+    v.scan('''\
+f'{a}, {b:0d} {c:<30} {d:.2%} {e()} {f:{width}.{precision}}'
+f'{ {x:y for (x, y) in ((1, 2), (3, 4))} }'
+''')
+    check(v.used_names,
+        ['a', 'b', 'c', 'd', 'e', 'f', 'width', 'precision', 'x', 'y'])
 
 
 def test_new_format_string_access(v):
