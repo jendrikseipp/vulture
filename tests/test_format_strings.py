@@ -25,7 +25,7 @@ f'{a}, {b:0d} {c:<30} {d:.2%} {e()} {f:{width}.{precision}}'
 f'{ {x:y for (x, y) in ((1, 2), (3, 4))} }'
 ''')
     check(v.used_names,
-        ['a', 'b', 'c', 'd', 'e', 'f', 'width', 'precision', 'x', 'y'])
+          ['a', 'b', 'c', 'd', 'e', 'f', 'precision', 'width', 'x', 'y'])
 
 
 def test_new_format_string_access(v):
