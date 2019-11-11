@@ -429,9 +429,6 @@ class Vulture(ast.NodeVisitor):
             self._define(
                 self.defined_classes, node.name, node, ignore=_ignore_class)
     
-    def visit_Constant(self, node):
-        self.visit_Str(node)
-
     def visit_FunctionDef(self, node):
         decorator_names = [utils.get_decorator_name(
             decorator) for decorator in node.decorator_list]
