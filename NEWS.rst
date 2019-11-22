@@ -1,7 +1,7 @@
 News
 ====
 
-1.2 (unreleased)
+1.2 (2019-11-22)
 ----------------
 * Fix tests for Python 3.8 (#166).
 * Use new ``Constant`` AST node under Python 3.8+ (#175).
