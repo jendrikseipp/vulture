@@ -35,6 +35,7 @@ def test_empty():
 def test_true():
     check_condition("True", True)
     check_condition("2", True)
+    check_condition("'s'", True)
     check_condition("['foo', 'bar']", True)
     check_condition("{'a': 1, 'b': 2}", True)
 
@@ -181,3 +182,12 @@ else:
     pass
 """)
     check_unreachable(v, 9, 4, 'else')
+
+
+def test_redundant_if(v):
+    v.scan("""\
+if [5]:
+    pass
+""")
+    print(v.unreachable_code[0].size)
+    check_unreachable(v, 1, 2, 'if')

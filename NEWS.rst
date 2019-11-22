@@ -1,6 +1,11 @@
 News
 ====
 
+1.3 (unreleased)
+----------------
+* Detect redundant 'if' conditions without 'else' blocks.
+
+
 1.2 (2019-11-22)
 ----------------
 * Fix tests for Python 3.8 (#166).

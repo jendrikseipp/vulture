@@ -341,13 +341,19 @@ class Vulture(ast.NodeVisitor):
                 last_node=node.body[-1],
                 message="unsatisfiable '{name}' condition".format(**locals()),
                 confidence=100)
-        else:
+        elif utils.condition_is_always_true(node.test):
             else_body = node.orelse
-            if utils.condition_is_always_true(node.test) and else_body:
+            if else_body:
                 self._define(
                     self.unreachable_code, 'else', else_body[0],
                     last_node=else_body[-1],
                     message="unreachable 'else' block",
+                    confidence=100)
+            elif name == 'if':
+                # Redundant if-condition without else block.
+                self._define(
+                    self.unreachable_code, name, node,
+                    message="redundant if-condition".format(**locals()),
                     confidence=100)
 
     def _handle_string(self, s):
