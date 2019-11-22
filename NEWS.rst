@@ -6,6 +6,7 @@ News
 * Fix tests for Python 3.8 (#166).
 * Use new ``Constant`` AST node under Python 3.8+ (#175).
 * Add test for f-strings (#177).
+* Add whitelist for ``logging`` module.
 
 
 1.1 (2019-09-23)
