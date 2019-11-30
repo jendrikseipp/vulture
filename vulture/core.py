@@ -120,10 +120,10 @@ class Item(object):
     def get_report(self, add_size=False):
         if add_size:
             line_format = 'line' if self.size == 1 else 'lines'
-            size_report = ', {0:d} {1}'.format(self.size, line_format)
+            size_report = ', {:d} {}'.format(self.size, line_format)
         else:
             size_report = ''
-        return "{0}:{1:d}: {2} ({3}% confidence{4})".format(
+        return "{}:{:d}: {} ({}% confidence{})".format(
             utils.format_path(self.filename), self.first_lineno,
             self.message, self.confidence, size_report)
 
@@ -188,15 +188,15 @@ class Vulture(ast.NodeVisitor):
         try:
             node = ast.parse(code, filename=self.filename)
         except SyntaxError as err:
-            text = ' at "{0}"'.format(err.text.strip()) if err.text else ''
-            print('{0}:{1:d}: {2}{3}'.format(
+            text = ' at "{}"'.format(err.text.strip()) if err.text else ''
+            print('{}:{:d}: {}{}'.format(
                 utils.format_path(filename), err.lineno, err.msg, text),
                 file=sys.stderr)
             self.found_dead_code_or_error = True
         except (TypeError, ValueError) as err:
             # Python < 3.5 raises TypeError and Python >= 3.5 raises
             # ValueError if source contains null bytes.
-            print('{0}: invalid source code "{1}"'.format(
+            print('{}: invalid source code "{}"'.format(
                 utils.format_path(filename), err), file=sys.stderr)
             self.found_dead_code_or_error = True
         else:
@@ -536,7 +536,7 @@ def _parse_args():
         return exclude.split(',')
 
     usage = "%(prog)s [options] PATH [PATH ...]"
-    version = "vulture {0}".format(__version__)
+    version = "vulture {}".format(__version__)
     glob_help = 'Patterns may contain glob wildcards (*, ?, [abc], [!abc]).'
     parser = argparse.ArgumentParser(prog='vulture', usage=usage)
     parser.add_argument(

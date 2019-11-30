@@ -79,7 +79,7 @@ def get_modules(paths, toplevel=True):
     for path in paths:
         path = os.path.abspath(path)
         if toplevel and path.endswith('.pyc'):
-            sys.exit('.pyc files are not supported: {0}'.format(path))
+            sys.exit('.pyc files are not supported: {}'.format(path))
         if os.path.isfile(path) and (path.endswith('.py') or toplevel):
             modules.append(path)
         elif os.path.isdir(path):
@@ -88,7 +88,7 @@ def get_modules(paths, toplevel=True):
                 for filename in sorted(os.listdir(path))]
             modules.extend(get_modules(subpaths, toplevel=False))
         elif toplevel:
-            sys.exit('Error: {0} could not be found.'.format(path))
+            sys.exit('Error: {} could not be found.'.format(path))
     return modules
 
 
@@ -124,7 +124,7 @@ class LoggingList(list):
 
     def append(self, item):
         if self._verbose:
-            print('define {0} "{1}"'.format(self.typ, item.name))
+            print('define {} "{}"'.format(self.typ, item.name))
         list.append(self, item)
 
 
@@ -136,5 +136,5 @@ class LoggingSet(set):
 
     def add(self, name):
         if self._verbose:
-            print('use {0} "{1}"'.format(self.typ, name))
+            print('use {} "{}"'.format(self.typ, name))
         set.add(self, name)
