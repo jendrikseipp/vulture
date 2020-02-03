@@ -1,7 +1,6 @@
 TODOs
 =====
 
-* Convert README.rst and NEWS.rst files to Markdown.
 * Detect unused variables in assignment expressions under Python 3.8+.
 * Use end_lineno and end_col_offset attributes when running Python 3.8+.
 

@@ -23,9 +23,6 @@ fi
 
 git pull
 
-# Check that NEWS file is up-to-date.
-grep "$VERSION" NEWS.rst || (echo "Version $VERSION missing in NEWS file." && exit 1)
-
 tox
 
 # Bump version.
@@ -40,5 +37,5 @@ git push
 git push --tags
 
 # Add changelog to Github release.
-./dev/make-release-notes.py "$VERSION" NEWS.rst "$CHANGES"
+./dev/make-release-notes.py "$VERSION" CHANGELOG.md "$CHANGES"
 hub release create v"$VERSION" --file "$CHANGES"
