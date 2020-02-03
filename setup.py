@@ -43,7 +43,8 @@ setuptools.setup(
     version=find_version('vulture', 'core.py'),
     description='Find dead code',
     long_description='\n\n'.join(
-        [open('README.rst').read(), open('NEWS.rst').read()]),
+        [open('README.md').read(), open('CHANGELOG.md').read()]),
+    long_description_content_type="text/markdown",
     keywords='dead-code-removal',
     author='Jendrik Seipp',
     author_email='jendrikseipp@gmail.com',
