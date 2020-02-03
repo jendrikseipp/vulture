@@ -17,6 +17,6 @@ script:
   - python --version
   - vulture vulture/ tests/
   - python -m vulture vulture/ tests/
-  - tox -e py,docs,style
+  - tox -e py,style
 after_success:
   - coveralls
