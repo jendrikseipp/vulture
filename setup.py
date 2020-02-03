@@ -11,17 +11,18 @@ from setuptools.command.test import test as TestCommand
 
 def read(*parts):
     here = os.path.abspath(os.path.dirname(__file__))
-    with codecs.open(os.path.join(here, *parts), 'r') as f:
+    with codecs.open(os.path.join(here, *parts), "r") as f:
         return f.read()
 
 
 def find_version(*file_parts):
     version_file = read(*file_parts)
     version_match = re.search(
-        r"^__version__ = ['\"]([^'\"]*)['\"]$", version_file, re.M)
+        r"^__version__ = ['\"]([^'\"]*)['\"]$", version_file, re.M
+    )
     if version_match:
         return version_match.group(1)
-    raise RuntimeError('Unable to find version string.')
+    raise RuntimeError("Unable to find version string.")
 
 
 class PyTest(TestCommand):
@@ -39,39 +40,38 @@ class PyTest(TestCommand):
 
 
 setuptools.setup(
-    name='vulture',
-    version=find_version('vulture', 'core.py'),
-    description='Find dead code',
-    long_description='\n\n'.join(
-        [open('README.md').read(), open('CHANGELOG.md').read()]),
+    name="vulture",
+    version=find_version("vulture", "core.py"),
+    description="Find dead code",
+    long_description="\n\n".join(
+        [open("README.md").read(), open("CHANGELOG.md").read()]
+    ),
     long_description_content_type="text/markdown",
-    keywords='dead-code-removal',
-    author='Jendrik Seipp',
-    author_email='jendrikseipp@gmail.com',
-    url='https://github.com/jendrikseipp/vulture',
-    license='MIT',
+    keywords="dead-code-removal",
+    author="Jendrik Seipp",
+    author_email="jendrikseipp@gmail.com",
+    url="https://github.com/jendrikseipp/vulture",
+    license="MIT",
     classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Environment :: Console',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: Implementation :: CPython',
-        'Programming Language :: Python :: Implementation :: PyPy',
-        'Topic :: Software Development :: Quality Assurance'
+        "Development Status :: 5 - Production/Stable",
+        "Environment :: Console",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Programming Language :: Python :: Implementation :: PyPy",
+        "Topic :: Software Development :: Quality Assurance",
     ],
-    entry_points={
-        'console_scripts': ['vulture = vulture.core:main'],
-    },
-    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*',
-    tests_require=['pytest', 'pytest-cov'],
-    cmdclass={'test': PyTest},
-    packages=setuptools.find_packages(exclude=['tests']),
-    package_data={'vulture': ['whitelists/*.py']},
+    entry_points={"console_scripts": ["vulture = vulture.core:main"]},
+    python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
+    tests_require=["pytest", "pytest-cov"],
+    cmdclass={"test": PyTest},
+    packages=setuptools.find_packages(exclude=["tests"]),
+    package_data={"vulture": ["whitelists/*.py"]},
 )

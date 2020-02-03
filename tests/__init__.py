@@ -10,23 +10,26 @@ from vulture import core
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(DIR)
-WHITELISTS = glob.glob(os.path.join(REPO, 'vulture', 'whitelists', '*.py'))
+WHITELISTS = glob.glob(os.path.join(REPO, "vulture", "whitelists", "*.py"))
 
 skip_if_not_has_async = pytest.mark.skipif(
-    not hasattr(ast, 'AsyncFunctionDef'),
-    reason="needs async support (added in Python 3.5)")
+    not hasattr(ast, "AsyncFunctionDef"),
+    reason="needs async support (added in Python 3.5)",
+)
 
 
 def call_vulture(args, **kwargs):
     return subprocess.call(
-        [sys.executable, '-m', 'vulture'] + args, cwd=REPO, **kwargs)
+        [sys.executable, "-m", "vulture"] + args, cwd=REPO, **kwargs
+    )
 
 
 def check(items_or_names, expected_names):
     """items_or_names must be a collection of Items or a set of strings."""
     try:
-        assert (sorted(item.name for item in items_or_names) ==
-                sorted(expected_names))
+        assert sorted(item.name for item in items_or_names) == sorted(
+            expected_names
+        )
     except AttributeError:
         assert items_or_names == set(expected_names)
 

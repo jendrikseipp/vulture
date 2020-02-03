@@ -7,11 +7,12 @@ import tokenize
 
 # Encoding to use when converting input files to unicode. Python 2 trips
 # over the BOM, so we use "utf-8-sig" which drops the BOM.
-ENCODING = 'utf-8-sig'
+ENCODING = "utf-8-sig"
 
 # The ast module in Python 2 trips over "coding" cookies, so strip them.
 ENCODING_REGEX = re.compile(
-    r"^[ \t\v]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+).*?$", flags=re.M)
+    r"^[ \t\v]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+).*?$", flags=re.M
+)
 
 
 class VultureInputException(Exception):
@@ -59,7 +60,7 @@ def format_path(path):
     if not path:
         return path
     relpath = os.path.relpath(path)
-    return relpath if not relpath.startswith('..') else path
+    return relpath if not relpath.startswith("..") else path
 
 
 def get_decorator_name(decorator):
@@ -70,7 +71,7 @@ def get_decorator_name(decorator):
         parts.append(decorator.attr)
         decorator = decorator.value
     parts.append(decorator.id)
-    return '@' + '.'.join(reversed(parts))
+    return "@" + ".".join(reversed(parts))
 
 
 def get_modules(paths, toplevel=True):
@@ -78,17 +79,18 @@ def get_modules(paths, toplevel=True):
     modules = []
     for path in paths:
         path = os.path.abspath(path)
-        if toplevel and path.endswith('.pyc'):
-            sys.exit('.pyc files are not supported: {}'.format(path))
-        if os.path.isfile(path) and (path.endswith('.py') or toplevel):
+        if toplevel and path.endswith(".pyc"):
+            sys.exit(".pyc files are not supported: {}".format(path))
+        if os.path.isfile(path) and (path.endswith(".py") or toplevel):
             modules.append(path)
         elif os.path.isdir(path):
             subpaths = [
                 os.path.join(path, filename)
-                for filename in sorted(os.listdir(path))]
+                for filename in sorted(os.listdir(path))
+            ]
             modules.extend(get_modules(subpaths, toplevel=False))
         elif toplevel:
-            sys.exit('Error: {} could not be found.'.format(path))
+            sys.exit("Error: {} could not be found.".format(path))
     return modules
 
 

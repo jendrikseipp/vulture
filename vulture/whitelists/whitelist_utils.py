@@ -25,6 +25,7 @@ class Whitelist:
     correct, but can also be executed.
 
     """
+
     def __getattr__(self, _):
         pass
 

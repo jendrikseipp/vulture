@@ -1,6 +1,7 @@
 import pytest
 
 from . import check, v
+
 assert v  # silence pyflakes
 
 
@@ -12,6 +13,7 @@ def check_whitelist(v):
         for item in v.get_unused_code():
             v.scan(item.get_whitelist_string())
         check(v.get_unused_code(), results_after)
+
     return examine
 
 
@@ -20,7 +22,7 @@ def test_unused_function(check_whitelist):
 def func():
     pass
 """
-    check_whitelist(code, ['func'], [])
+    check_whitelist(code, ["func"], [])
 
 
 def test_unused_class(check_whitelist):
@@ -29,7 +31,7 @@ class Foo:
     def __init__(self):
         pass
 """
-    check_whitelist(code, ['Foo'], [])
+    check_whitelist(code, ["Foo"], [])
 
 
 def test_unused_variables(check_whitelist):
@@ -37,7 +39,7 @@ def test_unused_variables(check_whitelist):
 foo = 'unused'
 bar = 'variable'
 """
-    check_whitelist(code, ['foo', 'bar'], [])
+    check_whitelist(code, ["foo", "bar"], [])
 
 
 def test_unused_import(check_whitelist):
@@ -47,7 +49,7 @@ import foo as bar
 from abc import iou
 from lorem import ipsum as dolor
 """
-    check_whitelist(code, ['xyz', 'bar', 'iou', 'dolor'], [])
+    check_whitelist(code, ["xyz", "bar", "iou", "dolor"], [])
 
 
 def test_unused_attribute(check_whitelist):
@@ -56,7 +58,7 @@ class Foo:
     def bar(self):
         self.foobar = 'unused attr'
 """
-    check_whitelist(code, ['Foo', 'bar', 'foobar'], [])
+    check_whitelist(code, ["Foo", "bar", "foobar"], [])
 
 
 def test_unused_property(check_whitelist):
@@ -66,7 +68,7 @@ class Foo:
     def bar(self):
         pass
 """
-    check_whitelist(code, ['Foo', 'bar'], [])
+    check_whitelist(code, ["Foo", "bar"], [])
 
 
 def test_unreachable_code(check_whitelist):
@@ -75,4 +77,4 @@ def foo():
     return "Foo Bar"
     print("Hello")
 """
-    check_whitelist(code, ['foo', 'return'], ['return'])
+    check_whitelist(code, ["foo", "return"], ["return"])

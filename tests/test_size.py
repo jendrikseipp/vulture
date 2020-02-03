@@ -19,7 +19,7 @@ def get_last_line_number_slow(node):
     and the functions and classes in tensorflow.
 
     """
-    return max(getattr(node, 'lineno', -1) for node in ast.walk(node))
+    return max(getattr(node, "lineno", -1) for node in ast.walk(node))
 
 
 def count_lines(node):
@@ -32,7 +32,7 @@ def count_lines(node):
 def check_size(example, size):
     tree = ast.parse(example)
     for node in tree.body:
-        if isinstance(node, ast.ClassDef) and node.name == 'Foo':
+        if isinstance(node, ast.ClassDef) and node.name == "Foo":
             assert count_lines(node) == size
             break
     else:

@@ -3,6 +3,7 @@ import sys
 import pytest
 
 from . import v
+
 assert v  # Silence pyflakes
 
 mock_code = """\
@@ -26,12 +27,13 @@ class Foo:
 
 @pytest.fixture
 def check_report(v, capsys):
-    def test_report(code, expected,  make_whitelist=False):
-        filename = 'foo.py'
+    def test_report(code, expected, make_whitelist=False):
+        filename = "foo.py"
         v.scan(code, filename=filename)
         capsys.readouterr()
         v.report(make_whitelist=make_whitelist)
         assert capsys.readouterr().out == expected.format(filename=filename)
+
     return test_report
 
 

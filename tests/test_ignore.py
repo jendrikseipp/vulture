@@ -4,8 +4,11 @@ from . import check, skip_if_not_has_async
 
 
 def check_ignore(code, ignore_names, ignore_decorators, expected):
-    v = core.Vulture(verbose=True, ignore_names=ignore_names,
-                     ignore_decorators=ignore_decorators)
+    v = core.Vulture(
+        verbose=True,
+        ignore_names=ignore_names,
+        ignore_decorators=ignore_decorators,
+    )
     v.scan(code)
     check(v.get_unused_code(), expected)
 
@@ -19,7 +22,7 @@ ftobar = 3
 baz = 10000
 funny = True
 """
-    check_ignore(code, ['f?o*', 'ba[rz]'], [], ['funny'])
+    check_ignore(code, ["f?o*", "ba[rz]"], [], ["funny"])
 
 
 def test_function():
@@ -33,7 +36,7 @@ def foo():
 def bar():
     pass
 """
-    check_ignore(code, ['foo*'], [], ['bar'])
+    check_ignore(code, ["foo*"], [], ["bar"])
 
 
 @skip_if_not_has_async
@@ -44,7 +47,7 @@ async def foobar():
 async def bar():
     pass
 """
-    check_ignore(code, ['foo*'], [], ['bar'])
+    check_ignore(code, ["foo*"], [], ["bar"])
 
 
 def test_class():
@@ -53,7 +56,7 @@ class Foo:
     def __init__(self):
         pass
 """
-    check_ignore(code, ['Foo'], [], [])
+    check_ignore(code, ["Foo"], [], [])
 
 
 def test_class_ignore():
@@ -65,7 +68,7 @@ class Foo:
 class Bar:
     pass
 """
-    check_ignore(code, [], [], ['Foo', 'Bar'])
+    check_ignore(code, [], [], ["Foo", "Bar"])
 
 
 def test_property():
@@ -80,8 +83,8 @@ class Foo:
     def foo_bar(self):
         return 'bar'
 """
-    check_ignore(code, ['Foo'], ['@property'], [])
-    check_ignore(code, ['Foo'], [], ['some_property', 'foo_bar'])
+    check_ignore(code, ["Foo"], ["@property"], [])
+    check_ignore(code, ["Foo"], [], ["some_property", "foo_bar"])
 
 
 def test_attribute():
@@ -91,7 +94,7 @@ class Foo:
         self.attr_foo = attr_foo
         self.attr_bar = attr_bar
 """
-    check_ignore(code, ['foo', '*_foo'], [], ['Foo', 'attr_bar'])
+    check_ignore(code, ["foo", "*_foo"], [], ["Foo", "attr_bar"])
 
 
 def test_decorated_functions():
@@ -123,8 +126,8 @@ def foo():
 def barfoo():
     pass
 """
-    check_ignore(code, [], ['@decor', '*@f.foobar'], ['prop_one'])
-    check_ignore(code, [], ['*decor', '@*f.foobar'], ['prop_one'])
+    check_ignore(code, [], ["@decor", "*@f.foobar"], ["prop_one"])
+    check_ignore(code, [], ["*decor", "@*f.foobar"], ["prop_one"])
 
 
 @skip_if_not_has_async
@@ -139,7 +142,7 @@ async def async_function():
 async def foo():
     pass
 """
-    check_ignore(code, [], ['@app.route', '@a.b'], ['foo'])
+    check_ignore(code, [], ["@app.route", "@a.b"], ["foo"])
 
 
 def test_decorated_property():
@@ -149,9 +152,9 @@ def test_decorated_property():
 def foo():
     pass
 """
-    check_ignore(code, [], ['@bar'], [])
-    check_ignore(code, [], ['@baz'], ['foo'])
-    check_ignore(code, [], ['@property'], [])
+    check_ignore(code, [], ["@bar"], [])
+    check_ignore(code, [], ["@baz"], ["foo"])
+    check_ignore(code, [], ["@property"], [])
 
 
 def test_decorated_property_reversed():
@@ -161,10 +164,10 @@ def test_decorated_property_reversed():
 def foo():
     pass
 """
-    check_ignore(code, [], ['@bar'], [])
-    check_ignore(code, [], ['@property'], [])
-    check_ignore(code, [], ['@b*r'], [])
-    check_ignore(code, [], ['@barfoo'], ['foo'])
+    check_ignore(code, [], ["@bar"], [])
+    check_ignore(code, [], ["@property"], [])
+    check_ignore(code, [], ["@b*r"], [])
+    check_ignore(code, [], ["@barfoo"], ["foo"])
 
 
 def test_decorated_class():
@@ -175,5 +178,5 @@ class Bar:
     def __init__(self):
         pass
 """
-    check_ignore(code, [], [], ['Bar'])
-    check_ignore(code, [], ['@bar*'], [])
+    check_ignore(code, [], [], ["Bar"])
+    check_ignore(code, [], ["@bar*"], [])

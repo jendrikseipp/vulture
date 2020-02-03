@@ -1,6 +1,7 @@
 import pytest
 
 from . import v
+
 assert v  # Silence pyflakes.
 
 
@@ -15,9 +16,11 @@ def test_null_byte(v):
 
 
 def test_confidence_range(v):
-    v.scan("""\
+    v.scan(
+        """\
 def foo():
     pass
-""")
+"""
+    )
     with pytest.raises(ValueError):
         v.get_unused_code(min_confidence=150)
