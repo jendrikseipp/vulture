@@ -1,11 +1,7 @@
 # Vulture - Find dead code
 
-[![Travis CI build status
-(Linux)](https://travis-ci.org/jendrikseipp/vulture.svg?branch=master)](https://travis-ci.org/jendrikseipp/vulture)
-
-[![AppVeyor CI build status
-(Windows)](https://ci.appveyor.com/api/projects/status/github/jendrikseipp/vulture?svg=true)](https://ci.appveyor.com/project/jendrikseipp96693/vulture)
-
+[![Travis CI build status (Linux)](https://travis-ci.org/jendrikseipp/vulture.svg?branch=master)](https://travis-ci.org/jendrikseipp/vulture)
+[![AppVeyor CI build status (Windows)](https://ci.appveyor.com/api/projects/status/github/jendrikseipp/vulture?svg=true)](https://ci.appveyor.com/project/jendrikseipp96693/vulture)
 [![image](https://coveralls.io/repos/github/jendrikseipp/vulture/badge.svg?branch=master)](https://coveralls.io/github/jendrikseipp/vulture?branch=master)
 
 Vulture finds unused code in Python programs. This is useful for
@@ -52,7 +48,7 @@ it may discover more dead code.
 
 You can add used code that is reported as unused to a Python module and
 add it to the list of scanned paths. To obtain such a whitelist
-automatically, pass `--make-whitelist` to Vulture. :
+automatically, pass `--make-whitelist` to Vulture:
 
     $ vulture mydir --make-whitelist > whitelist.py
     $ vulture mydir whitelist.py
@@ -156,11 +152,11 @@ Greeter.greet
 Alternatively, you can pass `--make-whitelist` to Vulture and obtain an
 automatically generated whitelist.
 
-Passing both the original program and the whitelist to Vulture :
+Passing both the original program and the whitelist to Vulture
 
     vulture dead_code.py whitelist_dead_code.py
 
-makes Vulture ignore the "greet" method:
+makes Vulture ignore the `greet` method:
 
     dead_code.py:1: unused import 'os' (90% confidence)
     dead_code.py:8: unused variable 'message' (60% confidence)
