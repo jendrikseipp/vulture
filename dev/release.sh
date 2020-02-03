@@ -3,9 +3,12 @@
 set -exuo pipefail
 
 VERSION="$1"
+CHANGES="/tmp/vulture-$VERSION-changes"
+
+cd "$(dirname ${0})/../"
 
 # Check dependencies.
-twine -h > /dev/null
+python3 -m twine -h > /dev/null
 
 # Check for uncommited changes.
 set +e
@@ -35,3 +38,7 @@ python3 -m twine upload dist/vulture-${VERSION}.tar.gz dist/vulture-${VERSION}-p
 
 git push
 git push --tags
+
+# Add changelog to Github release.
+./dev/make-release-notes.py v"$VERSION" NEWS.rst "$CHANGES"
+hub release edit v"$VERSION" --file "$CHANGES"

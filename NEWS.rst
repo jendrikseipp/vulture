@@ -1,7 +1,7 @@
 News
 ====
 
-1.3 (unreleased)
+1.3 (2020-02-03)
 ----------------
 * Detect redundant 'if' conditions without 'else' blocks.
 * Add whitelist for ``string.Formatter`` (Joseph Bylund, #183).
