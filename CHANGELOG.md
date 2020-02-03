@@ -1,13 +1,13 @@
 # 1.3 (2020-02-03)
 
 * Detect redundant 'if' conditions without 'else' blocks.
-* Add whitelist for `string.Formatter` (Joseph Bylund, \#183).
+* Add whitelist for `string.Formatter` (Joseph Bylund, #183).
 
 # 1.2 (2019-11-22)
 
-* Fix tests for Python 3.8 (\#166).
-* Use new `Constant` AST node under Python 3.8+ (\#175).
-* Add test for f-strings (\#177).
+* Fix tests for Python 3.8 (#166).
+* Use new `Constant` AST node under Python 3.8+ (#175).
+* Add test for f-strings (#177).
 * Add whitelist for `logging` module.
 
 # 1.1 (2019-09-23)
@@ -16,7 +16,7 @@
 * Add whitelist for `ctypes` module.
 * Check that type annotations are parsed and type comments are ignored
   (thanks @kx-chen).
-* Support checking files with BOM under Python 2.7 (\#170).
+* Support checking files with BOM under Python 2.7 (#170).
 
 # 1.0 (2018-10-23)
 
@@ -159,7 +159,7 @@
 
 # 0.10 (2016-07-14)
 
-* Detect unused function and method arguments (issue \#15).
+* Detect unused function and method arguments (issue #15).
 * Detect unused \*args and \*\*kwargs parameters.
 * Change license from GPL to MIT.
 
