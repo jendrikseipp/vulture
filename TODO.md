@@ -1,7 +1,7 @@
 # TODOs
 
 * Detect unused variables in assignment expressions under Python 3.8+.
-* Use end\_lineno and end\_col\_offset attributes when running Python
+* Use end_lineno and end_col_offset attributes when running Python
   3.8+.
 
 # Non-TODOs
@@ -18,7 +18,7 @@
   Item for computing the size on demand. This is 1.5 times as slow as
   computing no sizes.
 * Compute sizes on demand. Storing nodes increases memory usage from
-  \~120 MiB to \~580 MiB for tensorflow's Python code.
+  ~120 MiB to ~580 MiB for tensorflow's Python code.
 * Detect unreachable code for `ast.IfExp` (rarely used, even more
   rarely "unused").
 * Detect unreachable code for `ast.Assert` (`assert False` is common
