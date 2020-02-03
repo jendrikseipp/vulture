@@ -21,7 +21,7 @@ build_script:
 test_script:
 - cmd: "%PYTHON% --version"
 - cmd: "%PYTHON% -m vulture vulture/ tests/"
-- cmd: "%PYTHON% -m tox -e py,style"
+- cmd: "%PYTHON% -m tox -e py"
 
 matrix:
   fast_finish: false

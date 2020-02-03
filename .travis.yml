@@ -17,6 +17,7 @@ script:
   - python --version
   - vulture vulture/ tests/
   - python -m vulture vulture/ tests/
-  - tox -e py,style
+  - tox -e py
+  - if [ "$TRAVIS_PYTHON_VERSION" == "3.6" ]; then tox -e style; fi
 after_success:
   - coveralls
