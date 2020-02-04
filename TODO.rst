@@ -22,7 +22,7 @@ Non-TODOs
 * Detect unreachable code for ``ast.Assert`` (``assert False`` is common idiom
   for aborting rogue code).
 * Detect superfluous expressions like ``a <= b``, ``42``,  ``foo and bar``
-  occuring outside of a statement (hard to detect if code is unneeded).
+  occurring outside of a statement (hard to detect if code is unneeded).
 * Detect that body of ``if foo:`` is unreachable if foo is only assigned "false" values
   (complicated: e.g., foo = []; foo.append(1); if foo: ...).
 * Use coverage.py to detect false-positives (#109). Workflow too complicated.
