@@ -122,7 +122,7 @@ Pull requests
 How to send a pull request?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Visit your fork on GitHub, change the branch to the one you commited to, and 
+Visit your fork on GitHub, change the branch to the one you committed to, and 
 click the ``New Pull Request`` button.
 
 Follow-up
