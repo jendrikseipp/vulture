@@ -30,11 +30,11 @@ Now, whenever you work on the project, activate the corresponding
 environment.
 
   - On **Unix-based** systems, this can be done with:
-    
+
         $ source vulture_dev/bin/activate
 
   - And on **Windows** this is done with:
-    
+
         $ vulture_dev\scripts\activate
 
 For deactivation, use:
@@ -89,8 +89,8 @@ Run `tox` using:
 
 ### How to send a pull request?
 
-Visit your fork on GitHub, change the branch to the one you commited to,
-and click the `New Pull Request` button.
+Visit your fork on GitHub, change the branch to the one you committed
+to, and click the `New Pull Request` button.
 
 ### Follow-up
 
