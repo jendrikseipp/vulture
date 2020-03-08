@@ -1,3 +1,7 @@
+# Unreleased
+
+* Ignore unused import statements which occur in `__init__.py` (RJ722, #192).
+
 # 1.3 (2020-02-03)
 
 * Detect redundant 'if' conditions without 'else' blocks.
