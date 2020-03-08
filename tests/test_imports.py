@@ -207,3 +207,18 @@ def test_import_alias_use_alias(v):
     check(v.unused_funcs, [])
     check(v.unused_imports, [])
     check(v.unused_vars, [])
+
+
+def test_ignore_init_py_files(v):
+    v.scan(
+        """\
+import bar
+from foo import *
+from zoo import zebra
+
+unused_var = 'monty'
+""",
+        filename="nested/project/__init__.py",
+    )
+    check(v.unused_imports, [])
+    check(v.unused_vars, ["unused_var"])

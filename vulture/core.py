@@ -74,9 +74,13 @@ def _ignore_class(filename, class_name):
     return _is_test_file(filename) and "Test" in class_name
 
 
-def _ignore_import(_filename, import_name):
-    # Ignore star-imported names, since we can't detect whether they are used.
-    return import_name == "*"
+def _ignore_import(filename, import_name):
+    """
+    Ignore star-imported names since we can't detect whether they are used.
+    Ignore imports from __init__.py files since they're commonly used to
+    collect objects from a package.
+    """
+    return os.path.basename(filename) == "__init__.py" or import_name == "*"
 
 
 def _ignore_function(filename, function_name):
