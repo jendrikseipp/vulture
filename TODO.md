@@ -3,6 +3,9 @@
 * Detect unused variables in assignment expressions under Python 3.8+.
 * Use end_lineno and end_col_offset attributes when running Python
   3.8+.
+* Ignore functions in conftest.py files that start with "pytest_".
+* Ignore setup_module(), teardown_module(), etc. in test_*.py files
+  (see https://docs.pytest.org/en/latest/xunit_setup.html for full list).
 
 # Non-TODOs
 
