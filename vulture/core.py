@@ -168,7 +168,8 @@ class Item(object):
             size_report = ", {:d} {}".format(self.size, line_format)
         else:
             size_report = ""
-        return "{}:{:d}: {} ({}% confidence{})".format(
+        return "<{}> {}:{:d}: {} ({}% confidence{})".format(
+            ERROR_CODES[self.typ],
             utils.format_path(self.filename),
             self.first_lineno,
             self.message,
