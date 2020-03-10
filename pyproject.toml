@@ -10,7 +10,7 @@ include = '\.pyi?$'
 exclude = '''
 /(
     \.eggs
-  | \.hg
+  | \.git
   | \.tox
   | \.venv
   | _build
