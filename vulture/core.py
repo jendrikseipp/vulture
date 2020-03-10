@@ -53,8 +53,8 @@ ERROR_CODES = {
     "function": "V003",
     "import": "V004",
     "property": "V005",
-    "variable": "V006",
-    "unreachable_code": "V007",
+    "unreachable_code": "V006",
+    "variable": "V007",
 }
 
 NOQA_REGEXP = re.compile(
@@ -323,14 +323,6 @@ class Vulture(ast.NodeVisitor):
         """
         Return ordered list of unused Item objects.
         """
-
-        def has_noqa(obj):
-            return obj.first_lineno in (
-                self.noqa_matches[ERROR_CODES[obj.typ]].union(
-                    self.noqa_matches["all"]
-                )
-            )
-
         if not 0 <= min_confidence <= 100:
             raise ValueError("min_confidence must be between 0 and 100.")
 
@@ -350,14 +342,12 @@ class Vulture(ast.NodeVisitor):
             + self.unreachable_code
         )
 
-        reported_unused = [
-            obj
-            for obj in unused_code
-            if obj.confidence >= min_confidence and not has_noqa(obj)
+        confidently_unused = [
+            obj for obj in unused_code if obj.confidence >= min_confidence
         ]
 
         return sorted(
-            reported_unused, key=by_size if sort_by_size else by_name
+            confidently_unused, key=by_size if sort_by_size else by_name
         )
 
     def report(
@@ -508,11 +498,23 @@ class Vulture(ast.NodeVisitor):
         confidence=DEFAULT_CONFIDENCE,
         ignore=None,
     ):
+        def ignored(name):
+            return (
+                (ignore and ignore(self.filename, name))
+                or _match(name, self.ignore_names)
+            )
+
+        def has_noqa(lineno, typ):
+            return lineno in (
+                self.noqa_matches[ERROR_CODES[typ]].union(
+                    self.noqa_matches["all"]
+                )
+            )
+
         last_node = last_node or first_node
         typ = collection.typ
-        if (ignore and ignore(self.filename, name)) or _match(
-            name, self.ignore_names
-        ):
+        first_lineno = first_node.lineno
+        if ignored(name) or has_noqa(first_lineno, typ):
             self._log('Ignoring {typ} "{name}"'.format(**locals()))
         else:
             first_lineno = lines.get_first_line_number(first_node)
@@ -528,6 +530,7 @@ class Vulture(ast.NodeVisitor):
                     confidence=confidence,
                 )
             )
+        )
 
     def _define_variable(self, name, node, confidence=DEFAULT_CONFIDENCE):
         self._define(
