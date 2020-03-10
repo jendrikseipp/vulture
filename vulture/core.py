@@ -505,6 +505,10 @@ class Vulture(ast.NodeVisitor):
             )
 
         def has_noqa(lineno, typ):
+            if typ == "property" and sys.version_info >= (3, 8):
+                # python3.8 onwards, lineno for property is the same as that of
+                # the decorated method.
+                lineno = lineno - 1
             return lineno in (
                 self.noqa_matches[ERROR_CODES[typ]].union(
                     self.noqa_matches["all"]
