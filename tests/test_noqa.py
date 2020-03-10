@@ -11,7 +11,7 @@ something.z = 'z'  # noqa: V006 (code for unused variable)
 something.u = 'u'  # noqa
 """
     )
-    check(v.get_unused_code(), ["z"])
+    check(v.unused_attrs, ["z"])
 
 
 def test_noqa_classes(v):
@@ -27,7 +27,7 @@ class DEF:  # noqa
     pass
 """
     )
-    check(v.get_unused_code(), ["ABC"])
+    check(v.unused_classes, ["ABC"])
 
 
 def test_noqa_functions(v):
@@ -46,7 +46,8 @@ def hello(name):  # noqa
     print("Hello")
 """
     )
-    check(v.get_unused_code(), ["tune", "instrument", "problems"])
+    check(v.unused_funcs, ["problems"])
+    check(v.unused_vars, ["instrument", "tune"])
 
 
 def test_noqa_imports(v):
@@ -60,7 +61,7 @@ from me import *
 import dis  # noqa: V001 (code for unused attr)
 """
     )
-    check(v.get_unused_code(), ["foo", "zoo", "dis"])
+    check(v.unused_imports, ["foo", "zoo", "dis"])
 
 
 def test_noqa_propoerties(v):
@@ -84,16 +85,15 @@ class Zoo:
         pass
 """
     )
-    check(
-        v.get_unused_code(),
-        ["Zoo", "width", "depth", "entry_gates", "tickets"],
-    )
+    check(v.unused_props, ['entry_gates', 'tickets'])
+    check(v.unused_classes, ['Zoo'])
+    check(v.unused_vars, ["width", "depth"])
 
 
 def test_noqa_unreacahble_code(v):
     v.scan(
         """\
-def shave_sheeps(sheeps):  # noqa: V003
+def shave_sheeps(sheeps):
     for sheep in sheeps:
         if sheep.bald:
             continue
@@ -105,7 +105,8 @@ def shave_sheeps(sheeps):  # noqa: V003
             sheep.shave_again()
 """
     )
-    check(v.get_unused_code(), [])
+    check(v.unreachable_code, [])
+    check(v.unused_funcs, ["shave_sheeps"])
 
 
 def test_noqa_variables(v):
@@ -117,7 +118,8 @@ shero = "doggy"   # noqa: V001, V004 (code for unused import, attr)
 shinchan.friend = ['masao']  # noqa: V007
 """
     )
-    check(v.get_unused_code(), ["shero", "friend"])
+    check(v.unused_vars, ["shero"])
+    check(v.unused_attrs, ["friend"])
 
 
 def test_noqa_with_multiple_issue_codes(v):
@@ -143,7 +145,7 @@ import this
 # noqa
 """
     )
-    check(v.get_unused_code(), ["this"])
+    check(v.unused_imports, ["this"])
 
 
 def test_noqa_with_invalid_codes(v):
@@ -152,7 +154,7 @@ def test_noqa_with_invalid_codes(v):
 import this  # V098, A123, F876
 """
     )
-    check(v.get_unused_code(), ["this"])
+    check(v.unused_imports, ["this"])
 
 
 def test_noqa_with_special_unicode(v):
@@ -162,4 +164,4 @@ import abc  # noqa: V012, V😎12
 import problems  # noqa: V03🙃1
 """
     )
-    check(v.get_unused_code(), ["abc", "problems"])
+    check(v.unused_imports, ["abc", "problems"])
