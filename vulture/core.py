@@ -58,10 +58,9 @@ ISSUE_CODE_MAP = {
 }
 
 NOQA_REGEXP = re.compile(
+    # Use the same regex as flake8 does.
+    # https://gitlab.com/pycqa/flake8/-/tree/master/src/flake8/defaults.py
     # We're looking for items that look like this:
-    # `# noqa`
-    # `#noqa`
-    # `#noqa: E123`
     # `# noqa: E123`
     # `# noqa: E123,W451,F921`
     # `# noqa:E123,W451,F921`
@@ -71,14 +70,10 @@ NOQA_REGEXP = re.compile(
     # We do not want to capture the ``: `` that follows ``noqa``
     # We do not care about the casing of ``noqa``
     # We want a comma-separated list of errors
-    # https://regex101.com/r/4XUuax/3 full explenation of the regex
-    r"#( )?noqa(?::[\s]?(?P<codes>([A-Z]+[0-9]+(?:[,\s]+)?)+))?",
+    # https://regex101.com/r/4XUuax/2 full explanation of the regex
+    r"# noqa(?::[\s]?(?P<codes>([A-Z]+[0-9]+(?:[,\s]+)?)+))?",
     re.IGNORECASE,
 )
-
-
-def _find_noqa(line):
-    return NOQA_REGEXP.search(line)
 
 
 def _get_unused_items(defined_items, used_names):
@@ -148,7 +143,6 @@ class Item(object):
         "last_lineno",
         "message",
         "confidence",
-        "issue_code",
     )
 
     def __init__(
@@ -168,7 +162,6 @@ class Item(object):
         self.last_lineno = last_lineno
         self.message = message or "unused {typ} '{name}'".format(**locals())
         self.confidence = confidence
-        self.issue_code = ISSUE_CODE_MAP[typ]
 
     @property
     def size(self):
@@ -241,26 +234,27 @@ class Vulture(ast.NodeVisitor):
 
         self.ignore_names = ignore_names or []
         self.ignore_decorators = ignore_decorators or []
-        self.noqa_matches = defaultdict(list)
+        self.noqa_matches = defaultdict(set)
 
         self.filename = ""
         self.code = []
         self.found_dead_code_or_error = False
 
-    def add_noqa_match(self, code, lineno):
-        self.noqa_matches[code].append(lineno)
-
     def parse_noqa(self, code):
-        for index, line in enumerate(code):
-            match = _find_noqa(line)
-            if match is not None:
-                code = match.groupdict()["codes"] or "all"
-                self.add_noqa_match(code=code, lineno=index + 1)
+        for lineno, line in enumerate(code, start=1):
+            match = NOQA_REGEXP.search(line)
+            if match:
+                codes = [
+                    c.strip()
+                    for c in (match.groupdict()["codes"] or "all").split(",")
+                    # if no code is specified, assign it to `all`
+                ]
+                for code in codes:
+                    self.noqa_matches[code].add(lineno)
 
     def scan(self, code, filename=""):
         code = utils.sanitize_code(code)
         self.code = code.splitlines()
-        # import ipdb; ipdb.set_trace()
         self.parse_noqa(self.code)
         self.filename = filename
         try:
@@ -337,13 +331,10 @@ class Vulture(ast.NodeVisitor):
         """
 
         def _has_noqa(obj):
-            code = (
-                obj.issue_code
-                if obj.issue_code in self.noqa_matches
-                else "all"
+            return obj.first_lineno in (
+                self.noqa_matches[ISSUE_CODE_MAP[obj.typ]]
+                or self.noqa_matches["all"]
             )
-            if code in self.noqa_matches:
-                return obj.first_lineno in self.noqa_matches[code]
 
         if not 0 <= min_confidence <= 100:
             raise ValueError("min_confidence must be between 0 and 100.")
@@ -364,14 +355,11 @@ class Vulture(ast.NodeVisitor):
             + self.unreachable_code
         )
 
-        results_without_noqa = [
-            obj for obj in unused_code if not _has_noqa(obj)
-        ]
-
+        # breakpoint()
         confidently_unused = [
             obj
-            for obj in results_without_noqa
-            if obj.confidence >= min_confidence
+            for obj in unused_code
+            if obj.confidence >= min_confidence and not _has_noqa(obj)
         ]
 
         return sorted(
