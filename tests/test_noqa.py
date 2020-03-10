@@ -243,13 +243,3 @@ import this  # V098, A123, F876
 """
     )
     check(v.unused_imports, ["this"])
-
-
-def test_noqa_with_special_unicode(v):
-    v.scan(
-        """\
-import abc  # noqa: V012, V😎12
-import problems  # noqa: V03🙃1
-"""
-    )
-    check(v.unused_imports, ["abc", "problems"])
