@@ -47,7 +47,7 @@ IGNORED_VARIABLE_NAMES = {"object", "self"}
 if sys.version_info < (3, 4):
     IGNORED_VARIABLE_NAMES |= {"True", "False"}
 
-ISSUE_CODE_MAP = {
+ERROR_CODES = {
     "attribute": "V001",
     "class": "V002",
     "function": "V003",
@@ -61,16 +61,10 @@ NOQA_REGEXP = re.compile(
     # Use the same regex as flake8 does.
     # https://gitlab.com/pycqa/flake8/-/tree/master/src/flake8/defaults.py
     # We're looking for items that look like this:
+    # `# noqa`
     # `# noqa: E123`
     # `# noqa: E123,W451,F921`
-    # `# noqa:E123,W451,F921`
     # `# NoQA: E123,W451,F921`
-    # `# NOQA: E123,W451,F921`
-    # `# NOQA:E123,W451,F921`
-    # We do not want to capture the ``: `` that follows ``noqa``
-    # We do not care about the casing of ``noqa``
-    # We want a comma-separated list of errors
-    # https://regex101.com/r/4XUuax/2 full explanation of the regex
     r"# noqa(?::[\s]?(?P<codes>([A-Z]+[0-9]+(?:[,\s]+)?)+))?",
     re.IGNORECASE,
 )
@@ -246,8 +240,8 @@ class Vulture(ast.NodeVisitor):
             if match:
                 codes = [
                     c.strip()
-                    for c in (match.groupdict()["codes"] or "all").split(",")
                     # if no code is specified, assign it to `all`
+                    for c in (match.groupdict()["codes"] or "all").split(",")
                 ]
                 for code in codes:
                     self.noqa_matches[code].add(lineno)
@@ -330,10 +324,11 @@ class Vulture(ast.NodeVisitor):
         Return ordered list of unused Item objects.
         """
 
-        def _has_noqa(obj):
+        def has_noqa(obj):
             return obj.first_lineno in (
-                self.noqa_matches[ISSUE_CODE_MAP[obj.typ]]
-                or self.noqa_matches["all"]
+                self.noqa_matches[ERROR_CODES[obj.typ]].union(
+                    self.noqa_matches["all"]
+                )
             )
 
         if not 0 <= min_confidence <= 100:
@@ -355,15 +350,14 @@ class Vulture(ast.NodeVisitor):
             + self.unreachable_code
         )
 
-        # breakpoint()
-        confidently_unused = [
+        reported_unused = [
             obj
             for obj in unused_code
-            if obj.confidence >= min_confidence and not _has_noqa(obj)
+            if obj.confidence >= min_confidence and not has_noqa(obj)
         ]
 
         return sorted(
-            confidently_unused, key=by_size if sort_by_size else by_name
+            reported_unused, key=by_size if sort_by_size else by_name
         )
 
     def report(
