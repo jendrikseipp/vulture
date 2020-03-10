@@ -1,6 +1,44 @@
+import pytest
+
+from vulture.core import NOQA_REGEXP
 from . import check, v
 
 assert v  # Silence pyflakes.
+
+
+@pytest.mark.parametrize(
+    "line, codes",
+    [
+        ("# noqa", ["all"]),
+        ("## noqa", ["all"]),
+        ("# noqa Hi, go on.", ["all"]),
+        ("# noqa: V001", ["V001"]),
+        ("# noqa: V001, V007", ["V001", "V007"]),
+        ("# NoQA: V001,      V003, \t V004", ["V001", "V003", "V004"]),
+    ],
+)
+def test_noqa_regex_present(line, codes):
+    match = NOQA_REGEXP.search(line)
+    parsed = [
+        c.strip() for c in (match.groupdict()["codes"] or "all").split(",")
+    ]
+    assert parsed == codes
+
+
+@pytest.mark.parametrize(
+    "line",
+    [("# noqa: 123V"), ("# noqa explaination: V012"), ("# noqa: ,V001"),],
+)
+def test_noqa_regex_no_groups(line):
+    assert NOQA_REGEXP.search(line).groupdict()["codes"] == None
+
+
+@pytest.mark.parametrize(
+    "line",
+    [("#noqa"), ("##noqa"), ("# n o q a"), ("#NOQA"), ("# Hello, noqa"),],
+)
+def test_noqa_regex_not_present(line):
+    assert bool(NOQA_REGEXP.search(line)) == False
 
 
 def test_noqa_attributes(v):
@@ -85,8 +123,8 @@ class Zoo:
         pass
 """
     )
-    check(v.unused_props, ['entry_gates', 'tickets'])
-    check(v.unused_classes, ['Zoo'])
+    check(v.unused_props, ["entry_gates", "tickets"])
+    check(v.unused_classes, ["Zoo"])
     check(v.unused_vars, ["width", "depth"])
 
 

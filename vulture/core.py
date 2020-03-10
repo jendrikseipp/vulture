@@ -500,9 +500,8 @@ class Vulture(ast.NodeVisitor):
         ignore=None,
     ):
         def ignored(name):
-            return (
-                (ignore and ignore(self.filename, name))
-                or _match(name, self.ignore_names)
+            return (ignore and ignore(self.filename, name)) or _match(
+                name, self.ignore_names
             )
 
         def has_noqa(lineno, typ):
