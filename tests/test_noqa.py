@@ -41,6 +41,56 @@ def test_noqa_regex_not_present(line):
     assert bool(NOQA_REGEXP.search(line)) is False
 
 
+def test_noqa_without_codes(v):
+    v.scan(
+        """\
+import this  # noqa
+
+class Cellar:  # noqa
+    @propoerty  # noqa
+    def wine(self, grapes): # noqa
+        pass
+
+    def serve(self, quantity=50):  # noqa
+        self.quantity_served = quantity  # noqa
+        return
+        self.pour()  # noqa
+"""
+    )
+    check(v.unused_attrs, [])
+    check(v.unused_classes, [])
+    check(v.unused_funcs, [])
+    check(v.unused_imports, [])
+    check(v.unused_props, [])
+    check(v.unreachable_code, [])
+    check(v.unused_vars, [])
+
+
+def test_noqa_specific_issue_codes(v):
+    v.scan(
+        """\
+import this  # noqa: V004
+
+class Cellar:  # noqa: V002
+    @property  # noqa: V005
+    def wine(self, grapes):  # noqa: V007
+        pass
+
+    def serve(self, quantity=50):  # noqa: V003
+        self.quantity_served = quantity  # noqa: V001
+        return
+        self.pour()  # noqa: V006
+"""
+    )
+    check(v.unused_attrs, [])
+    check(v.unused_classes, [])
+    check(v.unused_funcs, [])
+    check(v.unused_imports, [])
+    check(v.unused_props, [])
+    check(v.unreachable_code, [])
+    check(v.unused_vars, [])
+
+
 def test_noqa_attributes(v):
     v.scan(
         """\
