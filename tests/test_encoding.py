@@ -39,10 +39,20 @@ def test_non_utf8_encoding(v, tmpdir):
 
 
 def test_utf8_with_bom(v, tmpdir):
-    name = "utf8_bom"
+    name = "test_utf8_bom"
     filename = str(tmpdir.mkdir(name).join(name + ".py"))
     # utf8_sig prepends the BOM to the file.
     with io.open(filename, mode="w", encoding="utf-8-sig") as f:
         f.write(u"")
     v.scavenge([f.name])
     assert not v.found_dead_code_or_error
+
+
+def test_file_without_code(v, tmpdir):
+    code = "# this is not code, its a comment"
+    name = "no_code"
+    filename = str(tmpdir.mkdir(name).join(name + ".py"))
+    with open(filename, "w+") as f:
+        f.write(code)
+    v.scavenge([f.name])
+    assert v.found_dead_code_or_error

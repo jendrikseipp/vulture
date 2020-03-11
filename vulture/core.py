@@ -101,6 +101,14 @@ def _ignore_variable(filename, varname):
     )
 
 
+def _ignore_empty_file(filename):
+    """
+    Ignore certain files, even if they're empty. Files like __init__.py make
+    sense to be empty, whereas junk files (files without source code) do not.
+    """
+    return _is_test_file(filename) or filename.endswith("__init__.py")
+
+
 class Item(object):
     """
     Hold the name, type and location of defined code.
@@ -236,7 +244,16 @@ class Vulture(ast.NodeVisitor):
             )
             self.found_dead_code_or_error = True
         else:
-            self.visit(node)
+            if not len(node.body) and not _ignore_empty_file(filename):
+                print(
+                    "{}: file contains no source code".format(
+                        utils.format_path(filename)
+                    ),
+                    file=sys.stderr,
+                )
+                self.found_dead_code_or_error = True
+            else:
+                self.visit(node)
 
     def scavenge(self, paths, exclude=None):
         def prepare_pattern(pattern):
