@@ -25,7 +25,13 @@ def test_noqa_regex_present(line, codes):
 
 @pytest.mark.parametrize(
     "line",
-    [("# noqa: 123V"), ("# noqa explaination: V012"), ("# noqa: ,V101")],
+    [
+        ("# noqa: 123V"),
+        ("# noqa explaination: V012"),
+        ("# noqa: ,V101"),
+        ("# noqa: #noqa: V102"),
+        ("# noqa: # noqa: V102"),
+    ],
 )
 def test_noqa_regex_no_groups(line):
     assert NOQA_REGEXP.search(line).groupdict()["codes"] is None
