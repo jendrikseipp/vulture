@@ -509,15 +509,14 @@ class Vulture(ast.NodeVisitor):
 
             # if name not ignored, check if annotated with "# noqa"
             if typ == "property" and sys.version_info < (3, 8):
-                # for python < 3.8, increment as many line numbers as there are
+                # For python < 3.8, increment as many line numbers as there are
                 # decorators on the method.
-                # python3.8 onwards, lineno for property is the same as that of
-                # the decorated method.
+                # From python3.8 onwards, lineno for property is the same as
+                # that of the decorated method.
                 lineno = lineno + len(first_node.decorator_list)
-            return lineno in (
-                self.noqa_matches[ERROR_CODES[typ]].union(
-                    self.noqa_matches["all"]
-                )
+            return (
+                lineno in self.noqa_matches[ERROR_CODES[typ]]
+                or lineno in self.noqa_matches["all"]
             )
 
         last_node = last_node or first_node

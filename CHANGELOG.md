@@ -1,3 +1,9 @@
+# Unreleased
+
+* Report issue codes in ouput (e.g., `code.py:1: V104 unused import ...`)
+  (RJ722, #195)
+* Support `# noqa` comments to suppress results on that line. (RJ722, #195).
+
 # 1.4 (2020-03-30)
 
 * Ignore unused import statements in `__init__.py` (RJ722, #192).

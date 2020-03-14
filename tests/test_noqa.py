@@ -27,7 +27,7 @@ def test_noqa_regex_present(line, codes):
     "line",
     [
         ("# noqa: 123V"),
-        ("# noqa explaination: V012"),
+        ("# noqa explanation: V012"),
         ("# noqa: ,V101"),
         ("# noqa: #noqa: V102"),
         ("# noqa: # noqa: V102"),
@@ -42,7 +42,7 @@ def test_noqa_regex_no_groups(line):
     [("#noqa"), ("##noqa"), ("# n o q a"), ("#NOQA"), ("# Hello, noqa")],
 )
 def test_noqa_regex_not_present(line):
-    assert bool(NOQA_REGEXP.search(line)) is False
+    assert not NOQA_REGEXP.search(line)
 
 
 def test_noqa_without_codes(v):
@@ -52,8 +52,8 @@ import this  # noqa
 
 class Cellar:  # noqa
     @property
-    def wine(self, grapes): # noqa
-        pass
+    def wine(self): # noqa
+        grapes = True  # noqa
 
     def serve(self, quantity=50):  # noqa
         self.quantity_served = quantity  # noqa
@@ -77,8 +77,8 @@ import this  # noqa: V104
 
 class Cellar:  # noqa: V102
     @property
-    def wine(self, grapes):  # noqa: V105, V106
-        pass
+    def wine(self):  # noqa: V105
+        grapes = True  # noqa: V106
 
     def serve(self, quantity=50):  # noqa: V103
         self.quantity_served = quantity  # noqa: V101
@@ -131,7 +131,6 @@ def play(tune, instrument='bongs', _hz='50'):  # noqa: V103
 
 # noqa
 def problems():  # noqa: V104
-    ''' They don't go away. :-)'''
     pass  # noqa: V103
 
 def hello(name):  # noqa
