@@ -171,10 +171,10 @@ class Item(object):
             size_report = ", {:d} {}".format(self.size, line_format)
         else:
             size_report = ""
-        return "<{}> {}:{:d}: {} ({}% confidence{})".format(
-            ERROR_CODES[self.typ],
+        return "{}:{:d}: {} {} ({}% confidence{})".format(
             utils.format_path(self.filename),
             self.first_lineno,
+            ERROR_CODES[self.typ],
             self.message,
             self.confidence,
             size_report,
@@ -509,9 +509,7 @@ class Vulture(ast.NodeVisitor):
                 # decorators on the method.
                 # python3.8 onwards, lineno for property is the same as that of
                 # the decorated method.
-                print("buahahahaha")
                 lineno = lineno + len(first_node.decorator_list)
-                print('d ', lineno)
             return lineno in (
                 self.noqa_matches[ERROR_CODES[typ]].union(
                     self.noqa_matches["all"]
