@@ -84,6 +84,18 @@ class Foo(object):
     check_size(example, size)
 
 
+def test_size_property_def():
+    example = """
+class Foo:
+    @foo
+    @property
+    @xoo
+    def zoo(self):
+        pass
+"""
+    check_size(example, 6)
+
+
 def test_size_while():
     example = """
 class Foo:

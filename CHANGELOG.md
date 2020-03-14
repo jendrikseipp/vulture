@@ -1,6 +1,8 @@
 # Unreleased
 
 * Ignore unused import statements which occur in `__init__.py` (RJ722, #192).
+* Report first line number of method definition for unused properties (RJ722,
+  #200). 
 
 # 1.3 (2020-02-03)
 
