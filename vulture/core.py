@@ -77,6 +77,9 @@ def _get_unused_items(defined_items, used_names):
     unused_items.sort(key=lambda item: item.name.lower())
     return unused_items
 
+def _parse_error_codes(match):
+    # if no code is specified, assign it to `all`
+    return [c.strip() for c in (match.groupdict()["codes"] or "all").split(",")]
 
 def _is_special_name(name):
     return name.startswith("__") and name.endswith("__")
@@ -239,12 +242,7 @@ class Vulture(ast.NodeVisitor):
         for lineno, line in enumerate(code, start=1):
             match = NOQA_REGEXP.search(line)
             if match:
-                codes = [
-                    c.strip()
-                    # if no code is specified, assign it to `all`
-                    for c in (match.groupdict()["codes"] or "all").split(",")
-                ]
-                for code in codes:
+                for code in _parse_error_codes(match):
                     self.noqa_matches[code].add(lineno)
 
     def scan(self, code, filename=""):
