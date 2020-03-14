@@ -12,9 +12,9 @@ assert v  # Silence pyflakes.
         ("# noqa", ["all"]),
         ("## noqa", ["all"]),
         ("# noqa Hi, go on.", ["all"]),
-        ("# noqa: V001", ["V001"]),
-        ("# noqa: V001, V007", ["V001", "V007"]),
-        ("# NoQA: V001,      V003, \t V004", ["V001", "V003", "V004"]),
+        ("# noqa: V101", ["V101"]),
+        ("# noqa: V101, V106", ["V101", "V106"]),
+        ("# NoQA: V101,      V103, \t V104", ["V101", "V103", "V104"]),
     ],
 )
 def test_noqa_regex_present(line, codes):
@@ -25,7 +25,7 @@ def test_noqa_regex_present(line, codes):
 
 @pytest.mark.parametrize(
     "line",
-    [("# noqa: 123V"), ("# noqa explaination: V012"), ("# noqa: ,V001")],
+    [("# noqa: 123V"), ("# noqa explaination: V012"), ("# noqa: ,V101")],
 )
 def test_noqa_regex_no_groups(line):
     assert NOQA_REGEXP.search(line).groupdict()["codes"] is None
@@ -45,7 +45,7 @@ def test_noqa_without_codes(v):
 import this  # noqa
 
 class Cellar:  # noqa
-    @propoerty  # noqa
+    @property
     def wine(self, grapes): # noqa
         pass
 
@@ -67,17 +67,17 @@ class Cellar:  # noqa
 def test_noqa_specific_issue_codes(v):
     v.scan(
         """\
-import this  # noqa: V004
+import this  # noqa: V104
 
-class Cellar:  # noqa: V002
-    @property  # noqa: V005
-    def wine(self, grapes):  # noqa: V007
+class Cellar:  # noqa: V102
+    @property
+    def wine(self, grapes):  # noqa: V105, V106
         pass
 
-    def serve(self, quantity=50):  # noqa: V003
-        self.quantity_served = quantity  # noqa: V001
+    def serve(self, quantity=50):  # noqa: V103
+        self.quantity_served = quantity  # noqa: V101
         return
-        self.pour()  # noqa: V006
+        self.pour()  # noqa: V201
 """
     )
     check(v.unused_attrs, [])
@@ -92,8 +92,8 @@ class Cellar:  # noqa: V002
 def test_noqa_attributes(v):
     v.scan(
         """\
-something.x = 'x'  # noqa: V001
-something.z = 'z'  # noqa: V006 (code for unused variable)
+something.x = 'x'  # noqa: V101
+something.z = 'z'  # noqa: V106 (code for unused variable)
 something.u = 'u'  # noqa
 """
     )
@@ -103,11 +103,11 @@ something.u = 'u'  # noqa
 def test_noqa_classes(v):
     v.scan(
         """\
-class QtWidget:  # noqa: V002
+class QtWidget:  # noqa: V102
     pass
 
 class ABC(QtWidget):
-    pass  # noqa: V002 (should not ignore)
+    pass  # noqa: V102 (should not ignore)
 
 class DEF:  # noqa
     pass
@@ -119,14 +119,14 @@ class DEF:  # noqa
 def test_noqa_functions(v):
     v.scan(
         """\
-def play(tune, instrument='bongs', _hz='50'):  # noqa: V003
+def play(tune, instrument='bongs', _hz='50'):  # noqa: V103
     pass
 
 
 # noqa
-def problems():  # noqa: V004
+def problems():  # noqa: V104
     ''' They don't go away. :-)'''
-    pass  # noqa: V003
+    pass  # noqa: V103
 
 def hello(name):  # noqa
     print("Hello")
@@ -140,11 +140,11 @@ def test_noqa_imports(v):
     v.scan(
         """\
 import foo
-import this  # noqa: V004
+import this  # noqa: V104
 import zoo
 from koo import boo  # noqa
 from me import *
-import dis  # noqa: V001 (code for unused attr)
+import dis  # noqa: V101 (code for unused attr)
 """
     )
     check(v.unused_imports, ["foo", "zoo", "dis"])
@@ -159,15 +159,15 @@ class Zoo:
         pass
 
     @property
-    def area(self, width, depth):  # noqa: V005
+    def area(self, width, depth):  # noqa: V105
         pass
 
     @property  # noqa  (should not be ignored)
     def entry_gates(self):
         pass
 
-    @property  
-    def tickets(self):  # noqa: V003 (code for unused function)
+    @property
+    def tickets(self):  # noqa: V103 (code for unused function)
         pass
 """
     )
@@ -183,12 +183,12 @@ class Foo:
     @property
     @make_it_cool
     @log
-    def something(self):  # noqa: V005
+    def something(self):  # noqa: V105
         pass
 
     @coolify
     @property
-    def something_else(self):  # noqa: V005
+    def something_else(self):  # noqa: V105
         pass
 
     @a
@@ -198,35 +198,35 @@ class Foo:
         pass
 """
     )
-    check(v.unused_props, ['abcd'])
+    check(v.unused_props, ["abcd"])
 
 
 def test_noqa_unreacahble_code(v):
     v.scan(
         """\
-def shave_sheeps(sheeps):
-    for sheep in sheeps:
-        if sheep.bald:
+def shave_sheep(sheep):
+    for a_sheep in sheep:
+        if a_sheep.is_bald:
             continue
-            sheep.grow_hair()  # noqa: V006
-        sheep.shave()
-    return sheeps
-    for sheep in sheeps:  # noqa: V006
-        if sheep.still_has_hair:
-            sheep.shave_again()
+            a_sheep.grow_hair()  # noqa: V201
+        a_sheep.shave()
+    return
+    for a_sheep in sheep:  # noqa: V201
+        if a_sheep.still_has_hair:
+            a_sheep.shave_again()
 """
     )
     check(v.unreachable_code, [])
-    check(v.unused_funcs, ["shave_sheeps"])
+    check(v.unused_funcs, ["shave_sheep"])
 
 
 def test_noqa_variables(v):
     v.scan(
         """\
-mitsi = "Mother"  # noqa: V007
+mitsi = "Mother"  # noqa: V106
 harry = "Father"  # noqa
-shero = "doggy"   # noqa: V001, V004 (code for unused import, attr)
-shinchan.friend = ['masao']  # noqa: V007
+shero = "doggy"   # noqa: V101, V104 (code for unused import, attr)
+shinchan.friend = ['masao']  # noqa: V106 (code for unused variable)
 """
     )
     check(v.unused_vars, ["shero"])
@@ -236,13 +236,13 @@ shinchan.friend = ['masao']  # noqa: V007
 def test_noqa_with_multiple_issue_codes(v):
     v.scan(
         """\
-def world(axis):  # noqa: V003, V006
+def world(axis):  # noqa: V103, V201
     pass
 
 
 for _ in range(3):
     continue
-    xyz = hello(something, else):  # noqa: V006, V007
+    xyz = hello(something, else):  # noqa: V201, V106
 """
     )
     check(v.get_unused_code(), [])

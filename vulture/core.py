@@ -48,13 +48,13 @@ if sys.version_info < (3, 4):
     IGNORED_VARIABLE_NAMES |= {"True", "False"}
 
 ERROR_CODES = {
-    "attribute": "V001",
-    "class": "V002",
-    "function": "V003",
-    "import": "V004",
-    "property": "V005",
-    "unreachable_code": "V006",
-    "variable": "V007",
+    "attribute": "V101",
+    "class": "V102",
+    "function": "V103",
+    "import": "V104",
+    "property": "V105",
+    "unreachable_code": "V201",
+    "variable": "V106",
 }
 
 NOQA_REGEXP = re.compile(
@@ -77,9 +77,13 @@ def _get_unused_items(defined_items, used_names):
     unused_items.sort(key=lambda item: item.name.lower())
     return unused_items
 
+
 def _parse_error_codes(match):
     # if no code is specified, assign it to `all`
-    return [c.strip() for c in (match.groupdict()["codes"] or "all").split(",")]
+    return [
+        c.strip() for c in (match.groupdict()["codes"] or "all").split(",")
+    ]
+
 
 def _is_special_name(name):
     return name.startswith("__") and name.endswith("__")

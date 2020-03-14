@@ -37,13 +37,13 @@ def check_report(v, capsys):
 
 def test_item_report(check_report):
     expected = """\
-{filename}:1: V004 unused import 'foo' (90% confidence)
-{filename}:3: V002 unused class 'Foo' (60% confidence)
-{filename}:7: V003 unused function 'bar' (60% confidence)
-{filename}:8: V001 unused attribute 'foobar' (60% confidence)
-{filename}:9: V007 unused variable 'foobar' (60% confidence)
-{filename}:11: V006  unreachable code after 'return' (100% confidence)
-{filename}:13: V005  unused property 'myprop' (60% confidence)
+{filename}:1: V104 unused import 'foo' (90% confidence)
+{filename}:3: V102 unused class 'Foo' (60% confidence)
+{filename}:7: V103 unused function 'bar' (60% confidence)
+{filename}:8: V101 unused attribute 'foobar' (60% confidence)
+{filename}:9: V106 unused variable 'foobar' (60% confidence)
+{filename}:11: V201 unreachable code after 'return' (100% confidence)
+{filename}:13: V105 unused property 'myprop' (60% confidence)
 """
     check_report(mock_code, expected)
 
