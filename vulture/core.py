@@ -497,16 +497,21 @@ class Vulture(ast.NodeVisitor):
         confidence=DEFAULT_CONFIDENCE,
         ignore=None,
     ):
-        def ignored(name):
-            return (ignore and ignore(self.filename, name)) or _match(
+        def ignored(lineno):
+            if (ignore and ignore(self.filename, name)) or _match(
                 name, self.ignore_names
-            )
+            ):
+                return True
 
-        def has_noqa(lineno, typ):
-            if typ == "property" and sys.version_info >= (3, 8):
+            # if name not ignored, check if annotated with "# noqa"
+            if typ == "property" and sys.version_info < (3, 8):
+                # for python < 3.8, increment as many line numbers as there are
+                # decorators on the method.
                 # python3.8 onwards, lineno for property is the same as that of
                 # the decorated method.
-                lineno = lineno - 1
+                print("buahahahaha")
+                lineno = lineno + len(first_node.decorator_list)
+                print('d ', lineno)
             return lineno in (
                 self.noqa_matches[ERROR_CODES[typ]].union(
                     self.noqa_matches["all"]
@@ -516,7 +521,8 @@ class Vulture(ast.NodeVisitor):
         last_node = last_node or first_node
         typ = collection.typ
         first_lineno = first_node.lineno
-        if ignored(name) or has_noqa(first_lineno, typ):
+
+        if ignored(first_lineno):
             self._log('Ignoring {typ} "{name}"'.format(**locals()))
         else:
             first_lineno = lines.get_first_line_number(first_node)

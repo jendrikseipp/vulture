@@ -150,30 +150,55 @@ import dis  # noqa: V001 (code for unused attr)
     check(v.unused_imports, ["foo", "zoo", "dis"])
 
 
-def test_noqa_propoerties(v):
+def test_noqa_properties(v):
     v.scan(
         """\
 class Zoo:
-    @property  # noqa
-    def no_of_coalas(self):
-        pass
-
-    @property  # noqa: V005
-    def area(self, width, depth):  
+    @property
+    def no_of_coalas(self):  # noqa
         pass
 
     @property
-    def entry_gates(self):  # noqa
+    def area(self, width, depth):  # noqa: V005
         pass
 
-    @property  # noqa: V003 (code for unused function)
-    def tickets(self):
+    @property  # noqa  (should not be ignored)
+    def entry_gates(self):
+        pass
+
+    @property  
+    def tickets(self):  # noqa: V003 (code for unused function)
         pass
 """
     )
     check(v.unused_props, ["entry_gates", "tickets"])
     check(v.unused_classes, ["Zoo"])
     check(v.unused_vars, ["width", "depth"])
+
+
+def test_noqa_properties_multiple_decorators(v):
+    v.scan(
+        """\
+class Foo:
+    @property
+    @make_it_cool
+    @log
+    def something(self):  # noqa: V005
+        pass
+
+    @coolify
+    @property
+    def something_else(self):  # noqa: V005
+        pass
+
+    @a
+    @property
+    @b  # noqa
+    def abcd(self):
+        pass
+"""
+    )
+    check(v.unused_props, ['abcd'])
 
 
 def test_noqa_unreacahble_code(v):
