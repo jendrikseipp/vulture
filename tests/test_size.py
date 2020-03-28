@@ -22,18 +22,18 @@ def get_last_line_number_slow(node):
     return max(getattr(node, "lineno", -1) for node in ast.walk(node))
 
 
-def count_lines(node):
+def count_lines(node, typ):
     """Estimate the number of lines of the given AST node."""
     last_lineno = lines.get_last_line_number(node)
     assert get_last_line_number_slow(node) == last_lineno
-    return last_lineno - node.lineno + 1
+    return last_lineno - lines.get_first_line_number(node, typ) + 1
 
 
 def check_size(example, size):
     tree = ast.parse(example)
     for node in tree.body:
         if isinstance(node, ast.ClassDef) and node.name == "Foo":
-            assert count_lines(node) == size
+            assert count_lines(node, "class") == size
             break
     else:
         raise AssertionError('Failed to find top-level class "Foo" in code')
@@ -79,17 +79,15 @@ class Foo(object):
             pass
 """
     size = 11
-    if sys.version_info >= (3, 8):
-        size = 10
     check_size(example, size)
 
 
-def test_size_property_def():
+def test_size_decorated_class():
     example = """
+@foo
+@property
+@xoo
 class Foo:
-    @foo
-    @property
-    @xoo
     def zoo(self):
         pass
 """

@@ -461,15 +461,6 @@ class Vulture(ast.NodeVisitor):
         confidence=DEFAULT_CONFIDENCE,
         ignore=None,
     ):
-        def _get_first_lineno(first_node, typ):
-            if typ == "property" and sys.version_info < (3, 8):
-                # For python < 3.8, increment as many line numbers as there are
-                # decorators on the method.
-                # From Python3.8 onwards, lineno for property is the same as
-                # that of decorated method.
-                return first_node.lineno + len(first_node.decorator_list)
-            return first_node.lineno
-
         last_node = last_node or first_node
         typ = collection.typ
         if (ignore and ignore(self.filename, name)) or _match(
@@ -477,7 +468,7 @@ class Vulture(ast.NodeVisitor):
         ):
             self._log('Ignoring {typ} "{name}"'.format(**locals()))
         else:
-            first_lineno = _get_first_lineno(first_node, typ)
+            first_lineno = lines.get_first_line_number(first_node, typ)
             last_lineno = lines.get_last_line_number(last_node)
             collection.append(
                 Item(
