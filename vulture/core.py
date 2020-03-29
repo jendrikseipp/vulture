@@ -79,7 +79,7 @@ def _get_unused_items(defined_items, used_names):
 
 
 def _parse_error_codes(match):
-    # if no code is specified, assign it to `all`
+    # If no error code is specified, add the line to the "all" category.
     return [
         c.strip() for c in (match.groupdict()["codes"] or "all").split(",")
     ]
@@ -507,13 +507,7 @@ class Vulture(ast.NodeVisitor):
             ):
                 return True
 
-            # if name not ignored, check if annotated with "# noqa"
-            if typ == "property" and sys.version_info < (3, 8):
-                # For python < 3.8, increment as many line numbers as there are
-                # decorators on the method.
-                # From python3.8 onwards, lineno for property is the same as
-                # that of the decorated method.
-                lineno = lineno + len(first_node.decorator_list)
+            # Check if the reported line is annotated with "# noqa".
             return (
                 lineno in self.noqa_matches[ERROR_CODES[typ]]
                 or lineno in self.noqa_matches["all"]
@@ -521,12 +515,11 @@ class Vulture(ast.NodeVisitor):
 
         last_node = last_node or first_node
         typ = collection.typ
-        first_lineno = first_node.lineno
+        first_lineno = lines.get_first_line_number(first_node)
 
         if ignored(first_lineno):
             self._log('Ignoring {typ} "{name}"'.format(**locals()))
         else:
-            first_lineno = lines.get_first_line_number(first_node)
             last_lineno = lines.get_last_line_number(last_node)
             collection.append(
                 Item(
@@ -539,7 +532,6 @@ class Vulture(ast.NodeVisitor):
                     confidence=confidence,
                 )
             )
-        )
 
     def _define_variable(self, name, node, confidence=DEFAULT_CONFIDENCE):
         self._define(

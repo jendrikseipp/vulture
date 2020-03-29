@@ -50,12 +50,14 @@ def test_noqa_without_codes(v):
         """\
 import this  # noqa
 
-class Cellar:  # noqa
-    @property
-    def wine(self): # noqa
+@underground  # noqa
+class Cellar:
+    @property  # noqa
+    def wine(self):
         grapes = True  # noqa
 
-    def serve(self, quantity=50):  # noqa
+    @without_ice  # noqa
+    def serve(self, quantity=50):
         self.quantity_served = quantity  # noqa
         return
         self.pour()  # noqa
@@ -75,12 +77,14 @@ def test_noqa_specific_issue_codes(v):
         """\
 import this  # noqa: V104
 
-class Cellar:  # noqa: V102
-    @property
-    def wine(self):  # noqa: V105
+@underground  # noqa: V102
+class Cellar:
+    @property  # noqa: V105
+    def wine(self):
         grapes = True  # noqa: V106
 
-    def serve(self, quantity=50):  # noqa: V103
+    @without_ice  # noqa: V103
+    def serve(self, quantity=50):
         self.quantity_served = quantity  # noqa: V101
         return
         self.pour()  # noqa: V201
@@ -160,35 +164,36 @@ def test_noqa_properties(v):
         """\
 class Zoo:
     @property
-    def no_of_coalas(self):  # noqa
+    def no_of_koalas(self):  # noqa
         pass
 
     @property
     def area(self, width, depth):  # noqa: V105
         pass
 
-    @property  # noqa  (should not be ignored)
+    @property  # noqa
     def entry_gates(self):
         pass
 
-    @property
-    def tickets(self):  # noqa: V103 (code for unused function)
+    @property  # noqa: V103 (code for unused function)
+    def tickets(self):
         pass
 """
     )
-    check(v.unused_props, ["entry_gates", "tickets"])
+    check(v.unused_props, ["no_of_koalas", "area", "tickets"])
     check(v.unused_classes, ["Zoo"])
     check(v.unused_vars, ["width", "depth"])
 
 
-def test_noqa_properties_multiple_decorators(v):
+def test_noqa_multiple_decorators(v):
     v.scan(
         """\
+@bar  # noqa: V102
 class Foo:
-    @property
+    @property  # noqa: V105
     @make_it_cool
     @log
-    def something(self):  # noqa: V105
+    def something(self):
         pass
 
     @coolify
@@ -203,7 +208,8 @@ class Foo:
         pass
 """
     )
-    check(v.unused_props, ["abcd"])
+    check(v.unused_props, ["something_else", "abcd"])
+    check(v.unused_classes, [])
 
 
 def test_noqa_unreacahble_code(v):

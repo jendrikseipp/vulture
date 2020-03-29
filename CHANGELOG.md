@@ -1,6 +1,6 @@
 # Unreleased
 
-* Report issue codes in ouput (e.g., `code.py:1: V104 unused import ...`)
+* Report issue codes in output (e.g., `code.py:1: V104 unused import ...`)
   (RJ722, #195)
 * Support `# noqa` comments to suppress results on that line. (RJ722, #195).
 
