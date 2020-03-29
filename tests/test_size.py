@@ -26,7 +26,7 @@ def count_lines(node):
     """Estimate the number of lines of the given AST node."""
     last_lineno = lines.get_last_line_number(node)
     assert get_last_line_number_slow(node) == last_lineno
-    return last_lineno - node.lineno + 1
+    return last_lineno - lines.get_first_line_number(node) + 1
 
 
 def check_size(example, size):
@@ -79,9 +79,19 @@ class Foo(object):
             pass
 """
     size = 11
-    if sys.version_info >= (3, 8):
-        size = 10
     check_size(example, size)
+
+
+def test_size_decorated_class():
+    example = """
+@foo
+@property
+@xoo
+class Foo:
+    def zoo(self):
+        pass
+"""
+    check_size(example, 6)
 
 
 def test_size_while():

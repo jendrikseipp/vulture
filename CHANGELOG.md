@@ -1,6 +1,8 @@
 # Unreleased
 
 * Ignore unused import statements which occur in `__init__.py` (RJ722, #192).
+* Report first decorator's line number for decorated objects on Python 3.8+.
+  (RJ722, #200)
 
 # 1.3 (2020-02-03)
 

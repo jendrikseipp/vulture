@@ -468,7 +468,7 @@ class Vulture(ast.NodeVisitor):
         ):
             self._log('Ignoring {typ} "{name}"'.format(**locals()))
         else:
-            first_lineno = first_node.lineno
+            first_lineno = lines.get_first_line_number(first_node)
             last_lineno = lines.get_last_line_number(last_node)
             collection.append(
                 Item(
