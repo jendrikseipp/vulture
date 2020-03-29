@@ -61,7 +61,12 @@ def test_exclude():
         return call_vulture(["vulture/", "--exclude", get_csv(excludes)])
 
     assert call_vulture_with_excludes(["core.py", "utils.py"]) == 1
-    assert call_vulture_with_excludes(["core.py", "utils.py", "lines.py"]) == 0
+    assert (
+        call_vulture_with_excludes(
+            ["core.py", "utils.py", "lines.py", "noqa.py"]
+        )
+        == 0
+    )
 
 
 def test_make_whitelist():

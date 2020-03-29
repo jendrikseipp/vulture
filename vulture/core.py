@@ -36,6 +36,7 @@ import string
 import sys
 
 from vulture import lines
+from vulture import noqa
 from vulture import utils
 
 __version__ = "1.4"
@@ -57,18 +58,6 @@ ERROR_CODES = {
     "variable": "V106",
 }
 
-NOQA_REGEXP = re.compile(
-    # Use the same regex as flake8 does.
-    # https://gitlab.com/pycqa/flake8/-/tree/master/src/flake8/defaults.py
-    # We're looking for items that look like this:
-    # `# noqa`
-    # `# noqa: E123`
-    # `# noqa: E123,W451,F921`
-    # `# NoQA: E123,W451,F921`
-    r"# noqa(?::[\s]?(?P<codes>([A-Z]+[0-9]+(?:[,\s]+)?)+))?",
-    re.IGNORECASE,
-)
-
 
 def _get_unused_items(defined_items, used_names):
     unused_items = [
@@ -76,13 +65,6 @@ def _get_unused_items(defined_items, used_names):
     ]
     unused_items.sort(key=lambda item: item.name.lower())
     return unused_items
-
-
-def _parse_error_codes(match):
-    # If no error code is specified, add the line to the "all" category.
-    return [
-        c.strip() for c in (match.groupdict()["codes"] or "all").split(",")
-    ]
 
 
 def _is_special_name(name):
@@ -236,23 +218,15 @@ class Vulture(ast.NodeVisitor):
 
         self.ignore_names = ignore_names or []
         self.ignore_decorators = ignore_decorators or []
-        self.noqa_matches = defaultdict(set)
 
         self.filename = ""
         self.code = []
         self.found_dead_code_or_error = False
 
-    def parse_noqa(self, code):
-        for lineno, line in enumerate(code, start=1):
-            match = NOQA_REGEXP.search(line)
-            if match:
-                for code in _parse_error_codes(match):
-                    self.noqa_matches[code].add(lineno)
-
     def scan(self, code, filename=""):
         code = utils.sanitize_code(code)
         self.code = code.splitlines()
-        self.parse_noqa(self.code)
+        self.noqa_lines = noqa.parse_noqa(self.code)
         self.filename = filename
         try:
             node = ast.parse(code, filename=self.filename)
@@ -508,10 +482,7 @@ class Vulture(ast.NodeVisitor):
                 return True
 
             # Check if the reported line is annotated with "# noqa".
-            return (
-                lineno in self.noqa_matches[ERROR_CODES[typ]]
-                or lineno in self.noqa_matches["all"]
-            )
+            return noqa.ignore_line(self.noqa_lines, lineno, typ)
 
         last_node = last_node or first_node
         typ = collection.typ

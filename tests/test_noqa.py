@@ -1,6 +1,6 @@
 import pytest
 
-from vulture.core import NOQA_REGEXP, _parse_error_codes
+from vulture.noqa import NOQA_REGEXP, parse_error_codes
 from . import check, v
 
 assert v  # Silence pyflakes.
@@ -19,7 +19,7 @@ assert v  # Silence pyflakes.
 )
 def test_noqa_regex_present(line, codes):
     match = NOQA_REGEXP.search(line)
-    parsed = _parse_error_codes(match)
+    parsed = parse_error_codes(match)
     assert parsed == codes
 
 
