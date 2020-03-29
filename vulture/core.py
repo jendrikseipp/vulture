@@ -27,7 +27,6 @@ from __future__ import print_function
 
 import argparse
 import ast
-from collections import defaultdict
 from fnmatch import fnmatch, fnmatchcase
 import os.path
 import pkgutil
@@ -476,13 +475,11 @@ class Vulture(ast.NodeVisitor):
         ignore=None,
     ):
         def ignored(lineno):
-            if (ignore and ignore(self.filename, name)) or _match(
-                name, self.ignore_names
-            ):
-                return True
-
-            # Check if the reported line is annotated with "# noqa".
-            return noqa.ignore_line(self.noqa_lines, lineno, typ)
+            return (
+                (ignore and ignore(self.filename, name))
+                or _match(name, self.ignore_names)
+                or noqa.ignore_line(self.noqa_lines, lineno, ERROR_CODES[typ])
+            )
 
         last_node = last_node or first_node
         typ = collection.typ

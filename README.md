@@ -19,6 +19,7 @@ tool for higher code quality.
 * tested: tests itself and has complete test coverage
 * complements pyflakes and has the same output syntax
 * sorts unused classes and functions by size with `--sort-by-size`
+* respects `# noqa` comments
 * supports Python 2.7 and Python \>= 3.5
 
 ## Installation
@@ -57,6 +58,16 @@ We collect whitelists for common Python modules and packages in
 `vulture/whitelists/` (pull requests are welcome). If you want to ignore
 a whole file or directory, use the `--exclude` parameter (e.g.,
 `--exclude *settings.py,docs/`).
+
+The other, more common way of ignoring results is to annotate the line causing
+the false positive with `# noqa <ERROR_CODE>` in a trailing comment.
+
+The `ERROR_CODE` specifies what kind of dead code to ignore (see the table
+below for details). In case no error code is specified, Vulture ignores all
+results for the line.
+
+Note that the line number for any decorated object is the same as the line
+number of the first decorator.
 
 **Ignoring names**
 
@@ -130,9 +141,9 @@ Calling :
 
 results in the following output:
 
-    dead_code.py:1: unused import 'os' (90% confidence)
-    dead_code.py:4: unused function 'greet' (60% confidence)
-    dead_code.py:8: unused variable 'message' (60% confidence)
+    dead_code.py:1: V104 unused import 'os' (90% confidence)
+    dead_code.py:4: V103 unused function 'greet' (60% confidence)
+    dead_code.py:8: V106 unused variable 'message' (60% confidence)
 
 Vulture correctly reports "os" and "message" as unused, but it fails to
 detect that "greet" is actually used. The recommended method to deal
@@ -158,8 +169,39 @@ Passing both the original program and the whitelist to Vulture
 
 makes Vulture ignore the `greet` method:
 
-    dead_code.py:1: unused import 'os' (90% confidence)
-    dead_code.py:8: unused variable 'message' (60% confidence)
+    dead_code.py:1: V104 unused import 'os' (90% confidence)
+    dead_code.py:8: V106 unused variable 'message' (60% confidence)
+
+**Using "# noqa"**
+
+```python
+import os
+
+class Greeter:
+    def greet(self):  # noqa: V103
+        print("Hi")
+
+def hello_world():
+    message = "Hello, world!"
+    greeter = Greeter()
+    greet_func = getattr(greeter, "greet")
+    greet_func()
+
+if __name__ == "__main__":
+    hello_world()
+```
+
+## Error codes
+
+| Error Code |    Description    |
+| ---------- | ----------------- |
+|    V101    | Unused Attribute  |
+|    V102    | Unused Class      |
+|    V103    | Unused Function   |
+|    V104    | Unused Import     |
+|    V105    | Unused Property   |
+|    V106    | Unused Variable   |
+|    V201    | Unreachable Code  |
 
 ## Exit codes
 

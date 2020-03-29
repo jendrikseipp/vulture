@@ -1,6 +1,6 @@
 import pytest
 
-from vulture.noqa import NOQA_REGEXP, parse_error_codes
+from vulture.noqa import NOQA_REGEXP, _parse_error_codes
 from . import check, v
 
 assert v  # Silence pyflakes.
@@ -19,7 +19,7 @@ assert v  # Silence pyflakes.
 )
 def test_noqa_regex_present(line, codes):
     match = NOQA_REGEXP.search(line)
-    parsed = parse_error_codes(match)
+    parsed = _parse_error_codes(match)
     assert parsed == codes
 
 
@@ -277,3 +277,16 @@ import this  # V098, A123, F876
 """
     )
     check(v.unused_imports, ["this"])
+
+
+@pytest.mark.parametrize(
+    "first_file, second_file",
+    [
+        ("foo = None", "bar = None  # noqa"),
+        ("bar = None  # noqa", "foo = None"),
+    ],
+)
+def test_noqa_multiple_files(first_file, second_file, v):
+    v.scan(first_file, filename="first_file.py")
+    v.scan(second_file, filename="second_file.py")
+    check(v.unused_vars, ["foo"])
