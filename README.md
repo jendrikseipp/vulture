@@ -59,12 +59,13 @@ We collect whitelists for common Python modules and packages in
 a whole file or directory, use the `--exclude` parameter (e.g.,
 `--exclude *settings.py,docs/`).
 
-The other, more common way of ignoring results is to annotate the line causing
-the false positive with `# noqa <ERROR_CODE>` in a trailing comment.
+Another way of ignoring errors is to annotate the line causing the false 
+positive with `# noqa: <ERROR_CODE>` in a trailing comment (e.g., 
+`# noqa: V103`).
 
 The `ERROR_CODE` specifies what kind of dead code to ignore (see the table
-below for details). In case no error code is specified, Vulture ignores all
-results for the line.
+below for the list of error codes). In case no error code is specified, 
+Vulture ignores all results for the line.
 
 Note that the line number for any decorated object is the same as the line
 number of the first decorator.
@@ -175,33 +176,24 @@ makes Vulture ignore the `greet` method:
 **Using "# noqa"**
 
 ```python
-import os
+import os  # noqa
 
-class Greeter:
+class Greeter:  # noqa: 102
     def greet(self):  # noqa: V103
         print("Hi")
-
-def hello_world():
-    message = "Hello, world!"
-    greeter = Greeter()
-    greet_func = getattr(greeter, "greet")
-    greet_func()
-
-if __name__ == "__main__":
-    hello_world()
 ```
 
 ## Error codes
 
-| Error Code |    Description    |
+| Error code |    Description    |
 | ---------- | ----------------- |
-|    V101    | Unused Attribute  |
-|    V102    | Unused Class      |
-|    V103    | Unused Function   |
-|    V104    | Unused Import     |
-|    V105    | Unused Property   |
-|    V106    | Unused Variable   |
-|    V201    | Unreachable Code  |
+|    V101    | Unused attribute  |
+|    V102    | Unused class      |
+|    V103    | Unused function   |
+|    V104    | Unused import     |
+|    V105    | Unused property   |
+|    V106    | Unused variable   |
+|    V201    | Unreachable code  |
 
 ## Exit codes
 
