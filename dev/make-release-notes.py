@@ -11,7 +11,7 @@ notes_list = []
 
 def add_to_release_notes(line):
     assert line.endswith("."), line
-    notes_list.append(f"* {line}\n")
+
 
 
 with open(CHANGELOG) as f:
@@ -22,13 +22,12 @@ with open(CHANGELOG) as f:
             f'start with "{HEADER_REGEX.rstrip()}"'
         )
     notes_list.extend([first_line[2:], "\n"])
+    next(f)  # Skip empty line.
     for line in f:
         if not line.strip():
-            continue
-        if line.startswith("* "):
-            add_to_release_notes(line[2:].strip())
-        else:
             break
+        else:
+            notes_list.append(line)
 
 
 def check(name, text):
