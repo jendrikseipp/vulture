@@ -9,10 +9,6 @@ HEADER_REGEX = fr"# {VERSION} \(\d\d\d\d-\d\d-\d\d\)\n"
 notes_list = []
 
 
-def add_to_release_notes(line):
-    assert line.endswith("."), line
-
-
 with open(CHANGELOG) as f:
     first_line = next(f)
     if not re.match(HEADER_REGEX, first_line):
