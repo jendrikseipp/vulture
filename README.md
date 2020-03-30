@@ -59,12 +59,12 @@ We collect whitelists for common Python modules and packages in
 a whole file or directory, use the `--exclude` parameter (e.g.,
 `--exclude *settings.py,docs/`).
 
-Another way of ignoring errors is to annotate the line causing the false 
-positive with `# noqa: <ERROR_CODE>` in a trailing comment (e.g., 
+Another way of ignoring errors is to annotate the line causing the false
+positive with `# noqa: <ERROR_CODE>` in a trailing comment (e.g.,
 `# noqa: V103`).
 
 The `ERROR_CODE` specifies what kind of dead code to ignore (see the table
-below for the list of error codes). In case no error code is specified, 
+below for the list of error codes). In case no error code is specified,
 Vulture ignores all results for the line.
 
 Note that the line number for any decorated object is the same as the line
