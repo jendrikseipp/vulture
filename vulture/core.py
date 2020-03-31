@@ -2,7 +2,7 @@
 #
 # vulture - Find dead code.
 #
-# Copyright (c) 2012-2019 Jendrik Seipp (jendrikseipp@gmail.com)
+# Copyright (c) 2012-2020 Jendrik Seipp (jendrikseipp@gmail.com)
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
@@ -35,6 +35,7 @@ import string
 import sys
 
 from vulture import lines
+from vulture import noqa
 from vulture import utils
 
 __version__ = "1.4"
@@ -45,6 +46,16 @@ IGNORED_VARIABLE_NAMES = {"object", "self"}
 # True and False are NameConstants since Python 3.4.
 if sys.version_info < (3, 4):
     IGNORED_VARIABLE_NAMES |= {"True", "False"}
+
+ERROR_CODES = {
+    "attribute": "V101",
+    "class": "V102",
+    "function": "V103",
+    "import": "V104",
+    "property": "V105",
+    "unreachable_code": "V201",
+    "variable": "V106",
+}
 
 
 def _get_unused_items(defined_items, used_names):
@@ -145,9 +156,10 @@ class Item(object):
             size_report = ", {:d} {}".format(self.size, line_format)
         else:
             size_report = ""
-        return "{}:{:d}: {} ({}% confidence{})".format(
+        return "{}:{:d}: {} {} ({}% confidence{})".format(
             utils.format_path(self.filename),
             self.first_lineno,
+            ERROR_CODES[self.typ],
             self.message,
             self.confidence,
             size_report,
@@ -213,6 +225,7 @@ class Vulture(ast.NodeVisitor):
     def scan(self, code, filename=""):
         code = utils.sanitize_code(code)
         self.code = code.splitlines()
+        self.noqa_lines = noqa.parse_noqa(self.code)
         self.filename = filename
         try:
             node = ast.parse(code, filename=self.filename)
@@ -461,14 +474,20 @@ class Vulture(ast.NodeVisitor):
         confidence=DEFAULT_CONFIDENCE,
         ignore=None,
     ):
+        def ignored(lineno):
+            return (
+                (ignore and ignore(self.filename, name))
+                or _match(name, self.ignore_names)
+                or noqa.ignore_line(self.noqa_lines, lineno, ERROR_CODES[typ])
+            )
+
         last_node = last_node or first_node
         typ = collection.typ
-        if (ignore and ignore(self.filename, name)) or _match(
-            name, self.ignore_names
-        ):
+        first_lineno = lines.get_first_line_number(first_node)
+
+        if ignored(first_lineno):
             self._log('Ignoring {typ} "{name}"'.format(**locals()))
         else:
-            first_lineno = lines.get_first_line_number(first_node)
             last_lineno = lines.get_last_line_number(last_node)
             collection.append(
                 Item(
