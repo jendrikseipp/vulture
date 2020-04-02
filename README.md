@@ -54,6 +54,10 @@ automatically, pass `--make-whitelist` to Vulture:
     $ vulture mydir --make-whitelist > whitelist.py
     $ vulture mydir whitelist.py
 
+Note that the resulting `whitelist.py` file will contain valid Python
+syntax, but for Python to be able to *run* it, you will usually have to
+make some modifications.
+
 We collect whitelists for common Python modules and packages in
 `vulture/whitelists/` (pull requests are welcome). If you want to ignore
 a whole file or directory, use the `--exclude` parameter (e.g.,
