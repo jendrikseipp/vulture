@@ -182,7 +182,7 @@ makes Vulture ignore the `greet` method:
 ```python
 import os  # noqa
 
-class Greeter:  # noqa: 102
+class Greeter:  # noqa: V102
     def greet(self):  # noqa: V103
         print("Hi")
 ```
