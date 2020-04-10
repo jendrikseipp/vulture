@@ -3,7 +3,7 @@
 import re
 import sys
 
-_, VERSION, CHANGELOG, LIST = sys.argv
+_, VERSION, CHANGELOG, LIST = sys.argv  # skipcq: PYL-W0632
 HEADER_REGEX = fr"# {VERSION} \(\d\d\d\d-\d\d-\d\d\)\n"
 
 notes_list = []

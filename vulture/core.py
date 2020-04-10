@@ -112,7 +112,7 @@ def _ignore_variable(filename, varname):
     )
 
 
-class Item(object):
+class Item(object):  # skipcq: PYL-R0205
     """
     Hold the name, type and location of defined code.
     """
@@ -270,6 +270,7 @@ class Vulture(ast.NodeVisitor):
             self._log("Scanning:", module)
             try:
                 module_string = utils.read_file(module)
+            # skipcq: PYL-W0641
             except utils.VultureInputException as err:  # noqa: F841
                 print(
                     "Error: Could not read file {module} - {err}\n"
@@ -659,6 +660,7 @@ def _parse_args():
 
     usage = "%(prog)s [options] PATH [PATH ...]"
     version = "vulture {}".format(__version__)
+    # skipcq: PYL-W0641
     glob_help = "Patterns may contain glob wildcards (*, ?, [abc], [!abc])."
     parser = argparse.ArgumentParser(prog="vulture", usage=usage)
     parser.add_argument(
