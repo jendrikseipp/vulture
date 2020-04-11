@@ -64,15 +64,15 @@ a whole file or directory, use the `--exclude` parameter (e.g.,
 `--exclude *settings.py,docs/`).
 
 Another way of ignoring errors is to annotate the line causing the false
-positive with `# noqa: <ERROR_CODE>` in a trailing comment (e.g.,
-`# noqa: V103`).
+positive with `# noqa: <ERROR_CODE>` in a trailing comment (e.g., `#
+noqa: V103`). The `ERROR_CODE` specifies what kind of dead code to
+ignore (see the table below for the list of error codes). In case no
+error code is specified, Vulture ignores all results for the line.
+(Note that the line number for decorated objects is the line number of
+the first decorator.)
 
-The `ERROR_CODE` specifies what kind of dead code to ignore (see the table
-below for the list of error codes). In case no error code is specified,
-Vulture ignores all results for the line.
-
-Note that the line number for any decorated object is the same as the line
-number of the first decorator.
+We recommend using whitelists instead of `noqa` comments, since `noqa`
+comments add visual noise to the code and make it harder to read.
 
 **Ignoring names**
 
