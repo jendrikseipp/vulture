@@ -38,6 +38,13 @@ NOQA_REGEXP = re.compile(
     re.IGNORECASE,
 )
 
+NOQA_CODE_MAP = {
+    # flake8 F401: module imported but unused.
+    "F401": "V104",
+    # flake8 F841: local variable is assigned to but never used.
+    "F841": "V106",
+}
+
 
 def _parse_error_codes(match):
     # If no error code is specified, add the line to the "all" category.
@@ -52,6 +59,7 @@ def parse_noqa(code):
         match = NOQA_REGEXP.search(line)
         if match:
             for error_code in _parse_error_codes(match):
+                error_code = NOQA_CODE_MAP.get(error_code, error_code)
                 noqa_lines[error_code].add(lineno)
     return noqa_lines
 

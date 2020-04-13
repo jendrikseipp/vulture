@@ -1,6 +1,7 @@
 import pytest
 
-from vulture.noqa import NOQA_REGEXP, _parse_error_codes
+from vulture.core import ERROR_CODES
+from vulture.noqa import NOQA_CODE_MAP, NOQA_REGEXP, _parse_error_codes
 from . import check, v
 
 assert v  # Silence pyflakes.
@@ -290,3 +291,19 @@ def test_noqa_multiple_files(first_file, second_file, v):
     v.scan(first_file, filename="first_file.py")
     v.scan(second_file, filename="second_file.py")
     check(v.unused_vars, ["foo"])
+
+
+def test_flake8_noqa_codes(v):
+    assert NOQA_CODE_MAP["F401"] == ERROR_CODES["import"]
+    assert NOQA_CODE_MAP["F841"] == ERROR_CODES["variable"]
+    v.scan(
+        """\
+import this  # noqa: F401
+
+def foo():
+    bar = 2  # noqa: F841
+"""
+    )
+    check(v.unused_funcs, ["foo"])
+    check(v.unused_imports, [])
+    check(v.unused_vars, [])

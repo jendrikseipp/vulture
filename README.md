@@ -189,15 +189,20 @@ class Greeter:  # noqa: V102
 
 ## Error codes
 
-| Error code |    Description    |
-| ---------- | ----------------- |
-|    V101    | Unused attribute  |
-|    V102    | Unused class      |
-|    V103    | Unused function   |
-|    V104    | Unused import     |
-|    V105    | Unused property   |
-|    V106    | Unused variable   |
-|    V201    | Unreachable code  |
+For compatibility with [flake8](https://flake8.pycqa.org/), Vulture
+supports the [F401 and
+F841](https://flake8.pycqa.org/en/latest/user/error-codes.html) error
+codes.
+
+| Error codes |    Description    |
+| ----------- | ----------------- |
+| V101        | Unused attribute  |
+| V102        | Unused class      |
+| V103        | Unused function   |
+| V104, F401  | Unused import     |
+| V105        | Unused property   |
+| V106, F841  | Unused variable   |
+| V201        | Unreachable code  |
 
 ## Exit codes
 
