@@ -401,17 +401,26 @@ class Vulture(ast.NodeVisitor):
 
     def _handle_conditional_node(self, node, name):
         if utils.condition_is_always_false(node.test):
+            last_node = node.body if isinstance(node, ast.IfExp) else node.body[-1]
             self._define(
                 self.unreachable_code,
                 name,
                 node,
-                last_node=node.body[-1],
+                last_node=last_node,
                 message="unsatisfiable '{name}' condition".format(**locals()),
                 confidence=100,
             )
         elif utils.condition_is_always_true(node.test):
             else_body = node.orelse
-            if else_body:
+            if name == "ternary":
+                self._define(
+                    self.unreachable_code,
+                    name,
+                    else_body,
+                    message="unreachable 'else' expression",
+                    confidence=100,
+                )
+            elif else_body:
                 self._define(
                     self.unreachable_code,
                     "else",
@@ -573,6 +582,9 @@ class Vulture(ast.NodeVisitor):
 
     def visit_If(self, node):
         self._handle_conditional_node(node, "if")
+
+    def visit_IfExp(self, node):
+        self._handle_conditional_node(node, "ternary")
 
     def visit_Import(self, node):
         self._add_aliases(node)

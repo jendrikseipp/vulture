@@ -212,3 +212,13 @@ if [5]:
     )
     print(v.unreachable_code[0].size)
     check_unreachable(v, 1, 2, "if")
+
+
+def test_if_exp_true(v):
+    v.scan("foo if True else bar")
+    check_unreachable(v, 1, 1, "ternary")
+
+
+def test_if_exp_false(v):
+    v.scan("foo if False else bar")
+    check_unreachable(v, 1, 1, "ternary")
