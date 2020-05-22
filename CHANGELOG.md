@@ -1,7 +1,5 @@
 # Unreleased
 
-* Report error codes in output, e.g., `code.py:1: V104 unused import ...`
-  (RJ722, #195).
 * Support flake8 noqa error codes F401 (unused import) and F841 (unused local
   variable) (RJ722, #195).
 
