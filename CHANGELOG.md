@@ -2,10 +2,8 @@
 
 * Report error codes in output, e.g., `code.py:1: V104 unused import ...`
   (RJ722, #195).
-* Support `# noqa` comments to suppress results from that line
-  (RJ722, #195).
-* Support flake8 error codes F401 (unused import) and F841 (unused local
-  variable).
+* Support flake8 noqa error codes F401 (unused import) and F841 (unused local
+  variable) (RJ722, #195).
 
 # 1.4 (2020-03-30)
 
