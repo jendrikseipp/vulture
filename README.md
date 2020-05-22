@@ -19,7 +19,6 @@ tool for higher code quality.
 * tested: tests itself and has complete test coverage
 * complements pyflakes and has the same output syntax
 * sorts unused classes and functions by size with `--sort-by-size`
-* respects `# noqa` comments
 * supports Python 2.7 and Python \>= 3.5
 
 ## Installation
@@ -63,6 +62,7 @@ We collect whitelists for common Python modules and packages in
 a whole file or directory, use the `--exclude` parameter (e.g.,
 `--exclude *settings.py,docs/`).
 
+<!-- Hide noqa docs until we decide whether we want to support it.
 Another way of ignoring errors is to annotate the line causing the false
 positive with `# noqa: <ERROR_CODE>` in a trailing comment (e.g., `#
 noqa: V103`). The `ERROR_CODE` specifies what kind of dead code to
@@ -70,9 +70,15 @@ ignore (see the table below for the list of error codes). In case no
 error code is specified, Vulture ignores all results for the line.
 (Note that the line number for decorated objects is the line number of
 the first decorator.)
+-->
 
-We recommend using whitelists instead of `noqa` comments, since `noqa`
-comments add visual noise to the code and make it harder to read.
+For compatibility with [flake8](https://flake8.pycqa.org/), Vulture
+supports the [F401 and
+F841](https://flake8.pycqa.org/en/latest/user/error-codes.html) error
+codes for ignoring unused imports (`# noqa: F401`) and unused local
+variables (`# noqa: F841`). However, we recommend using whitelists instead
+of `noqa` comments, since `noqa` comments add visual noise to the code and
+make it harder to read.
 
 **Ignoring names**
 
@@ -177,6 +183,7 @@ makes Vulture ignore the `greet` method:
     dead_code.py:1: V104 unused import 'os' (90% confidence)
     dead_code.py:8: V106 unused variable 'message' (60% confidence)
 
+<!-- Hide noqa docs until we decide whether we want to support it.
 **Using "# noqa"**
 
 ```python
@@ -203,6 +210,8 @@ codes.
 | V105        | Unused property   |
 | V106, F841  | Unused variable   |
 | V201        | Unreachable code  |
+
+-->
 
 ## Exit codes
 

@@ -1,7 +1,7 @@
 # Unreleased
 
 * Detect unreachable code in conditional expressions (Agathiyan Bragadeesh, #178).
-* Support flake8 error codes F401 (unused import) and F841 (unused local
+* Support flake8 noqa error codes F401 (unused import) and F841 (unused local
   variable) (RJ722, #195).
 
 # 1.4 (2020-03-30)
