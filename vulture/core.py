@@ -401,12 +401,13 @@ class Vulture(ast.NodeVisitor):
 
     def _handle_conditional_node(self, node, name):
         if utils.condition_is_always_false(node.test):
-            last_node = node.body if isinstance(node, ast.IfExp) else node.body[-1]
             self._define(
                 self.unreachable_code,
                 name,
                 node,
-                last_node=last_node,
+                last_node=node.body
+                if isinstance(node, ast.IfExp)
+                else node.body[-1],
                 message="unsatisfiable '{name}' condition".format(**locals()),
                 confidence=100,
             )
