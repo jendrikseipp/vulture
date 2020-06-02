@@ -1,4 +1,8 @@
-# 1.5 (2020-05-24)
+# 1.6 (unreleased)
+
+* Differentiate between functions and methods (Jendrik Seipp, #112, #209).
+
+  # 1.5 (2020-05-24)
 
 * Support flake8 "noqa" error codes F401 (unused import) and F841 (unused
   local variable) (RJ722, #195).
