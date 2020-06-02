@@ -1,5 +1,8 @@
 version: 1.0.{build}
 
+# Do not build feature branches that are already built as part of a pull request.
+skip_branch_with_pr: true
+
 environment:
   matrix:
   - TOXENV: py27
