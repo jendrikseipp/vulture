@@ -80,9 +80,9 @@ import this  # noqa: V104
 
 @underground  # noqa: V102
 class Cellar:
-    @property  # noqa: V105
+    @property  # noqa: V106
     def wine(self):
-        grapes = True  # noqa: V106
+        grapes = True  # noqa: V107
 
     @without_ice  # noqa: V103
     def serve(self, quantity=50):
@@ -95,6 +95,7 @@ class Cellar:
     check(v.unused_classes, [])
     check(v.unused_funcs, [])
     check(v.unused_imports, [])
+    check(v.unused_methods, ["serve"])
     check(v.unused_props, [])
     check(v.unreachable_code, [])
     check(v.unused_vars, [])
@@ -104,7 +105,7 @@ def test_noqa_attributes(v):
     v.scan(
         """\
 something.x = 'x'  # noqa: V101
-something.z = 'z'  # noqa: V106 (code for unused variable)
+something.z = 'z'  # noqa: V107 (code for unused variable)
 something.u = 'u'  # noqa
 """
     )
@@ -191,7 +192,7 @@ def test_noqa_multiple_decorators(v):
         """\
 @bar  # noqa: V102
 class Foo:
-    @property  # noqa: V105
+    @property  # noqa: V106
     @make_it_cool
     @log
     def something(self):
@@ -199,7 +200,7 @@ class Foo:
 
     @coolify
     @property
-    def something_else(self):  # noqa: V105
+    def something_else(self):  # noqa: V106
         pass
 
     @a
@@ -235,10 +236,10 @@ def shave_sheep(sheep):
 def test_noqa_variables(v):
     v.scan(
         """\
-mitsi = "Mother"  # noqa: V106
+mitsi = "Mother"  # noqa: V107
 harry = "Father"  # noqa
 shero = "doggy"   # noqa: V101, V104 (code for unused import, attr)
-shinchan.friend = ['masao']  # noqa: V106 (code for unused variable)
+shinchan.friend = ['masao']  # noqa: V107 (code for unused variable)
 """
     )
     check(v.unused_vars, ["shero"])
@@ -254,7 +255,7 @@ def world(axis):  # noqa: V103, V201
 
 for _ in range(3):
     continue
-    xyz = hello(something, else):  # noqa: V201, V106
+    xyz = hello(something, else):  # noqa: V201, V107
 """
     )
     check(v.get_unused_code(), [])

@@ -47,15 +47,14 @@ IGNORED_VARIABLE_NAMES = {"object", "self"}
 if sys.version_info < (3, 4):
     IGNORED_VARIABLE_NAMES |= {"True", "False"}
 
-# TODO: reorganize codes.
 ERROR_CODES = {
     "attribute": "V101",
     "class": "V102",
     "function": "V103",
     "import": "V104",
-    "method": "V107",
-    "property": "V105",
-    "variable": "V106",
+    "method": "V105",
+    "property": "V106",
+    "variable": "V107",
     "unreachable_code": "V201",
 }
 
