@@ -10,6 +10,7 @@
   disable=unused-import): unused-import, unused-variable, unused-argument
   and possibly-unused-variable. See
   https://github.com/janjur/readable-pylint-messages#unused-import.
+* Move from Travis to GitHub actions.
 
 # Non-TODOs
 
@@ -22,8 +23,6 @@
   computing no sizes.
 * Compute sizes on demand. Storing nodes increases memory usage from
   ~120 MiB to ~580 MiB for tensorflow's Python code.
-* Detect unreachable code for `ast.IfExp` (rarely used, even more
-  rarely "unused").
 * Detect unreachable code for `ast.Assert` (`assert False` is common
   idiom for aborting rogue code).
 * Detect superfluous expressions like `a <= b`, `42`, `foo and bar`
