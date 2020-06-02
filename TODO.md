@@ -15,10 +15,6 @@
 
 * Ignore hidden files and directories (might be unexpected, use
   --exclude instead).
-* Differentiate between functions and methods. For our purposes
-  methods are functions with a "self" parameter and they are stored as
-  attributes, not as variables. However, we can't differentiate
-  between function and method executions.
 * Use Assign instead of Name AST nodes for estimating the size of
   assignments (KISS).
 * Only count lines for unused code by storing a function `get_size` in

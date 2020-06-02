@@ -52,9 +52,10 @@ ERROR_CODES = {
     "class": "V102",
     "function": "V103",
     "import": "V104",
-    "property": "V105",
+    "method": "V105",
+    "property": "V106",
+    "variable": "V107",
     "unreachable_code": "V201",
-    "variable": "V106",
 }
 
 
@@ -95,8 +96,12 @@ def _ignore_import(filename, import_name):
 
 
 def _ignore_function(filename, function_name):
-    return _is_special_name(function_name) or (
-        function_name.startswith("test_") and _is_test_file(filename)
+    return function_name.startswith("test_") and _is_test_file(filename)
+
+
+def _ignore_method(filename, method_name):
+    return _is_special_name(method_name) or (
+        method_name.startswith("test_") and _is_test_file(filename)
     )
 
 
@@ -171,7 +176,9 @@ class Item(object):
                 self.message, filename, self.first_lineno
             )
         else:
-            prefix = "_." if self.typ in ["attribute", "property"] else ""
+            prefix = ""
+            if self.typ in ["attribute", "method", "property"]:
+                prefix = "_."
             return "{}{}  # unused {} ({}:{:d})".format(
                 prefix, self.name, self.typ, filename, self.first_lineno
             )
@@ -207,6 +214,7 @@ class Vulture(ast.NodeVisitor):
         self.defined_classes = get_list("class")
         self.defined_funcs = get_list("function")
         self.defined_imports = get_list("import")
+        self.defined_methods = get_list("method")
         self.defined_props = get_list("property")
         self.defined_vars = get_list("variable")
         self.unreachable_code = get_list("unreachable_code")
@@ -312,6 +320,7 @@ class Vulture(ast.NodeVisitor):
             + self.unused_classes
             + self.unused_funcs
             + self.unused_imports
+            + self.unused_methods
             + self.unused_props
             + self.unused_vars
             + self.unreachable_code
@@ -359,6 +368,10 @@ class Vulture(ast.NodeVisitor):
         return _get_unused_items(
             self.defined_imports, self.used_names | self.used_attrs
         )
+
+    @property
+    def unused_methods(self):
+        return _get_unused_items(self.defined_methods, self.used_attrs)
 
     @property
     def unused_props(self):
@@ -557,7 +570,26 @@ class Vulture(ast.NodeVisitor):
             utils.get_decorator_name(decorator)
             for decorator in node.decorator_list
         ]
-        typ = "property" if "@property" in decorator_names else "function"
+
+        first_arg = None
+        if node.args.args:
+            try:
+                first_arg = node.args.args[0].arg
+            except AttributeError:
+                # Python 2.7
+                first_arg = node.args.args[0].id
+
+        if "@property" in decorator_names:
+            typ = "property"
+        elif (
+            "@staticmethod" in decorator_names
+            or "@classmethod" in decorator_names
+            or first_arg == "self"
+        ):
+            typ = "method"
+        else:
+            typ = "function"
+
         if any(
             _match(name, self.ignore_decorators) for name in decorator_names
         ):
@@ -568,8 +600,11 @@ class Vulture(ast.NodeVisitor):
             )
         elif typ == "property":
             self._define(self.defined_props, node.name, node)
+        elif typ == "method":
+            self._define(
+                self.defined_methods, node.name, node, ignore=_ignore_method
+            )
         else:
-            # Function is not a property.
             self._define(
                 self.defined_funcs, node.name, node, ignore=_ignore_function
             )

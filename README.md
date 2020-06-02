@@ -154,7 +154,7 @@ results in the following output:
 
     dead_code.py:1: V104 unused import 'os' (90% confidence)
     dead_code.py:4: V103 unused function 'greet' (60% confidence)
-    dead_code.py:8: V106 unused variable 'message' (60% confidence)
+    dead_code.py:8: V107 unused variable 'message' (60% confidence)
 
 Vulture correctly reports "os" and "message" as unused, but it fails to
 detect that "greet" is actually used. The recommended method to deal
@@ -181,7 +181,7 @@ Passing both the original program and the whitelist to Vulture
 makes Vulture ignore the `greet` method:
 
     dead_code.py:1: V104 unused import 'os' (90% confidence)
-    dead_code.py:8: V106 unused variable 'message' (60% confidence)
+    dead_code.py:8: V107 unused variable 'message' (60% confidence)
 
 <!-- Hide noqa docs until we decide whether we want to support it.
 **Using "# noqa"**
@@ -208,7 +208,8 @@ codes.
 | V103        | Unused function   |
 | V104, F401  | Unused import     |
 | V105        | Unused property   |
-| V106, F841  | Unused variable   |
+| V106        | Unused method     |
+| V107, F841  | Unused variable   |
 | V201        | Unreachable code  |
 
 -->

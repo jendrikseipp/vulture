@@ -95,9 +95,10 @@ class Foo:
 """
     )
     check(v.defined_classes, ["Foo"])
-    check(v.defined_funcs, ["bar"])
+    check(v.defined_funcs, [])
+    check(v.defined_methods, ["bar"])
     check(v.unused_classes, ["Foo"])
-    check(v.unused_funcs, ["bar"])
+    check(v.unused_methods, ["bar"])
 
 
 def test_function_and_method1(v):
@@ -114,9 +115,11 @@ func()
 """
     )
     check(v.defined_classes, ["Bar"])
-    check(v.defined_funcs, ["func", "func"])
+    check(v.defined_funcs, ["func"])
+    check(v.defined_methods, ["func"])
     check(v.unused_classes, ["Bar"])
     check(v.unused_funcs, [])
+    check(v.unused_methods, ["func"])
 
 
 def test_attribute1(v):
@@ -162,7 +165,8 @@ b.foo
     )
     check(v.used_attrs, ["foo"])
     check(v.defined_classes, ["Bar"])
-    check(v.defined_funcs, ["foo"])
+    check(v.defined_funcs, [])
+    check(v.defined_methods, ["foo"])
     check(v.unused_classes, [])
     check(v.unused_funcs, [])
 
@@ -273,12 +277,22 @@ def __init__(self):
 class Bar(object):
     def foo(self):
         pass
+
+    @classmethod
+    def bar(cls):
+        pass
+
+    @staticmethod
+    def foobar():
+        pass
 """
     )
     check(v.defined_classes, ["Bar"])
-    check(v.defined_funcs, ["foo"])
+    check(v.defined_funcs, [])
+    check(v.defined_methods, ["foo", "bar", "foobar"])
     check(v.unused_classes, ["Bar"])
     check(v.unused_funcs, [])
+    check(v.unused_methods, ["bar", "foobar"])
 
 
 def test_token_types(v):

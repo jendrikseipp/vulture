@@ -42,7 +42,7 @@ NOQA_CODE_MAP = {
     # flake8 F401: module imported but unused.
     "F401": "V104",
     # flake8 F841: local variable is assigned to but never used.
-    "F841": "V106",
+    "F841": "V107",
 }
 
 
