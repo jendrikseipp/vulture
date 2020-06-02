@@ -3,10 +3,8 @@
 import codecs
 import os.path
 import re
-import sys
 
 import setuptools
-from setuptools.command.test import test as TestCommand
 
 
 def read(*parts):
@@ -23,20 +21,6 @@ def find_version(*file_parts):
     if version_match:
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
-
-
-class PyTest(TestCommand):
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-
-        self.test_args = []
-        self.test_suite = True
-
-    def run_tests(self):
-        # import here, cause outside the eggs aren't loaded
-        import pytest
-
-        sys.exit(pytest.main(self.test_args))
 
 
 setuptools.setup(
@@ -70,8 +54,6 @@ setuptools.setup(
     ],
     entry_points={"console_scripts": ["vulture = vulture.core:main"]},
     python_requires=">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*",
-    tests_require=["pytest", "pytest-cov"],
-    cmdclass={"test": PyTest},
     packages=setuptools.find_packages(exclude=["tests"]),
     package_data={"vulture": ["whitelists/*.py"]},
 )
