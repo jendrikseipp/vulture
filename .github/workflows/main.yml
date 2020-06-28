@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version: [pypy3, 2.7, 3.5, 3.6, 3.7, 3.8]
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            python-version: pypy2
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install coveralls setuptools tox wheel
+
+    - name: Build Wheel
+      run: python setup.py bdist_wheel
+
+    - name: Install Vulture from Wheel (For Linux and MacOS)
+      if: ${{ matrix.os != 'windows-latest' }}
+      run: "python -m pip install --only-binary=:all: ./dist/vulture-*.whl"
+
+    - name: Install Vulture from Wheel (For Windows)
+      if: ${{ matrix.os == 'windows-latest' }}
+      run: "python -m pip install --only-binary=:all: --no-index --ignore-installed --find-links=dist/ vulture"
+
+    - name: Run Vulture
+      run: |
+        vulture vulture/ tests/
+        python -m vulture vulture/ tests/
+
+    - name: Run Tests
+      run: tox -e py
+
+    - name: Check for Style Issues
+      if: ${{ matrix.python-version == 3.6 && matrix.os == 'ubuntu-latest' }}
+      run: tox -e style
+
+    - name: Report Coverage to Coveralls
+      # Report coverage only once: Python 3.8 on Ubuntu
+      if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == 3.8 }}
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+      run: coveralls
