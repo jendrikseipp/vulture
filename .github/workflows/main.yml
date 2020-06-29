@@ -54,6 +54,12 @@ jobs:
       if: ${{ matrix.python-version == 3.6 && matrix.os == 'ubuntu-latest' }}
       run: tox -e style
 
+    - name: Check for Repo Token
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+      # No need to worry, this wouldn't actually print the secret!
+      run: echo $COVERALLS_REPO_TOKEN
+
     - name: Report Coverage to Coveralls
       # Report coverage only once: Python 3.8 on Ubuntu
       if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == 3.8 }}
