@@ -1,13 +1,6 @@
 name: Ubuntu
 
-# see https://github.community/t5/GitHub-Actions/How-to-trigger-an-action-on-push-or-pull-request-but-not-both/m-p/35805
-on:
-  push:
-    branches:
-    - master
-  pull_request:
-    branches:
-    - master
+on: [push]
 
 jobs:
   build:
