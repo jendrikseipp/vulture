@@ -23,13 +23,14 @@ def find_version(*file_parts):
     raise RuntimeError("Unable to find version string.")
 
 
+with open("README.md") as f1, open("CHANGELOG.md") as f2:
+    long_description = f1.read() + "\n\n" + f2.read()
+
 setuptools.setup(
     name="vulture",
     version=find_version("vulture", "core.py"),
     description="Find dead code",
-    long_description="\n\n".join(
-        [open("README.md").read(), open("CHANGELOG.md").read()]
-    ),
+    long_description=long_description,
     long_description_content_type="text/markdown",
     keywords="dead-code-removal",
     author="Jendrik Seipp",
