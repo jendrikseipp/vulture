@@ -23,9 +23,8 @@ def find_version(*file_parts):
     raise RuntimeError("Unable to find version string.")
 
 
-with open("README.md") as freadme, \
-     open("CHANGELOG.md") as fchanges:
-    long_description = freadme.read() + "\n\n" + fchanges.read()
+with open("README.md") as f1, open("CHANGELOG.md") as f2:
+    long_description = f1.read() + "\n\n" + f2.read()
 
 setuptools.setup(
     name="vulture",
