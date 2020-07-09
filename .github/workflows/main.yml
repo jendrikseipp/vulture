@@ -19,7 +19,6 @@ jobs:
             python-version: pypy2
           - os: ubuntu-20.04
             python-version: pypy2
-            experimental: true
 
     steps:
     - name: Checkout Code
@@ -35,14 +34,14 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install coveralls setuptools tox wheel
 
-    - name: Build Wheel
+    - name: Build wheel
       run: python setup.py bdist_wheel
 
-    - name: Install Vulture from Wheel (For Linux and MacOS)
+    - name: Install Vulture from wheel (For Linux and MacOS)
       if: ${{ matrix.os != 'windows-2019' }}
       run: "python -m pip install --only-binary=:all: ./dist/vulture-*.whl"
 
-    - name: Install Vulture from Wheel (For Windows)
+    - name: Install Vulture from wheel (For Windows)
       if: ${{ matrix.os == 'windows-2019' }}
       run: "python -m pip install --only-binary=:all: --no-index --ignore-installed --find-links=dist/ vulture"
 
