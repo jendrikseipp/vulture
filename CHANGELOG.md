@@ -1,6 +1,7 @@
 # 1.6 (unreleased)
 
 * Differentiate between functions and methods (Jendrik Seipp, #112, #209).
+* Move from Travis to GitHub actions (RJ722, #211).
 
   # 1.5 (2020-05-24)
 
