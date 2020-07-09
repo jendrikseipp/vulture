@@ -10,7 +10,6 @@
   disable=unused-import): unused-import, unused-variable, unused-argument
   and possibly-unused-variable. See
   https://github.com/janjur/readable-pylint-messages#unused-import.
-* Move from Travis to GitHub actions.
 
 # Non-TODOs
 

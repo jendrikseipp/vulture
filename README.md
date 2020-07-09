@@ -1,7 +1,6 @@
 # Vulture - Find dead code
 
-[![Travis CI build status (Linux)](https://travis-ci.org/jendrikseipp/vulture.svg?branch=master)](https://travis-ci.org/jendrikseipp/vulture)
-[![AppVeyor CI build status (Windows)](https://ci.appveyor.com/api/projects/status/github/jendrikseipp/vulture?svg=true)](https://ci.appveyor.com/project/jendrikseipp96693/vulture)
+![CI:Test](https://github.com/jendrikseipp/vulture/workflows/CI/badge.svg)
 [![image](https://coveralls.io/repos/github/jendrikseipp/vulture/badge.svg?branch=master)](https://coveralls.io/github/jendrikseipp/vulture?branch=master)
 
 Vulture finds unused code in Python programs. This is useful for
