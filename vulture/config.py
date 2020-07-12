@@ -16,6 +16,28 @@ MIN_CONFIDENCE_DEFAULT = 0
 
 def _parse_toml(infile):
     # type: (TextIO) -> Config
+    """
+    Parse a TOML file for config values.
+
+    It will search for a section named ``[tool.vulture]`` which contains the
+    same keys as the CLI arguments seen with ``--help``. All leading dashes are
+    removed and other dashes are replaced by underscores (so ``--sort-by-size``
+    becomes ``sort_by_size``).
+
+    Arguments containing multiple values are standard TOML lists.
+
+    Example::
+
+        [tool.vulture]
+        exclude = ['exclude1', 'exclude2']
+        ignore_decorators = ['deco1', 'deco2']
+        ignore_names = ['name1', 'name2']
+        make_whitelist = true
+        min_confidence = 10
+        sort_by_size = true
+        verbose = true
+        paths = ['path1', 'path2']
+    """
     data = toml.load(infile)
     vulture_settings = data.get("tool", {}).get("vulture", {})
     output = Config(
