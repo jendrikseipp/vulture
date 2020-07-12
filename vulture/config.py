@@ -5,8 +5,31 @@ command-line arguments or the pyproject.toml file.
 # pylint: disable=bad-continuation
 import argparse
 from typing import List, Optional
+from typing.io import TextIO
+
+import toml
 
 from .version import __version__
+
+MIN_CONFIDENCE_DEFAULT = 0
+
+
+def _parse_toml(infile):
+    # type: (TextIO) -> Config
+    data = toml.load(infile)
+    vulture_settings = data.get("tool", {}).get("vulture", {})
+    output = Config(
+        paths=vulture_settings.get("paths", []),
+        exclude=vulture_settings.get("exclude", []),
+        ignore_decorators=vulture_settings.get("ignore_decorators", []),
+        ignore_names=vulture_settings.get("ignore_names", []),
+        make_whitelist=vulture_settings.get("make_whitelist", False),
+        min_confidence=vulture_settings.get(
+            "min_confidence", MIN_CONFIDENCE_DEFAULT),
+        sort_by_size=vulture_settings.get("sort_by_size", False),
+        verbose=vulture_settings.get("verbose", False),
+    )
+    return output
 
 
 def _parse_args(args=None):
@@ -64,7 +87,7 @@ def _parse_args(args=None):
     parser.add_argument(
         "--min-confidence",
         type=int,
-        default=0,
+        default=MIN_CONFIDENCE_DEFAULT,
         help="Minimum confidence (between 0 and 100) for code to be"
         " reported as unused.",
     )
