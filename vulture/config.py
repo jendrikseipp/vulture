@@ -4,7 +4,7 @@ command-line arguments or the pyproject.toml file.
 """
 # pylint: disable=bad-continuation
 import argparse
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 from typing.io import TextIO
 
 import toml
@@ -112,7 +112,7 @@ def _parse_args(args=None):
     return output
 
 
-class Config(object):
+class Config(Dict[str, Any]):
     """
     A config object wrapping various variables and used to abstract away the
     difference between CLI-arg parsing and TOML loading.
@@ -120,23 +120,9 @@ class Config(object):
     # pylint: disable=too-many-arguments, too-few-public-methods
     # pylint: disable=useless-object-inheritance
     # pylint: disable=too-many-instance-attributes
-    def __init__(
-        self,
-        paths,
-        exclude,
-        ignore_decorators,
-        ignore_names,
-        make_whitelist,
-        min_confidence,
-        sort_by_size,
-        verbose,
-    ):
-        # type: (List[str], List[str], List[str], List[str], bool, int, bool, bool) -> None
-        self.paths = paths
-        self.exclude = exclude
-        self.ignore_decorators = ignore_decorators
-        self.ignore_names = ignore_names
-        self.make_whitelist = make_whitelist
-        self.min_confidence = min_confidence
-        self.sort_by_size = sort_by_size
-        self.verbose = verbose
+
+    def __getattribute__(self, name):
+        # type: (str) -> Any
+        if name in self:
+            return self[name]
+        return super(Config, self).__getattribute__(name)

@@ -33,7 +33,7 @@ def test_cli_args():
         "path2",
     ])
     assert isinstance(result, Config)
-    assert vars(result) == expected
+    assert result == expected
 
 
 def test_toml_config():
@@ -65,4 +65,4 @@ def test_toml_config():
     ))
     result = _parse_toml(data)
     assert isinstance(result, Config)
-    assert vars(result) == expected
+    assert result == expected
