@@ -28,7 +28,7 @@ with open("README.md") as f1, open("CHANGELOG.md") as f2:
 
 setuptools.setup(
     name="vulture",
-    version=find_version("vulture", "core.py"),
+    version=find_version("vulture", "version.py"),
     description="Find dead code",
     long_description=long_description,
     long_description_content_type="text/markdown",

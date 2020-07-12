@@ -38,8 +38,6 @@ from vulture import lines
 from vulture import noqa
 from vulture import utils
 
-__version__ = "1.5"
-
 DEFAULT_CONFIDENCE = 60
 
 IGNORED_VARIABLE_NAMES = {"object", "self"}
