@@ -106,6 +106,24 @@ You can use the `--min-confidence` flag to set the minimum confidence
 for code to be reported as unused. Use `--min-confidence 100` to only
 report code that is guaranteed to be unused within the analyzed files.
 
+## Configuration
+
+CLI arguments can also be added to `pyproject.toml` into the `tool.vulture`
+section. Leading dashes are removed and remaining dashes are replaced with
+underscores. Example:
+
+``` toml
+[tool.vulture]
+exclude = ['exclude1', 'exclude2']
+ignore_decorators = ['deco1', 'deco2']
+ignore_names = ['name1', 'name2']
+make_whitelist = true
+min_confidence = 10
+sort_by_size = true
+verbose = true
+paths = ['path1', 'path2']
+```
+
 ## How does it work?
 
 Vulture uses the `ast` module to build abstract syntax trees for all
