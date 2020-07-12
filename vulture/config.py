@@ -48,7 +48,8 @@ def _parse_toml(infile):
         ignore_names=vulture_settings.get("ignore_names", []),
         make_whitelist=vulture_settings.get("make_whitelist", False),
         min_confidence=vulture_settings.get(
-            "min_confidence", MIN_CONFIDENCE_DEFAULT),
+            "min_confidence", MIN_CONFIDENCE_DEFAULT
+        ),
         sort_by_size=vulture_settings.get("sort_by_size", False),
         verbose=vulture_settings.get("verbose", False),
     )
@@ -63,6 +64,7 @@ def _parse_args(args=None):
     :param args: A list of strings representing the CLI arguments. If left to
         the default, this will default to sys.argv
     """
+
     def csv(exclude):
         return exclude.split(",")
 
@@ -140,6 +142,7 @@ class Config(Dict[str, Any]):
     A config object wrapping various variables and used to abstract away the
     difference between CLI-arg parsing and TOML loading.
     """
+
     # pylint: disable=too-many-arguments, too-few-public-methods
     # pylint: disable=useless-object-inheritance
     # pylint: disable=too-many-instance-attributes

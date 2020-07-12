@@ -21,17 +21,19 @@ def test_cli_args():
         sort_by_size=True,
         verbose=True,
     )
-    result = _parse_args([
-        "--exclude=exclude1,exclude2",
-        "--ignore-decorators=deco1,deco2",
-        "--ignore-names=name1,name2",
-        "--make-whitelist",
-        "--min-confidence=10",
-        "--sort-by-size",
-        "--verbose",
-        "path1",
-        "path2",
-    ])
+    result = _parse_args(
+        [
+            "--exclude=exclude1,exclude2",
+            "--ignore-decorators=deco1,deco2",
+            "--ignore-names=name1,name2",
+            "--make-whitelist",
+            "--min-confidence=10",
+            "--sort-by-size",
+            "--verbose",
+            "path1",
+            "path2",
+        ]
+    )
     assert isinstance(result, Config)
     assert result == expected
 
@@ -50,8 +52,9 @@ def test_toml_config():
         sort_by_size=True,
         verbose=True,
     )
-    data = StringIO(dedent(
-        u"""\
+    data = StringIO(
+        dedent(
+            u"""\
         [tool.vulture]
         exclude = ['exclude1', 'exclude2']
         ignore_decorators = ['deco1', 'deco2']
@@ -62,7 +65,8 @@ def test_toml_config():
         verbose = true
         paths = ['path1', 'path2']
         """
-    ))
+        )
+    )
     result = _parse_toml(data)
     assert isinstance(result, Config)
     assert result == expected
