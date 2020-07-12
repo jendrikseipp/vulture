@@ -36,7 +36,7 @@ import sys
 from vulture import lines
 from vulture import noqa
 from vulture import utils
-from vulture.config import _parse_args
+from vulture.config import make_config
 
 DEFAULT_CONFIDENCE = 60
 
@@ -699,7 +699,7 @@ class Vulture(ast.NodeVisitor):
 
 
 def main():
-    config = _parse_args()
+    config = make_config()
     vulture = Vulture(
         verbose=config.verbose,
         ignore_names=config.ignore_names,

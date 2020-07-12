@@ -4,6 +4,7 @@ command-line arguments or the pyproject.toml file.
 """
 # pylint: disable=bad-continuation
 import argparse
+from os.path import exists
 from typing import Any, Dict, List, Optional
 from typing.io import TextIO
 
@@ -148,3 +149,17 @@ class Config(Dict[str, Any]):
         if name in self:
             return self[name]
         return super(Config, self).__getattribute__(name)
+
+
+def make_config():
+    # type: () -> Config
+    """
+    Returns a config object for vulture, merging both ``pyproject.toml`` and
+    CLI arguments (CLI will have precedence).
+    """
+    if exists("pyproject.toml"):
+        with open("pyproject.toml") as toml_config:
+            app_config = _parse_toml(toml_config)
+    cli_config = _parse_args()
+    app_config.update(cli_config)
+    return app_config
