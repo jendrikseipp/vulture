@@ -43,7 +43,7 @@ jobs:
 
     - name: Install Vulture from wheel (For Windows)
       if: ${{ matrix.os == 'windows-2019' }}
-      run: "python -m pip install --only-binary=:all: --no-index --ignore-installed --find-links=dist/ vulture"
+      run: "python -m pip install --only-binary=:all: --ignore-installed --find-links=dist/ vulture"
 
     - name: Run Vulture
       run: |
