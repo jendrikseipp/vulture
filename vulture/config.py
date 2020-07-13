@@ -39,7 +39,7 @@ def _parse_toml(infile):
     """
     data = toml.load(infile)
     vulture_settings = data.get("tool", {}).get("vulture", {})
-    output = Config(
+    return Config(
         paths=vulture_settings.get("paths", []),
         exclude=vulture_settings.get("exclude", []),
         ignore_decorators=vulture_settings.get("ignore_decorators", []),
@@ -51,7 +51,6 @@ def _parse_toml(infile):
         sort_by_size=vulture_settings.get("sort_by_size", False),
         verbose=vulture_settings.get("verbose", False),
     )
-    return output
 
 
 def _parse_args(args=None):
@@ -121,7 +120,7 @@ def _parse_args(args=None):
     parser.add_argument("-v", "--verbose", action="store_true")
     parser.add_argument("--version", action="version", version=version)
     namespace = parser.parse_args(args)
-    output = Config(
+    return Config(
         paths=namespace.paths,
         exclude=namespace.exclude,
         ignore_decorators=namespace.ignore_decorators,
@@ -131,7 +130,6 @@ def _parse_args(args=None):
         sort_by_size=namespace.sort_by_size,
         verbose=namespace.verbose,
     )
-    return output
 
 
 class Config(Dict[str, Any]):
