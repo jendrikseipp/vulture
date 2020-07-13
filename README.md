@@ -109,8 +109,8 @@ report code that is guaranteed to be unused within the analyzed files.
 ## Configuration
 
 CLI arguments can also be added to `pyproject.toml` into the `tool.vulture`
-section. Leading dashes are removed and remaining dashes are replaced with
-underscores. Example:
+section. Simply remove leading dashes and replace remaining dashes with
+underscores.  Example:
 
 ``` toml
 [tool.vulture]
