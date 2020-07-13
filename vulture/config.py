@@ -5,8 +5,7 @@ command-line arguments or the pyproject.toml file.
 from __future__ import print_function
 import argparse
 from os.path import abspath, exists
-from typing import Any, Dict, List, Optional
-from typing.io import TextIO
+from typing import Any, Dict
 
 import toml
 
