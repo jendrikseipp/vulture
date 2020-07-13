@@ -4,14 +4,13 @@ command-line arguments or the pyproject.toml file.
 """
 from __future__ import print_function
 import argparse
+import sys
 from os.path import abspath, exists
 from typing import Any, Dict
 
 import toml
 
 from .version import __version__
-
-MIN_CONFIDENCE_DEFAULT = 0
 
 
 class Config(Dict[str, Any]):
@@ -20,10 +19,40 @@ class Config(Dict[str, Any]):
     difference between CLI-arg parsing and TOML loading.
     """
 
+    #: Possible configuration options and their respective defaults
+    DEFAULTS = {
+        "min_confidence": 0,
+        "paths": [],
+        "exclude": [],
+        "ignore_decorators": [],
+        "ignore_names": [],
+        "make_whitelist": False,
+        "sort_by_size": False,
+        "verbose": False,
+    }
+
     def __getattribute__(self, name):
         if name in self:
             return self[name]
         return super(Config, self).__getattribute__(name)
+
+    @staticmethod
+    def from_dict(data):
+        """
+        Create a new config object from an existing dictionary, assign possible
+        defaults and warn about unprocessed options.
+        """
+        # keep a copy of the keys, so we can keep track of any unprocessed
+        # values.
+        remaining_keys = set(data.keys())
+
+        output = Config()
+        for key, default in Config.DEFAULTS.items():
+            output[key] = data.get(key, default)
+            remaining_keys.discard(key)
+        for remainder in sorted(remaining_keys):
+            print("Unprocessed config option %r" % remainder, file=sys.stderr)
+        return output
 
 
 def _parse_toml(infile):
@@ -51,18 +80,7 @@ def _parse_toml(infile):
     """
     data = toml.load(infile)
     vulture_settings = data.get("tool", {}).get("vulture", {})
-    return Config(
-        paths=vulture_settings.get("paths", []),
-        exclude=vulture_settings.get("exclude", []),
-        ignore_decorators=vulture_settings.get("ignore_decorators", []),
-        ignore_names=vulture_settings.get("ignore_names", []),
-        make_whitelist=vulture_settings.get("make_whitelist", False),
-        min_confidence=vulture_settings.get(
-            "min_confidence", MIN_CONFIDENCE_DEFAULT
-        ),
-        sort_by_size=vulture_settings.get("sort_by_size", False),
-        verbose=vulture_settings.get("verbose", False),
-    )
+    return Config.from_dict(vulture_settings)
 
 
 def _parse_args(args=None):
@@ -107,7 +125,7 @@ def _parse_args(args=None):
         "--ignore-names",
         metavar="PATTERNS",
         type=csv,
-        default=None,
+        default=Config.DEFAULTS["ignore_names"],
         help='Comma-separated list of names to ignore (e.g., "visit_*,do_*").'
         " {glob_help}".format(**locals()),
     )
@@ -120,7 +138,7 @@ def _parse_args(args=None):
     parser.add_argument(
         "--min-confidence",
         type=int,
-        default=MIN_CONFIDENCE_DEFAULT,
+        default=Config.DEFAULTS["min_confidence"],
         help="Minimum confidence (between 0 and 100) for code to be"
         " reported as unused.",
     )
@@ -132,16 +150,7 @@ def _parse_args(args=None):
     parser.add_argument("-v", "--verbose", action="store_true")
     parser.add_argument("--version", action="version", version=version)
     namespace = parser.parse_args(args)
-    return Config(
-        paths=namespace.paths,
-        exclude=namespace.exclude,
-        ignore_decorators=namespace.ignore_decorators,
-        ignore_names=namespace.ignore_names,
-        make_whitelist=namespace.make_whitelist,
-        min_confidence=namespace.min_confidence,
-        sort_by_size=namespace.sort_by_size,
-        verbose=namespace.verbose,
-    )
+    return Config.from_dict(vars(namespace))
 
 
 def make_config(argv=None, tomlfile=None):
