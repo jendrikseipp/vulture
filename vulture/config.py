@@ -144,17 +144,29 @@ class Config(Dict[str, Any]):
         return super(Config, self).__getattribute__(name)
 
 
-def make_config():
+def make_config(argv=None, tomlfile=None):
     """
     Returns a config object for vulture, merging both ``pyproject.toml`` and
     CLI arguments (CLI will have precedence).
+
+    :param argv: The CLI arguments to be parsed. This value is transparently
+        passed through to :py:meth:`argparse.ArgumentParser.parse_args`
+    :param tomlfile: An IO instance containing TOML data. By default this will
+        auto-detect an existing ``pyproject.toml`` file and exists solely for
+        unit-testing.
     """
-    cli_config = _parse_args()
-    toml_path = abspath("pyproject.toml")
-    if exists(toml_path):
-        if cli_config.verbose:
-            print("Reading config values from %r" % toml_path)
-        with open(toml_path) as toml_config:
-            toml_config = _parse_toml(toml_config)
+    cli_config = _parse_args(argv)
+
+    if tomlfile:
+        toml_config = _parse_toml(tomlfile)
+    else:
+        toml_path = abspath("pyproject.toml")
+        if exists(toml_path):
+            if cli_config.verbose:
+                print("Reading config values from %r" % toml_path)
+            with open(toml_path) as toml_config:
+                toml_config = _parse_toml(toml_config)
+        else:
+            toml_config = {}
     toml_config.update(cli_config)
     return toml_config
