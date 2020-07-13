@@ -13,7 +13,7 @@ def test_cli_args():
     """
     expected = dict(
         paths=["path1", "path2"],
-        exclude=["exclude1", "exclude2"],
+        exclude=["file*.py", "dir/"],
         ignore_decorators=["deco1", "deco2"],
         ignore_names=["name1", "name2"],
         make_whitelist=True,
@@ -23,7 +23,7 @@ def test_cli_args():
     )
     result = _parse_args(
         [
-            "--exclude=exclude1,exclude2",
+            "--exclude=file*.py,dir/",
             "--ignore-decorators=deco1,deco2",
             "--ignore-names=name1,name2",
             "--make-whitelist",
@@ -44,7 +44,7 @@ def test_toml_config():
     """
     expected = dict(
         paths=["path1", "path2"],
-        exclude=["exclude1", "exclude2"],
+        exclude=["file*.py", "dir/"],
         ignore_decorators=["deco1", "deco2"],
         ignore_names=["name1", "name2"],
         make_whitelist=True,
@@ -56,7 +56,7 @@ def test_toml_config():
         dedent(
             u"""\
         [tool.vulture]
-        exclude = ["exclude1", "exclude2"]
+        exclude = ["file*.py", "dir/"]
         ignore_decorators = ["deco1", "deco2"]
         ignore_names = ["name1", "name2"]
         make_whitelist = true

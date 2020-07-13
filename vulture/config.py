@@ -28,7 +28,7 @@ def _parse_toml(infile):
     Example::
 
         [tool.vulture]
-        exclude = ["exclude1", "exclude2"]
+        exclude = ["file*.py", "dir/"]
         ignore_decorators = ["deco1", "deco2"]
         ignore_names = ["name1", "name2"]
         make_whitelist = true
