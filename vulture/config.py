@@ -28,14 +28,14 @@ def _parse_toml(infile):
     Example::
 
         [tool.vulture]
-        exclude = ['exclude1', 'exclude2']
-        ignore_decorators = ['deco1', 'deco2']
-        ignore_names = ['name1', 'name2']
+        exclude = ["exclude1", "exclude2"]
+        ignore_decorators = ["deco1", "deco2"]
+        ignore_names = ["name1", "name2"]
         make_whitelist = true
         min_confidence = 10
         sort_by_size = true
         verbose = true
-        paths = ['path1', 'path2']
+        paths = ["path1", "path2"]
     """
     data = toml.load(infile)
     vulture_settings = data.get("tool", {}).get("vulture", {})
