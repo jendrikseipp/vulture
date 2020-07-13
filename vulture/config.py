@@ -2,8 +2,9 @@
 This module handles retrieval of configuration values from either the
 command-line arguments or the pyproject.toml file.
 """
+from __future__ import print_function
 import argparse
-from os.path import exists
+from os.path import abspath, exists
 from typing import Any, Dict, List, Optional
 from typing.io import TextIO
 
@@ -151,9 +152,12 @@ def make_config():
     Returns a config object for vulture, merging both ``pyproject.toml`` and
     CLI arguments (CLI will have precedence).
     """
-    if exists("pyproject.toml"):
-        with open("pyproject.toml") as toml_config:
-            app_config = _parse_toml(toml_config)
     cli_config = _parse_args()
-    app_config.update(cli_config)
-    return app_config
+    toml_path = abspath("pyproject.toml")
+    if exists(toml_path):
+        if cli_config.verbose:
+            print("Reading config values from %r" % toml_path)
+        with open(toml_path) as toml_config:
+            toml_config = _parse_toml(toml_config)
+    toml_config.update(cli_config)
+    return toml_config
