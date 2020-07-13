@@ -60,7 +60,7 @@ def _parse_args(args=None):
     Parse CLI arguments
 
     :param args: A list of strings representing the CLI arguments. If left to
-        the default, this will default to sys.argv
+        the default, this will default to ``sys.argv``.
     """
 
     def csv(exclude):

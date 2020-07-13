@@ -9,7 +9,7 @@ from vulture.config import Config, _parse_args, _parse_toml
 
 def test_cli_args():
     """
-    Ensure that CLI arguments are converted to a config object
+    Ensure that CLI arguments are converted to a config object.
     """
     expected = dict(
         paths=["path1", "path2"],
@@ -40,7 +40,7 @@ def test_cli_args():
 
 def test_toml_config():
     """
-    Ensure parsing of TOML files results in a valid config object
+    Ensure parsing of TOML files results in a valid config object.
     """
     expected = dict(
         paths=["path1", "path2"],
