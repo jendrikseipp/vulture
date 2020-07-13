@@ -2,7 +2,6 @@
 This module handles retrieval of configuration values from either the
 command-line arguments or the pyproject.toml file.
 """
-# pylint: disable=bad-continuation
 import argparse
 from os.path import exists
 from typing import Any, Dict, List, Optional
@@ -16,7 +15,6 @@ MIN_CONFIDENCE_DEFAULT = 0
 
 
 def _parse_toml(infile):
-    # type: (TextIO) -> Config
     """
     Parse a TOML file for config values.
 
@@ -57,7 +55,6 @@ def _parse_toml(infile):
 
 
 def _parse_args(args=None):
-    # type: (Optional[List[str]]) -> Config
     """
     Parse CLI arguments
 
@@ -143,19 +140,13 @@ class Config(Dict[str, Any]):
     difference between CLI-arg parsing and TOML loading.
     """
 
-    # pylint: disable=too-many-arguments, too-few-public-methods
-    # pylint: disable=useless-object-inheritance
-    # pylint: disable=too-many-instance-attributes
-
     def __getattribute__(self, name):
-        # type: (str) -> Any
         if name in self:
             return self[name]
         return super(Config, self).__getattribute__(name)
 
 
 def make_config():
-    # type: () -> Config
     """
     Returns a config object for vulture, merging both ``pyproject.toml`` and
     CLI arguments (CLI will have precedence).
