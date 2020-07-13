@@ -14,6 +14,18 @@ from .version import __version__
 MIN_CONFIDENCE_DEFAULT = 0
 
 
+class Config(Dict[str, Any]):
+    """
+    A config object wrapping various variables and used to abstract away the
+    difference between CLI-arg parsing and TOML loading.
+    """
+
+    def __getattribute__(self, name):
+        if name in self:
+            return self[name]
+        return super(Config, self).__getattribute__(name)
+
+
 def _parse_toml(infile):
     """
     Parse a TOML file for config values.
@@ -130,18 +142,6 @@ def _parse_args(args=None):
         sort_by_size=namespace.sort_by_size,
         verbose=namespace.verbose,
     )
-
-
-class Config(Dict[str, Any]):
-    """
-    A config object wrapping various variables and used to abstract away the
-    difference between CLI-arg parsing and TOML loading.
-    """
-
-    def __getattribute__(self, name):
-        if name in self:
-            return self[name]
-        return super(Config, self).__getattribute__(name)
 
 
 def make_config(argv=None, tomlfile=None):
