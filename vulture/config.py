@@ -36,6 +36,9 @@ class Config(Dict[str, Any]):
             return self[name]
         return super(Config, self).__getattribute__(name)
 
+    def __repr__(self):
+        return "Config(%r)" % dict(self)
+
     @staticmethod
     def from_dict(data):
         """
