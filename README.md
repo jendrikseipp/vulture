@@ -108,20 +108,20 @@ report code that is guaranteed to be unused within the analyzed files.
 
 ## Configuration
 
-CLI arguments can also be added to `pyproject.toml` into the `tool.vulture`
-section. Simply remove leading dashes and replace remaining dashes with
-underscores.  Example:
+You can also store command line arguments in `pyproject.toml` under the
+`tool.vulture` section. Simply remove leading dashes and replace all
+remaining dashes with underscores. Example:
 
 ``` toml
 [tool.vulture]
 exclude = ["file*.py", "dir/"]
-ignore_decorators = ["deco1", "deco2"]
-ignore_names = ["name1", "name2"]
+ignore_decorators = ["@app.route", "@require_*"]
+ignore_names = ["visit_*", "do_*"]
 make_whitelist = true
-min_confidence = 10
+min_confidence = 80
 sort_by_size = true
 verbose = true
-paths = ["path1", "path2"]
+paths = ["myscript.py", "mydir"]
 ```
 
 ## How does it work?
