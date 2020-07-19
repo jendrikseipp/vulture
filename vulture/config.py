@@ -24,7 +24,6 @@ DEFAULTS = {
 }
 
 
-
 def from_dict(data):
     """
     Create a new config dictionary from an existing one, assign possible
@@ -39,7 +38,9 @@ def from_dict(data):
         output[key] = data.get(key, default)
         remaining_keys.discard(key)
     for remainder in sorted(remaining_keys):
-        print("Unprocessed config option %r" % remainder, file=sys.stderr)
+        print(
+            "Unprocessed config option {}".format(remainder), file=sys.stderr
+        )
     return output
 
 
@@ -160,7 +161,7 @@ def make_config(argv=None, tomlfile=None):
         toml_path = abspath("pyproject.toml")
         if exists(toml_path):
             if cli_config["verbose"]:
-                print("Reading config values from %r" % toml_path)
+                print("Reading config values from {}".format(toml_path))
             with open(toml_path) as toml_config:
                 toml_config = _parse_toml(toml_config)
         else:
