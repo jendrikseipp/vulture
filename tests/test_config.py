@@ -114,3 +114,23 @@ def test_config_merging():
         verbose=True,
     )
     assert result == expected
+
+
+def test_config_merging_verbose():
+    """
+    If we have set a boolean value in the TOML file, but not on the CLI, we
+    want the TOML value to be taken.
+
+    We'll take the "verbose" flag as example in this test.
+    """
+    toml = StringIO(
+        dedent(
+            u"""\
+        [tool.vulture]
+        verbose = true
+        """
+        )
+    )
+    cliargs = ["cli_path",]
+    result = make_config(cliargs, toml)
+    assert result["verbose"] is True

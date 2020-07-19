@@ -23,6 +23,9 @@ DEFAULTS = {
     "verbose": False,
 }
 
+#: sentinel value to distinguish between "False" and "no default given"
+NO_DEFAULT = object()
+
 
 def from_dict(data):
     """
@@ -121,6 +124,7 @@ def _parse_args(args=None):
     parser.add_argument(
         "--make-whitelist",
         action="store_true",
+        default=NO_DEFAULT,
         help="Report unused code in a format that can be added to a"
         " whitelist module.",
     )
@@ -134,9 +138,12 @@ def _parse_args(args=None):
     parser.add_argument(
         "--sort-by-size",
         action="store_true",
+        default=NO_DEFAULT,
         help="Sort unused functions and classes by their lines of code.",
     )
-    parser.add_argument("-v", "--verbose", action="store_true")
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", default=NO_DEFAULT
+    )
     parser.add_argument("--version", action="version", version=version)
     namespace = parser.parse_args(args)
     return from_dict(vars(namespace))
@@ -155,16 +162,32 @@ def make_config(argv=None, tomlfile=None):
     """
     cli_config = _parse_args(argv)
 
+    # If we loaded data from a TOML file, we want to print this out on stdout
+    # in verbose mode so we need to keep the value around.
+    detected_toml_path = ""
+
     if tomlfile:
         toml_config = _parse_toml(tomlfile)
+        detected_toml_path = str(tomlfile)
     else:
         toml_path = abspath("pyproject.toml")
         if exists(toml_path):
-            if cli_config["verbose"]:
-                print("Reading config values from {}".format(toml_path))
             with open(toml_path) as toml_config:
                 toml_config = _parse_toml(toml_config)
+            detected_toml_path = toml_path
         else:
             toml_config = {}
-    toml_config.update(cli_config)
+
+    # We can't use a simple call to dict.update() because some values should
+    # not be overwritten in the config. More precisely, if the values have "no
+    # real default" in the CLI args, they should not be taken into
+    # consideration.
+    for key in toml_config.keys():
+        cli_value = cli_config.get(key, NO_DEFAULT)
+        if cli_value is not NO_DEFAULT:
+            toml_config[key] = cli_value
+
+    if detected_toml_path and toml_config["verbose"]:
+        print("Reading config values from {}".format(detected_toml_path))
+
     return toml_config
