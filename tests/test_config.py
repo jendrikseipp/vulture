@@ -131,6 +131,8 @@ def test_config_merging_verbose():
         """
         )
     )
-    cliargs = ["cli_path",]
+    cliargs = [
+        "cli_path",
+    ]
     result = make_config(cliargs, toml)
     assert result["verbose"] is True
