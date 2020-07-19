@@ -701,15 +701,15 @@ class Vulture(ast.NodeVisitor):
 def main():
     config = make_config()
     vulture = Vulture(
-        verbose=config.verbose,
-        ignore_names=config.ignore_names,
-        ignore_decorators=config.ignore_decorators,
+        verbose=config["verbose"],
+        ignore_names=config["ignore_names"],
+        ignore_decorators=config["ignore_decorators"],
     )
-    vulture.scavenge(config.paths, exclude=config.exclude)
+    vulture.scavenge(config["paths"], exclude=config["exclude"])
     sys.exit(
         vulture.report(
-            min_confidence=config.min_confidence,
-            sort_by_size=config.sort_by_size,
-            make_whitelist=config.make_whitelist,
+            min_confidence=config["min_confidence"],
+            sort_by_size=config["sort_by_size"],
+            make_whitelist=config["make_whitelist"],
         )
     )

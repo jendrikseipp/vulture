@@ -8,4 +8,4 @@ TextIO
 
 # NOTE: This was added to make unit-tests pass and allow commiting intermediate
 # work. It should be removed once the TOML parsing is fully implemented.
-config._parse_toml
+config.make_config

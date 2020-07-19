@@ -4,7 +4,7 @@ This module contains unit-tests for config file and CLI argument parsing
 from io import StringIO
 from textwrap import dedent
 
-from vulture.config import Config, _parse_args, _parse_toml, make_config
+from vulture.config import _parse_args, _parse_toml, make_config
 
 
 def test_cli_args():
@@ -34,7 +34,7 @@ def test_cli_args():
             "path2",
         ]
     )
-    assert isinstance(result, Config)
+    assert isinstance(result, dict)
     assert result == expected
 
 
@@ -68,7 +68,7 @@ def test_toml_config():
         )
     )
     result = _parse_toml(data)
-    assert isinstance(result, Config)
+    assert isinstance(result, dict)
     assert result == expected
 
 
