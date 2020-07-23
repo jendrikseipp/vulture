@@ -165,28 +165,28 @@ def make_config(argv=None, tomlfile=None):
     detected_toml_path = ""
 
     if tomlfile:
-        toml_config = _parse_toml(tomlfile)
+        config = _parse_toml(tomlfile)
         detected_toml_path = str(tomlfile)
     else:
         toml_path = abspath("pyproject.toml")
         if exists(toml_path):
-            with open(toml_path) as toml_config:
-                toml_config = _parse_toml(toml_config)
+            with open(toml_path) as config:
+                config = _parse_toml(config)
             detected_toml_path = toml_path
         else:
-            toml_config = {}
+            config = {}
 
     # We can't use a simple call to dict.update() because some values should
     # not be overwritten in the config. More precisely, if the values have "no
     # real default" in the CLI args, they should not be taken into
     # consideration.
     cli_config = _parse_args(argv)
-    for key in toml_config.keys():
+    for key in config.keys():
         cli_value = cli_config.get(key, NO_DEFAULT)
         if cli_value is not NO_DEFAULT:
-            toml_config[key] = cli_value
+            config[key] = cli_value
 
-    if detected_toml_path and toml_config["verbose"]:
+    if detected_toml_path and config["verbose"]:
         print("Reading config values from {}".format(detected_toml_path))
 
-    return toml_config
+    return config
