@@ -160,8 +160,6 @@ def make_config(argv=None, tomlfile=None):
         auto-detect an existing ``pyproject.toml`` file and exists solely for
         unit-testing.
     """
-    cli_config = _parse_args(argv)
-
     # If we loaded data from a TOML file, we want to print this out on stdout
     # in verbose mode so we need to keep the value around.
     detected_toml_path = ""
@@ -182,6 +180,7 @@ def make_config(argv=None, tomlfile=None):
     # not be overwritten in the config. More precisely, if the values have "no
     # real default" in the CLI args, they should not be taken into
     # consideration.
+    cli_config = _parse_args(argv)
     for key in toml_config.keys():
         cli_value = cli_config.get(key, NO_DEFAULT)
         if cli_value is not NO_DEFAULT:
