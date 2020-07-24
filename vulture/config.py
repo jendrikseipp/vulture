@@ -42,10 +42,10 @@ def from_dict(data):
         remaining_keys.discard(key)
     for remainder in sorted(remaining_keys):
         print(
-            "Unprocessed config option {}".format(remainder), file=sys.stderr
+            u"Unprocessed config option {}".format(remainder), file=sys.stderr
         )
     if remaining_keys:
-        sys.exit("Invalid config!")
+        sys.exit(u"Invalid config!")
     return output
 
 
