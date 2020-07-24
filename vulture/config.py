@@ -44,6 +44,8 @@ def from_dict(data):
         print(
             "Unprocessed config option {}".format(remainder), file=sys.stderr
         )
+    if remaining_keys:
+        sys.exit("Invalid config!")
     return output
 
 

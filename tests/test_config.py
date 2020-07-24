@@ -3,8 +3,9 @@ This module contains unit-tests for config file and CLI argument parsing
 """
 from io import StringIO
 from textwrap import dedent
+from unittest.mock import patch
 
-from vulture.config import _parse_args, _parse_toml, make_config
+from vulture.config import _parse_args, _parse_toml, from_dict, make_config
 
 
 def test_cli_args():
@@ -136,3 +137,38 @@ def test_config_merging_verbose():
     ]
     result = make_config(cliargs, toml)
     assert result["verbose"] is True
+
+
+def test_invalid_config_exit_code():
+    """
+    If the config file contains unknown options we want to quit with a non-zero
+    exit-code
+    """
+
+    with patch("vulture.config.sys") as sys:
+        from_dict({"unknown_key_1": 1})
+
+    assert len(sys.exit.mock_calls) == 1
+    exit_arg = sys.exit.mock_calls[0].args[0][0]
+    assert (isinstance(exit_arg[0], int) and exit_arg[0] != 0) or isinstance(
+        exit_arg[0], str
+    )
+
+
+def test_invalid_config_options_output():
+    """
+    If the config file contains unknown options we want to see them on stderr.
+    We also should not see anything on stdout
+    """
+
+    stderr = StringIO()
+    stdout = StringIO()
+    with patch("vulture.config.sys") as sys:
+        sys.stderr = stderr
+        sys.stdout = stdout
+        from_dict(
+            {"unknown_key_1": 1, "unknown_key_2": 1,}
+        )
+    assert stdout.getvalue() == ""
+    assert "unknown_key_1" in stderr.getvalue()
+    assert "unknown_key_2" in stderr.getvalue()
