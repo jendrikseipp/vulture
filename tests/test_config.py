@@ -10,7 +10,7 @@ from vulture.config import _parse_args, _parse_toml, from_dict, make_config
 if sys.version_info < (3, 0):
     from mock import patch
 
-    strtype = unicode
+    strtype = unicode  # noqa
 else:
     from unittest.mock import patch
 
@@ -174,9 +174,7 @@ def test_invalid_config_options_output():
     with patch("vulture.config.sys") as sys:
         sys.stderr = stderr
         sys.stdout = stdout
-        from_dict(
-            {"unknown_key_1": 1, "unknown_key_2": 1,}
-        )
+        from_dict({"unknown_key_1": 1, "unknown_key_2": 1})
     assert stdout.getvalue() == ""
     assert "unknown_key_1" in stderr.getvalue()
     assert "unknown_key_2" in stderr.getvalue()
