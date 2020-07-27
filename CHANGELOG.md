@@ -1,4 +1,4 @@
-# 1.6 (unreleased)
+# 1.6 (2020-07-28)
 
 * Differentiate between functions and methods (Jendrik Seipp, #112, #209).
 * Move from Travis to GitHub actions (RJ722, #211).
