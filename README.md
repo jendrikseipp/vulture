@@ -22,8 +22,7 @@ tool for higher code quality.
 
 ## Installation
 
-    $ pip install vulture  # from PyPI
-    $ pip install .        # from cloned repo
+    $ pip install vulture
 
 ## Usage
 
@@ -43,11 +42,16 @@ value of 100% means that the code will never be executed. Values below
 After you have found and deleted dead code, run Vulture again, because
 it may discover more dead code.
 
-**Handling false positives**
+## Handling false positives
 
-You can add used code that is reported as unused to a Python module and
-add it to the list of scanned paths. To obtain such a whitelist
-automatically, pass `--make-whitelist` to Vulture:
+When Vulture incorrectly reports chunks of code as unused, you have
+several options for suppressing the false positives.
+
+**Whitelists**
+
+The recommended option is to add used code that is reported as unused to a
+Python module and add it to the list of scanned paths. To obtain such a
+whitelist automatically, pass `--make-whitelist` to Vulture:
 
     $ vulture mydir --make-whitelist > whitelist.py
     $ vulture mydir whitelist.py
@@ -57,9 +61,14 @@ syntax, but for Python to be able to *run* it, you will usually have to
 make some modifications.
 
 We collect whitelists for common Python modules and packages in
-`vulture/whitelists/` (pull requests are welcome). If you want to ignore
-a whole file or directory, use the `--exclude` parameter (e.g.,
-`--exclude *settings.py,docs/`).
+`vulture/whitelists/` (pull requests are welcome).
+
+**Ignoring files**
+
+If you want to ignore a whole file or directory, use the `--exclude`
+parameter (e.g., `--exclude *settings.py,docs/`).
+
+**Flake8 noqa comments**
 
 <!-- Hide noqa docs until we decide whether we want to support it.
 Another way of ignoring errors is to annotate the line causing the false
@@ -98,7 +107,8 @@ check that all whitelisted code actually still exists in your project.
 
 There are situations where you can't just remove unused variables, e.g.,
 in tuple assignments or function signatures. Vulture will ignore these
-variables if they start with an underscore (e.g., `_x, y = get_pos()`).
+variables if they start with an underscore (e.g., `_x, y = get_pos()` or
+`def my_method(self, widget, **_kwargs)`).
 
 **Minimum confidence**
 
@@ -147,13 +157,13 @@ if __name__ == "__main__":
 
 Calling :
 
-    vulture dead_code.py
+    $ vulture dead_code.py
 
 results in the following output:
 
-    dead_code.py:1: V104 unused import 'os' (90% confidence)
-    dead_code.py:4: V103 unused function 'greet' (60% confidence)
-    dead_code.py:8: V107 unused variable 'message' (60% confidence)
+    dead_code.py:1: unused import 'os' (90% confidence)
+    dead_code.py:4: unused function 'greet' (60% confidence)
+    dead_code.py:8: unused variable 'message' (60% confidence)
 
 Vulture correctly reports "os" and "message" as unused, but it fails to
 detect that "greet" is actually used. The recommended method to deal
@@ -175,12 +185,12 @@ automatically generated whitelist.
 
 Passing both the original program and the whitelist to Vulture
 
-    vulture dead_code.py whitelist_dead_code.py
+    $ vulture dead_code.py whitelist_dead_code.py
 
 makes Vulture ignore the `greet` method:
 
-    dead_code.py:1: V104 unused import 'os' (90% confidence)
-    dead_code.py:8: V107 unused variable 'message' (60% confidence)
+    dead_code.py:1: unused import 'os' (90% confidence)
+    dead_code.py:8: unused variable 'message' (60% confidence)
 
 <!-- Hide noqa docs until we decide whether we want to support it.
 **Using "# noqa"**
