@@ -14,7 +14,6 @@
   and possibly-unused-variable. See
   https://github.com/janjur/readable-pylint-messages#unused-import.
 * Drop Python 2.7 support.
-* Remove license text from source files.
 
 # Non-TODOs
 
