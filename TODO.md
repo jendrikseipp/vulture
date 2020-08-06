@@ -14,6 +14,7 @@
   and possibly-unused-variable. See
   https://github.com/janjur/readable-pylint-messages#unused-import.
 * Drop Python 2.7 support.
+* Parse type hints in comments.
 
 # Non-TODOs
 
