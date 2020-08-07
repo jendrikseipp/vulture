@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import print_function
-
 import argparse
 import ast
 from fnmatch import fnmatch, fnmatchcase
@@ -20,9 +16,6 @@ __version__ = "1.6"
 DEFAULT_CONFIDENCE = 60
 
 IGNORED_VARIABLE_NAMES = {"object", "self"}
-# True and False are NameConstants since Python 3.4.
-if sys.version_info < (3, 4):
-    IGNORED_VARIABLE_NAMES |= {"True", "False"}
 
 ERROR_CODES = {
     "attribute": "V101",
@@ -94,7 +87,7 @@ def _ignore_variable(filename, varname):
     )
 
 
-class Item(object):
+class Item:
     """
     Hold the name, type and location of defined code.
     """
@@ -135,7 +128,7 @@ class Item(object):
     def get_report(self, add_size=False):
         if add_size:
             line_format = "line" if self.size == 1 else "lines"
-            size_report = ", {:d} {}".format(self.size, line_format)
+            size_report = f", {self.size:d} {line_format}"
         else:
             size_report = ""
         return "{}:{:d}: {} ({}% confidence{})".format(
@@ -207,14 +200,13 @@ class Vulture(ast.NodeVisitor):
         self.found_dead_code_or_error = False
 
     def scan(self, code, filename=""):
-        code = utils.sanitize_code(code)
         self.code = code.splitlines()
         self.noqa_lines = noqa.parse_noqa(self.code)
         self.filename = filename
         try:
             node = ast.parse(code, filename=self.filename)
         except SyntaxError as err:
-            text = ' at "{}"'.format(err.text.strip()) if err.text else ""
+            text = f' at "{err.text.strip()}"' if err.text else ""
             print(
                 "{}:{:d}: {}{}".format(
                     utils.format_path(filename), err.lineno, err.msg, text
@@ -222,9 +214,8 @@ class Vulture(ast.NodeVisitor):
                 file=sys.stderr,
             )
             self.found_dead_code_or_error = True
-        except (TypeError, ValueError) as err:
-            # Python < 3.5 raises TypeError and Python >= 3.5 raises
-            # ValueError if source contains null bytes.
+        except ValueError as err:
+            # ValueError is raised if source contains null bytes.
             print(
                 '{}: invalid source code "{}"'.format(
                     utils.format_path(filename), err
@@ -273,7 +264,7 @@ class Vulture(ast.NodeVisitor):
                 try:
                     module_data = pkgutil.get_data("vulture", path)
                     self._log("Included whitelist:", path)
-                except IOError:
+                except OSError:
                     # Most imported modules don't have a whitelist.
                     continue
                 module_string = module_data.decode("utf-8")
@@ -510,11 +501,7 @@ class Vulture(ast.NodeVisitor):
         )
 
     def visit_arg(self, node):
-        """Function argument.
-
-        ast.arg was added in Python 3.0.
-        ast.arg.lineno was added in Python 3.4.
-        """
+        """Function argument"""
         self._define_variable(node.arg, node, confidence=100)
 
     def visit_AsyncFunctionDef(self, node):
@@ -548,13 +535,7 @@ class Vulture(ast.NodeVisitor):
             for decorator in node.decorator_list
         ]
 
-        first_arg = None
-        if node.args.args:
-            try:
-                first_arg = node.args.args[0].arg
-            except AttributeError:
-                # Python 2.7
-                first_arg = node.args.args[0].id
+        first_arg = node.args.args[0].arg if node.args.args else None
 
         if "@property" in decorator_names:
             typ = "property"
@@ -585,13 +566,6 @@ class Vulture(ast.NodeVisitor):
             self._define(
                 self.defined_funcs, node.name, node, ignore=_ignore_function
             )
-
-        # Detect *args and **kwargs parameters. Python 3 recognizes them
-        # in visit_Name. For Python 2 we use this workaround. We can't
-        # use visit_arguments, because its node has no lineno.
-        for param in [node.args.vararg, node.args.kwarg]:
-            if param and isinstance(param, str):
-                self._define_variable(param, node, confidence=100)
 
     def visit_If(self, node):
         self._handle_conditional_node(node, "if")
@@ -682,7 +656,7 @@ def _parse_args():
         return exclude.split(",")
 
     usage = "%(prog)s [options] PATH [PATH ...]"
-    version = "vulture {}".format(__version__)
+    version = f"vulture {__version__}"
     glob_help = "Patterns may contain glob wildcards (*, ?, [abc], [!abc])."
     parser = argparse.ArgumentParser(prog="vulture", usage=usage)
     parser.add_argument(

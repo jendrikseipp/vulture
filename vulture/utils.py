@@ -1,20 +1,7 @@
-# -*- coding: utf-8 -*-
-
 import ast
-import codecs
 import os
-import re
 import sys
 import tokenize
-
-# Encoding to use when converting input files to unicode. Python 2 trips
-# over the BOM, so we use "utf-8-sig" which drops the BOM.
-ENCODING = "utf-8-sig"
-
-# The ast module in Python 2 trips over "coding" cookies, so strip them.
-ENCODING_REGEX = re.compile(
-    r"^[ \t\v]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+).*?$", flags=re.M
-)
 
 
 class VultureInputException(Exception):
@@ -82,7 +69,7 @@ def get_modules(paths, toplevel=True):
     for path in paths:
         path = os.path.abspath(path)
         if toplevel and path.endswith(".pyc"):
-            sys.exit(".pyc files are not supported: {}".format(path))
+            sys.exit(f".pyc files are not supported: {path}")
         if os.path.isfile(path) and (path.endswith(".py") or toplevel):
             modules.append(path)
         elif os.path.isdir(path):
@@ -92,32 +79,17 @@ def get_modules(paths, toplevel=True):
             ]
             modules.extend(get_modules(subpaths, toplevel=False))
         elif toplevel:
-            sys.exit("Error: {} could not be found.".format(path))
+            sys.exit(f"Error: {path} could not be found.")
     return modules
 
 
 def read_file(filename):
-    # Python >= 3.2
     try:
         # Use encoding detected by tokenize.detect_encoding().
         with tokenize.open(filename) as f:
             return f.read()
     except (SyntaxError, UnicodeDecodeError) as err:
         raise VultureInputException(err)
-    except AttributeError:
-        # tokenize.open was added in Python 3.2.
-        pass
-
-    # Python < 3.2
-    try:
-        with codecs.open(filename, encoding=ENCODING) as f:
-            return f.read()
-    except UnicodeDecodeError as err:
-        raise VultureInputException(err)
-
-
-def sanitize_code(code):
-    return ENCODING_REGEX.sub("", code, count=1)
 
 
 class LoggingList(list):
@@ -128,7 +100,7 @@ class LoggingList(list):
 
     def append(self, item):
         if self._verbose:
-            print('define {} "{}"'.format(self.typ, item.name))
+            print(f'define {self.typ} "{item.name}"')
         list.append(self, item)
 
 
@@ -140,5 +112,5 @@ class LoggingSet(set):
 
     def add(self, name):
         if self._verbose:
-            print('use {} "{}"'.format(self.typ, name))
+            print(f'use {self.typ} "{name}"')
         set.add(self, name)

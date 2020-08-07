@@ -2,8 +2,6 @@ import ast
 
 from vulture import utils
 
-from . import skip_if_not_has_async
-
 
 def check_decorator_names(code, expected_names):
     decorator_names = []
@@ -38,7 +36,6 @@ def bar():
     check_decorator_names(code, ["@xyz"])
 
 
-@skip_if_not_has_async
 def test_get_decorator_name_async():
     code = """\
 @foo.bar.route('/foobar')

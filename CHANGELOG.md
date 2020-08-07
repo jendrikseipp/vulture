@@ -1,3 +1,7 @@
+# unreleased
+
+* Bump minimum Python version to 3.6 (Jendrik Seipp, #218).
+
 # 1.6 (2020-07-28)
 
 * Differentiate between functions and methods (Jendrik Seipp, #112, #209).
