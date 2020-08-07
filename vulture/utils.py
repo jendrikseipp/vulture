@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import ast
 import os
 import sys
@@ -71,7 +69,7 @@ def get_modules(paths, toplevel=True):
     for path in paths:
         path = os.path.abspath(path)
         if toplevel and path.endswith(".pyc"):
-            sys.exit(".pyc files are not supported: {}".format(path))
+            sys.exit(f".pyc files are not supported: {path}")
         if os.path.isfile(path) and (path.endswith(".py") or toplevel):
             modules.append(path)
         elif os.path.isdir(path):
@@ -81,7 +79,7 @@ def get_modules(paths, toplevel=True):
             ]
             modules.extend(get_modules(subpaths, toplevel=False))
         elif toplevel:
-            sys.exit("Error: {} could not be found.".format(path))
+            sys.exit(f"Error: {path} could not be found.")
     return modules
 
 
@@ -102,7 +100,7 @@ class LoggingList(list):
 
     def append(self, item):
         if self._verbose:
-            print('define {} "{}"'.format(self.typ, item.name))
+            print(f'define {self.typ} "{item.name}"')
         list.append(self, item)
 
 
@@ -114,5 +112,5 @@ class LoggingSet(set):
 
     def add(self, name):
         if self._verbose:
-            print('use {} "{}"'.format(self.typ, name))
+            print(f'use {self.typ} "{name}"')
         set.add(self, name)

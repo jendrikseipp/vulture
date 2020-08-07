@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import print_function
-
 import argparse
 import ast
 from fnmatch import fnmatch, fnmatchcase
@@ -91,7 +87,7 @@ def _ignore_variable(filename, varname):
     )
 
 
-class Item(object):
+class Item:
     """
     Hold the name, type and location of defined code.
     """
@@ -132,7 +128,7 @@ class Item(object):
     def get_report(self, add_size=False):
         if add_size:
             line_format = "line" if self.size == 1 else "lines"
-            size_report = ", {:d} {}".format(self.size, line_format)
+            size_report = f", {self.size:d} {line_format}"
         else:
             size_report = ""
         return "{}:{:d}: {} ({}% confidence{})".format(
@@ -210,7 +206,7 @@ class Vulture(ast.NodeVisitor):
         try:
             node = ast.parse(code, filename=self.filename)
         except SyntaxError as err:
-            text = ' at "{}"'.format(err.text.strip()) if err.text else ""
+            text = f' at "{err.text.strip()}"' if err.text else ""
             print(
                 "{}:{:d}: {}{}".format(
                     utils.format_path(filename), err.lineno, err.msg, text
@@ -268,7 +264,7 @@ class Vulture(ast.NodeVisitor):
                 try:
                     module_data = pkgutil.get_data("vulture", path)
                     self._log("Included whitelist:", path)
-                except IOError:
+                except OSError:
                     # Most imported modules don't have a whitelist.
                     continue
                 module_string = module_data.decode("utf-8")
@@ -660,7 +656,7 @@ def _parse_args():
         return exclude.split(",")
 
     usage = "%(prog)s [options] PATH [PATH ...]"
-    version = "vulture {}".format(__version__)
+    version = f"vulture {__version__}"
     glob_help = "Patterns may contain glob wildcards (*, ?, [abc], [!abc])."
     parser = argparse.ArgumentParser(prog="vulture", usage=usage)
     parser.add_argument(

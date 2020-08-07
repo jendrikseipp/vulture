@@ -8,7 +8,7 @@ assert v  # Silence pyflakes.
 
 def test_encoding1(v):
     v.scan(
-        u"""\
+        """\
 # -*- coding: utf-8 -*-
 pass
 """
@@ -18,7 +18,7 @@ pass
 
 def test_encoding2(v):
     v.scan(
-        u"""\
+        """\
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 pass
@@ -42,7 +42,7 @@ def test_utf8_with_bom(v, tmpdir):
     name = "utf8_bom"
     filename = str(tmpdir.mkdir(name).join(name + ".py"))
     # utf8_sig prepends the BOM to the file.
-    with io.open(filename, mode="w", encoding="utf-8-sig") as f:
-        f.write(u"")
+    with open(filename, mode="w", encoding="utf-8-sig") as f:
+        f.write("")
     v.scavenge([f.name])
     assert not v.found_dead_code_or_error
