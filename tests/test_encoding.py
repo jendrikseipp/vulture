@@ -1,5 +1,4 @@
 import codecs
-import io
 
 from . import v
 
