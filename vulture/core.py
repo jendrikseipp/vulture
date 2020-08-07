@@ -117,7 +117,7 @@ class Item:
         self.filename = filename
         self.first_lineno = first_lineno
         self.last_lineno = last_lineno
-        self.message = message or "unused {typ} '{name}'".format(**locals())
+        self.message = message or f"unused {typ} '{name}'"
         self.confidence = confidence
 
     @property
@@ -142,9 +142,7 @@ class Item:
     def get_whitelist_string(self):
         filename = utils.format_path(self.filename)
         if self.typ == "unreachable_code":
-            return "# {} ({}:{})".format(
-                self.message, filename, self.first_lineno
-            )
+            return f"# {self.message} ({filename}:{self.first_lineno})"
         else:
             prefix = ""
             if self.typ in ["attribute", "method", "property"]:
@@ -208,18 +206,14 @@ class Vulture(ast.NodeVisitor):
         except SyntaxError as err:
             text = f' at "{err.text.strip()}"' if err.text else ""
             print(
-                "{}:{:d}: {}{}".format(
-                    utils.format_path(filename), err.lineno, err.msg, text
-                ),
+                f"{utils.format_path(filename)}:{err.lineno}: {err.msg}{text}",
                 file=sys.stderr,
             )
             self.found_dead_code_or_error = True
         except ValueError as err:
             # ValueError is raised if source contains null bytes.
             print(
-                '{}: invalid source code "{}"'.format(
-                    utils.format_path(filename), err
-                ),
+                f'{utils.format_path(filename)}: invalid source code "{err}"',
                 file=sys.stderr,
             )
             self.found_dead_code_or_error = True
@@ -229,7 +223,7 @@ class Vulture(ast.NodeVisitor):
     def scavenge(self, paths, exclude=None):
         def prepare_pattern(pattern):
             if not any(char in pattern for char in ["*", "?", "["]):
-                pattern = "*{pattern}*".format(**locals())
+                pattern = f"*{pattern}*"
             return pattern
 
         exclude = [prepare_pattern(pattern) for pattern in (exclude or [])]
@@ -247,8 +241,8 @@ class Vulture(ast.NodeVisitor):
                 module_string = utils.read_file(module)
             except utils.VultureInputException as err:  # noqa: F841
                 print(
-                    "Error: Could not read file {module} - {err}\n"
-                    "Try to change the encoding to UTF-8.".format(**locals()),
+                    f"Error: Could not read file {module} - {err}\n"
+                    f"Try to change the encoding to UTF-8.",
                     file=sys.stderr,
                 )
                 self.found_dead_code_or_error = True
@@ -389,7 +383,7 @@ class Vulture(ast.NodeVisitor):
                 last_node=node.body
                 if isinstance(node, ast.IfExp)
                 else node.body[-1],
-                message="unsatisfiable '{name}' condition".format(**locals()),
+                message=f"unsatisfiable '{name}' condition",
                 confidence=100,
             )
         elif utils.condition_is_always_true(node.test):
@@ -417,7 +411,7 @@ class Vulture(ast.NodeVisitor):
                     self.unreachable_code,
                     name,
                     node,
-                    message="redundant if-condition".format(**locals()),
+                    message="redundant if-condition",
                     confidence=100,
                 )
 
@@ -427,6 +421,7 @@ class Vulture(ast.NodeVisitor):
 
         '%(my_var)s' % locals()
         '{my_var}'.format(**locals())
+        f'{my_var}'
 
         """
         # Old format strings.
@@ -476,7 +471,7 @@ class Vulture(ast.NodeVisitor):
         first_lineno = lines.get_first_line_number(first_node)
 
         if ignored(first_lineno):
-            self._log('Ignoring {typ} "{name}"'.format(**locals()))
+            self._log(f'Ignoring {typ} "{name}"')
         else:
             last_lineno = lines.get_last_line_number(last_node)
             collection.append(
@@ -519,9 +514,7 @@ class Vulture(ast.NodeVisitor):
                 utils.get_decorator_name(decorator), self.ignore_decorators
             ):
                 self._log(
-                    'Ignoring class "{}" (decorator whitelisted)'.format(
-                        node.name
-                    )
+                    f'Ignoring class "{node.name}" (decorator whitelisted)'
                 )
                 break
         else:
@@ -551,11 +544,7 @@ class Vulture(ast.NodeVisitor):
         if any(
             _match(name, self.ignore_decorators) for name in decorator_names
         ):
-            self._log(
-                'Ignoring {} "{}" (decorator whitelisted)'.format(
-                    typ, node.name
-                )
-            )
+            self._log(f'Ignoring {typ} "{node.name}" (decorator whitelisted)')
         elif typ == "property":
             self._define(self.defined_props, node.name, node)
         elif typ == "method":
@@ -632,9 +621,7 @@ class Vulture(ast.NodeVisitor):
                     class_name,
                     first_unreachable_node,
                     last_node=ast_list[-1],
-                    message="unreachable code after '{class_name}'".format(
-                        **locals()
-                    ),
+                    message=f"unreachable code after '{class_name}'",
                     confidence=100,
                 )
                 return
@@ -670,25 +657,25 @@ def _parse_args():
         "--exclude",
         metavar="PATTERNS",
         type=csv,
-        help="Comma-separated list of paths to ignore (e.g.,"
-        ' "*settings.py,docs/*.py"). {glob_help} A PATTERN without glob'
-        " wildcards is treated as *PATTERN*.".format(**locals()),
+        help=f"Comma-separated list of paths to ignore (e.g.,"
+        f' "*settings.py,docs/*.py"). {glob_help} A PATTERN without glob'
+        f" wildcards is treated as *PATTERN*.",
     )
     parser.add_argument(
         "--ignore-decorators",
         metavar="PATTERNS",
         type=csv,
-        help="Comma-separated list of decorators. Functions and classes using"
-        ' these decorators are ignored (e.g., "@app.route,@require_*").'
-        " {glob_help}".format(**locals()),
+        help=f"Comma-separated list of decorators. Functions and classes using"
+        f' these decorators are ignored (e.g., "@app.route,@require_*").'
+        f" {glob_help}",
     )
     parser.add_argument(
         "--ignore-names",
         metavar="PATTERNS",
         type=csv,
         default=None,
-        help='Comma-separated list of names to ignore (e.g., "visit_*,do_*").'
-        " {glob_help}".format(**locals()),
+        help=f'Comma-separated list of names to ignore (e.g., "visit_*,do_*").'
+        f" {glob_help}",
     )
     parser.add_argument(
         "--make-whitelist",
