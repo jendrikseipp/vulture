@@ -1,4 +1,3 @@
-import ast
 import glob
 import os.path
 import subprocess
@@ -11,11 +10,6 @@ from vulture import core
 DIR = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(DIR)
 WHITELISTS = glob.glob(os.path.join(REPO, "vulture", "whitelists", "*.py"))
-
-skip_if_not_has_async = pytest.mark.skipif(
-    not hasattr(ast, "AsyncFunctionDef"),
-    reason="needs async support (added in Python 3.5)",
-)
 
 
 def call_vulture(args, **kwargs):

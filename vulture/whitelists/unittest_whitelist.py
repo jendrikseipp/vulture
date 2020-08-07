@@ -1,4 +1,4 @@
-from unittest import TestCase
+from unittest import mock, TestCase
 
 TestCase.setUp
 TestCase.tearDown
@@ -10,17 +10,7 @@ TestCase.debug
 TestCase.failureException
 TestCase.longMessage
 TestCase.maxDiff
-try:
-    # new in Python 3.4
-    TestCase.subTest
-except AttributeError:
-    pass
+TestCase.subTest
 
-try:
-    # unittest.mock was introduced in Python 3.3
-    from unittest import mock
-except ImportError:
-    pass
-else:
-    mock.Mock.return_value
-    mock.Mock.side_effect
+mock.Mock.return_value
+mock.Mock.side_effect

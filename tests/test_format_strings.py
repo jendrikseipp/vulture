@@ -1,7 +1,3 @@
-import sys
-
-import pytest
-
 from . import check, v
 
 assert v  # Silence pyflakes.
@@ -17,10 +13,6 @@ def test_new_format_string(v):
     check(v.used_names, ["a", "b", "c", "d", "locals"])
 
 
-@pytest.mark.skipif(
-    sys.version_info < (3, 6),
-    reason="needs f-string support (added in Python 3.6)",
-)
 def test_f_string(v):
     v.scan(
         """\

@@ -20,9 +20,6 @@ __version__ = "1.6"
 DEFAULT_CONFIDENCE = 60
 
 IGNORED_VARIABLE_NAMES = {"object", "self"}
-# True and False are NameConstants since Python 3.4.
-if sys.version_info < (3, 4):
-    IGNORED_VARIABLE_NAMES |= {"True", "False"}
 
 ERROR_CODES = {
     "attribute": "V101",
@@ -207,7 +204,6 @@ class Vulture(ast.NodeVisitor):
         self.found_dead_code_or_error = False
 
     def scan(self, code, filename=""):
-        code = utils.sanitize_code(code)
         self.code = code.splitlines()
         self.noqa_lines = noqa.parse_noqa(self.code)
         self.filename = filename
@@ -222,9 +218,8 @@ class Vulture(ast.NodeVisitor):
                 file=sys.stderr,
             )
             self.found_dead_code_or_error = True
-        except (TypeError, ValueError) as err:
-            # Python < 3.5 raises TypeError and Python >= 3.5 raises
-            # ValueError if source contains null bytes.
+        except ValueError as err:
+            # ValueError is raised if source contains null bytes.
             print(
                 '{}: invalid source code "{}"'.format(
                     utils.format_path(filename), err
@@ -510,11 +505,7 @@ class Vulture(ast.NodeVisitor):
         )
 
     def visit_arg(self, node):
-        """Function argument.
-
-        ast.arg was added in Python 3.0.
-        ast.arg.lineno was added in Python 3.4.
-        """
+        """Function argument"""
         self._define_variable(node.arg, node, confidence=100)
 
     def visit_AsyncFunctionDef(self, node):
@@ -548,13 +539,7 @@ class Vulture(ast.NodeVisitor):
             for decorator in node.decorator_list
         ]
 
-        first_arg = None
-        if node.args.args:
-            try:
-                first_arg = node.args.args[0].arg
-            except AttributeError:
-                # Python 2.7
-                first_arg = node.args.args[0].id
+        first_arg = node.args.args[0].arg if node.args.args else None
 
         if "@property" in decorator_names:
             typ = "property"
@@ -585,13 +570,6 @@ class Vulture(ast.NodeVisitor):
             self._define(
                 self.defined_funcs, node.name, node, ignore=_ignore_function
             )
-
-        # Detect *args and **kwargs parameters. Python 3 recognizes them
-        # in visit_Name. For Python 2 we use this workaround. We can't
-        # use visit_arguments, because its node has no lineno.
-        for param in [node.args.vararg, node.args.kwarg]:
-            if param and isinstance(param, str):
-                self._define_variable(param, node, confidence=100)
 
     def visit_If(self, node):
         self._handle_conditional_node(node, "if")

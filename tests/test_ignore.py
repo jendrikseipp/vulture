@@ -1,6 +1,6 @@
 from vulture import core
 
-from . import check, skip_if_not_has_async
+from . import check
 
 
 def check_ignore(code, ignore_names, ignore_decorators, expected):
@@ -39,7 +39,6 @@ def bar():
     check_ignore(code, ["foo*"], [], ["bar"])
 
 
-@skip_if_not_has_async
 def test_async_function():
     code = """\
 async def foobar():
@@ -130,7 +129,6 @@ def barfoo():
     check_ignore(code, [], ["*decor", "@*f.foobar"], ["prop_one"])
 
 
-@skip_if_not_has_async
 def test_decorated_async_functions():
     code = """\
 @app.route('something')

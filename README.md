@@ -18,7 +18,7 @@ tool for higher code quality.
 * tested: tests itself and has complete test coverage
 * complements pyflakes and has the same output syntax
 * sorts unused classes and functions by size with `--sort-by-size`
-* supports Python 2.7 and Python \>= 3.5
+* supports Python \>= 3.6
 
 ## Installation
 

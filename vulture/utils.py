@@ -1,20 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import ast
-import codecs
 import os
-import re
 import sys
 import tokenize
-
-# Encoding to use when converting input files to unicode. Python 2 trips
-# over the BOM, so we use "utf-8-sig" which drops the BOM.
-ENCODING = "utf-8-sig"
-
-# The ast module in Python 2 trips over "coding" cookies, so strip them.
-ENCODING_REGEX = re.compile(
-    r"^[ \t\v]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+).*?$", flags=re.M
-)
 
 
 class VultureInputException(Exception):
@@ -97,27 +86,12 @@ def get_modules(paths, toplevel=True):
 
 
 def read_file(filename):
-    # Python >= 3.2
     try:
         # Use encoding detected by tokenize.detect_encoding().
         with tokenize.open(filename) as f:
             return f.read()
     except (SyntaxError, UnicodeDecodeError) as err:
         raise VultureInputException(err)
-    except AttributeError:
-        # tokenize.open was added in Python 3.2.
-        pass
-
-    # Python < 3.2
-    try:
-        with codecs.open(filename, encoding=ENCODING) as f:
-            return f.read()
-    except UnicodeDecodeError as err:
-        raise VultureInputException(err)
-
-
-def sanitize_code(code):
-    return ENCODING_REGEX.sub("", code, count=1)
 
 
 class LoggingList(list):
