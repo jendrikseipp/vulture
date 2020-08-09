@@ -41,14 +41,16 @@ def _is_special_name(name):
     return name.startswith("__") and name.endswith("__")
 
 
-def _match(name, patterns):
-    return any(fnmatchcase(name, pattern) for pattern in patterns)
+def _match(name, patterns, case=True):
+    func = fnmatchcase if case else fnmatch
+    return any(func(name, pattern) for pattern in patterns)
 
 
 def _is_test_file(filename):
-    return any(
-        fnmatch(os.path.basename(filename), pattern)
-        for pattern in ["test*.py", "*_test.py", "*-test.py"]
+    return _match(
+        os.path.abspath(filename),
+        ["*/test/*", "*/tests/*", "*/test*.py", "*/*_test.py", "*/*-test.py"],
+        case=False,
     )
 
 
