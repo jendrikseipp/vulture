@@ -116,6 +116,12 @@ You can use the `--min-confidence` flag to set the minimum confidence
 for code to be reported as unused. Use `--min-confidence 100` to only
 report code that is guaranteed to be unused within the analyzed files.
 
+**Unreachable code**
+
+If Vulture complains about code like `if False:`, you can use a Boolean
+flag `debug = False` and write `if debug:` instead. This makes the code
+more readable and silences Vulture.
+
 ## How does it work?
 
 Vulture uses the `ast` module to build abstract syntax trees for all
