@@ -1,5 +1,5 @@
 import logging
 
 logging.Filter.filter
-logging.Logger.propagate
+logging.getLogger().propagate
 logging.StreamHandler.emit
