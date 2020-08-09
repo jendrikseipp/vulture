@@ -510,6 +510,16 @@ class Vulture(ast.NodeVisitor):
         elif isinstance(node.ctx, ast.Load):
             self.used_attrs.add(node.attr)
 
+    def visit_Call(self, node):
+        """Count getattr/hasattr(x, "some_attr", ...) as usage of some_attr."""
+        if isinstance(node.func, ast.Name) and (
+            (node.func.id == "getattr" and 2 <= len(node.args) <= 3)
+            or (node.func.id == "hasattr" and len(node.args) == 2)
+        ):
+            attr_name_arg = node.args[1]
+            if isinstance(attr_name_arg, ast.Str):
+                self.used_attrs.add(attr_name_arg.s)
+
     def visit_ClassDef(self, node):
         for decorator in node.decorator_list:
             if _match(

@@ -146,6 +146,30 @@ A._d_ = 4
     check(v.unused_vars, [])
 
 
+def test_getattr(v):
+    v.scan(
+        """\
+class Thing:
+    used_attr1 = 1
+    used_attr2 = 2
+    used_attr3 = 3
+    unused_attr = 4
+
+getattr(Thing, "used_attr1")
+getattr(Thing, "used_attr2", None)
+hasattr(Thing, "used_attr3")
+
+# Weird calls ignored
+hasattr(Thing, "unused_attr", None)
+getattr(Thing)
+getattr("unused_attr")
+getattr(Thing, "unused_attr", 1, 2)
+"""
+    )
+    check(v.unused_vars, ["unused_attr"])
+    check(v.used_attrs, ["used_attr1", "used_attr2", "used_attr3"])
+
+
 def test_callback1(v):
     v.scan(
         """\
