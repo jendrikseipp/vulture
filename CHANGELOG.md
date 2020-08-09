@@ -3,6 +3,7 @@
 * Bump minimum Python version to 3.6 (Jendrik Seipp, #218).
 * Consider all files under `test` or `tests` directories test files
   (Jendrik Seipp).
+* Ignore `logging.Logger.propagate` attribute (Jendrik Seipp).
 
 # 1.6 (2020-07-28)
 
