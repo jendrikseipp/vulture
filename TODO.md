@@ -14,6 +14,7 @@
   and possibly-unused-variable. See
   https://github.com/janjur/readable-pylint-messages#unused-import.
 * Parse type hints in comments.
+* Ignore some decorators by default: @app.route, @cli.command.
 
 # Non-TODOs
 
