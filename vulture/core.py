@@ -203,15 +203,23 @@ class Vulture(ast.NodeVisitor):
         self.code = code.splitlines()
         self.noqa_lines = noqa.parse_noqa(self.code)
         self.filename = filename
-        try:
-            node = ast.parse(code, filename=self.filename)
-        except SyntaxError as err:
-            text = f' at "{err.text.strip()}"' if err.text else ""
+
+        def handle_syntax_error(e):
+            text = f' at "{e.text.strip()}"' if e.text else ""
             print(
-                f"{utils.format_path(filename)}:{err.lineno}: {err.msg}{text}",
+                f"{utils.format_path(filename)}:{e.lineno}: {e.msg}{text}",
                 file=sys.stderr,
             )
             self.found_dead_code_or_error = True
+
+        try:
+            node = (
+                ast.parse(code, filename=self.filename, type_comments=True)
+                if sys.version_info >= (3, 8)  # type_comments requires 3.8+
+                else ast.parse(code, filename=self.filename)
+            )
+        except SyntaxError as err:
+            handle_syntax_error(err)
         except ValueError as err:
             # ValueError is raised if source contains null bytes.
             print(
@@ -220,7 +228,11 @@ class Vulture(ast.NodeVisitor):
             )
             self.found_dead_code_or_error = True
         else:
-            self.visit(node)
+            # When parsing type comments, visiting can throw SyntaxError.
+            try:
+                self.visit(node)
+            except SyntaxError as err:
+                handle_syntax_error(err)
 
     def scavenge(self, paths, exclude=None):
         def prepare_pattern(pattern):
@@ -603,6 +615,20 @@ class Vulture(ast.NodeVisitor):
             self._log(lineno, ast.dump(node), line)
         if visitor:
             visitor(node)
+
+        # There isn't a clean subset of node types that might have type
+        # comments, so just check all of them.
+        type_comment = getattr(node, "type_comment", None)
+        if type_comment is not None:
+            mode = (
+                "func_type"
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                else "eval"
+            )
+            self.visit(
+                ast.parse(type_comment, filename="<type_comment>", mode=mode)
+            )
+
         return self.generic_visit(node)
 
     def _handle_ast_list(self, ast_list):
