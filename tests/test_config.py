@@ -3,7 +3,6 @@ This module contains unit-tests for config file and CLI argument parsing
 """
 from io import StringIO
 from textwrap import dedent
-from unittest.mock import patch
 
 import pytest
 from vulture.config import _parse_args, _parse_toml, from_dict, make_config
@@ -150,18 +149,15 @@ def test_invalid_config_exit_code():
     assert ext.value.code != 0
 
 
-def test_invalid_config_options_output():
+def test_invalid_config_options_output(capsys):
     """
     If the config file contains unknown options we want to see them on stderr.
     We also should not see anything on stdout
     """
 
-    stderr = StringIO()
-    stdout = StringIO()
-    with patch("vulture.config.sys") as sys:
-        sys.stderr = stderr
-        sys.stdout = stdout
+    with pytest.raises(SystemExit):
         from_dict({"unknown_key_1": 1, "unknown_key_2": 1})
-    assert stdout.getvalue() == ""
-    assert "unknown_key_1" in stderr.getvalue()
-    assert "unknown_key_2" in stderr.getvalue()
+    stdout, stderr = capsys.readouterr()
+    assert stdout == ""
+    assert "unknown_key_1" in stderr
+    assert "unknown_key_2" in stderr
