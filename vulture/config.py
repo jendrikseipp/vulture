@@ -186,6 +186,6 @@ def make_config(argv=None, tomlfile=None):
             config[key] = cli_value
 
     if detected_toml_path and config["verbose"]:
-        print(f"Reading config values from {detected_toml_path}")
+        print(f"Reading configuration from {detected_toml_path}")
 
     return config
