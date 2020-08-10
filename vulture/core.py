@@ -1,30 +1,4 @@
-# -*- coding: utf-8 -*-
-#
-# vulture - Find dead code.
-#
-# Copyright (c) 2012-2020 Jendrik Seipp (jendrikseipp@gmail.com)
-#
-# Permission is hereby granted, free of charge, to any person obtaining a
-# copy of this software and associated documentation files (the
-# "Software"), to deal in the Software without restriction, including
-# without limitation the rights to use, copy, modify, merge, publish,
-# distribute, sublicense, and/or sell copies of the Software, and to
-# permit persons to whom the Software is furnished to do so, subject to
-# the following conditions:
-#
-# The above copyright notice and this permission notice shall be included
-# in all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-# IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-# CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-# TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-from __future__ import print_function
-
+import argparse
 import ast
 from fnmatch import fnmatch, fnmatchcase
 import os.path
@@ -38,12 +12,11 @@ from vulture import noqa
 from vulture import utils
 from vulture.config import make_config
 
+__version__ = "1.6"
+
 DEFAULT_CONFIDENCE = 60
 
 IGNORED_VARIABLE_NAMES = {"object", "self"}
-# True and False are NameConstants since Python 3.4.
-if sys.version_info < (3, 4):
-    IGNORED_VARIABLE_NAMES |= {"True", "False"}
 
 ERROR_CODES = {
     "attribute": "V101",
@@ -69,14 +42,16 @@ def _is_special_name(name):
     return name.startswith("__") and name.endswith("__")
 
 
-def _match(name, patterns):
-    return any(fnmatchcase(name, pattern) for pattern in patterns)
+def _match(name, patterns, case=True):
+    func = fnmatchcase if case else fnmatch
+    return any(func(name, pattern) for pattern in patterns)
 
 
 def _is_test_file(filename):
-    return any(
-        fnmatch(os.path.basename(filename), pattern)
-        for pattern in ["test*.py", "*_test.py", "*-test.py"]
+    return _match(
+        os.path.abspath(filename),
+        ["*/test/*", "*/tests/*", "*/test*.py", "*/*_test.py", "*/*-test.py"],
+        case=False,
     )
 
 
@@ -115,7 +90,7 @@ def _ignore_variable(filename, varname):
     )
 
 
-class Item(object):
+class Item:
     """
     Hold the name, type and location of defined code.
     """
@@ -145,7 +120,7 @@ class Item(object):
         self.filename = filename
         self.first_lineno = first_lineno
         self.last_lineno = last_lineno
-        self.message = message or "unused {typ} '{name}'".format(**locals())
+        self.message = message or f"unused {typ} '{name}'"
         self.confidence = confidence
 
     @property
@@ -156,7 +131,7 @@ class Item(object):
     def get_report(self, add_size=False):
         if add_size:
             line_format = "line" if self.size == 1 else "lines"
-            size_report = ", {:d} {}".format(self.size, line_format)
+            size_report = f", {self.size:d} {line_format}"
         else:
             size_report = ""
         return "{}:{:d}: {} ({}% confidence{})".format(
@@ -170,9 +145,7 @@ class Item(object):
     def get_whitelist_string(self):
         filename = utils.format_path(self.filename)
         if self.typ == "unreachable_code":
-            return "# {} ({}:{})".format(
-                self.message, filename, self.first_lineno
-            )
+            return f"# {self.message} ({filename}:{self.first_lineno})"
         else:
             prefix = ""
             if self.typ in ["attribute", "method", "property"]:
@@ -228,38 +201,44 @@ class Vulture(ast.NodeVisitor):
         self.found_dead_code_or_error = False
 
     def scan(self, code, filename=""):
-        code = utils.sanitize_code(code)
         self.code = code.splitlines()
         self.noqa_lines = noqa.parse_noqa(self.code)
         self.filename = filename
-        try:
-            node = ast.parse(code, filename=self.filename)
-        except SyntaxError as err:
-            text = ' at "{}"'.format(err.text.strip()) if err.text else ""
+
+        def handle_syntax_error(e):
+            text = f' at "{e.text.strip()}"' if e.text else ""
             print(
-                "{}:{:d}: {}{}".format(
-                    utils.format_path(filename), err.lineno, err.msg, text
-                ),
+                f"{utils.format_path(filename)}:{e.lineno}: {e.msg}{text}",
                 file=sys.stderr,
             )
             self.found_dead_code_or_error = True
-        except (TypeError, ValueError) as err:
-            # Python < 3.5 raises TypeError and Python >= 3.5 raises
-            # ValueError if source contains null bytes.
+
+        try:
+            node = (
+                ast.parse(code, filename=self.filename, type_comments=True)
+                if sys.version_info >= (3, 8)  # type_comments requires 3.8+
+                else ast.parse(code, filename=self.filename)
+            )
+        except SyntaxError as err:
+            handle_syntax_error(err)
+        except ValueError as err:
+            # ValueError is raised if source contains null bytes.
             print(
-                '{}: invalid source code "{}"'.format(
-                    utils.format_path(filename), err
-                ),
+                f'{utils.format_path(filename)}: invalid source code "{err}"',
                 file=sys.stderr,
             )
             self.found_dead_code_or_error = True
         else:
-            self.visit(node)
+            # When parsing type comments, visiting can throw SyntaxError.
+            try:
+                self.visit(node)
+            except SyntaxError as err:
+                handle_syntax_error(err)
 
     def scavenge(self, paths, exclude=None):
         def prepare_pattern(pattern):
             if not any(char in pattern for char in ["*", "?", "["]):
-                pattern = "*{pattern}*".format(**locals())
+                pattern = f"*{pattern}*"
             return pattern
 
         exclude = [prepare_pattern(pattern) for pattern in (exclude or [])]
@@ -277,8 +256,8 @@ class Vulture(ast.NodeVisitor):
                 module_string = utils.read_file(module)
             except utils.VultureInputException as err:  # noqa: F841
                 print(
-                    "Error: Could not read file {module} - {err}\n"
-                    "Try to change the encoding to UTF-8.".format(**locals()),
+                    f"Error: Could not read file {module} - {err}\n"
+                    f"Try to change the encoding to UTF-8.",
                     file=sys.stderr,
                 )
                 self.found_dead_code_or_error = True
@@ -294,7 +273,7 @@ class Vulture(ast.NodeVisitor):
                 try:
                     module_data = pkgutil.get_data("vulture", path)
                     self._log("Included whitelist:", path)
-                except IOError:
+                except OSError:
                     # Most imported modules don't have a whitelist.
                     continue
                 module_string = module_data.decode("utf-8")
@@ -419,7 +398,7 @@ class Vulture(ast.NodeVisitor):
                 last_node=node.body
                 if isinstance(node, ast.IfExp)
                 else node.body[-1],
-                message="unsatisfiable '{name}' condition".format(**locals()),
+                message=f"unsatisfiable '{name}' condition",
                 confidence=100,
             )
         elif utils.condition_is_always_true(node.test):
@@ -447,7 +426,7 @@ class Vulture(ast.NodeVisitor):
                     self.unreachable_code,
                     name,
                     node,
-                    message="redundant if-condition".format(**locals()),
+                    message="redundant if-condition",
                     confidence=100,
                 )
 
@@ -457,6 +436,7 @@ class Vulture(ast.NodeVisitor):
 
         '%(my_var)s' % locals()
         '{my_var}'.format(**locals())
+        f'{my_var}'
 
         """
         # Old format strings.
@@ -506,7 +486,7 @@ class Vulture(ast.NodeVisitor):
         first_lineno = lines.get_first_line_number(first_node)
 
         if ignored(first_lineno):
-            self._log('Ignoring {typ} "{name}"'.format(**locals()))
+            self._log(f'Ignoring {typ} "{name}"')
         else:
             last_lineno = lines.get_last_line_number(last_node)
             collection.append(
@@ -531,11 +511,7 @@ class Vulture(ast.NodeVisitor):
         )
 
     def visit_arg(self, node):
-        """Function argument.
-
-        ast.arg was added in Python 3.0.
-        ast.arg.lineno was added in Python 3.4.
-        """
+        """Function argument"""
         self._define_variable(node.arg, node, confidence=100)
 
     def visit_AsyncFunctionDef(self, node):
@@ -553,9 +529,7 @@ class Vulture(ast.NodeVisitor):
                 utils.get_decorator_name(decorator), self.ignore_decorators
             ):
                 self._log(
-                    'Ignoring class "{}" (decorator whitelisted)'.format(
-                        node.name
-                    )
+                    f'Ignoring class "{node.name}" (decorator whitelisted)'
                 )
                 break
         else:
@@ -569,13 +543,7 @@ class Vulture(ast.NodeVisitor):
             for decorator in node.decorator_list
         ]
 
-        first_arg = None
-        if node.args.args:
-            try:
-                first_arg = node.args.args[0].arg
-            except AttributeError:
-                # Python 2.7
-                first_arg = node.args.args[0].id
+        first_arg = node.args.args[0].arg if node.args.args else None
 
         if "@property" in decorator_names:
             typ = "property"
@@ -591,11 +559,7 @@ class Vulture(ast.NodeVisitor):
         if any(
             _match(name, self.ignore_decorators) for name in decorator_names
         ):
-            self._log(
-                'Ignoring {} "{}" (decorator whitelisted)'.format(
-                    typ, node.name
-                )
-            )
+            self._log(f'Ignoring {typ} "{node.name}" (decorator whitelisted)')
         elif typ == "property":
             self._define(self.defined_props, node.name, node)
         elif typ == "method":
@@ -606,13 +570,6 @@ class Vulture(ast.NodeVisitor):
             self._define(
                 self.defined_funcs, node.name, node, ignore=_ignore_function
             )
-
-        # Detect *args and **kwargs parameters. Python 3 recognizes them
-        # in visit_Name. For Python 2 we use this workaround. We can't
-        # use visit_arguments, because its node has no lineno.
-        for param in [node.args.vararg, node.args.kwarg]:
-            if param and isinstance(param, str):
-                self._define_variable(param, node, confidence=100)
 
     def visit_If(self, node):
         self._handle_conditional_node(node, "if")
@@ -659,6 +616,20 @@ class Vulture(ast.NodeVisitor):
             self._log(lineno, ast.dump(node), line)
         if visitor:
             visitor(node)
+
+        # There isn't a clean subset of node types that might have type
+        # comments, so just check all of them.
+        type_comment = getattr(node, "type_comment", None)
+        if type_comment is not None:
+            mode = (
+                "func_type"
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                else "eval"
+            )
+            self.visit(
+                ast.parse(type_comment, filename="<type_comment>", mode=mode)
+            )
+
         return self.generic_visit(node)
 
     def _handle_ast_list(self, ast_list):
@@ -679,9 +650,7 @@ class Vulture(ast.NodeVisitor):
                     class_name,
                     first_unreachable_node,
                     last_node=ast_list[-1],
-                    message="unreachable code after '{class_name}'".format(
-                        **locals()
-                    ),
+                    message=f"unreachable code after '{class_name}'",
                     confidence=100,
                 )
                 return
@@ -696,6 +665,68 @@ class Vulture(ast.NodeVisitor):
                         self.visit(item)
             elif isinstance(value, ast.AST):
                 self.visit(value)
+
+
+def _parse_args():
+    def csv(exclude):
+        return exclude.split(",")
+
+    usage = "%(prog)s [options] PATH [PATH ...]"
+    version = f"vulture {__version__}"
+    glob_help = "Patterns may contain glob wildcards (*, ?, [abc], [!abc])."
+    parser = argparse.ArgumentParser(prog="vulture", usage=usage)
+    parser.add_argument(
+        "paths",
+        nargs="+",
+        metavar="PATH",
+        help="Paths may be Python files or directories. For each directory"
+        " Vulture analyzes all contained *.py files.",
+    )
+    parser.add_argument(
+        "--exclude",
+        metavar="PATTERNS",
+        type=csv,
+        help=f"Comma-separated list of paths to ignore (e.g.,"
+        f' "*settings.py,docs/*.py"). {glob_help} A PATTERN without glob'
+        f" wildcards is treated as *PATTERN*.",
+    )
+    parser.add_argument(
+        "--ignore-decorators",
+        metavar="PATTERNS",
+        type=csv,
+        help=f"Comma-separated list of decorators. Functions and classes using"
+        f' these decorators are ignored (e.g., "@app.route,@require_*").'
+        f" {glob_help}",
+    )
+    parser.add_argument(
+        "--ignore-names",
+        metavar="PATTERNS",
+        type=csv,
+        default=None,
+        help=f'Comma-separated list of names to ignore (e.g., "visit_*,do_*").'
+        f" {glob_help}",
+    )
+    parser.add_argument(
+        "--make-whitelist",
+        action="store_true",
+        help="Report unused code in a format that can be added to a"
+        " whitelist module.",
+    )
+    parser.add_argument(
+        "--min-confidence",
+        type=int,
+        default=0,
+        help="Minimum confidence (between 0 and 100) for code to be"
+        " reported as unused.",
+    )
+    parser.add_argument(
+        "--sort-by-size",
+        action="store_true",
+        help="Sort unused functions and classes by their lines of code.",
+    )
+    parser.add_argument("-v", "--verbose", action="store_true")
+    parser.add_argument("--version", action="version", version=version)
+    return parser.parse_args()
 
 
 def main():

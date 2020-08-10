@@ -1,4 +1,13 @@
-# 1.6 (unreleased)
+# unreleased
+
+* Bump minimum Python version to 3.6 (Jendrik Seipp, #218).
+* Consider all files under `test` or `tests` directories test files
+  (Jendrik Seipp).
+* Ignore `logging.Logger.propagate` attribute (Jendrik Seipp).
+* Parse mypy / PEP 484 / PEP 526 `# type: ...` comments if on Python 3.8+.
+  (jingw, #220)
+
+# 1.6 (2020-07-28)
 
 * Differentiate between functions and methods (Jendrik Seipp, #112, #209).
 * Move from Travis to GitHub actions (RJ722, #211).

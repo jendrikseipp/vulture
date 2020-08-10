@@ -1,8 +1,6 @@
 import sys
 
-import pytest
-
-from . import check, skip_if_not_has_async, v
+from . import check, v
 
 assert v  # Silence pyflakes.
 
@@ -73,7 +71,6 @@ b = foo(5)
     check(v.defined_funcs, ["foo"])
 
 
-@skip_if_not_has_async
 def test_async_function(v):
     v.scan(
         """\
@@ -85,7 +82,6 @@ async def foo():
     check(v.unused_funcs, ["foo"])
 
 
-@skip_if_not_has_async
 def test_async_method(v):
     v.scan(
         """\
@@ -451,7 +447,6 @@ class OtherClass:
     check(v.unused_funcs, ["other_func"])
 
 
-@skip_if_not_has_async
 def test_async_function_name_in_test_file(v):
     v.scan(
         """\
@@ -467,7 +462,6 @@ async def other_func():
     check(v.unused_funcs, ["other_func"])
 
 
-@skip_if_not_has_async
 def test_async_function_name_in_normal_file(v):
     v.scan(
         """\
@@ -620,7 +614,6 @@ a = 2
     check(v.unused_vars, ["a", "a"])
 
 
-@pytest.mark.skipif(sys.version_info < (3, 5), reason="requires Python 3.5+")
 def test_arg_type_annotation(v):
     v.scan(
         """\
@@ -636,7 +629,6 @@ def f(n: int) -> Iterable[int]:
     check(v.unused_imports, [])
 
 
-@pytest.mark.skipif(sys.version_info < (3, 6), reason="requires Python 3.6+")
 def test_var_type_annotation(v):
     v.scan(
         """\
@@ -654,16 +646,46 @@ x: List[int] = [1]
 def test_type_hint_comments(v):
     v.scan(
         """\
-import typing
+from typing import Any, Dict, List, Text, Tuple
 
-if typing.TYPE_CHECKING:
-    from typing import List, Text
 
-def foo(foo_li):
-    # type: (List[Text]) -> None
-    for bar in foo_li:
-        bar.xyz()
+def plain_function(arg):
+    # type: (Text) -> None
+    pass
+
+async def async_function(arg):
+    # type: (List[int]) -> None
+    pass
+
+some_var = {}  # type: Dict[str, str]
+
+class Thing:
+    def __init__(self):
+        self.some_attr = (1, 2)  # type: Tuple[int, int]
+
+for x in []:  # type: Any
+    print(x)
 """
     )
 
-    check(v.unused_imports, ["List", "Text"])
+    if sys.version_info < (3, 8):
+        check(v.unused_imports, ["Any", "Dict", "List", "Text", "Tuple"])
+    else:
+        check(v.unused_imports, [])
+        assert not v.found_dead_code_or_error
+
+
+def test_invalid_type_comment(v):
+    v.scan(
+        """\
+def bad():
+    # type: bogus
+    pass
+bad()
+"""
+    )
+
+    if sys.version_info < (3, 8):
+        assert not v.found_dead_code_or_error
+    else:
+        assert v.found_dead_code_or_error

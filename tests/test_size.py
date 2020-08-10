@@ -1,9 +1,6 @@
 import ast
-import sys
 
 from vulture import lines
-
-from . import skip_if_not_has_async
 
 
 def get_last_line_number_slow(node):
@@ -308,18 +305,13 @@ class Foo:
     check_size(example, 2)
 
 
-# We currently cannot handle code ending with an ellipsis on Python 2.
 def test_size_ellipsis():
     example = """
 class Foo:
     bar[1:2,
         ...]
 """
-    if sys.version_info < (3, 0):
-        check_size(example, 2)
-    else:
-        # ast.Ellipsis is a subclass of ast.expr in Python 3.
-        check_size(example, 3)
+    check_size(example, 3)
 
 
 def test_size_starargs():
@@ -343,7 +335,6 @@ class Foo:
     check_size(example, 2)
 
 
-@skip_if_not_has_async
 def test_size_async_function_def():
     example = """
 class Foo:
@@ -353,7 +344,6 @@ class Foo:
     check_size(example, 3)
 
 
-@skip_if_not_has_async
 def test_size_async_with():
     example = """
 class Foo:
@@ -364,7 +354,6 @@ class Foo:
     check_size(example, 4)
 
 
-@skip_if_not_has_async
 def test_size_async_for():
     example = """
 class Foo:

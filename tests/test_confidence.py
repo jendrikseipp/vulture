@@ -1,7 +1,4 @@
-import sys
-
 from vulture import core
-from . import skip_if_not_has_async
 
 dc = core.DEFAULT_CONFIDENCE
 
@@ -43,16 +40,9 @@ def foo(a):
 
 foo(5)
 """
-    if sys.version_info < (3, 0):
-        # Python 2
-        check_min_confidence(code, 50, {"a": dc, "b": dc})
-        check_min_confidence(code, dc, {"a": dc, "b": dc})
-        check_min_confidence(code, 100, {})
-    else:
-        # Python 3
-        check_min_confidence(code, 50, {"a": 100, "b": dc})
-        check_min_confidence(code, dc, {"a": 100, "b": dc})
-        check_min_confidence(code, 100, {"a": 100})
+    check_min_confidence(code, 50, {"a": 100, "b": dc})
+    check_min_confidence(code, dc, {"a": 100, "b": dc})
+    check_min_confidence(code, 100, {"a": 100})
 
 
 def test_confidence_class():
@@ -83,7 +73,6 @@ Foo()
     check_min_confidence(code, 100, {})
 
 
-@skip_if_not_has_async
 def test_confidence_async_def():
     code = """\
 async def foo():

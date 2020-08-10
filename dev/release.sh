@@ -7,6 +7,8 @@ CHANGES="/tmp/vulture-$VERSION-changes"
 
 cd "$(dirname ${0})/../"
 
+source .venv/bin/activate
+
 # Check dependencies.
 python3 -m twine -h > /dev/null
 

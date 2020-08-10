@@ -6,10 +6,15 @@
 * Ignore functions in conftest.py files that start with "pytest_".
 * Ignore setup_module(), teardown_module(), etc. in test_*.py files
   (see https://docs.pytest.org/en/latest/xunit_setup.html for full list).
+* Ignore methods wrapped with functools.wraps() (functions aren't problematic).
+* Ignore methods used in property() function
+  (https://docs.python.org/3/library/functions.html#property).
 * Honor (speaking) pylint error codes (e.g., # pylint:
   disable=unused-import): unused-import, unused-variable, unused-argument
   and possibly-unused-variable. See
   https://github.com/janjur/readable-pylint-messages#unused-import.
+* Parse type hints in comments.
+* Ignore some decorators by default: @app.route, @cli.command.
 
 # Non-TODOs
 
