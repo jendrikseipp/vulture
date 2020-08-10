@@ -26,11 +26,31 @@ DEFAULTS = {
 NO_DEFAULT = object()
 
 
+def _check_config_types(data):
+    """
+    Checks the types of the values in *data* against the expected types of
+    config-values. If a value is of the wrong type it will raise a SystemExit.
+    """
+    given_types = {
+        (key, type(value))
+        for key, value in data.items()
+        if key in DEFAULTS and value is not NO_DEFAULT
+    }
+    expected_types = {(key, type(value)) for key, value in DEFAULTS.items()}
+    incorrect_types = given_types - expected_types
+    if incorrect_types:
+        keys = ", ".join(sorted(item[0] for item in incorrect_types))
+        msg = f"Incorrect data-types for the config values: {keys}"
+        sys.exit(msg)
+
+
 def from_dict(data):
     """
     Create a new config dictionary from an existing one, assign possible
     defaults and warn about unprocessed options.
     """
+    _check_config_types(data)
+
     # keep a copy of the keys, so we can keep track of any unprocessed
     # values.
     remaining_keys = set(data.keys())
@@ -100,6 +120,7 @@ def _parse_args(args=None):
         "--exclude",
         metavar="PATTERNS",
         type=csv,
+        default=[],
         help="Comma-separated list of paths to ignore (e.g.,"
         ' "*settings.py,docs/*.py"). {glob_help} A PATTERN without glob'
         " wildcards is treated as *PATTERN*.".format(**locals()),
@@ -108,6 +129,7 @@ def _parse_args(args=None):
         "--ignore-decorators",
         metavar="PATTERNS",
         type=csv,
+        default=[],
         help="Comma-separated list of decorators. Functions and classes using"
         ' these decorators are ignored (e.g., "@app.route,@require_*").'
         " {glob_help}".format(**locals()),

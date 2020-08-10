@@ -5,7 +5,22 @@ from io import StringIO
 from textwrap import dedent
 
 import pytest
-from vulture.config import _parse_args, _parse_toml, from_dict, make_config
+from vulture.config import (
+    DEFAULTS,
+    _parse_args,
+    _parse_toml,
+    from_dict,
+    make_config,
+)
+
+#: This dictionary maps types to "incompatible" types in the config. It is used
+#: later for parametrizing a test.
+WRONG_TYPES = {
+    int: str,
+    str: int,
+    list: str,
+    bool: str,
+}
 
 
 def test_cli_args():
@@ -161,3 +176,17 @@ def test_invalid_config_options_output(capsys):
     assert stdout == ""
     assert "unknown_key_1" in stderr
     assert "unknown_key_2" in stderr
+
+
+@pytest.mark.parametrize(
+    "key, type_",
+    [(key, WRONG_TYPES[type(value)]) for key, value in DEFAULTS.items()],
+)
+def test_incompatible_option_type(key, type_):
+    """
+    If a config value has a different type from the default value we should
+    exit with an error-code
+    """
+    value = type_()
+    with pytest.raises(SystemExit):
+        from_dict({key: value})
