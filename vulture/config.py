@@ -53,16 +53,17 @@ def from_dict(data):
 
     # keep a copy of the keys, so we can keep track of any unprocessed
     # values.
-    remaining_keys = set(data.keys())
+    unknown_keys = set(data) - set(DEFAULTS)
+    if unknown_keys:
+        print(
+            f"Unknown configuration keys: {sorted(unknown_keys)}",
+            file=sys.stderr,
+        )
+        sys.exit("invalid Config")
 
     output = {}
     for key, default in DEFAULTS.items():
         output[key] = data.get(key, default)
-        remaining_keys.discard(key)
-    for remainder in sorted(remaining_keys):
-        print(f"Unprocessed config option {remainder}", file=sys.stderr)
-    if remaining_keys:
-        sys.exit("Invalid config!")
     return output
 
 
