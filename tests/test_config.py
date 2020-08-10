@@ -143,7 +143,7 @@ def test_config_merging_verbose():
 def test_invalid_config_exit_code():
     """
     If the config file contains unknown options we want to quit with a non-zero
-    exit-code
+    exit code.
     """
     with pytest.raises(SystemExit) as ext:
         from_dict({"unknown_key_1": 1})
