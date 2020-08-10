@@ -2,7 +2,6 @@
 This module handles retrieval of configuration values from either the
 command-line arguments or the pyproject.toml file.
 """
-from __future__ import print_function
 import argparse
 import sys
 from os.path import abspath, exists
@@ -41,11 +40,9 @@ def from_dict(data):
         output[key] = data.get(key, default)
         remaining_keys.discard(key)
     for remainder in sorted(remaining_keys):
-        print(
-            u"Unprocessed config option {}".format(remainder), file=sys.stderr
-        )
+        print(f"Unprocessed config option {remainder}", file=sys.stderr)
     if remaining_keys:
-        sys.exit(u"Invalid config!")
+        sys.exit("Invalid config!")
     return output
 
 
@@ -89,7 +86,7 @@ def _parse_args(args=None):
         return exclude.split(",")
 
     usage = "%(prog)s [options] PATH [PATH ...]"
-    version = "vulture {}".format(__version__)
+    version = f"vulture {__version__}"
     glob_help = "Patterns may contain glob wildcards (*, ?, [abc], [!abc])."
     parser = argparse.ArgumentParser(prog="vulture", usage=usage)
     parser.add_argument(
@@ -189,6 +186,6 @@ def make_config(argv=None, tomlfile=None):
             config[key] = cli_value
 
     if detected_toml_path and config["verbose"]:
-        print("Reading config values from {}".format(detected_toml_path))
+        print(f"Reading config values from {detected_toml_path}")
 
     return config

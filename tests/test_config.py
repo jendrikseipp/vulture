@@ -1,20 +1,12 @@
 """
 This module contains unit-tests for config file and CLI argument parsing
 """
-import sys
 from io import StringIO
 from textwrap import dedent
 
 from vulture.config import _parse_args, _parse_toml, from_dict, make_config
 
-if sys.version_info < (3, 0):
-    from mock import patch
-
-    strtype = unicode  # noqa
-else:
-    from unittest.mock import patch
-
-    strtype = str
+from unittest.mock import patch
 
 
 def test_cli_args():
@@ -64,7 +56,7 @@ def test_toml_config():
     )
     data = StringIO(
         dedent(
-            u"""\
+            """\
         [tool.vulture]
         exclude = ["file*.py", "dir/"]
         ignore_decorators = ["deco1", "deco2"]
@@ -89,7 +81,7 @@ def test_config_merging():
     """
     toml = StringIO(
         dedent(
-            u"""\
+            """\
         [tool.vulture]
         exclude = ["toml_exclude"]
         ignore_decorators = ["toml_deco"]
@@ -135,7 +127,7 @@ def test_config_merging_verbose():
     """
     toml = StringIO(
         dedent(
-            u"""\
+            """\
         [tool.vulture]
         verbose = true
         """
@@ -159,7 +151,7 @@ def test_invalid_config_exit_code():
     assert len(msys.exit.mock_calls) == 1
     exit_arg = msys.exit.mock_calls[0].args[0][0]
     assert (isinstance(exit_arg[0], int) and exit_arg[0] != 0) or isinstance(
-        exit_arg[0], strtype
+        exit_arg[0], str
     )
 
 
