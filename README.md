@@ -45,7 +45,8 @@ it may discover more dead code.
 ## Handling false positives
 
 When Vulture incorrectly reports chunks of code as unused, you have
-several options for suppressing the false positives.
+several options for suppressing the false positives. If fixing your false
+positives could benefit other users as well, please file an issue report.
 
 **Whitelists**
 
@@ -121,6 +122,20 @@ report code that is guaranteed to be unused within the analyzed files.
 If Vulture complains about code like `if False:`, you can use a Boolean
 flag `debug = False` and write `if debug:` instead. This makes the code
 more readable and silences Vulture.
+
+**Forward references for type annotations**
+
+See [#216](https://github.com/jendrikseipp/vulture/issues/216). For
+example, instead of `def foo(arg: "Sequence"): ...`, we recommend using
+
+``` python
+from __future__ import annotations
+
+def foo(arg: Sequence):
+    ...
+```
+
+if you're using Python 3.7+.
 
 ## How does it work?
 
