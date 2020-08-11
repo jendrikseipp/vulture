@@ -115,7 +115,7 @@ def _parse_args(args=None):
         "--exclude",
         metavar="PATTERNS",
         type=csv,
-        default=[],
+        default=DEFAULTS["exclude"],
         help="Comma-separated list of paths to ignore (e.g.,"
         ' "*settings.py,docs/*.py"). {glob_help} A PATTERN without glob'
         " wildcards is treated as *PATTERN*.".format(**locals()),
@@ -124,7 +124,7 @@ def _parse_args(args=None):
         "--ignore-decorators",
         metavar="PATTERNS",
         type=csv,
-        default=[],
+        default=DEFAULTS["ignore_decorators"],
         help="Comma-separated list of decorators. Functions and classes using"
         ' these decorators are ignored (e.g., "@app.route,@require_*").'
         " {glob_help}".format(**locals()),
