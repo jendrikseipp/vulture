@@ -26,22 +26,18 @@ DEFAULTS = {
 NO_DEFAULT = object()
 
 
-def _check_config_types(data):
+def _check_input_config(data):
     """
     Checks the types of the values in *data* against the expected types of
     config-values. If a value is of the wrong type it will raise a SystemExit.
     """
-    given_types = {
-        (key, type(value))
-        for key, value in data.items()
-        if key in DEFAULTS and value is not NO_DEFAULT
-    }
-    expected_types = {(key, type(value)) for key, value in DEFAULTS.items()}
-    incorrect_types = given_types - expected_types
-    if incorrect_types:
-        keys = ", ".join(sorted(item[0] for item in incorrect_types))
-        msg = f"Incorrect data-types for the config values: {keys}"
-        sys.exit(msg)
+    for key, value in data.items():
+        if key not in DEFAULTS:
+            print(f"Unknown configuration key: {key}", file=sys.stderr)
+            sys.exit("Invalid config")
+        if value is not NO_DEFAULT and type(value) != type(DEFAULTS[key]):
+            print(f"Data type for {key} must be {DEFAULTS[key]}", file=sys.stderr)
+            sys.exit("Invalid config")
 
 
 def from_dict(data):
@@ -49,7 +45,7 @@ def from_dict(data):
     Create a new config dictionary from an existing one, assign possible
     defaults and warn about unprocessed options.
     """
-    _check_config_types(data)
+    _check_input_config(data)
 
     unknown_keys = set(data) - set(DEFAULTS)
     if unknown_keys:

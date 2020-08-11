@@ -171,11 +171,10 @@ def test_invalid_config_options_output(capsys):
     """
 
     with pytest.raises(SystemExit):
-        from_dict({"unknown_key_1": 1, "unknown_key_2": 1})
+        from_dict({"unknown_key_1": 1})
     stdout, stderr = capsys.readouterr()
     assert stdout == ""
     assert "unknown_key_1" in stderr
-    assert "unknown_key_2" in stderr
 
 
 @pytest.mark.parametrize(
