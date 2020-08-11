@@ -11,7 +11,7 @@ from vulture import lines
 from vulture import noqa
 from vulture import utils
 
-__version__ = "1.6"
+__version__ = "2.0"
 
 DEFAULT_CONFIDENCE = 60
 
