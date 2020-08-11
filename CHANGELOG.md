@@ -1,3 +1,7 @@
+# unreleased
+* Treat `getattr/hasattr(obj, "constant_string", ...)` as a reference to
+  `obj.constant_string` (jingw, #219).
+
 # 2.0 (2020-08-11)
 
 * Parse `# type: ...` comments if on Python 3.8+ (jingw, #220).
@@ -6,8 +10,6 @@
 * Consider all files under `test` or `tests` directories test files
   (Jendrik Seipp).
 * Ignore `logging.Logger.propagate` attribute (Jendrik Seipp).
-* Treat `getattr/hasattr(obj, "constant_string", ...)` as a reference to
-  `obj.constant_string`. (jingw, #219)
 
 # 1.6 (2020-07-28)
 
