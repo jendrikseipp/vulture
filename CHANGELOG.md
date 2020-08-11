@@ -1,11 +1,11 @@
-# unreleased
+# 2.0 (2020-08-11)
 
-* Bump minimum Python version to 3.6 (Jendrik Seipp, #218).
+* Parse `# type: ...` comments if on Python 3.8+ (jingw, #220).
+* Bump minimum Python version to 3.6 (Jendrik Seipp, #218). The last
+  Vulture release that supports Python 2.7 and Python 3.5 is version 1.6.
 * Consider all files under `test` or `tests` directories test files
   (Jendrik Seipp).
 * Ignore `logging.Logger.propagate` attribute (Jendrik Seipp).
-* Parse mypy / PEP 484 / PEP 526 `# type: ...` comments if on Python 3.8+.
-  (jingw, #220)
 
 # 1.6 (2020-07-28)
 
