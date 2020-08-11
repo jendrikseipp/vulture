@@ -51,8 +51,6 @@ def from_dict(data):
     """
     _check_config_types(data)
 
-    # keep a copy of the keys, so we can keep track of any unprocessed
-    # values.
     unknown_keys = set(data) - set(DEFAULTS)
     if unknown_keys:
         print(
