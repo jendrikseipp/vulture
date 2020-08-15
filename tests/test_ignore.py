@@ -90,10 +90,10 @@ def test_attribute():
     code = """\
 class Foo:
     def __init__(self, attr_foo, attr_bar):
-        self.attr_foo = attr_foo
-        self.attr_bar = attr_bar
+        self._attr_foo = attr_foo
+        self._attr_bar = attr_bar
 """
-    check_ignore(code, ["foo", "*_foo"], [], ["Foo", "attr_bar"])
+    check_ignore(code, ["foo", "*_foo"], [], ["Foo", "_attr_bar"])
 
 
 def test_decorated_functions():

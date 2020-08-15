@@ -177,9 +177,6 @@ class Vulture(ast.NodeVisitor):
         def get_list(typ):
             return utils.LoggingList(typ, self.verbose)
 
-        def get_set(typ):
-            return utils.LoggingSet(typ, self.verbose)
-
         self.defined_attrs = get_list("attribute")
         self.defined_classes = get_list("class")
         self.defined_funcs = get_list("function")
@@ -189,8 +186,7 @@ class Vulture(ast.NodeVisitor):
         self.defined_vars = get_list("variable")
         self.unreachable_code = get_list("unreachable_code")
 
-        self.used_attrs = get_set("attribute")
-        self.used_names = get_set("name")
+        self.used_names = utils.LoggingSet("name", self.verbose)
 
         self.ignore_names = ignore_names or []
         self.ignore_decorators = ignore_decorators or []
@@ -329,39 +325,31 @@ class Vulture(ast.NodeVisitor):
 
     @property
     def unused_classes(self):
-        return _get_unused_items(
-            self.defined_classes, self.used_attrs | self.used_names
-        )
+        return _get_unused_items(self.defined_classes, self.used_names)
 
     @property
     def unused_funcs(self):
-        return _get_unused_items(
-            self.defined_funcs, self.used_attrs | self.used_names
-        )
+        return _get_unused_items(self.defined_funcs, self.used_names)
 
     @property
     def unused_imports(self):
-        return _get_unused_items(
-            self.defined_imports, self.used_names | self.used_attrs
-        )
+        return _get_unused_items(self.defined_imports, self.used_names)
 
     @property
     def unused_methods(self):
-        return _get_unused_items(self.defined_methods, self.used_attrs)
+        return _get_unused_items(self.defined_methods, self.used_names)
 
     @property
     def unused_props(self):
-        return _get_unused_items(self.defined_props, self.used_attrs)
+        return _get_unused_items(self.defined_props, self.used_names)
 
     @property
     def unused_vars(self):
-        return _get_unused_items(
-            self.defined_vars, self.used_attrs | self.used_names
-        )
+        return _get_unused_items(self.defined_vars, self.used_names)
 
     @property
     def unused_attrs(self):
-        return _get_unused_items(self.defined_attrs, self.used_attrs)
+        return _get_unused_items(self.defined_attrs, self.used_names)
 
     def _log(self, *args):
         if self.verbose:
@@ -456,12 +444,9 @@ class Vulture(ast.NodeVisitor):
             # Remove brackets and contents: "a[0][b].c[d].e" -> "a.c.e".
             # "a.b.c" -> name = "a", attributes = ["b", "c"]
             name_and_attrs = re.sub(r"\[\w*\]", "", field_name).split(".")
-            name = name_and_attrs[0]
-            if is_identifier(name):
-                self.used_names.add(name)
-            for attr in name_and_attrs[1:]:
-                if is_identifier(attr):
-                    self.used_attrs.add(attr)
+            for name_or_attr in name_and_attrs:
+                if is_identifier(name_or_attr):
+                    self.used_names.add(name_or_attr)
 
     def _define(
         self,
@@ -520,7 +505,7 @@ class Vulture(ast.NodeVisitor):
         if isinstance(node.ctx, ast.Store):
             self._define(self.defined_attrs, node.attr, node)
         elif isinstance(node.ctx, ast.Load):
-            self.used_attrs.add(node.attr)
+            self.used_names.add(node.attr)
 
     def visit_Call(self, node):
         """Count getattr/hasattr(x, "some_attr", ...) as usage of some_attr."""
@@ -530,7 +515,7 @@ class Vulture(ast.NodeVisitor):
         ):
             attr_name_arg = node.args[1]
             if isinstance(attr_name_arg, ast.Str):
-                self.used_attrs.add(attr_name_arg.s)
+                self.used_names.add(attr_name_arg.s)
 
     def visit_ClassDef(self, node):
         for decorator in node.decorator_list:
