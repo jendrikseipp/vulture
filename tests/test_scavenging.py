@@ -115,7 +115,31 @@ func()
     check(v.defined_methods, ["func"])
     check(v.unused_classes, ["Bar"])
     check(v.unused_funcs, [])
-    check(v.unused_methods, ["func"])
+    # Bar.func is unused, but it's hard to detect this without producing a
+    # false positive in test_function_and_method2.
+    check(v.unused_methods, [])
+
+
+def test_function_and_method2(v):
+    v.scan(
+        """\
+class Bar(object):
+    def func(self):
+        pass
+
+    other_name_for_func = func
+
+Bar().other_name_for_func()
+"""
+    )
+    check(v.defined_classes, ["Bar"])
+    check(v.defined_funcs, [])
+    check(v.defined_methods, ["func"])
+    check(v.defined_vars, ["other_name_for_func"])
+    check(v.unused_classes, [])
+    check(v.unused_funcs, [])
+    check(v.unused_methods, [])
+    check(v.unused_vars, [])
 
 
 def test_attribute1(v):
@@ -128,7 +152,7 @@ foo.bar = 2
     check(v.unused_funcs, [])
     check(v.defined_funcs, [])
     check(v.defined_attrs, ["bar", "bar"])
-    check(v.used_attrs, [])
+    check(v.used_names, ["foo"])
     check(v.unused_attrs, ["bar", "bar"])
 
 
@@ -143,7 +167,7 @@ A._d_ = 4
 """
     )
     check(v.defined_attrs, ["_", "_a", "__b", "__c__", "_d_"])
-    check(v.used_attrs, [])
+    check(v.used_names, ["A"])
     check(v.unused_attrs, ["_", "__b", "__c__", "_a", "_d_"])
     check(v.unused_vars, [])
 
@@ -169,7 +193,17 @@ getattr(Thing, "unused_attr", 1, 2)
 """
     )
     check(v.unused_vars, ["unused_attr"])
-    check(v.used_attrs, ["used_attr1", "used_attr2", "used_attr3"])
+    check(
+        v.used_names,
+        [
+            "Thing",
+            "getattr",
+            "hasattr",
+            "used_attr1",
+            "used_attr2",
+            "used_attr3",
+        ],
+    )
 
 
 def test_callback1(v):
@@ -183,7 +217,7 @@ b = Bar()
 b.foo
 """
     )
-    check(v.used_attrs, ["foo"])
+    check(v.used_names, ["Bar", "b", "foo"])
     check(v.defined_classes, ["Bar"])
     check(v.defined_funcs, [])
     check(v.defined_methods, ["foo"])
@@ -198,7 +232,7 @@ class Bar(object):
     pass
 """
     )
-    check(v.used_attrs, [])
+    check(v.used_names, [])
     check(v.defined_classes, ["Bar"])
     check(v.unused_classes, ["Bar"])
 
@@ -213,7 +247,6 @@ class Foo(Bar):
 Foo()
 """
     )
-    check(v.used_attrs, [])
     check(v.used_names, ["Bar", "Foo"])
     check(v.defined_classes, ["Bar", "Foo"])
     check(v.unused_classes, [])
@@ -227,7 +260,6 @@ class Bar():
 [Bar]
 """
     )
-    check(v.used_attrs, [])
     check(v.used_names, ["Bar"])
     check(v.defined_classes, ["Bar"])
     check(v.unused_classes, [])
@@ -241,7 +273,7 @@ class Bar():
 Bar()
 """
     )
-    check(v.used_attrs, [])
+    check(v.used_names, ["Bar"])
     check(v.defined_classes, ["Bar"])
     check(v.unused_classes, [])
 
@@ -254,7 +286,7 @@ class Bar():
 b = Bar()
 """
     )
-    check(v.used_attrs, [])
+    check(v.used_names, ["Bar"])
     check(v.defined_classes, ["Bar"])
     check(v.unused_classes, [])
     check(v.unused_vars, ["b"])
@@ -326,8 +358,7 @@ x.d
     )
     check(v.defined_funcs, [])
     check(v.defined_vars, ["b"])
-    check(v.used_names, ["a", "c", "x"])
-    check(v.used_attrs, ["d"])
+    check(v.used_names, ["a", "c", "d", "x"])
     check(v.unused_attrs, [])
     check(v.unused_funcs, [])
     check(v.unused_props, [])
@@ -346,7 +377,7 @@ def test_variable2(v):
     v.scan("a = 1\nc = b.a")
     check(v.defined_funcs, [])
     check(v.defined_vars, ["a", "c"])
-    check(v.used_names, ["b"])
+    check(v.used_names, ["a", "b"])
     check(v.unused_vars, ["c"])
 
 
@@ -435,7 +466,7 @@ class Bar(object):
     check(v.defined_attrs, ["a"])
     check(v.defined_classes, ["Bar"])
     check(v.defined_vars, [])
-    check(v.used_attrs, [])
+    check(v.used_names, [])
     check(v.unused_attrs, ["a"])
     check(v.unused_classes, ["Bar"])
 
@@ -464,7 +495,6 @@ class OtherClass:
     check(v.defined_classes, ["OtherClass"])
     check(v.defined_funcs, ["other_func"])
     check(v.defined_vars, [])
-    check(v.used_attrs, [])
     check(v.used_names, [])
     check(v.unused_attrs, [])
     check(v.unused_classes, ["OtherClass"])
@@ -524,7 +554,6 @@ class OtherClass:
     check(v.defined_classes, ["BasicTestCase", "OtherClass", "TestClass"])
     check(v.defined_funcs, ["test_func", "other_func"])
     check(v.defined_vars, [])
-    check(v.used_attrs, [])
     check(v.used_names, [])
     check(v.unused_attrs, [])
     check(v.unused_classes, ["BasicTestCase", "OtherClass", "TestClass"])
@@ -546,9 +575,8 @@ foo.a = 2
     )
     check(v.defined_attrs, ["a"])
     check(v.defined_vars, ["a"])
-    check(v.used_attrs, [])
     check(v.used_names, ["a", "foo"])
-    check(v.unused_attrs, ["a"])
+    check(v.unused_attrs, [])
 
 
 def test_boolean(v):
