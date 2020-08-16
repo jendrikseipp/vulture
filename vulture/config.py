@@ -119,7 +119,7 @@ def _parse_args(args=None):
         "--exclude",
         metavar="PATTERNS",
         type=csv,
-        default=DEFAULTS["exclude"],
+        default=MISSING,
         help=f"Comma-separated list of paths to ignore (e.g.,"
         f' "*settings.py,docs/*.py"). {glob_help} A PATTERN without glob'
         f" wildcards is treated as *PATTERN*.",
@@ -128,7 +128,7 @@ def _parse_args(args=None):
         "--ignore-decorators",
         metavar="PATTERNS",
         type=csv,
-        default=DEFAULTS["ignore_decorators"],
+        default=MISSING,
         help=f"Comma-separated list of decorators. Functions and classes using"
         f' these decorators are ignored (e.g., "@app.route,@require_*").'
         f" {glob_help}",
@@ -137,7 +137,7 @@ def _parse_args(args=None):
         "--ignore-names",
         metavar="PATTERNS",
         type=csv,
-        default=DEFAULTS["ignore_names"],
+        default=MISSING,
         help=f'Comma-separated list of names to ignore (e.g., "visit_*,do_*").'
         f" {glob_help}",
     )
@@ -151,7 +151,7 @@ def _parse_args(args=None):
     parser.add_argument(
         "--min-confidence",
         type=int,
-        default=DEFAULTS["min_confidence"],
+        default=MISSING,
         help="Minimum confidence (between 0 and 100) for code to be"
         " reported as unused.",
     )
