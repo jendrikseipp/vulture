@@ -23,7 +23,7 @@ DEFAULTS = {
 }
 
 #: sentinel value to distinguish between "False" and "no default given"
-NO_DEFAULT = object()
+MISSING = object()
 
 
 def _check_input_config(data):
@@ -35,7 +35,7 @@ def _check_input_config(data):
         if key not in DEFAULTS:
             print(f"Unknown configuration key: {key}", file=sys.stderr)
             sys.exit("Invalid config")
-        if value is not NO_DEFAULT and not isinstance(
+        if value is not MISSING and not isinstance(
             value, type(DEFAULTS[key])
         ):
             print(
@@ -144,7 +144,7 @@ def _parse_args(args=None):
     parser.add_argument(
         "--make-whitelist",
         action="store_true",
-        default=NO_DEFAULT,
+        default=MISSING,
         help="Report unused code in a format that can be added to a"
         " whitelist module.",
     )
@@ -158,11 +158,11 @@ def _parse_args(args=None):
     parser.add_argument(
         "--sort-by-size",
         action="store_true",
-        default=NO_DEFAULT,
+        default=MISSING,
         help="Sort unused functions and classes by their lines of code.",
     )
     parser.add_argument(
-        "-v", "--verbose", action="store_true", default=NO_DEFAULT
+        "-v", "--verbose", action="store_true", default=MISSING
     )
     parser.add_argument("--version", action="version", version=version)
     namespace = parser.parse_args(args)
@@ -202,8 +202,8 @@ def make_config(argv=None, tomlfile=None):
     # consideration.
     cli_config = _parse_args(argv)
     for key in config.keys():
-        cli_value = cli_config.get(key, NO_DEFAULT)
-        if cli_value is not NO_DEFAULT:
+        cli_value = cli_config.get(key, MISSING)
+        if cli_value is not MISSING:
             config[key] = cli_value
 
     if detected_toml_path and config["verbose"]:
