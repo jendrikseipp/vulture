@@ -128,7 +128,7 @@ def test_config_merging():
     assert result == expected
 
 
-def test_config_merging_verbose():
+def test_config_merging_boolan():
     """
     If we have set a boolean value in the TOML file, but not on the CLI, we
     want the TOML value to be taken.
