@@ -120,26 +120,26 @@ def _parse_args(args=None):
         metavar="PATTERNS",
         type=csv,
         default=DEFAULTS["exclude"],
-        help="Comma-separated list of paths to ignore (e.g.,"
-        ' "*settings.py,docs/*.py"). {glob_help} A PATTERN without glob'
-        " wildcards is treated as *PATTERN*.".format(**locals()),
+        help=f"Comma-separated list of paths to ignore (e.g.,"
+        f' "*settings.py,docs/*.py"). {glob_help} A PATTERN without glob'
+        f" wildcards is treated as *PATTERN*.",
     )
     parser.add_argument(
         "--ignore-decorators",
         metavar="PATTERNS",
         type=csv,
         default=DEFAULTS["ignore_decorators"],
-        help="Comma-separated list of decorators. Functions and classes using"
-        ' these decorators are ignored (e.g., "@app.route,@require_*").'
-        " {glob_help}".format(**locals()),
+        help=f"Comma-separated list of decorators. Functions and classes using"
+        f' these decorators are ignored (e.g., "@app.route,@require_*").'
+        f" {glob_help}",
     )
     parser.add_argument(
         "--ignore-names",
         metavar="PATTERNS",
         type=csv,
         default=DEFAULTS["ignore_names"],
-        help='Comma-separated list of names to ignore (e.g., "visit_*,do_*").'
-        " {glob_help}".format(**locals()),
+        help=f'Comma-separated list of names to ignore (e.g., "visit_*,do_*").'
+        f" {glob_help}",
     )
     parser.add_argument(
         "--make-whitelist",
