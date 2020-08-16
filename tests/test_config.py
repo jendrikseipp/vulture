@@ -150,27 +150,20 @@ def test_config_merging_verbose():
     assert result["verbose"] is True
 
 
-def test_invalid_config_exit_code():
-    """
-    If the config file contains unknown options we want to quit with a non-zero
-    exit code.
-    """
-    with pytest.raises(SystemExit) as ext:
-        from_dict({"unknown_key_1": 1})
-    assert ext.value.code != 0
 
 
 def test_invalid_config_options_output(capsys):
     """
-    If the config file contains unknown options we want to see them on stderr.
-    We also should not see anything on stdout
+    If the config file contains unknown options we want to get a non-zero exit
+    codew, see them on stderr and not see anything on stdout.
     """
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(SystemExit) as ext:
         from_dict({"unknown_key_1": 1})
     stdout, stderr = capsys.readouterr()
     assert stdout == ""
     assert "unknown_key_1" in stderr
+    assert ext.value.code != 0
 
 
 @pytest.mark.parametrize(
