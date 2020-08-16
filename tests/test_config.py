@@ -150,8 +150,6 @@ def test_config_merging_boolan():
     assert result["verbose"] is True
 
 
-
-
 def test_invalid_config_options_output(capsys):
     """
     If the config file contains unknown options we want to get a non-zero exit
