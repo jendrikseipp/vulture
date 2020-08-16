@@ -3,6 +3,7 @@ This module contains unit-tests for config file and CLI argument parsing
 """
 from io import StringIO
 from textwrap import dedent
+from itertools import permutations
 
 import pytest
 from vulture.config import (
@@ -15,12 +16,7 @@ from vulture.config import (
 
 #: This dictionary maps types to "incompatible" types in the config. It is used
 #: later for parametrizing a test.
-WRONG_TYPES = {
-    int: str,
-    str: int,
-    list: str,
-    bool: str,
-}
+WRONG_TYPES = dict(permutations([int, str, list, bool], 2))
 
 
 def test_cli_args():
@@ -178,14 +174,14 @@ def test_invalid_config_options_output(capsys):
 
 
 @pytest.mark.parametrize(
-    "key, type_",
+    "key, wrong_type",
     [(key, WRONG_TYPES[type(value)]) for key, value in DEFAULTS.items()],
 )
-def test_incompatible_option_type(key, type_):
+def test_incompatible_option_type(key, wrong_type):
     """
     If a config value has a different type from the default value we should
     exit with an error-code
     """
-    value = type_()
+    test_value = wrong_type()
     with pytest.raises(SystemExit):
-        from_dict({key: value})
+        from_dict({key: test_value})

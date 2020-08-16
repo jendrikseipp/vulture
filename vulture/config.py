@@ -35,8 +35,8 @@ def _check_input_config(data):
         if key not in DEFAULTS:
             print(f"Unknown configuration key: {key}", file=sys.stderr)
             sys.exit("Invalid config")
-        if value is not MISSING and not isinstance(
-            value, type(DEFAULTS[key])
+        if value is not MISSING and not type(value) is type(  # noqa: E721
+            DEFAULTS[key]
         ):
             print(
                 f"Data type for {key} must be {DEFAULTS[key]}", file=sys.stderr
