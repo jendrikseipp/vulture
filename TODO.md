@@ -11,7 +11,6 @@
   possibly-unused-variable and unreachable-code. See
   https://github.com/janjur/readable-pylint-messages#unused-import.
 * Ignore some decorators by default: @app.route, @cli.command.
-* Ignore imports in `__init__.py` files.
 
 # Non-TODOs
 
