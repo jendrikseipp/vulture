@@ -12,7 +12,7 @@ from vulture import noqa
 from vulture import utils
 from vulture.config import make_config
 
-__version__ = "1.6"
+__version__ = "2.0"
 
 DEFAULT_CONFIDENCE = 60
 
@@ -178,9 +178,6 @@ class Vulture(ast.NodeVisitor):
         def get_list(typ):
             return utils.LoggingList(typ, self.verbose)
 
-        def get_set(typ):
-            return utils.LoggingSet(typ, self.verbose)
-
         self.defined_attrs = get_list("attribute")
         self.defined_classes = get_list("class")
         self.defined_funcs = get_list("function")
@@ -190,8 +187,7 @@ class Vulture(ast.NodeVisitor):
         self.defined_vars = get_list("variable")
         self.unreachable_code = get_list("unreachable_code")
 
-        self.used_attrs = get_set("attribute")
-        self.used_names = get_set("name")
+        self.used_names = utils.LoggingSet("name", self.verbose)
 
         self.ignore_names = ignore_names or []
         self.ignore_decorators = ignore_decorators or []
@@ -330,39 +326,31 @@ class Vulture(ast.NodeVisitor):
 
     @property
     def unused_classes(self):
-        return _get_unused_items(
-            self.defined_classes, self.used_attrs | self.used_names
-        )
+        return _get_unused_items(self.defined_classes, self.used_names)
 
     @property
     def unused_funcs(self):
-        return _get_unused_items(
-            self.defined_funcs, self.used_attrs | self.used_names
-        )
+        return _get_unused_items(self.defined_funcs, self.used_names)
 
     @property
     def unused_imports(self):
-        return _get_unused_items(
-            self.defined_imports, self.used_names | self.used_attrs
-        )
+        return _get_unused_items(self.defined_imports, self.used_names)
 
     @property
     def unused_methods(self):
-        return _get_unused_items(self.defined_methods, self.used_attrs)
+        return _get_unused_items(self.defined_methods, self.used_names)
 
     @property
     def unused_props(self):
-        return _get_unused_items(self.defined_props, self.used_attrs)
+        return _get_unused_items(self.defined_props, self.used_names)
 
     @property
     def unused_vars(self):
-        return _get_unused_items(
-            self.defined_vars, self.used_attrs | self.used_names
-        )
+        return _get_unused_items(self.defined_vars, self.used_names)
 
     @property
     def unused_attrs(self):
-        return _get_unused_items(self.defined_attrs, self.used_attrs)
+        return _get_unused_items(self.defined_attrs, self.used_names)
 
     def _log(self, *args):
         if self.verbose:
@@ -454,15 +442,12 @@ class Vulture(ast.NodeVisitor):
             names = []
 
         for field_name in names:
-            # Remove brackets and contents: "a[0][b].c[d].e" -> "a.c.e".
-            # "a.b.c" -> name = "a", attributes = ["b", "c"]
-            name_and_attrs = re.sub(r"\[\w*\]", "", field_name).split(".")
-            name = name_and_attrs[0]
-            if is_identifier(name):
-                self.used_names.add(name)
-            for attr in name_and_attrs[1:]:
-                if is_identifier(attr):
-                    self.used_attrs.add(attr)
+            # Remove brackets and their contents: "a[0][b].c[d].e" -> "a.c.e",
+            # then split the resulting string: "a.b.c" -> ["a", "b", "c"]
+            vars = re.sub(r"\[\w*\]", "", field_name).split(".")
+            for var in vars:
+                if is_identifier(var):
+                    self.used_names.add(var)
 
     def _define(
         self,
@@ -521,7 +506,17 @@ class Vulture(ast.NodeVisitor):
         if isinstance(node.ctx, ast.Store):
             self._define(self.defined_attrs, node.attr, node)
         elif isinstance(node.ctx, ast.Load):
-            self.used_attrs.add(node.attr)
+            self.used_names.add(node.attr)
+
+    def visit_Call(self, node):
+        """Count getattr/hasattr(x, "some_attr", ...) as usage of some_attr."""
+        if isinstance(node.func, ast.Name) and (
+            (node.func.id == "getattr" and 2 <= len(node.args) <= 3)
+            or (node.func.id == "hasattr" and len(node.args) == 2)
+        ):
+            attr_name_arg = node.args[1]
+            if isinstance(attr_name_arg, ast.Str):
+                self.used_names.add(attr_name_arg.s)
 
     def visit_ClassDef(self, node):
         for decorator in node.decorator_list:

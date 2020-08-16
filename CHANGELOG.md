@@ -1,11 +1,17 @@
 # unreleased
+* Treat `getattr/hasattr(obj, "constant_string", ...)` as a reference to
+  `obj.constant_string` (jingw, #219).
+* Fix false positives when assigning to `x.some_name` but reading via
+  `some_name`, at the cost of potential false negatives (jingw, #221).
 
-* Bump minimum Python version to 3.6 (Jendrik Seipp, #218).
+# 2.0 (2020-08-11)
+
+* Parse `# type: ...` comments if on Python 3.8+ (jingw, #220).
+* Bump minimum Python version to 3.6 (Jendrik Seipp, #218). The last
+  Vulture release that supports Python 2.7 and Python 3.5 is version 1.6.
 * Consider all files under `test` or `tests` directories test files
   (Jendrik Seipp).
 * Ignore `logging.Logger.propagate` attribute (Jendrik Seipp).
-* Parse mypy / PEP 484 / PEP 526 `# type: ...` comments if on Python 3.8+.
-  (jingw, #220)
 
 # 1.6 (2020-07-28)
 

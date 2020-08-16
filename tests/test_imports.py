@@ -59,7 +59,7 @@ os.path.expanduser("~")
 """
     )
     check(v.defined_imports, ["os"])
-    check(v.used_names, ["os"])
+    check(v.used_names, ["os", "path", "expanduser"])
     check(v.unused_funcs, [])
     check(v.unused_imports, [])
     check(v.unused_vars, [])
