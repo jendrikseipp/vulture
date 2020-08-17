@@ -33,15 +33,11 @@ def _check_input_config(data):
     """
     for key, value in data.items():
         if key not in DEFAULTS:
-            print(f"Unknown configuration key: {key}", file=sys.stderr)
-            sys.exit("Invalid config")
+            sys.exit(f"Unknown configuration key: {key}")
         if value is not MISSING and not type(value) is type(  # noqa: E721
             DEFAULTS[key]
         ):
-            print(
-                f"Data type for {key} must be {DEFAULTS[key]}", file=sys.stderr
-            )
-            sys.exit("Invalid config")
+            sys.exit(f"Data type for {key} must be {DEFAULTS[key]}")
 
 
 def from_dict(data):
@@ -53,11 +49,7 @@ def from_dict(data):
 
     unknown_keys = set(data) - set(DEFAULTS)
     if unknown_keys:
-        print(
-            f"Unknown configuration keys: {sorted(unknown_keys)}",
-            file=sys.stderr,
-        )
-        sys.exit("invalid Config")
+        sys.exit(f"Unknown configuration keys: {sorted(unknown_keys)}")
 
     output = {}
     for key, default in DEFAULTS.items():
