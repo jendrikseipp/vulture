@@ -34,6 +34,9 @@ def _check_input_config(data):
     for key, value in data.items():
         if key not in DEFAULTS:
             sys.exit(f"Unknown configuration key: {key}")
+        # We disable the linter error concerning an "isinstance" check here
+        # because we *need* to be able to detect the difference between `int`
+        # and `bool`.
         if value is not MISSING and not type(value) is type(  # noqa: E721
             DEFAULTS[key]
         ):
