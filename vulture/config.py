@@ -42,6 +42,16 @@ def _check_input_config(data):
         ):
             sys.exit(f"Data type for {key} must be {DEFAULTS[key]}")
 
+def _check_output_config(config):
+    """
+    Run sanity checks on the generated config after all parsing and
+    preprocessing is done.
+
+    This will exit the application if an error is encountered.
+    """
+    if config["paths"] == []:
+        print(f"paths is required", file=sys.stderr)
+        sys.exit(1)
 
 def from_dict(data):
     """
@@ -99,13 +109,13 @@ def _parse_args(args=None):
     def csv(exclude):
         return exclude.split(",")
 
-    usage = "%(prog)s [options] PATH [PATH ...]"
+    usage = "%(prog)s [options] [PATH ...]"
     version = f"vulture {__version__}"
     glob_help = "Patterns may contain glob wildcards (*, ?, [abc], [!abc])."
     parser = argparse.ArgumentParser(prog="vulture", usage=usage)
     parser.add_argument(
         "paths",
-        nargs="+",
+        nargs="*",
         metavar="PATH",
         help="Paths may be Python files or directories. For each directory"
         " Vulture analyzes all contained *.py files.",
@@ -203,5 +213,7 @@ def make_config(argv=None, tomlfile=None):
 
     if detected_toml_path and config["verbose"]:
         print(f"Reading configuration from {detected_toml_path}")
+
+    _check_output_config(config)
 
     return config

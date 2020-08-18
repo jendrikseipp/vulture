@@ -176,3 +176,15 @@ def test_incompatible_option_type(key, wrong_type):
     test_value = wrong_type()
     with pytest.raises(SystemExit):
         from_dict({key: test_value})
+
+
+def test_missing_paths(capsys):
+    """
+    If the script is run without any paths, we want to see a helpful error
+    message
+    """
+    with pytest.raises(SystemExit):
+        make_config([])
+    _, stderr = capsys.readouterr()
+    assert 'paths' in stderr
+    assert 'required' in stderr
