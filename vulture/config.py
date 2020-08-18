@@ -40,7 +40,8 @@ def _check_input_config(data):
         if value is not MISSING and not type(value) is type(  # noqa: E721
             DEFAULTS[key]
         ):
-            sys.exit(f"Data type for {key} must be {DEFAULTS[key]}")
+            expected_type = type(DEFAULTS[key]).__name__
+            sys.exit(f"Data type for {key} must be {expected_type!r}")
 
 def _check_output_config(config):
     """
