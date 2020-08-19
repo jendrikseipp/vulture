@@ -3,7 +3,6 @@ This module contains unit-tests for config file and CLI argument parsing
 """
 from io import StringIO
 from textwrap import dedent
-from itertools import permutations
 
 import pytest
 from vulture.config import (
@@ -13,10 +12,6 @@ from vulture.config import (
     from_dict,
     make_config,
 )
-
-#: This dictionary maps types to "incompatible" types in the config. It is used
-#: later for parametrizing a test.
-WRONG_TYPES = dict(permutations([int, str, list, bool], 2))
 
 
 def test_cli_args():
@@ -152,8 +147,7 @@ def test_config_merging_boolan():
 
 def test_invalid_config_options_output():
     """
-    If the config file contains unknown options we want to get a non-zero exit
-    codew, see them on stderr and not see anything on stdout.
+    If the config file contains unknown options we want to abort.
     """
 
     with pytest.raises(SystemExit):
@@ -161,17 +155,17 @@ def test_invalid_config_options_output():
 
 
 @pytest.mark.parametrize(
-    "key, wrong_type",
-    [(key, WRONG_TYPES[type(value)]) for key, value in DEFAULTS.items()],
+    "key, value", list(DEFAULTS.items()),
 )
-def test_incompatible_option_type(key, wrong_type):
+def test_incompatible_option_type(key, value):
     """
-    If a config value has a different type from the default value we should
-    exit with an error-code
+    If a config value has a different type from the default value we abort.
     """
-    test_value = wrong_type()
-    with pytest.raises(SystemExit):
-        from_dict({key: test_value})
+    wrong_types = {int, str, list, bool} - {type(value)}
+    for wrong_type in wrong_types:
+        test_value = wrong_type()
+        with pytest.raises(SystemExit):
+            from_dict({key: test_value})
 
 
 def test_missing_paths():
