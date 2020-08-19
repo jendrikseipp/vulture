@@ -208,10 +208,9 @@ def make_config(argv=None, tomlfile=None):
     # real default" in the CLI args, they should not be taken into
     # consideration.
     cli_config = _parse_args(argv)
-    for key in config.keys():
-        cli_value = cli_config.get(key, MISSING)
-        if cli_value is not MISSING:
-            config[key] = cli_value
+    for key, value in cli_config.items():
+        if value is not MISSING:
+            config[key] = value
 
     if detected_toml_path and config["verbose"]:
         print(f"Reading configuration from {detected_toml_path}")
