@@ -1,4 +1,5 @@
 # 2.1 (2020-08-19)
+
 * Treat `getattr/hasattr(obj, "constant_string", ...)` as a reference to
   `obj.constant_string` (jingw, #219).
 * Fix false positives when assigning to `x.some_name` but reading via

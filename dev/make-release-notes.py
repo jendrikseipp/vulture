@@ -17,7 +17,9 @@ with open(CHANGELOG) as f:
             f'start with "{HEADER_REGEX.rstrip()}"'
         )
     notes_list.extend([first_line[2:], "\n"])
-    next(f)  # Skip empty line.
+    line = next(f)  # Skip empty line.
+    if line.strip():
+        sys.exit("There must be an empty line after each header")
     for line in f:
         if not line.strip():
             break
