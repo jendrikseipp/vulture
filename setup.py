@@ -28,7 +28,7 @@ with open("README.md") as f1, open("CHANGELOG.md") as f2:
 
 setuptools.setup(
     name="vulture",
-    version=find_version("vulture", "core.py"),
+    version=find_version("vulture", "version.py"),
     description="Find dead code",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -51,6 +51,7 @@ setuptools.setup(
         "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Software Development :: Quality Assurance",
     ],
+    install_requires=["toml"],
     entry_points={"console_scripts": ["vulture = vulture.core:main"]},
     python_requires=">=3.6",
     packages=setuptools.find_packages(exclude=["tests"]),

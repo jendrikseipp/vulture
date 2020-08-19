@@ -3,6 +3,7 @@
   `obj.constant_string` (jingw, #219).
 * Fix false positives when assigning to `x.some_name` but reading via
   `some_name`, at the cost of potential false negatives (jingw, #221).
+* Allow reading options from `pyproject.toml` (Michel Albert, #164, #215).
 
 # 2.0 (2020-08-11)
 
