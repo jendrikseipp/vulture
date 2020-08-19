@@ -10,6 +10,7 @@ import sys
 from vulture import lines
 from vulture import noqa
 from vulture import utils
+from vulture.config import make_config
 
 __version__ = "2.0"
 
@@ -724,17 +725,17 @@ def _parse_args():
 
 
 def main():
-    args = _parse_args()
+    config = make_config()
     vulture = Vulture(
-        verbose=args.verbose,
-        ignore_names=args.ignore_names,
-        ignore_decorators=args.ignore_decorators,
+        verbose=config["verbose"],
+        ignore_names=config["ignore_names"],
+        ignore_decorators=config["ignore_decorators"],
     )
-    vulture.scavenge(args.paths, exclude=args.exclude)
+    vulture.scavenge(config["paths"], exclude=config["exclude"])
     sys.exit(
         vulture.report(
-            min_confidence=args.min_confidence,
-            sort_by_size=args.sort_by_size,
-            make_whitelist=args.make_whitelist,
+            min_confidence=config["min_confidence"],
+            sort_by_size=config["sort_by_size"],
+            make_whitelist=config["make_whitelist"],
         )
     )

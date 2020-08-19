@@ -137,6 +137,25 @@ def foo(arg: Sequence):
 
 if you're using Python 3.7+.
 
+
+## Configuration
+
+You can also store command line arguments in `pyproject.toml` under the
+`tool.vulture` section. Simply remove leading dashes and replace all
+remaining dashes with underscores. Example:
+
+``` toml
+[tool.vulture]
+exclude = ["file*.py", "dir/"]
+ignore_decorators = ["@app.route", "@require_*"]
+ignore_names = ["visit_*", "do_*"]
+make_whitelist = true
+min_confidence = 80
+sort_by_size = true
+verbose = true
+paths = ["myscript.py", "mydir"]
+```
+
 ## How does it work?
 
 Vulture uses the `ast` module to build abstract syntax trees for all

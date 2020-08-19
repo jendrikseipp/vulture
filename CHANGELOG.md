@@ -17,6 +17,7 @@
 
 * Differentiate between functions and methods (Jendrik Seipp, #112, #209).
 * Move from Travis to GitHub actions (RJ722, #211).
+* Allow reading config values from `pyproject.toml` (Michel Albert, #164).
 
 # 1.5 (2020-05-24)
 
