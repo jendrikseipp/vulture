@@ -156,7 +156,7 @@ def test_invalid_config_options_output():
     codew, see them on stderr and not see anything on stdout.
     """
 
-    with pytest.raises(SystemExit) as ext:
+    with pytest.raises(SystemExit):
         from_dict({"unknown_key_1": 1})
 
 
