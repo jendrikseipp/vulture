@@ -51,8 +51,7 @@ def _check_output_config(config):
     This will exit the application if an error is encountered.
     """
     if config["paths"] == []:
-        print(f"paths is required", file=sys.stderr)
-        sys.exit(1)
+        sys.exit(f"paths is required")
 
 def from_dict(data):
     """
