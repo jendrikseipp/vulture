@@ -190,14 +190,12 @@ def make_config(argv=None, tomlfile=None):
         else:
             config = {}
 
-    # We can't use a simple call to dict.update() because some values should
-    # not be overwritten in the config. More precisely, if the values have "no
-    # real default" in the CLI args, they should not be taken into
-    # consideration.
     cli_config = _parse_args(argv)
-    for key, value in cli_config.items():
-        config[key] = value
 
+    # Overwrite TOML options with CLI options, if given.
+    config.update(cli_config)
+
+    # Set defaults for missing options.
     for key, value in DEFAULTS.items():
         config.setdefault(key, value)
 
