@@ -43,6 +43,7 @@ def _check_input_config(data):
             expected_type = type(DEFAULTS[key]).__name__
             sys.exit(f"Data type for {key} must be {expected_type!r}")
 
+
 def _check_output_config(config):
     """
     Run sanity checks on the generated config after all parsing and
@@ -51,7 +52,8 @@ def _check_output_config(config):
     This will exit the application if an error is encountered.
     """
     if config["paths"] == []:
-        sys.exit(f"paths is required")
+        sys.exit("paths is required")
+
 
 def from_dict(data):
     """
