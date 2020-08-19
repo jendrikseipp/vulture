@@ -1,10 +1,12 @@
 """
-This module contains unit-tests for config file and CLI argument parsing
+Unit tests for config file and CLI argument parsing.
 """
+
 from io import StringIO
 from textwrap import dedent
 
 import pytest
+
 from vulture.config import (
     DEFAULTS,
     _parse_args,
@@ -123,18 +125,17 @@ def test_config_merging():
     assert result == expected
 
 
-def test_config_merging_boolan():
+def test_config_merging_missing():
     """
     If we have set a boolean value in the TOML file, but not on the CLI, we
     want the TOML value to be taken.
-
-    We'll take the "verbose" flag as example in this test.
     """
     toml = StringIO(
         dedent(
             """\
         [tool.vulture]
         verbose = true
+        ignore_names = ["name1"]
         """
         )
     )
@@ -143,6 +144,7 @@ def test_config_merging_boolan():
     ]
     result = make_config(cliargs, toml)
     assert result["verbose"] is True
+    assert result["ignore_names"] == ["name1"]
 
 
 def test_invalid_config_options_output():
