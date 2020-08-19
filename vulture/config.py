@@ -22,9 +22,6 @@ DEFAULTS = {
     "verbose": False,
 }
 
-#: sentinel value to distinguish between "False" and "no default given"
-MISSING = object()
-
 
 def _check_input_config(data):
     """
@@ -34,12 +31,9 @@ def _check_input_config(data):
     for key, value in data.items():
         if key not in DEFAULTS:
             sys.exit(f"Unknown configuration key: {key}")
-        # We disable the linter error concerning an "isinstance" check here
-        # because we *need* to be able to detect the difference between `int`
-        # and `bool`.
-        if value is not MISSING and not type(value) is type(  # noqa: E721
-            DEFAULTS[key]
-        ):
+        # The linter suggests to use "isinstance" here but this fails to
+        # detect the difference between `int` and `bool`.
+        if type(value) is not type(DEFAULTS[key]):  # noqa: E721
             expected_type = type(DEFAULTS[key]).__name__
             sys.exit(f"Data type for {key} must be {expected_type!r}")
 
@@ -49,27 +43,10 @@ def _check_output_config(config):
     Run sanity checks on the generated config after all parsing and
     preprocessing is done.
 
-    This will exit the application if an error is encountered.
+    Exit the application if an error is encountered.
     """
-    if config["paths"] == []:
-        sys.exit("paths is required")
-
-
-def from_dict(data):
-    """
-    Create a new config dictionary from an existing one, assign possible
-    defaults and warn about unprocessed options.
-    """
-    _check_input_config(data)
-
-    unknown_keys = set(data) - set(DEFAULTS)
-    if unknown_keys:
-        sys.exit(f"Unknown configuration keys: {sorted(unknown_keys)}")
-
-    output = {}
-    for key, default in DEFAULTS.items():
-        output[key] = data.get(key, default)
-    return output
+    if not config["paths"]:
+        sys.exit("Please pass at least one file or directory")
 
 
 def _parse_toml(infile):
@@ -96,17 +73,21 @@ def _parse_toml(infile):
         paths = ["path1", "path2"]
     """
     data = toml.load(infile)
-    vulture_settings = data.get("tool", {}).get("vulture", {})
-    return from_dict(vulture_settings)
+    settings = data.get("tool", {}).get("vulture", {})
+    _check_input_config(settings)
+    return settings
 
 
 def _parse_args(args=None):
     """
-    Parse CLI arguments
+    Parse CLI arguments.
 
     :param args: A list of strings representing the CLI arguments. If left to
         the default, this will default to ``sys.argv``.
     """
+
+    # Sentinel value to distinguish between "False" and "no default given".
+    missing = object()
 
     def csv(exclude):
         return exclude.split(",")
@@ -126,7 +107,7 @@ def _parse_args(args=None):
         "--exclude",
         metavar="PATTERNS",
         type=csv,
-        default=MISSING,
+        default=missing,
         help=f"Comma-separated list of paths to ignore (e.g.,"
         f' "*settings.py,docs/*.py"). {glob_help} A PATTERN without glob'
         f" wildcards is treated as *PATTERN*.",
@@ -135,7 +116,7 @@ def _parse_args(args=None):
         "--ignore-decorators",
         metavar="PATTERNS",
         type=csv,
-        default=MISSING,
+        default=missing,
         help=f"Comma-separated list of decorators. Functions and classes using"
         f' these decorators are ignored (e.g., "@app.route,@require_*").'
         f" {glob_help}",
@@ -144,45 +125,51 @@ def _parse_args(args=None):
         "--ignore-names",
         metavar="PATTERNS",
         type=csv,
-        default=MISSING,
+        default=missing,
         help=f'Comma-separated list of names to ignore (e.g., "visit_*,do_*").'
         f" {glob_help}",
     )
     parser.add_argument(
         "--make-whitelist",
         action="store_true",
-        default=MISSING,
+        default=missing,
         help="Report unused code in a format that can be added to a"
         " whitelist module.",
     )
     parser.add_argument(
         "--min-confidence",
         type=int,
-        default=MISSING,
+        default=missing,
         help="Minimum confidence (between 0 and 100) for code to be"
         " reported as unused.",
     )
     parser.add_argument(
         "--sort-by-size",
         action="store_true",
-        default=MISSING,
+        default=missing,
         help="Sort unused functions and classes by their lines of code.",
     )
     parser.add_argument(
-        "-v", "--verbose", action="store_true", default=MISSING
+        "-v", "--verbose", action="store_true", default=missing
     )
     parser.add_argument("--version", action="version", version=version)
     namespace = parser.parse_args(args)
-    return from_dict(vars(namespace))
+    cli_args = {
+        key: value
+        for key, value in vars(namespace).items()
+        if value is not missing
+    }
+    _check_input_config(cli_args)
+    return cli_args
 
 
 def make_config(argv=None, tomlfile=None):
     """
     Returns a config object for vulture, merging both ``pyproject.toml`` and
-    CLI arguments (CLI will have precedence).
+    CLI arguments (CLI arguments have precedence).
 
     :param argv: The CLI arguments to be parsed. This value is transparently
-        passed through to :py:meth:`argparse.ArgumentParser.parse_args`
+        passed through to :py:meth:`argparse.ArgumentParser.parse_args`.
     :param tomlfile: An IO instance containing TOML data. By default this will
         auto-detect an existing ``pyproject.toml`` file and exists solely for
         unit-testing.
@@ -209,8 +196,10 @@ def make_config(argv=None, tomlfile=None):
     # consideration.
     cli_config = _parse_args(argv)
     for key, value in cli_config.items():
-        if value is not MISSING:
-            config[key] = value
+        config[key] = value
+
+    for key, value in DEFAULTS.items():
+        config.setdefault(key, value)
 
     if detected_toml_path and config["verbose"]:
         print(f"Reading configuration from {detected_toml_path}")

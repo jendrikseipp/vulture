@@ -9,9 +9,9 @@ import pytest
 
 from vulture.config import (
     DEFAULTS,
+    _check_input_config,
     _parse_args,
     _parse_toml,
-    from_dict,
     make_config,
 )
 
@@ -153,7 +153,7 @@ def test_invalid_config_options_output():
     """
 
     with pytest.raises(SystemExit):
-        from_dict({"unknown_key_1": 1})
+        _check_input_config({"unknown_key_1": 1})
 
 
 @pytest.mark.parametrize(
@@ -167,13 +167,12 @@ def test_incompatible_option_type(key, value):
     for wrong_type in wrong_types:
         test_value = wrong_type()
         with pytest.raises(SystemExit):
-            from_dict({key: test_value})
+            _check_input_config({key: test_value})
 
 
 def test_missing_paths():
     """
-    If the script is run without any paths, we want to see a helpful error
-    message
+    If the script is run without any paths, we want to abort.
     """
     with pytest.raises(SystemExit):
         make_config([])
