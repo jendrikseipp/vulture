@@ -111,13 +111,13 @@ class Item:
 
     def __init__(
         self,
-        name,
-        typ,
-        filename,
-        first_lineno,
-        last_lineno,
-        message="",
-        confidence=DEFAULT_CONFIDENCE,
+        name: str,
+        typ: str,
+        filename: str,
+        first_lineno: int,
+        last_lineno: int,
+        message: str = "",
+        confidence: int = DEFAULT_CONFIDENCE,
     ):
         self.name = name
         self.typ = typ
@@ -132,7 +132,7 @@ class Item:
         assert self.last_lineno >= self.first_lineno
         return self.last_lineno - self.first_lineno + 1
 
-    def get_report(self, add_size=False):
+    def get_report(self, add_size: bool = False) -> str:
         if add_size:
             line_format = "line" if self.size == 1 else "lines"
             size_report = f", {self.size:d} {line_format}"
@@ -175,11 +175,14 @@ class Vulture(ast.NodeVisitor):
     """Find dead code."""
 
     def __init__(
-        self, verbose=False, ignore_names=None, ignore_decorators=None
+        self,
+        verbose: bool = False,
+        ignore_names: List[str] = None,
+        ignore_decorators: List[str] = None
     ):
-        self.verbose: bool = verbose
+        self.verbose = verbose
 
-        def get_list(typ):
+        def get_list(typ: str):
             return utils.LoggingList(typ, self.verbose)
 
         self.defined_attrs = get_list("attribute")
@@ -197,10 +200,10 @@ class Vulture(ast.NodeVisitor):
         self.ignore_decorators = ignore_decorators or []
 
         self.filename = ""
-        self.code = []
+        self.code: List[str] = []
         self.found_dead_code_or_error = False
 
-    def scan(self, code, filename=""):
+    def scan(self, code: str, filename: str = "") -> None:
         self.code = code.splitlines()
         self.noqa_lines = noqa.parse_noqa(self.code)
         self.filename = filename
@@ -460,7 +463,7 @@ class Vulture(ast.NodeVisitor):
         first_node,
         last_node=None,
         message="",
-        confidence=DEFAULT_CONFIDENCE,
+        confidence: int = DEFAULT_CONFIDENCE,
         ignore=None,
     ):
         def ignored(lineno):

@@ -185,9 +185,9 @@ def make_config(argv: List[str] = None, tomlfile: TextIO = None) -> dict:
     else:
         toml_path = pathlib.Path("pyproject.toml").resolve()
         if toml_path.is_file():
-            with open(toml_path) as config:
-                config = _parse_toml(config)
-            detected_toml_path = toml_path
+            with open(toml_path) as fconfig:
+                config = _parse_toml(fconfig)
+            detected_toml_path = str(toml_path)
         else:
             config = {}
 

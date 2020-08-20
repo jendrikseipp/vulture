@@ -1,3 +1,4 @@
+from typing import List
 import ast
 import os
 import sys
@@ -8,7 +9,7 @@ class VultureInputException(Exception):
     pass
 
 
-def _safe_eval(node, default):
+def _safe_eval(node, default: bool) -> bool:
     """
     Safely evaluate the Boolean expression under the given AST node.
 
@@ -37,11 +38,11 @@ def _safe_eval(node, default):
             return default
 
 
-def condition_is_always_false(condition):
+def condition_is_always_false(condition) -> bool:
     return not _safe_eval(condition, True)
 
 
-def condition_is_always_true(condition):
+def condition_is_always_true(condition) -> bool:
     return _safe_eval(condition, False)
 
 
@@ -52,7 +53,7 @@ def format_path(path):
     return relpath if not relpath.startswith("..") else path
 
 
-def get_decorator_name(decorator):
+def get_decorator_name(decorator) -> str:
     if isinstance(decorator, ast.Call):
         decorator = decorator.func
     parts = []
@@ -63,7 +64,7 @@ def get_decorator_name(decorator):
     return "@" + ".".join(reversed(parts))
 
 
-def get_modules(paths, toplevel=True):
+def get_modules(paths: List[str], toplevel: bool = True):
     """Take files from the command line even if they don't end with .py."""
     modules = []
     for path in paths:
@@ -83,7 +84,7 @@ def get_modules(paths, toplevel=True):
     return modules
 
 
-def read_file(filename):
+def read_file(filename: str) -> str:
     try:
         # Use encoding detected by tokenize.detect_encoding().
         with tokenize.open(filename) as f:
@@ -93,7 +94,7 @@ def read_file(filename):
 
 
 class LoggingList(list):
-    def __init__(self, typ, verbose: bool):
+    def __init__(self, typ: str, verbose: bool):
         self.typ = typ
         self._verbose = verbose
         return list.__init__(self)
@@ -105,12 +106,12 @@ class LoggingList(list):
 
 
 class LoggingSet(set):
-    def __init__(self, typ, verbose):
+    def __init__(self, typ: str, verbose: bool):
         self.typ = typ
         self._verbose = verbose
         return set.__init__(self)
 
-    def add(self, name):
+    def add(self, name: str):
         if self._verbose:
             print(f'use {self.typ} "{name}"')
         set.add(self, name)
