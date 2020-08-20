@@ -239,14 +239,14 @@ class Vulture(ast.NodeVisitor):
                 handle_syntax_error(err)
 
     def scavenge(self, paths, exclude=None):
-        def prepare_pattern(pattern):
-            if not any(char in pattern for char in ["*", "?", "["]):
+        def prepare_pattern(pattern: str) -> str:
+            if not any(char in pattern for char in "*?["):
                 pattern = f"*{pattern}*"
             return pattern
 
         exclude = [prepare_pattern(pattern) for pattern in (exclude or [])]
 
-        def exclude_file(name):
+        def exclude_file(name: str) -> bool:
             return any(fnmatch(name, pattern) for pattern in exclude)
 
         for module in utils.get_modules(paths):
@@ -282,17 +282,19 @@ class Vulture(ast.NodeVisitor):
                 module_string = module_data.decode("utf-8")
                 self.scan(module_string, filename=path)
 
-    def get_unused_code(self, min_confidence=0, sort_by_size=False):
+    def get_unused_code(self,
+                        min_confidence: int = 0,
+                        sort_by_size: bool = False) -> List[Item]:
         """
         Return ordered list of unused Item objects.
         """
         if not 0 <= min_confidence <= 100:
             raise ValueError("min_confidence must be between 0 and 100.")
 
-        def by_name(item):
+        def by_name(item: Item) ->Tuple[str, int] :
             return (item.filename.lower(), item.first_lineno)
 
-        def by_size(item):
+        def by_size(item: Item) -> Tuple[int, str, int]:
             return (item.size,) + by_name(item)
 
         unused_code = (
@@ -363,7 +365,7 @@ class Vulture(ast.NodeVisitor):
         if self.verbose:
             print(*args)
 
-    def _add_aliases(self, node):
+    def _add_aliases(self, node) -> None:
         """
         We delegate to this method instead of using visit_alias() to have
         access to line numbers and to filter imports from __future__.
@@ -384,7 +386,7 @@ class Vulture(ast.NodeVisitor):
             if alias is not None:
                 self.used_names.add(name_and_alias.name)
 
-    def _handle_conditional_node(self, node, name):
+    def _handle_conditional_node(self, node, name) -> None:
         if utils.condition_is_always_false(node.test):
             self._define(
                 self.unreachable_code,
@@ -425,7 +427,7 @@ class Vulture(ast.NodeVisitor):
                     confidence=100,
                 )
 
-    def _handle_string(self, s):
+    def _handle_string(self, s: str):
         """
         Parse variable names in format strings:
 
@@ -435,9 +437,10 @@ class Vulture(ast.NodeVisitor):
 
         """
         # Old format strings.
-        self.used_names |= set(re.findall(r"\%\((\w+)\)", s))
+        #self.used_names |= set(re.findall(r"\%\((\w+)\)", s))
+        self.used_names.update(set(re.findall(r"\%\((\w+)\)", s)))
 
-        def is_identifier(name):
+        def is_identifier(name: str) -> bool:
             return bool(re.match(r"[a-zA-Z_][a-zA-Z0-9_]*", name))
 
         # New format strings.
