@@ -1,20 +1,14 @@
 #! /usr/bin/env python
 
-import codecs
-import os.path
+import pathlib
 import re
 
 import setuptools
 
 
-def read(*parts):
-    here = os.path.abspath(os.path.dirname(__file__))
-    with codecs.open(os.path.join(here, *parts), "r") as f:
-        return f.read()
-
-
-def find_version(*file_parts):
-    version_file = read(*file_parts)
+def find_version(*parts):
+    here = pathlib.Path(__file__).parent
+    version_file = here.joinpath(*parts).read_text()
     version_match = re.search(
         r"^__version__ = ['\"]([^'\"]*)['\"]$", version_file, re.M
     )
