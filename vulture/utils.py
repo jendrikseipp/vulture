@@ -1,8 +1,11 @@
-from typing import List
+from typing import List, TYPE_CHECKING
 import ast
 import os
 import sys
 import tokenize
+
+if TYPE_CHECKING:
+    from vulture.core import Item
 
 
 class VultureInputException(Exception):
@@ -99,7 +102,7 @@ class LoggingList(list):
         self._verbose = verbose
         return list.__init__(self)
 
-    def append(self, item):
+    def append(self, item: 'Item') -> None:
         if self._verbose:
             print(f'define {self.typ} "{item.name}"')
         list.append(self, item)

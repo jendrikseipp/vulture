@@ -128,7 +128,7 @@ class Item:
         self.confidence = confidence
 
     @property
-    def size(self):
+    def size(self) -> int:
         assert self.last_lineno >= self.first_lineno
         return self.last_lineno - self.first_lineno + 1
 
