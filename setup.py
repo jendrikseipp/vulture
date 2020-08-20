@@ -6,7 +6,7 @@ import re
 import setuptools
 
 
-def find_version(*file_parts):
+def find_version(*parts):
     here = pathlib.Path(__file__).parent
     version_file = here.joinpath(*parts).read_text()
     version_match = re.search(
