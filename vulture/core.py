@@ -1,7 +1,7 @@
 import argparse
 import ast
 from fnmatch import fnmatch
-from typing import List
+from typing import List, Tuple
 import os.path
 import pathlib
 import pkgutil
@@ -32,7 +32,7 @@ ERROR_CODES = {
 }
 
 
-def _get_unused_items(defined_items, used_names):
+def _get_unused_items(defined_items, used_names) -> list:
     unused_items = [
         item for item in set(defined_items) if item.name not in used_names
     ]
@@ -40,7 +40,7 @@ def _get_unused_items(defined_items, used_names):
     return unused_items
 
 
-def _is_special_name(name):
+def _is_special_name(name: str) -> bool:
     return name.startswith("__") and name.endswith("__")
 
 
@@ -51,7 +51,7 @@ def _match(name: str, patterns: List[str], case: bool = True) -> bool:
     return any(file_path.match(pattern) for pattern in patterns)
 
 
-def _is_test_file(filename):
+def _is_test_file(filename: str) -> bool:
     return _match(
         os.path.abspath(filename),
         ["*/test/*", "*/tests/*", "*/test*.py", "*/*_test.py", "*/*-test.py"],
@@ -59,30 +59,30 @@ def _is_test_file(filename):
     )
 
 
-def _ignore_class(filename, class_name):
+def _ignore_class(filename: str, class_name) -> bool:
     return _is_test_file(filename) and "Test" in class_name
 
 
-def _ignore_import(filename, import_name):
+def _ignore_import(filename: str, import_name: str) -> bool:
     """
     Ignore star-imported names since we can't detect whether they are used.
     Ignore imports from __init__.py files since they're commonly used to
     collect objects from a package.
     """
-    return os.path.basename(filename) == "__init__.py" or import_name == "*"
+    return pathlib.Path(filename).name == "__init__.py" or import_name == "*"
 
 
-def _ignore_function(filename, function_name):
+def _ignore_function(filename: str, function_name: str) -> bool:
     return function_name.startswith("test_") and _is_test_file(filename)
 
 
-def _ignore_method(filename, method_name):
+def _ignore_method(filename: str, method_name: str) -> bool:
     return _is_special_name(method_name) or (
         method_name.startswith("test_") and _is_test_file(filename)
     )
 
 
-def _ignore_variable(filename, varname):
+def _ignore_variable(filename: str, varname: str) -> bool:
     """
     Ignore _ (Python idiom), _x (pylint convention) and
     __x__ (special variable or method), but not __x.
@@ -146,7 +146,7 @@ class Item:
             size_report,
         )
 
-    def get_whitelist_string(self):
+    def get_whitelist_string(self) -> str:
         filename = utils.format_path(self.filename)
         if self.typ == "unreachable_code":
             return f"# {self.message} ({filename}:{self.first_lineno})"
@@ -158,7 +158,7 @@ class Item:
                 prefix, self.name, self.typ, filename, self.first_lineno
             )
 
-    def _tuple(self):
+    def _tuple(self) -> Tuple[str, int, str]:
         return (self.filename, self.first_lineno, self.name)
 
     def __repr__(self):
@@ -666,8 +666,8 @@ class Vulture(ast.NodeVisitor):
                 self.visit(value)
 
 
-def _parse_args():
-    def csv(exclude):
+def _parse_args() -> argparse.Namespace:
+    def csv(exclude: str) -> List[str]:
         return exclude.split(",")
 
     usage = "%(prog)s [options] PATH [PATH ...]"

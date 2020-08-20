@@ -2,10 +2,10 @@
 This module handles retrieval of configuration values from either the
 command-line arguments or the pyproject.toml file.
 """
+from typing import TextIO, List
 import argparse
-import sys
-from os.path import abspath
 import pathlib
+import sys
 
 import toml
 
@@ -24,7 +24,7 @@ DEFAULTS = {
 }
 
 
-def _check_input_config(data: dict):
+def _check_input_config(data: dict) -> None:
     """
     Checks the types of the values in *data* against the expected types of
     config-values. If a value is of the wrong type it will raise a SystemExit.
@@ -79,7 +79,7 @@ def _parse_toml(infile) -> dict:
     return settings
 
 
-def _parse_args(args=None):
+def _parse_args(args: List[str] = None) -> dict:
     """
     Parse CLI arguments.
 
@@ -164,7 +164,7 @@ def _parse_args(args=None):
     return cli_args
 
 
-def make_config(argv=None, tomlfile=None):
+def make_config(argv: List[str] = None, tomlfile: TextIO = None) -> dict:
     """
     Returns a config object for vulture, merging both ``pyproject.toml`` and
     CLI arguments (CLI arguments have precedence).
