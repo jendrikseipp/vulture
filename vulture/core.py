@@ -177,7 +177,7 @@ class Vulture(ast.NodeVisitor):
     def __init__(
         self, verbose=False, ignore_names=None, ignore_decorators=None
     ):
-        self.verbose = verbose
+        self.verbose: bool = verbose
 
         def get_list(typ):
             return utils.LoggingList(typ, self.verbose)

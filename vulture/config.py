@@ -4,7 +4,8 @@ command-line arguments or the pyproject.toml file.
 """
 import argparse
 import sys
-from os.path import abspath, exists
+from os.path import abspath
+import pathlib
 
 import toml
 
@@ -23,7 +24,7 @@ DEFAULTS = {
 }
 
 
-def _check_input_config(data):
+def _check_input_config(data: dict):
     """
     Checks the types of the values in *data* against the expected types of
     config-values. If a value is of the wrong type it will raise a SystemExit.
@@ -38,7 +39,7 @@ def _check_input_config(data):
             sys.exit(f"Data type for {key} must be {expected_type!r}")
 
 
-def _check_output_config(config):
+def _check_output_config(config: dict) -> None:
     """
     Run sanity checks on the generated config after all parsing and
     preprocessing is done.
@@ -49,7 +50,7 @@ def _check_output_config(config):
         sys.exit("Please pass at least one file or directory")
 
 
-def _parse_toml(infile):
+def _parse_toml(infile) -> dict:
     """
     Parse a TOML file for config values.
 
@@ -182,8 +183,8 @@ def make_config(argv=None, tomlfile=None):
         config = _parse_toml(tomlfile)
         detected_toml_path = str(tomlfile)
     else:
-        toml_path = abspath("pyproject.toml")
-        if exists(toml_path):
+        toml_path = pathlib.Path("pyproject.toml").resolve()
+        if toml_path.is_file():
             with open(toml_path) as config:
                 config = _parse_toml(config)
             detected_toml_path = toml_path

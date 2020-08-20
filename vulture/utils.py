@@ -93,7 +93,7 @@ def read_file(filename):
 
 
 class LoggingList(list):
-    def __init__(self, typ, verbose):
+    def __init__(self, typ, verbose: bool):
         self.typ = typ
         self._verbose = verbose
         return list.__init__(self)
