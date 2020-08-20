@@ -1,7 +1,9 @@
 import argparse
 import ast
-from fnmatch import fnmatch, fnmatchcase
+from fnmatch import fnmatch
+from typing import List
 import os.path
+import pathlib
 import pkgutil
 import re
 import string
@@ -42,9 +44,11 @@ def _is_special_name(name):
     return name.startswith("__") and name.endswith("__")
 
 
-def _match(name, patterns, case=True):
-    func = fnmatchcase if case else fnmatch
-    return any(func(name, pattern) for pattern in patterns)
+def _match(name: str, patterns: List[str], case: bool = True) -> bool:
+    if not case:
+        name = name.lower()
+    file_path = pathlib.Path(name)
+    return any(file_path.match(pattern) for pattern in patterns)
 
 
 def _is_test_file(filename):
