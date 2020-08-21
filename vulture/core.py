@@ -246,8 +246,8 @@ class Vulture(ast.NodeVisitor):
 
         exclude = [prepare_pattern(pattern) for pattern in (exclude or [])]
 
-        def exclude_file(name: str) -> bool:
-            return any(fnmatch(name, pattern) for pattern in exclude)
+        def exclude_file(name: pathlib.Path) -> bool:
+            return any(name.match(pattern) for pattern in exclude)
 
         for module in utils.get_modules(paths):
             if exclude_file(module):
