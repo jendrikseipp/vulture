@@ -44,16 +44,17 @@ def _is_special_name(name: str) -> bool:
     return name.startswith("__") and name.endswith("__")
 
 
-def _match(name: str, patterns: List[str], case: bool = True) -> bool:
+def _match(name: pathlib.Path, patterns: List[str], case: bool = True) -> bool:
     if not case:
-        name = name.lower()
-    file_path = pathlib.Path(name)
-    return any(file_path.match(pattern) for pattern in patterns)
+        name = pathlib.Path(str(name).lower())
+    #file_path = pathlib.Path(name)
+    return any(name.match(pattern) for pattern in patterns)
 
 
-def _is_test_file(filename: str) -> bool:
+def _is_test_file(filename: pathlib.Path) -> bool:
     return _match(
-        os.path.abspath(filename),
+        #os.path.abspath(filename),
+        filename.resolve(),
         ["*/test/*", "*/tests/*", "*/test*.py", "*/*_test.py", "*/*-test.py"],
         case=False,
     )
@@ -113,7 +114,7 @@ class Item:
         self,
         name: str,
         typ: str,
-        filename: str,
+        filename: pathlib.Path,
         first_lineno: int,
         last_lineno: int,
         message: str = "",
@@ -203,12 +204,12 @@ class Vulture(ast.NodeVisitor):
         self.code: List[str] = []
         self.found_dead_code_or_error = False
 
-    def scan(self, code: str, filename: str = "") -> None:
+    def scan(self, code: str, filename: str = pathlib.Path("")) -> None:
         self.code = code.splitlines()
         self.noqa_lines = noqa.parse_noqa(self.code)
         self.filename = filename
 
-        def handle_syntax_error(e):
+        def handle_syntax_error(e: SyntaxError) -> None:
             text = f' at "{e.text.strip()}"' if e.text else ""
             print(
                 f"{utils.format_path(filename)}:{e.lineno}: {e.msg}{text}",
@@ -238,7 +239,7 @@ class Vulture(ast.NodeVisitor):
             except SyntaxError as err:
                 handle_syntax_error(err)
 
-    def scavenge(self, paths, exclude=None):
+    def scavenge(self, paths: List[str], exclude=None):
         def prepare_pattern(pattern: str) -> str:
             if not any(char in pattern for char in "*?["):
                 pattern = f"*{pattern}*"
@@ -269,17 +270,21 @@ class Vulture(ast.NodeVisitor):
 
         unique_imports = {item.name for item in self.defined_imports}
         for import_name in unique_imports:
-            path = os.path.join("whitelists", import_name) + "_whitelist.py"
+            path = pathlib.Path("whitelists") / (import_name + "_whitelist.py")
             if exclude_file(path):
                 self._log("Excluded whitelist:", path)
             else:
                 try:
-                    module_data = pkgutil.get_data("vulture", path)
+                    module_data = pkgutil.get_data("vulture", str(path))
                     self._log("Included whitelist:", path)
                 except OSError:
                     # Most imported modules don't have a whitelist.
                     continue
-                module_string = module_data.decode("utf-8")
+                if module_data is not None:
+                    module_string = module_data.decode("utf-8")
+                # XXX: Added if condition here to satisfy mypy
+                else:
+                    module_string = ""
                 self.scan(module_string, filename=path)
 
     def get_unused_code(self,
