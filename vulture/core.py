@@ -1,7 +1,6 @@
 import argparse
 import ast
-from fnmatch import fnmatch
-from typing import List, Tuple
+from typing import List, Tuple, Union, Callable
 import os.path
 import pathlib
 import pkgutil
@@ -31,8 +30,117 @@ ERROR_CODES = {
     "unreachable_code": "V201",
 }
 
+NodeType = Union[ast.Constant,
+                    ast.Num,
+                    ast.Str,
+                    ast.FormattedValue,
+                    ast.JoinedStr,
+                    ast.Bytes,
+                    ast.List,
+                    ast.Tuple,
+                    ast.Set,
+                    ast.Dict,
+                    ast.Ellipsis,
+                    ast.NameConstant,
 
-def _get_unused_items(defined_items, used_names) -> list:
+                    ast.Name,
+                    ast.Load,
+                    ast.Store,
+                    ast.Del,
+                    ast.Starred,
+
+                    ast.Expr,
+                    ast.NamedExpr,
+                    ast.UnaryOp,
+                    ast.UAdd,
+                    ast.USub,
+                    ast.Not,
+                    ast.Invert,
+                    ast.BinOp,
+                    ast.Add,
+                    ast.Sub,
+                    ast.Mult,
+                    ast.Div,
+                    ast.FloorDiv,
+                    ast.Mod,
+                    ast.Pow,
+                    ast.LShift,
+                    ast.RShift,
+                    ast.BitOr,
+                    ast.BitXor,
+                    ast.BitAnd,
+                    ast.MatMult,
+                    ast.BoolOp,
+                    ast.And,
+                    ast.Or,
+                    ast.Compare,
+                    ast.Eq,
+                    ast.NotEq,
+                    ast.Lt,
+                    ast.LtE,
+                    ast.Gt,
+                    ast.GtE,
+                    ast.Is,
+                    ast.IsNot,
+                    ast.In,
+                    ast.NotIn,
+                    ast.Call,
+                    ast.keyword,
+                    ast.IfExp,
+                    ast.Attribute,
+                    ast.Subscript,
+                    ast.Index,
+                    ast.Slice,
+                    ast.ExtSlice,
+                    ast.ListComp,
+                    ast.SetComp,
+                    ast.GeneratorExp,
+                    ast.DictComp,
+                    ast.comprehension,
+                    ast.Assign,
+                    ast.AnnAssign,
+                    ast.AugAssign,
+                    #ast.Print,
+                    ast.Raise,
+                    ast.Assert,
+                    ast.Delete,
+                    ast.Pass,
+                    ast.Import,
+                    ast.ImportFrom,
+                    ast.alias,
+                    ast.If,
+                    ast.For,
+                    ast.While,
+                    ast.Break,
+                    ast.Continue,
+                    ast.Try,
+                    #ast.TryFinally,
+                    #ast.TryExcept,
+                    ast.ExceptHandler,
+                    ast.With,
+                    ast.withitem,
+                    ast.FunctionDef,
+                    ast.Lambda,
+                    ast.arguments,
+                    ast.arg,
+                    ast.Return,
+                    ast.Yield,
+                    ast.YieldFrom,
+                    ast.Global,
+                    ast.Nonlocal,
+                    ast.ClassDef,
+                    ast.AsyncFunctionDef,
+                    ast.Await,
+                    ast.AsyncFor,
+                    ast.AsyncWith,
+                    ast.Module,
+                    ast.Interactive,
+                    ast.Expression]
+
+
+
+def _get_unused_items(defined_items: List['Item'],
+                      used_names: List[str]) -> List['Item']:
     unused_items = [
         item for item in set(defined_items) if item.name not in used_names
     ]
@@ -60,7 +168,7 @@ def _is_test_file(filename: pathlib.Path) -> bool:
     )
 
 
-def _ignore_class(filename: str, class_name) -> bool:
+def _ignore_class(filename: pathlib.Path, class_name: str) -> bool:
     return _is_test_file(filename) and "Test" in class_name
 
 
@@ -73,17 +181,17 @@ def _ignore_import(filename: str, import_name: str) -> bool:
     return pathlib.Path(filename).name == "__init__.py" or import_name == "*"
 
 
-def _ignore_function(filename: str, function_name: str) -> bool:
+def _ignore_function(filename: pathlib.Path, function_name: str) -> bool:
     return function_name.startswith("test_") and _is_test_file(filename)
 
 
-def _ignore_method(filename: str, method_name: str) -> bool:
+def _ignore_method(filename: pathlib.Path, method_name: str) -> bool:
     return _is_special_name(method_name) or (
         method_name.startswith("test_") and _is_test_file(filename)
     )
 
 
-def _ignore_variable(filename: str, varname: str) -> bool:
+def _ignore_variable(filename: str, varname: str) -> bool:  # XXX: unused var 'filename'
     """
     Ignore _ (Python idiom), _x (pylint convention) and
     __x__ (special variable or method), but not __x.
@@ -159,7 +267,7 @@ class Item:
                 prefix, self.name, self.typ, filename, self.first_lineno
             )
 
-    def _tuple(self) -> Tuple[str, int, str]:
+    def _tuple(self) -> Tuple[pathlib.Path, int, str]:
         return (self.filename, self.first_lineno, self.name)
 
     def __repr__(self):
@@ -204,7 +312,7 @@ class Vulture(ast.NodeVisitor):
         self.code: List[str] = []
         self.found_dead_code_or_error = False
 
-    def scan(self, code: str, filename: str = pathlib.Path("")) -> None:
+    def scan(self, code: str, filename: pathlib.Path = pathlib.Path("")) -> None:   #XXX: class instance as default argument cause problem??? Maybe default to None?
         self.code = code.splitlines()
         self.noqa_lines = noqa.parse_noqa(self.code)
         self.filename = filename
@@ -296,8 +404,8 @@ class Vulture(ast.NodeVisitor):
         if not 0 <= min_confidence <= 100:
             raise ValueError("min_confidence must be between 0 and 100.")
 
-        def by_name(item: Item) ->Tuple[str, int] :
-            return (item.filename.lower(), item.first_lineno)
+        def by_name(item: Item) -> Tuple[str, int]:
+            return (str(item.filename).lower(), item.first_lineno)
 
         def by_size(item: Item) -> Tuple[int, str, int]:
             return (item.size,) + by_name(item)
@@ -317,13 +425,14 @@ class Vulture(ast.NodeVisitor):
             obj for obj in unused_code if obj.confidence >= min_confidence
         ]
 
-        return sorted(
+        return sorted(  # XXX: Maybe work here directly?
             confidently_unused, key=by_size if sort_by_size else by_name
         )
 
-    def report(
-        self, min_confidence=0, sort_by_size=False, make_whitelist=False
-    ):
+    def report(self,
+               min_confidence: int = 0,
+               sort_by_size: bool = False,
+               make_whitelist: bool = False) -> bool:
         """
         Print ordered list of Item objects to stdout.
         """
@@ -366,7 +475,7 @@ class Vulture(ast.NodeVisitor):
     def unused_attrs(self):
         return _get_unused_items(self.defined_attrs, self.used_names)
 
-    def _log(self, *args):
+    def _log(self, *args) -> None:
         if self.verbose:
             print(*args)
 
@@ -466,18 +575,18 @@ class Vulture(ast.NodeVisitor):
 
     def _define(
         self,
-        collection,
-        name,
+        collection: utils.LoggingList,
+        name: str,
         first_node,
         last_node=None,
-        message="",
+        message: str = "",
         confidence: int = DEFAULT_CONFIDENCE,
-        ignore=None,
+        ignore: Callable[[str, str], bool] = None,
     ):
         def ignored(lineno):
             return (
                 (ignore and ignore(self.filename, name))
-                or _match(name, self.ignore_names)
+                or name in self.ignore_names
                 or noqa.ignore_line(self.noqa_lines, lineno, ERROR_CODES[typ])
             )
 
@@ -501,7 +610,10 @@ class Vulture(ast.NodeVisitor):
                 )
             )
 
-    def _define_variable(self, name, node, confidence=DEFAULT_CONFIDENCE):
+    def _define_variable(self,
+                         name: str,
+                         node,
+                         confidence: int = DEFAULT_CONFIDENCE) -> None:
         self._define(
             self.defined_vars,
             name,
@@ -535,9 +647,10 @@ class Vulture(ast.NodeVisitor):
 
     def visit_ClassDef(self, node):
         for decorator in node.decorator_list:
-            if _match(
-                utils.get_decorator_name(decorator), self.ignore_decorators
-            ):
+#            if _match(
+#                utils.get_decorator_name(decorator), self.ignore_decorators
+#            ):
+            if utils.get_decorator_name(decorator) in self.ignore_decorators:
                 self._log(
                     f'Ignoring class "{node.name}" (decorator whitelisted)'
                 )
@@ -566,9 +679,10 @@ class Vulture(ast.NodeVisitor):
         else:
             typ = "function"
 
-        if any(
-            _match(name, self.ignore_decorators) for name in decorator_names
-        ):
+        if any(name in self.ignore_decorators for name in decorator_names):
+#        if any(
+#            _match_str(name, self.ignore_decorators) for name in decorator_names
+#        ):
             self._log(f'Ignoring {typ} "{node.name}" (decorator whitelisted)')
         elif typ == "property":
             self._define(self.defined_props, node.name, node)

@@ -26,14 +26,15 @@ pass
     assert not v.found_dead_code_or_error
 
 
-def test_non_utf8_encoding(v, tmpdir):
+def test_non_utf8_encoding(v, tmp_path):
     code = ""
     name = "non_utf8"
-    non_utf_8_file = str(tmpdir.mkdir(name).join(name + ".py"))
+    non_utf_8_file = tmp_path / (name + ".py")
     with open(non_utf_8_file, mode="wb") as f:
         f.write(codecs.BOM_UTF16_LE)
         f.write(code.encode("utf_16_le"))
-    v.scavenge([f.name])
+    #v.scavenge([f.name])
+    v.scavenge([str(non_utf_8_file)])
     assert v.found_dead_code_or_error
 
 

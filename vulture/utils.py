@@ -49,12 +49,18 @@ def condition_is_always_false(condition) -> bool:
 def condition_is_always_true(condition) -> bool:
     return _safe_eval(condition, False)
 
+#def format_path(path):
+#    if not path:
+#        return path
+#    relpath = os.path.relpath(path)
+#    return relpath if not relpath.startswith("..") else path
 
-def format_path(path):
-    if not path:
-        return path
-    relpath = os.path.relpath(path)
-    return relpath if not relpath.startswith("..") else path
+def format_path(path: pathlib.Path) -> str:    # XXX: use pathlib??
+    path_str = str(path)
+    if not path_str:
+        return path_str
+    relpath = os.path.relpath(path_str)
+    return path_str if relpath.startswith("..") else relpath
 
 
 def get_decorator_name(decorator) -> str:
