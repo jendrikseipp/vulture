@@ -78,7 +78,13 @@ def get_modules(paths: List[str], toplevel: bool = True) -> List[pathlib.Path]:
     modules = []
     for path_str in paths:
         path = pathlib.Path(path_str).resolve()
-        top_paths = path.glob('*')
+
+        if path.is_file():
+            top_paths = [path]
+        else:
+            top_paths = path.glob('*')
+
+
         for top_path in top_paths:
             if top_path.is_file():
                 if top_path.suffix == '.pyc':
@@ -87,6 +93,7 @@ def get_modules(paths: List[str], toplevel: bool = True) -> List[pathlib.Path]:
                     modules.append(top_path)
             elif not top_path.is_dir():
                 sys.exit(f"Error: {top_path} could not be found.")
+        #if path.is_dir():
         sub_paths = path.rglob('*.py')
         for sub_path in sub_paths:
             if sub_path.is_file():
