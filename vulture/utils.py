@@ -80,10 +80,9 @@ def get_modules(paths: List[str], toplevel: bool = True) -> List[pathlib.Path]:
         path = pathlib.Path(path_str).resolve()
 
         if path.is_file():
-            top_paths = [path]
+            top_paths = (_ for _ in [path])
         else:
             top_paths = path.glob('*')
-
 
         for top_path in top_paths:
             if top_path.is_file():
