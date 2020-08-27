@@ -1,3 +1,7 @@
+# unreleased
+
+* Only parse format strings when being used with `locals()` (jingw, #225).
+
 # 2.1 (2020-08-19)
 
 * Treat `getattr/hasattr(obj, "constant_string", ...)` as a reference to
