@@ -157,7 +157,8 @@ def test_invalid_config_options_output():
 
 
 @pytest.mark.parametrize(
-    "key, value", list(DEFAULTS.items()),
+    "key, value",
+    list(DEFAULTS.items()),
 )
 def test_incompatible_option_type(key, value):
     """

@@ -50,7 +50,7 @@ def condition_is_always_true(condition) -> bool:
     return _safe_eval(condition, False)
 
 
-def format_path(path: pathlib.Path) -> str:    # XXX: use pathlib??
+def format_path(path: pathlib.Path) -> str:
     path_str = str(path)
     if not path_str:
         return path_str
@@ -68,6 +68,7 @@ def get_decorator_name(decorator) -> str:
     parts.append(decorator.id)
     return "@" + ".".join(reversed(parts))
 
+
 def get_modules(paths: List[str]) -> List[pathlib.Path]:
     """Take files from the command line even if they don't end with .py."""
     modules = []
@@ -80,17 +81,17 @@ def get_modules(paths: List[str]) -> List[pathlib.Path]:
         if path.is_file():
             top_paths = (_ for _ in [path])
         else:
-            top_paths = path.glob('*')
+            top_paths = path.glob("*")
 
         for top_path in top_paths:
             if top_path.is_file():
-                if top_path.suffix == '.pyc':
+                if top_path.suffix == ".pyc":
                     sys.exit(f".pyc files are not supported: {top_path}")
                 else:
                     modules.append(top_path)
             elif not top_path.is_dir():
                 sys.exit(f"Error: {top_path} could not be found.")
-        sub_paths = path.rglob('*.py')
+        sub_paths = path.rglob("*.py")
         for sub_path in sub_paths:
             if sub_path.is_file():
                 modules.append(sub_path)
@@ -112,7 +113,7 @@ class LoggingList(list):
         self._verbose = verbose
         return list.__init__(self)
 
-    def append(self, item: 'Item') -> None:
+    def append(self, item: "Item") -> None:
         if self._verbose:
             print(f'define {self.typ} "{item.name}"')
         list.append(self, item)

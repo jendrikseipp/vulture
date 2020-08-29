@@ -90,7 +90,7 @@ def _parse_args(args: List[str] = None) -> dict:
     # Sentinel value to distinguish between "False" and "no default given".
     missing = object()
 
-    def csv(exclude):
+    def csv(exclude: str) -> List[str]:
         return exclude.split(",")
 
     usage = "%(prog)s [options] [PATH ...]"

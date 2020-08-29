@@ -17,6 +17,8 @@ __version__ = "2.0"
 
 DEFAULT_CONFIDENCE = 60
 
+DEFAULT_FILE_PATH = pathlib.Path("")
+
 IGNORED_VARIABLE_NAMES = {"object", "self"}
 
 ERROR_CODES = {
@@ -31,8 +33,9 @@ ERROR_CODES = {
 }
 
 
-def _get_unused_items(defined_items: List['Item'],
-                      used_names: List[str]) -> List['Item']:
+def _get_unused_items(
+    defined_items: List["Item"], used_names: List[str]
+) -> List["Item"]:
     unused_items = [
         item for item in set(defined_items) if item.name not in used_names
     ]
@@ -49,8 +52,10 @@ def _match(name: pathlib.Path, patterns: List[str], case: bool = True) -> bool:
         name = pathlib.Path(str(name).lower())
     return any(name.match(pattern) for pattern in patterns)
 
+
 def _match_name(name: str, patterns: List[str]) -> bool:
     return any(fnmatchcase(name, pattern) for pattern in patterns)
+
 
 def _is_test_file(filename: pathlib.Path) -> bool:
     return _match(
@@ -64,13 +69,13 @@ def _ignore_class(filename: pathlib.Path, class_name: str) -> bool:
     return _is_test_file(filename) and "Test" in class_name
 
 
-def _ignore_import(filename: str, import_name: str) -> bool:
+def _ignore_import(filename: pathlib.Path, import_name: str) -> bool:
     """
     Ignore star-imported names since we can't detect whether they are used.
     Ignore imports from __init__.py files since they're commonly used to
     collect objects from a package.
     """
-    return pathlib.Path(filename).name == "__init__.py" or import_name == "*"
+    return filename.name == "__init__.py" or import_name == "*"
 
 
 def _ignore_function(filename: pathlib.Path, function_name: str) -> bool:
@@ -83,7 +88,7 @@ def _ignore_method(filename: pathlib.Path, method_name: str) -> bool:
     )
 
 
-def _ignore_variable(filename: str, varname: str) -> bool:  # XXX: unused var 'filename'
+def _ignore_variable(filename: pathlib.Path, varname: str) -> bool:
     """
     Ignore _ (Python idiom), _x (pylint convention) and
     __x__ (special variable or method), but not __x.
@@ -179,7 +184,7 @@ class Vulture(ast.NodeVisitor):
         self,
         verbose: bool = False,
         ignore_names: List[str] = None,
-        ignore_decorators: List[str] = None
+        ignore_decorators: List[str] = None,
     ):
         self.verbose = verbose
 
@@ -200,11 +205,13 @@ class Vulture(ast.NodeVisitor):
         self.ignore_names = ignore_names or []
         self.ignore_decorators = ignore_decorators or []
 
-        self.filename = ""
+        self.filename = pathlib.Path()
         self.code: List[str] = []
         self.found_dead_code_or_error = False
 
-    def scan(self, code: str, filename: pathlib.Path = pathlib.Path("")) -> None:   #XXX: class instance as default argument cause problem??? Maybe default to None?
+    def scan(
+        self, code: str, filename: pathlib.Path = DEFAULT_FILE_PATH
+    ) -> None:
         self.code = code.splitlines()
         self.noqa_lines = noqa.parse_noqa(self.code)
         self.filename = filename
@@ -219,9 +226,11 @@ class Vulture(ast.NodeVisitor):
 
         try:
             node = (
-                ast.parse(code, filename=self.filename, type_comments=True)
+                ast.parse(
+                    code, filename=str(self.filename), type_comments=True
+                )
                 if sys.version_info >= (3, 8)  # type_comments requires 3.8+
-                else ast.parse(code, filename=self.filename)
+                else ast.parse(code, filename=str(self.filename))
             )
         except SyntaxError as err:
             handle_syntax_error(err)
@@ -248,7 +257,7 @@ class Vulture(ast.NodeVisitor):
         exclude = [prepare_pattern(pattern) for pattern in (exclude or [])]
 
         def exclude_file(name: pathlib.Path) -> bool:
-            #return any(name.match(pattern) for pattern in exclude)
+            # return any(name.match(pattern) for pattern in exclude)
             return any(fnmatch(str(name), pattern) for pattern in exclude)
 
         for module in utils.get_modules(paths):
@@ -282,15 +291,15 @@ class Vulture(ast.NodeVisitor):
                     # Most imported modules don't have a whitelist.
                     continue
                 if module_data is not None:
+                    # Added `if` condition here to satisfy mypy
                     module_string = module_data.decode("utf-8")
-                    # XXX: Added if condition here to satisfy mypy
                 else:
                     module_string = ""
                 self.scan(module_string, filename=path)
 
-    def get_unused_code(self,
-                        min_confidence: int = 0,
-                        sort_by_size: bool = False) -> List[Item]:
+    def get_unused_code(
+        self, min_confidence: int = 0, sort_by_size: bool = False
+    ) -> List[Item]:
         """
         Return ordered list of unused Item objects.
         """
@@ -318,14 +327,16 @@ class Vulture(ast.NodeVisitor):
             obj for obj in unused_code if obj.confidence >= min_confidence
         ]
 
-        return sorted(  # XXX: Maybe work here directly?
+        return sorted(
             confidently_unused, key=by_size if sort_by_size else by_name
         )
 
-    def report(self,
-               min_confidence: int = 0,
-               sort_by_size: bool = False,
-               make_whitelist: bool = False) -> bool:
+    def report(
+        self,
+        min_confidence: int = 0,
+        sort_by_size: bool = False,
+        make_whitelist: bool = False,
+    ) -> bool:
         """
         Print ordered list of Item objects to stdout.
         """
@@ -444,7 +455,7 @@ class Vulture(ast.NodeVisitor):
 
         """
         # Old format strings.
-        #self.used_names |= set(re.findall(r"\%\((\w+)\)", s))
+        # self.used_names |= set(re.findall(r"\%\((\w+)\)", s))
         self.used_names.update(set(re.findall(r"\%\((\w+)\)", s)))
 
         def is_identifier(name: str) -> bool:
@@ -474,7 +485,7 @@ class Vulture(ast.NodeVisitor):
         last_node=None,
         message: str = "",
         confidence: int = DEFAULT_CONFIDENCE,
-        ignore: Callable[[str, str], bool] = None,
+        ignore: Callable[[pathlib.Path, str], bool] = None,
     ):
         def ignored(lineno):
             return (
@@ -503,10 +514,9 @@ class Vulture(ast.NodeVisitor):
                 )
             )
 
-    def _define_variable(self,
-                         name: str,
-                         node,
-                         confidence: int = DEFAULT_CONFIDENCE) -> None:
+    def _define_variable(
+        self, name: str, node, confidence: int = DEFAULT_CONFIDENCE
+    ) -> None:
         self._define(
             self.defined_vars,
             name,
@@ -572,7 +582,8 @@ class Vulture(ast.NodeVisitor):
             typ = "function"
 
         if any(
-            _match_name(name, self.ignore_decorators) for name in decorator_names
+            _match_name(name, self.ignore_decorators)
+            for name in decorator_names
         ):
             self._log(f'Ignoring {typ} "{node.name}" (decorator whitelisted)')
         elif typ == "property":
@@ -682,7 +693,7 @@ class Vulture(ast.NodeVisitor):
                 self.visit(value)
 
 
-def _parse_args() -> argparse.Namespace:    # XXX: two _parse_args() ???
+def _parse_args() -> argparse.Namespace:  # XXX: two _parse_args() ???
     def csv(exclude: str) -> List[str]:
         return exclude.split(",")
 
