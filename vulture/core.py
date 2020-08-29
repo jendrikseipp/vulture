@@ -1,7 +1,7 @@
 import argparse
 import ast
+from fnmatch import fnmatch, fnmatchcase
 from typing import List, Tuple, Callable
-from fnmatch import fnmatchcase
 import pathlib
 import pkgutil
 import re
@@ -248,7 +248,8 @@ class Vulture(ast.NodeVisitor):
         exclude = [prepare_pattern(pattern) for pattern in (exclude or [])]
 
         def exclude_file(name: pathlib.Path) -> bool:
-            return any(name.match(pattern) for pattern in exclude)
+            #return any(name.match(pattern) for pattern in exclude)
+            return any(fnmatch(str(name), pattern) for pattern in exclude)
 
         for module in utils.get_modules(paths):
             if exclude_file(module):
@@ -282,7 +283,7 @@ class Vulture(ast.NodeVisitor):
                     continue
                 if module_data is not None:
                     module_string = module_data.decode("utf-8")
-                # XXX: Added if condition here to satisfy mypy
+                    # XXX: Added if condition here to satisfy mypy
                 else:
                     module_string = ""
                 self.scan(module_string, filename=path)
