@@ -1,6 +1,7 @@
 import argparse
 import ast
 from typing import List, Tuple, Union, Callable
+from fnmatch import fnmatchcase
 import os.path
 import pathlib
 import pkgutil
@@ -30,114 +31,6 @@ ERROR_CODES = {
     "unreachable_code": "V201",
 }
 
-NodeType = Union[ast.Constant,
-                    ast.Num,
-                    ast.Str,
-                    ast.FormattedValue,
-                    ast.JoinedStr,
-                    ast.Bytes,
-                    ast.List,
-                    ast.Tuple,
-                    ast.Set,
-                    ast.Dict,
-                    ast.Ellipsis,
-                    ast.NameConstant,
-
-                    ast.Name,
-                    ast.Load,
-                    ast.Store,
-                    ast.Del,
-                    ast.Starred,
-
-                    ast.Expr,
-                    ast.NamedExpr,
-                    ast.UnaryOp,
-                    ast.UAdd,
-                    ast.USub,
-                    ast.Not,
-                    ast.Invert,
-                    ast.BinOp,
-                    ast.Add,
-                    ast.Sub,
-                    ast.Mult,
-                    ast.Div,
-                    ast.FloorDiv,
-                    ast.Mod,
-                    ast.Pow,
-                    ast.LShift,
-                    ast.RShift,
-                    ast.BitOr,
-                    ast.BitXor,
-                    ast.BitAnd,
-                    ast.MatMult,
-                    ast.BoolOp,
-                    ast.And,
-                    ast.Or,
-                    ast.Compare,
-                    ast.Eq,
-                    ast.NotEq,
-                    ast.Lt,
-                    ast.LtE,
-                    ast.Gt,
-                    ast.GtE,
-                    ast.Is,
-                    ast.IsNot,
-                    ast.In,
-                    ast.NotIn,
-                    ast.Call,
-                    ast.keyword,
-                    ast.IfExp,
-                    ast.Attribute,
-                    ast.Subscript,
-                    ast.Index,
-                    ast.Slice,
-                    ast.ExtSlice,
-                    ast.ListComp,
-                    ast.SetComp,
-                    ast.GeneratorExp,
-                    ast.DictComp,
-                    ast.comprehension,
-                    ast.Assign,
-                    ast.AnnAssign,
-                    ast.AugAssign,
-                    #ast.Print,
-                    ast.Raise,
-                    ast.Assert,
-                    ast.Delete,
-                    ast.Pass,
-                    ast.Import,
-                    ast.ImportFrom,
-                    ast.alias,
-                    ast.If,
-                    ast.For,
-                    ast.While,
-                    ast.Break,
-                    ast.Continue,
-                    ast.Try,
-                    #ast.TryFinally,
-                    #ast.TryExcept,
-                    ast.ExceptHandler,
-                    ast.With,
-                    ast.withitem,
-                    ast.FunctionDef,
-                    ast.Lambda,
-                    ast.arguments,
-                    ast.arg,
-                    ast.Return,
-                    ast.Yield,
-                    ast.YieldFrom,
-                    ast.Global,
-                    ast.Nonlocal,
-                    ast.ClassDef,
-                    ast.AsyncFunctionDef,
-                    ast.Await,
-                    ast.AsyncFor,
-                    ast.AsyncWith,
-                    ast.Module,
-                    ast.Interactive,
-                    ast.Expression]
-
-
 
 def _get_unused_items(defined_items: List['Item'],
                       used_names: List[str]) -> List['Item']:
@@ -155,13 +48,13 @@ def _is_special_name(name: str) -> bool:
 def _match(name: pathlib.Path, patterns: List[str], case: bool = True) -> bool:
     if not case:
         name = pathlib.Path(str(name).lower())
-    #file_path = pathlib.Path(name)
     return any(name.match(pattern) for pattern in patterns)
 
+def _match_name(name: str, patterns: List[str]) -> bool:
+    return any(fnmatchcase(name, pattern) for pattern in patterns)
 
 def _is_test_file(filename: pathlib.Path) -> bool:
     return _match(
-        #os.path.abspath(filename),
         filename.resolve(),
         ["*/test/*", "*/tests/*", "*/test*.py", "*/*_test.py", "*/*-test.py"],
         case=False,
@@ -586,7 +479,7 @@ class Vulture(ast.NodeVisitor):
         def ignored(lineno):
             return (
                 (ignore and ignore(self.filename, name))
-                or name in self.ignore_names
+                or _match_name(name, self.ignore_names)
                 or noqa.ignore_line(self.noqa_lines, lineno, ERROR_CODES[typ])
             )
 
@@ -650,7 +543,10 @@ class Vulture(ast.NodeVisitor):
 #            if _match(
 #                utils.get_decorator_name(decorator), self.ignore_decorators
 #            ):
-            if utils.get_decorator_name(decorator) in self.ignore_decorators:
+            if _match_name(
+                utils.get_decorator_name(decorator), self.ignore_decorators
+            ):
+            #if utils.get_decorator_name(decorator) in self.ignore_decorators:
                 self._log(
                     f'Ignoring class "{node.name}" (decorator whitelisted)'
                 )
@@ -679,7 +575,10 @@ class Vulture(ast.NodeVisitor):
         else:
             typ = "function"
 
-        if any(name in self.ignore_decorators for name in decorator_names):
+#        if any(name in self.ignore_decorators for name in decorator_names):
+        if any(
+            _match_name(name, self.ignore_decorators) for name in decorator_names
+        ):
 #        if any(
 #            _match_str(name, self.ignore_decorators) for name in decorator_names
 #        ):
