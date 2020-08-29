@@ -37,11 +37,10 @@ def test_non_utf8_encoding(v, tmp_path):
     assert v.found_dead_code_or_error
 
 
-def test_utf8_with_bom(v, tmpdir):
+def test_utf8_with_bom(v, tmp_path):
     name = "utf8_bom"
-    filename = str(tmpdir.mkdir(name).join(name + ".py"))
+    filepath = tmp_path / (name + ".py")
     # utf8_sig prepends the BOM to the file.
-    with open(filename, mode="w", encoding="utf-8-sig") as f:
-        f.write("")
-    v.scavenge([f.name])
+    filepath.write_text("", encoding="utf-8-sig")
+    v.scavenge([str(filepath)])
     assert not v.found_dead_code_or_error

@@ -49,11 +49,6 @@ def condition_is_always_false(condition) -> bool:
 def condition_is_always_true(condition) -> bool:
     return _safe_eval(condition, False)
 
-#def format_path(path):
-#    if not path:
-#        return path
-#    relpath = os.path.relpath(path)
-#    return relpath if not relpath.startswith("..") else path
 
 def format_path(path: pathlib.Path) -> str:    # XXX: use pathlib??
     path_str = str(path)
@@ -73,11 +68,14 @@ def get_decorator_name(decorator) -> str:
     parts.append(decorator.id)
     return "@" + ".".join(reversed(parts))
 
-def get_modules(paths: List[str], toplevel: bool = True) -> List[pathlib.Path]:
+def get_modules(paths: List[str]) -> List[pathlib.Path]:
     """Take files from the command line even if they don't end with .py."""
     modules = []
     for path_str in paths:
         path = pathlib.Path(path_str).resolve()
+
+        if not path.exists():
+            sys.exit(f"Error: {path} could not be found.")
 
         if path.is_file():
             top_paths = (_ for _ in [path])
@@ -92,50 +90,11 @@ def get_modules(paths: List[str], toplevel: bool = True) -> List[pathlib.Path]:
                     modules.append(top_path)
             elif not top_path.is_dir():
                 sys.exit(f"Error: {top_path} could not be found.")
-        #if path.is_dir():
         sub_paths = path.rglob('*.py')
         for sub_path in sub_paths:
             if sub_path.is_file():
                 modules.append(sub_path)
     return modules
-
-#def orig_get_modules(paths: List[str], toplevel: bool = True) -> List[pathlib.Path]:
-#    """Take files from the command line even if they don't end with .py."""
-#    modules = []
-#    for path_str in paths:
-#        path = pathlib.Path(path_str).resolve()
-#        if toplevel and path.suffix == ".pyc":
-#            sys.exit(f".pyc files are not supported: {path}")
-#        if path.is_file() and (path.suffix == ".py" or toplevel):
-#            modules.append(path)
-#        elif path.is_dir():
-#            subpaths = [
-#                os.path.join(path, filename)
-#                for filename in sorted(os.listdir(path))
-#            ]
-#            modules.extend(get_modules(subpaths, toplevel=False))
-#        elif toplevel:
-#            sys.exit(f"Error: {path} could not be found.")
-#    return modules
-
-#def get_modules(paths, toplevel=True):
-#    """Take files from the command line even if they don't end with .py."""
-#    modules = []
-#    for path in paths:
-#        path = os.path.abspath(path)
-#        if toplevel and path.endswith(".pyc"):
-#            sys.exit(f".pyc files are not supported: {path}")
-#        if os.path.isfile(path) and (path.endswith(".py") or toplevel):
-#            modules.append(path)
-#        elif os.path.isdir(path):
-#            subpaths = [
-#                os.path.join(path, filename)
-#                for filename in sorted(os.listdir(path))
-#            ]
-#            modules.extend(get_modules(subpaths, toplevel=False))
-#        elif toplevel:
-#            sys.exit(f"Error: {path} could not be found.")
-#    return modules
 
 
 def read_file(filename: pathlib.Path) -> str:

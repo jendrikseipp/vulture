@@ -1,8 +1,7 @@
 import argparse
 import ast
-from typing import List, Tuple, Union, Callable
+from typing import List, Tuple, Callable
 from fnmatch import fnmatchcase
-import os.path
 import pathlib
 import pkgutil
 import re
@@ -540,13 +539,9 @@ class Vulture(ast.NodeVisitor):
 
     def visit_ClassDef(self, node):
         for decorator in node.decorator_list:
-#            if _match(
-#                utils.get_decorator_name(decorator), self.ignore_decorators
-#            ):
             if _match_name(
                 utils.get_decorator_name(decorator), self.ignore_decorators
             ):
-            #if utils.get_decorator_name(decorator) in self.ignore_decorators:
                 self._log(
                     f'Ignoring class "{node.name}" (decorator whitelisted)'
                 )
@@ -575,13 +570,9 @@ class Vulture(ast.NodeVisitor):
         else:
             typ = "function"
 
-#        if any(name in self.ignore_decorators for name in decorator_names):
         if any(
             _match_name(name, self.ignore_decorators) for name in decorator_names
         ):
-#        if any(
-#            _match_str(name, self.ignore_decorators) for name in decorator_names
-#        ):
             self._log(f'Ignoring {typ} "{node.name}" (decorator whitelisted)')
         elif typ == "property":
             self._define(self.defined_props, node.name, node)
@@ -690,7 +681,7 @@ class Vulture(ast.NodeVisitor):
                 self.visit(value)
 
 
-def _parse_args() -> argparse.Namespace:
+def _parse_args() -> argparse.Namespace:    # XXX: two _parse_args() ???
     def csv(exclude: str) -> List[str]:
         return exclude.split(",")
 
