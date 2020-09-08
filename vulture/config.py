@@ -20,7 +20,7 @@ DEFAULTS = {
     "make_whitelist": False,
     "sort_by_size": False,
     "verbose": False,
-    "absolute_paths": False
+    "absolute_paths": False,
 }
 
 
