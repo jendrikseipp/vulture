@@ -121,9 +121,6 @@ class LoggingSet(set):
         self._verbose = verbose
         return set.__init__(self)
 
-    def update(self, *others):
-        return set.update(self, *others)
-
     def add(self, name):
         if self._verbose:
             print(f'use {self.typ} "{name}"')
