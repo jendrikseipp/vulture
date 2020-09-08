@@ -27,6 +27,7 @@ def test_cli_args():
         ignore_names=["name1", "name2"],
         make_whitelist=True,
         min_confidence=10,
+        absolute_paths=True,
         sort_by_size=True,
         verbose=True,
     )
@@ -39,6 +40,7 @@ def test_cli_args():
             "--min-confidence=10",
             "--sort-by-size",
             "--verbose",
+            "--absolute-paths",
             "path1",
             "path2",
         ]
@@ -97,6 +99,7 @@ def test_config_merging():
         min_confidence = 10
         sort_by_size = false
         verbose = false
+        absolute_paths = true
         paths = ["toml_path"]
         """
         )
@@ -108,6 +111,7 @@ def test_config_merging():
         "--make-whitelist",
         "--min-confidence=20",
         "--sort-by-size",
+        "--absolute-paths",
         "--verbose",
         "cli_path",
     ]
@@ -120,6 +124,7 @@ def test_config_merging():
         make_whitelist=True,
         min_confidence=20,
         sort_by_size=True,
+        absolute_paths=True,
         verbose=True,
     )
     assert result == expected

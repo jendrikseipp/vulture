@@ -1,6 +1,25 @@
 import ast
+import os
+import pathlib
 
 from vulture import utils
+
+
+def check_paths(filename, absolute=False):
+    pathstr = utils.format_path(filename, absolute)
+    # platform dependencies and path types need to be accounted for
+    pp = pathlib.PurePath(pathstr)
+    check = pp.is_absolute()
+    if absolute:
+        assert check == True
+    # even if absolute == True, the path might have been specified absolute
+    # so can't conclude negatively
+
+def test_absolute_path():
+    check_paths(__file__, absolute=True)
+
+def test_relative_path():
+    check_paths(__file__, absolute=False)
 
 
 def check_decorator_names(code, expected_names):

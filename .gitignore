@@ -9,3 +9,4 @@ vulture.egg-info/
 .pytest_cache/
 .tox/
 .venv/
+.idea/

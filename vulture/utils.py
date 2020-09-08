@@ -2,6 +2,7 @@ import ast
 import os
 import sys
 import tokenize
+from pathlib import Path
 
 
 class VultureInputException(Exception):
@@ -45,10 +46,20 @@ def condition_is_always_true(condition):
     return _safe_eval(condition, False)
 
 
-def format_path(path):
+def format_path(path, absolute=False):
     if not path:
         return path
-    relpath = os.path.relpath(path)
+    if not absolute:
+        relpath = os.path.relpath(path)
+        # print(f'relative path {relpath}', file=sys.stderr, flush=True)
+    else:
+        # print('absolute paths set', file=sys.stderr)
+        pp = Path(path)
+        # make the path absolute, resolving any symlinks
+        resolved_path = pp.resolve(strict=True)
+        # relpath = os.path.abspath(path)
+        relpath = str(resolved_path)
+        # print(f'abs path {relpath}', file=sys.stderr, flush=True)
     return relpath if not relpath.startswith("..") else path
 
 
@@ -96,7 +107,8 @@ class LoggingList(list):
     def __init__(self, typ, verbose):
         self.typ = typ
         self._verbose = verbose
-        return list.__init__(self)
+        # return list.__init__(self)
+        list.__init__(self)
 
     def append(self, item):
         if self._verbose:
@@ -108,7 +120,8 @@ class LoggingSet(set):
     def __init__(self, typ, verbose):
         self.typ = typ
         self._verbose = verbose
-        return set.__init__(self)
+        # return set.__init__(self)
+        set.__init__(self)
 
     def add(self, name):
         if self._verbose:

@@ -103,6 +103,7 @@ class Item:
         "last_lineno",
         "message",
         "confidence",
+        "absolute_paths"
     )
 
     def __init__(
@@ -114,6 +115,7 @@ class Item:
         last_lineno,
         message="",
         confidence=DEFAULT_CONFIDENCE,
+        absolute_paths=False
     ):
         self.name = name
         self.typ = typ
@@ -122,6 +124,7 @@ class Item:
         self.last_lineno = last_lineno
         self.message = message or f"unused {typ} '{name}'"
         self.confidence = confidence
+        self.absolute_paths = absolute_paths
 
     @property
     def size(self):
@@ -135,7 +138,7 @@ class Item:
         else:
             size_report = ""
         return "{}:{:d}: {} ({}% confidence{})".format(
-            utils.format_path(self.filename),
+            utils.format_path(self.filename, absolute=self.absolute_paths),
             self.first_lineno,
             self.message,
             self.confidence,
@@ -143,7 +146,7 @@ class Item:
         )
 
     def get_whitelist_string(self):
-        filename = utils.format_path(self.filename)
+        filename = utils.format_path(self.filename, self.absolute_paths)
         if self.typ == "unreachable_code":
             return f"# {self.message} ({filename}:{self.first_lineno})"
         else:
@@ -171,10 +174,10 @@ class Vulture(ast.NodeVisitor):
     """Find dead code."""
 
     def __init__(
-        self, verbose=False, ignore_names=None, ignore_decorators=None
+        self, verbose=False, ignore_names=None, ignore_decorators=None, absolute_paths=False
     ):
         self.verbose = verbose
-
+        self.absolute_paths = absolute_paths
         def get_list(typ):
             return utils.LoggingList(typ, self.verbose)
 
@@ -201,17 +204,18 @@ class Vulture(ast.NodeVisitor):
         self.noqa_lines = noqa.parse_noqa(self.code)
         self.filename = filename
 
+        abs_paths = self.absolute_paths
         def handle_syntax_error(e):
             text = f' at "{e.text.strip()}"' if e.text else ""
             print(
-                f"{utils.format_path(filename)}:{e.lineno}: {e.msg}{text}",
+                f"{utils.format_path(filename, absolute=abs_paths)}:{e.lineno}: {e.msg}{text}",
                 file=sys.stderr,
             )
             self.found_dead_code_or_error = True
 
         try:
             node = (
-                ast.parse(code, filename=self.filename, type_comments=True)
+                ast.parse(code, filename=self.filename, type_comments=True)  # fails if not python 3.8.x
                 if sys.version_info >= (3, 8)  # type_comments requires 3.8+
                 else ast.parse(code, filename=self.filename)
             )
@@ -220,7 +224,7 @@ class Vulture(ast.NodeVisitor):
         except ValueError as err:
             # ValueError is raised if source contains null bytes.
             print(
-                f'{utils.format_path(filename)}: invalid source code "{err}"',
+                f'{utils.format_path(filename, absolute=self.absolute_paths)}: invalid source code "{err}"',
                 file=sys.stderr,
             )
             self.found_dead_code_or_error = True
@@ -452,6 +456,7 @@ class Vulture(ast.NodeVisitor):
                     last_lineno,
                     message=message,
                     confidence=confidence,
+                    absolute_paths=self.absolute_paths
                 )
             )
 
@@ -733,6 +738,14 @@ def _parse_args():
         action="store_true",
         help="Sort unused functions and classes by their lines of code.",
     )
+    parser.add_argument(
+        "--absolute-paths",
+        action="store_true",
+        default=False,
+        required=False,
+        help="Output absolute file paths.",
+    )
+
     parser.add_argument("-v", "--verbose", action="store_true")
     parser.add_argument("--version", action="version", version=version)
     return parser.parse_args()
@@ -744,6 +757,7 @@ def main():
         verbose=config["verbose"],
         ignore_names=config["ignore_names"],
         ignore_decorators=config["ignore_decorators"],
+        absolute_paths=config["absolute_paths"]
     )
     vulture.scavenge(config["paths"], exclude=config["exclude"])
     sys.exit(
