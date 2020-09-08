@@ -1,19 +1,15 @@
-from typing import List, TYPE_CHECKING
 import ast
 import os
 import pathlib
 import sys
 import tokenize
 
-if TYPE_CHECKING:
-    from vulture.core import Item
-
 
 class VultureInputException(Exception):
     pass
 
 
-def _safe_eval(node, default: bool) -> bool:
+def _safe_eval(node, default):
     """
     Safely evaluate the Boolean expression under the given AST node.
 
@@ -42,15 +38,15 @@ def _safe_eval(node, default: bool) -> bool:
             return default
 
 
-def condition_is_always_false(condition) -> bool:
+def condition_is_always_false(condition):
     return not _safe_eval(condition, True)
 
 
-def condition_is_always_true(condition) -> bool:
+def condition_is_always_true(condition):
     return _safe_eval(condition, False)
 
 
-def format_path(path: pathlib.Path) -> str:
+def format_path(path):
     path_str = str(path)
     if not path_str:
         return path_str
@@ -58,7 +54,7 @@ def format_path(path: pathlib.Path) -> str:
     return path_str if relpath.startswith("..") else relpath
 
 
-def get_decorator_name(decorator) -> str:
+def get_decorator_name(decorator):
     if isinstance(decorator, ast.Call):
         decorator = decorator.func
     parts = []
@@ -69,7 +65,7 @@ def get_decorator_name(decorator) -> str:
     return "@" + ".".join(reversed(parts))
 
 
-def get_modules(paths: List[str]) -> List[pathlib.Path]:
+def get_modules(paths):
     """Take files from the command line even if they don't end with .py."""
     modules = []
     for path_str in paths:
@@ -98,7 +94,7 @@ def get_modules(paths: List[str]) -> List[pathlib.Path]:
     return modules
 
 
-def read_file(filename: pathlib.Path) -> str:
+def read_file(filename):
     try:
         # Use encoding detected by tokenize.detect_encoding().
         with tokenize.open(filename) as f:
@@ -108,19 +104,19 @@ def read_file(filename: pathlib.Path) -> str:
 
 
 class LoggingList(list):
-    def __init__(self, typ: str, verbose: bool):
+    def __init__(self, typ, verbose):
         self.typ = typ
         self._verbose = verbose
         return list.__init__(self)
 
-    def append(self, item: "Item") -> None:
+    def append(self, item):
         if self._verbose:
             print(f'define {self.typ} "{item.name}"')
         list.append(self, item)
 
 
 class LoggingSet(set):
-    def __init__(self, typ: str, verbose: bool):
+    def __init__(self, typ, verbose):
         self.typ = typ
         self._verbose = verbose
         return set.__init__(self)
@@ -128,7 +124,7 @@ class LoggingSet(set):
     def update(self, *others):
         return set.update(self, *others)
 
-    def add(self, name: str):
+    def add(self, name):
         if self._verbose:
             print(f'use {self.typ} "{name}"')
         set.add(self, name)

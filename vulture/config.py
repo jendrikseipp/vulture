@@ -2,7 +2,6 @@
 This module handles retrieval of configuration values from either the
 command-line arguments or the pyproject.toml file.
 """
-from typing import TextIO, List
 import argparse
 import pathlib
 import sys
@@ -24,7 +23,7 @@ DEFAULTS = {
 }
 
 
-def _check_input_config(data: dict) -> None:
+def _check_input_config(data):
     """
     Checks the types of the values in *data* against the expected types of
     config-values. If a value is of the wrong type it will raise a SystemExit.
@@ -39,7 +38,7 @@ def _check_input_config(data: dict) -> None:
             sys.exit(f"Data type for {key} must be {expected_type!r}")
 
 
-def _check_output_config(config: dict) -> None:
+def _check_output_config(config):
     """
     Run sanity checks on the generated config after all parsing and
     preprocessing is done.
@@ -50,7 +49,7 @@ def _check_output_config(config: dict) -> None:
         sys.exit("Please pass at least one file or directory")
 
 
-def _parse_toml(infile) -> dict:
+def _parse_toml(infile):
     """
     Parse a TOML file for config values.
 
@@ -79,7 +78,7 @@ def _parse_toml(infile) -> dict:
     return settings
 
 
-def _parse_args(args: List[str] = None) -> dict:
+def _parse_args(args=None):
     """
     Parse CLI arguments.
 
@@ -90,7 +89,7 @@ def _parse_args(args: List[str] = None) -> dict:
     # Sentinel value to distinguish between "False" and "no default given".
     missing = object()
 
-    def csv(exclude: str) -> List[str]:
+    def csv(exclude):
         return exclude.split(",")
 
     usage = "%(prog)s [options] [PATH ...]"
@@ -164,7 +163,7 @@ def _parse_args(args: List[str] = None) -> dict:
     return cli_args
 
 
-def make_config(argv: List[str] = None, tomlfile: TextIO = None) -> dict:
+def make_config(argv=None, tomlfile=None):
     """
     Returns a config object for vulture, merging both ``pyproject.toml`` and
     CLI arguments (CLI arguments have precedence).

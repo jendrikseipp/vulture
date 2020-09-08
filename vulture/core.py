@@ -1,7 +1,6 @@
 import argparse
 import ast
 from fnmatch import fnmatch, fnmatchcase
-from typing import List, Tuple, Callable
 import pathlib
 import pkgutil
 import re
@@ -33,9 +32,7 @@ ERROR_CODES = {
 }
 
 
-def _get_unused_items(
-    defined_items: List["Item"], used_names: List[str]
-) -> List["Item"]:
+def _get_unused_items(defined_items, used_names):
     unused_items = [
         item for item in set(defined_items) if item.name not in used_names
     ]
@@ -43,21 +40,21 @@ def _get_unused_items(
     return unused_items
 
 
-def _is_special_name(name: str) -> bool:
+def _is_special_name(name):
     return name.startswith("__") and name.endswith("__")
 
 
-def _match(name: pathlib.Path, patterns: List[str], case: bool = True) -> bool:
+def _match(name, patterns, case=True):
     if not case:
         name = pathlib.Path(str(name).lower())
     return any(name.match(pattern) for pattern in patterns)
 
 
-def _match_name(name: str, patterns: List[str]) -> bool:
+def _match_name(name, patterns):
     return any(fnmatchcase(name, pattern) for pattern in patterns)
 
 
-def _is_test_file(filename: pathlib.Path) -> bool:
+def _is_test_file(filename):
     return _match(
         filename.resolve(),
         ["*/test/*", "*/tests/*", "*/test*.py", "*/*_test.py", "*/*-test.py"],
@@ -65,11 +62,11 @@ def _is_test_file(filename: pathlib.Path) -> bool:
     )
 
 
-def _ignore_class(filename: pathlib.Path, class_name: str) -> bool:
+def _ignore_class(filename, class_name):
     return _is_test_file(filename) and "Test" in class_name
 
 
-def _ignore_import(filename: pathlib.Path, import_name: str) -> bool:
+def _ignore_import(filename, import_name):
     """
     Ignore star-imported names since we can't detect whether they are used.
     Ignore imports from __init__.py files since they're commonly used to
@@ -78,17 +75,17 @@ def _ignore_import(filename: pathlib.Path, import_name: str) -> bool:
     return filename.name == "__init__.py" or import_name == "*"
 
 
-def _ignore_function(filename: pathlib.Path, function_name: str) -> bool:
+def _ignore_function(filename, function_name):
     return function_name.startswith("test_") and _is_test_file(filename)
 
 
-def _ignore_method(filename: pathlib.Path, method_name: str) -> bool:
+def _ignore_method(filename, method_name):
     return _is_special_name(method_name) or (
         method_name.startswith("test_") and _is_test_file(filename)
     )
 
 
-def _ignore_variable(filename: pathlib.Path, varname: str) -> bool:
+def _ignore_variable(filename, varname):
     """
     Ignore _ (Python idiom), _x (pylint convention) and
     __x__ (special variable or method), but not __x.
@@ -117,13 +114,13 @@ class Item:
 
     def __init__(
         self,
-        name: str,
-        typ: str,
-        filename: pathlib.Path,
-        first_lineno: int,
-        last_lineno: int,
-        message: str = "",
-        confidence: int = DEFAULT_CONFIDENCE,
+        name,
+        typ,
+        filename,
+        first_lineno,
+        last_lineno,
+        message="",
+        confidence=DEFAULT_CONFIDENCE,
     ):
         self.name = name
         self.typ = typ
@@ -134,11 +131,11 @@ class Item:
         self.confidence = confidence
 
     @property
-    def size(self) -> int:
+    def size(self):
         assert self.last_lineno >= self.first_lineno
         return self.last_lineno - self.first_lineno + 1
 
-    def get_report(self, add_size: bool = False) -> str:
+    def get_report(self, add_size=False):
         if add_size:
             line_format = "line" if self.size == 1 else "lines"
             size_report = f", {self.size:d} {line_format}"
@@ -152,7 +149,7 @@ class Item:
             size_report,
         )
 
-    def get_whitelist_string(self) -> str:
+    def get_whitelist_string(self):
         filename = utils.format_path(self.filename)
         if self.typ == "unreachable_code":
             return f"# {self.message} ({filename}:{self.first_lineno})"
@@ -164,7 +161,7 @@ class Item:
                 prefix, self.name, self.typ, filename, self.first_lineno
             )
 
-    def _tuple(self) -> Tuple[pathlib.Path, int, str]:
+    def _tuple(self):
         return (self.filename, self.first_lineno, self.name)
 
     def __repr__(self):
@@ -182,13 +179,13 @@ class Vulture(ast.NodeVisitor):
 
     def __init__(
         self,
-        verbose: bool = False,
-        ignore_names: List[str] = None,
-        ignore_decorators: List[str] = None,
+        verbose=False,
+        ignore_names=None,
+        ignore_decorators=None,
     ):
         self.verbose = verbose
 
-        def get_list(typ: str):
+        def get_list(typ):
             return utils.LoggingList(typ, self.verbose)
 
         self.defined_attrs = get_list("attribute")
@@ -206,17 +203,15 @@ class Vulture(ast.NodeVisitor):
         self.ignore_decorators = ignore_decorators or []
 
         self.filename = pathlib.Path()
-        self.code: List[str] = []
+        self.code = []
         self.found_dead_code_or_error = False
 
-    def scan(
-        self, code: str, filename: pathlib.Path = DEFAULT_FILE_PATH
-    ) -> None:
+    def scan(self, code, filename=DEFAULT_FILE_PATH):
         self.code = code.splitlines()
         self.noqa_lines = noqa.parse_noqa(self.code)
         self.filename = filename
 
-        def handle_syntax_error(e: SyntaxError) -> None:
+        def handle_syntax_error(e):
             text = f' at "{e.text.strip()}"' if e.text else ""
             print(
                 f"{utils.format_path(filename)}:{e.lineno}: {e.msg}{text}",
@@ -248,16 +243,15 @@ class Vulture(ast.NodeVisitor):
             except SyntaxError as err:
                 handle_syntax_error(err)
 
-    def scavenge(self, paths: List[str], exclude=None):
-        def prepare_pattern(pattern: str) -> str:
+    def scavenge(self, paths, exclude=None):
+        def prepare_pattern(pattern):
             if not any(char in pattern for char in "*?["):
                 pattern = f"*{pattern}*"
             return pattern
 
         exclude = [prepare_pattern(pattern) for pattern in (exclude or [])]
 
-        def exclude_file(name: pathlib.Path) -> bool:
-            # return any(name.match(pattern) for pattern in exclude)
+        def exclude_file(name: pathlib.Path):
             return any(fnmatch(str(name), pattern) for pattern in exclude)
 
         for module in utils.get_modules(paths):
@@ -290,26 +284,20 @@ class Vulture(ast.NodeVisitor):
                 except OSError:
                     # Most imported modules don't have a whitelist.
                     continue
-                if module_data is not None:
-                    # Added `if` condition here to satisfy mypy
-                    module_string = module_data.decode("utf-8")
-                else:
-                    module_string = ""
+                module_string = module_data.decode("utf-8")
                 self.scan(module_string, filename=path)
 
-    def get_unused_code(
-        self, min_confidence: int = 0, sort_by_size: bool = False
-    ) -> List[Item]:
+    def get_unused_code(self, min_confidence=0, sort_by_size=False):
         """
         Return ordered list of unused Item objects.
         """
         if not 0 <= min_confidence <= 100:
             raise ValueError("min_confidence must be between 0 and 100.")
 
-        def by_name(item: Item) -> Tuple[str, int]:
+        def by_name(item: Item):
             return (str(item.filename).lower(), item.first_lineno)
 
-        def by_size(item: Item) -> Tuple[int, str, int]:
+        def by_size(item: Item):
             return (item.size,) + by_name(item)
 
         unused_code = (
@@ -333,10 +321,10 @@ class Vulture(ast.NodeVisitor):
 
     def report(
         self,
-        min_confidence: int = 0,
-        sort_by_size: bool = False,
-        make_whitelist: bool = False,
-    ) -> bool:
+        min_confidence=0,
+        sort_by_size=False,
+        make_whitelist=False,
+    ):
         """
         Print ordered list of Item objects to stdout.
         """
@@ -379,11 +367,11 @@ class Vulture(ast.NodeVisitor):
     def unused_attrs(self):
         return _get_unused_items(self.defined_attrs, self.used_names)
 
-    def _log(self, *args) -> None:
+    def _log(self, *args):
         if self.verbose:
             print(*args)
 
-    def _add_aliases(self, node) -> None:
+    def _add_aliases(self, node):
         """
         We delegate to this method instead of using visit_alias() to have
         access to line numbers and to filter imports from __future__.
@@ -404,7 +392,7 @@ class Vulture(ast.NodeVisitor):
             if alias is not None:
                 self.used_names.add(name_and_alias.name)
 
-    def _handle_conditional_node(self, node, name) -> None:
+    def _handle_conditional_node(self, node, name):
         if utils.condition_is_always_false(node.test):
             self._define(
                 self.unreachable_code,
@@ -445,7 +433,7 @@ class Vulture(ast.NodeVisitor):
                     confidence=100,
                 )
 
-    def _handle_string(self, s: str):
+    def _handle_string(self, s):
         """
         Parse variable names in format strings:
 
@@ -458,7 +446,7 @@ class Vulture(ast.NodeVisitor):
         # self.used_names |= set(re.findall(r"\%\((\w+)\)", s))
         self.used_names.update(set(re.findall(r"\%\((\w+)\)", s)))
 
-        def is_identifier(name: str) -> bool:
+        def is_identifier(name: str):
             return bool(re.match(r"[a-zA-Z_][a-zA-Z0-9_]*", name))
 
         # New format strings.
@@ -479,13 +467,13 @@ class Vulture(ast.NodeVisitor):
 
     def _define(
         self,
-        collection: utils.LoggingList,
-        name: str,
+        collection,
+        name,
         first_node,
         last_node=None,
-        message: str = "",
-        confidence: int = DEFAULT_CONFIDENCE,
-        ignore: Callable[[pathlib.Path, str], bool] = None,
+        message="",
+        confidence=DEFAULT_CONFIDENCE,
+        ignore=None,
     ):
         def ignored(lineno):
             return (
@@ -514,9 +502,7 @@ class Vulture(ast.NodeVisitor):
                 )
             )
 
-    def _define_variable(
-        self, name: str, node, confidence: int = DEFAULT_CONFIDENCE
-    ) -> None:
+    def _define_variable(self, name, node, confidence=DEFAULT_CONFIDENCE):
         self._define(
             self.defined_vars,
             name,
@@ -693,8 +679,8 @@ class Vulture(ast.NodeVisitor):
                 self.visit(value)
 
 
-def _parse_args() -> argparse.Namespace:  # XXX: two _parse_args() ???
-    def csv(exclude: str) -> List[str]:
+def _parse_args():  # XXX: two _parse_args() ???
+    def csv(exclude):
         return exclude.split(",")
 
     usage = "%(prog)s [options] PATH [PATH ...]"

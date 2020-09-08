@@ -1,4 +1,3 @@
-from typing import List
 from collections import defaultdict
 import re
 
@@ -29,7 +28,7 @@ def _parse_error_codes(match):
     ]
 
 
-def parse_noqa(code: List[str]) -> dict:
+def parse_noqa(code):
     noqa_lines = defaultdict(set)
     for lineno, line in enumerate(code, start=1):
         match = NOQA_REGEXP.search(line)
