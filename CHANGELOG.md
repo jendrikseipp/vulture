@@ -1,6 +1,7 @@
 # unreleased
 
 * Only parse format strings when being used with `locals()` (jingw, #225).
+* Don't override paths in pyproject.toml with empty CLI paths (bcbnz, #228).
 
 # 2.1 (2020-08-19)
 
