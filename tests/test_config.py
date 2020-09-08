@@ -147,6 +147,27 @@ def test_config_merging_missing():
     assert result["ignore_names"] == ["name1"]
 
 
+def test_config_merging_toml_paths_only():
+    """
+    If we have paths in the TOML but not on the CLI, the TOML paths should be
+    used.
+    """
+    toml = StringIO(
+        dedent(
+            """\
+        [tool.vulture]
+        paths = ["path1", "path2"]
+        """
+        )
+    )
+    cliargs = [
+        "--exclude=test_*.py",
+    ]
+    result = make_config(cliargs, toml)
+    assert result["paths"] == ["path1", "path2"]
+    assert result["exclude"] == ["test_*.py"]
+
+
 def test_invalid_config_options_output():
     """
     If the config file contains unknown options we want to abort.
@@ -156,10 +177,7 @@ def test_invalid_config_options_output():
         _check_input_config({"unknown_key_1": 1})
 
 
-@pytest.mark.parametrize(
-    "key, value",
-    list(DEFAULTS.items()),
-)
+@pytest.mark.parametrize("key, value", list(DEFAULTS.items()))
 def test_incompatible_option_type(key, value):
     """
     If a config value has a different type from the default value we abort.
