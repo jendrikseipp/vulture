@@ -1,5 +1,7 @@
 # unreleased
 
+* added --absolute-paths option to have vulture output absolute paths instead of relative paths (mcooperman, #227)
+
 * Only parse format strings when being used with `locals()` (jingw, #225).
 
 # 2.1 (2020-08-19)

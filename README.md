@@ -152,6 +152,7 @@ ignore_names = ["visit_*", "do_*"]
 make_whitelist = true
 min_confidence = 80
 sort_by_size = true
+absolute_paths = false
 verbose = true
 paths = ["myscript.py", "mydir"]
 ```
