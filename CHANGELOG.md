@@ -1,6 +1,7 @@
 # unreleased
 
 * added --absolute-paths option to have vulture output absolute paths instead of relative paths (mcooperman, #227)
+  changed git signing key to correct verification
 
 * Only parse format strings when being used with `locals()` (jingw, #225).
 
