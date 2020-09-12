@@ -100,7 +100,6 @@ def _parse_args(args=None):
         "paths",
         nargs="*",
         metavar="PATH",
-        default=missing,
         help="Paths may be Python files or directories. For each directory"
         " Vulture analyzes all contained *.py files.",
     )

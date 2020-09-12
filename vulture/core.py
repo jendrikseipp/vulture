@@ -176,7 +176,10 @@ class Vulture(ast.NodeVisitor):
     """Find dead code."""
 
     def __init__(
-        self, verbose=False, ignore_names=None, ignore_decorators=None,
+        self,
+        verbose=False,
+        ignore_names=None,
+        ignore_decorators=None,
     ):
         self.verbose = verbose
 
@@ -315,7 +318,10 @@ class Vulture(ast.NodeVisitor):
         )
 
     def report(
-        self, min_confidence=0, sort_by_size=False, make_whitelist=False,
+        self,
+        min_confidence=0,
+        sort_by_size=False,
+        make_whitelist=False,
     ):
         """
         Print ordered list of Item objects to stdout.
@@ -425,6 +431,38 @@ class Vulture(ast.NodeVisitor):
                     confidence=100,
                 )
 
+    def _handle_string(self, s):
+        """
+        Parse variable names in format strings:
+
+        '%(my_var)s' % locals()
+        '{my_var}'.format(**locals())
+        f'{my_var}'
+
+        """
+        # Old format strings.
+        # self.used_names |= set(re.findall(r"\%\((\w+)\)", s))
+        self.used_names.update(set(re.findall(r"\%\((\w+)\)", s)))
+
+        def is_identifier(name: str):
+            return bool(re.match(r"[a-zA-Z_][a-zA-Z0-9_]*", name))
+
+        # New format strings.
+        parser = string.Formatter()
+        try:
+            names = [name for _, name, _, _ in parser.parse(s) if name]
+        except ValueError:
+            # Invalid format string.
+            names = []
+
+        for field_name in names:
+            # Remove brackets and their contents: "a[0][b].c[d].e" -> "a.c.e",
+            # then split the resulting string: "a.b.c" -> ["a", "b", "c"]
+            vars = re.sub(r"\[\w*\]", "", field_name).split(".")
+            for var in vars:
+                if is_identifier(var):
+                    self.used_names.add(var)
+
     def _define(
         self,
         collection,
@@ -484,21 +522,8 @@ class Vulture(ast.NodeVisitor):
         elif isinstance(node.ctx, ast.Load):
             self.used_names.add(node.attr)
 
-    def visit_BinOp(self, node):
-        """
-        Parse variable names in old format strings:
-
-        "%(my_var)s" % locals()
-        """
-        if (
-            isinstance(node.left, ast.Str)
-            and isinstance(node.op, ast.Mod)
-            and self._is_locals_call(node.right)
-        ):
-            self.used_names |= set(re.findall(r"%\((\w+)\)", node.left.s))
-
     def visit_Call(self, node):
-        # Count getattr/hasattr(x, "some_attr", ...) as usage of some_attr.
+        """Count getattr/hasattr(x, "some_attr", ...) as usage of some_attr."""
         if isinstance(node.func, ast.Name) and (
             (node.func.id == "getattr" and 2 <= len(node.args) <= 3)
             or (node.func.id == "hasattr" and len(node.args) == 2)
@@ -506,49 +531,6 @@ class Vulture(ast.NodeVisitor):
             attr_name_arg = node.args[1]
             if isinstance(attr_name_arg, ast.Str):
                 self.used_names.add(attr_name_arg.s)
-
-        # Parse variable names in new format strings:
-        # "{my_var}".format(**locals())
-        if (
-            isinstance(node.func, ast.Attribute)
-            and isinstance(node.func.value, ast.Str)
-            and node.func.attr == "format"
-            and any(
-                kw.arg is None and self._is_locals_call(kw.value)
-                for kw in node.keywords
-            )
-        ):
-            self._handle_new_format_string(node.func.value.s)
-
-    def _handle_new_format_string(self, s):
-        def is_identifier(name):
-            return bool(re.match(r"[a-zA-Z_][a-zA-Z0-9_]*", name))
-
-        parser = string.Formatter()
-        try:
-            names = [name for _, name, _, _ in parser.parse(s) if name]
-        except ValueError:
-            # Invalid format string.
-            names = []
-
-        for field_name in names:
-            # Remove brackets and their contents: "a[0][b].c[d].e" -> "a.c.e",
-            # then split the resulting string: "a.b.c" -> ["a", "b", "c"]
-            vars = re.sub(r"\[\w*\]", "", field_name).split(".")
-            for var in vars:
-                if is_identifier(var):
-                    self.used_names.add(var)
-
-    @staticmethod
-    def _is_locals_call(node):
-        """Return True if the node is `locals()`."""
-        return (
-            isinstance(node, ast.Call)
-            and isinstance(node.func, ast.Name)
-            and node.func.id == "locals"
-            and not node.args
-            and not node.keywords
-        )
 
     def visit_ClassDef(self, node):
         for decorator in node.decorator_list:
@@ -620,6 +602,17 @@ class Vulture(ast.NodeVisitor):
             self.used_names.add(node.id)
         elif isinstance(node.ctx, (ast.Param, ast.Store)):
             self._define_variable(node.id, node)
+
+    if sys.version_info < (3, 8):
+
+        def visit_Str(self, node):
+            self._handle_string(node.s)
+
+    else:
+
+        def visit_Constant(self, node):
+            if isinstance(node.value, str):
+                self._handle_string(node.value)
 
     def visit_While(self, node):
         self._handle_conditional_node(node, "while")

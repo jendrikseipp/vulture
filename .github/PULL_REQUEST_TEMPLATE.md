@@ -5,11 +5,13 @@
 
 ## Related Issue
 <!--- Ideally, new features and changes are discussed in an issue first. -->
-<!--- If there is a corresponding issue, link to it here. Otherwise, remove this section. -->
+<!--- If there is a corresponding issue, please link to it here: -->
 
 ## Checklist:
-<!--- Go over the following points, and put an `x` into all boxes that apply. -->
-
-- [ ] I have updated the documentation in the README.md file or my changes don't require an update.
+<!--- Go over all the following points, and put an `x` in all the boxes that apply. -->
+<!--- If you're unsure about any of these, don't hesitate to ask. We're here to help! -->
+- [ ] My code follows the code style of this project.
+- [ ] I have updated the documentation in the README.md file.
 - [ ] I have added an entry in CHANGELOG.md.
-- [ ] I have added or adapted tests to cover my changes.
+- [ ] I have added tests to cover my changes.
+- [ ] All new and existing tests passed.
