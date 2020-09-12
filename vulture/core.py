@@ -1,11 +1,4 @@
-"""
-module: core
-
-Main classes and main entry point: main()
-"""
-
 # standard imports
-# import argparse
 import ast
 from fnmatch import fnmatch, fnmatchcase
 import os.path
