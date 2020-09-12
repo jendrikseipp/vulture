@@ -1,4 +1,11 @@
-import argparse
+"""
+module: core
+
+Main classes and main entry point: main()
+"""
+
+# standard imports
+# import argparse
 import ast
 from fnmatch import fnmatch, fnmatchcase
 import os.path
@@ -7,6 +14,9 @@ import re
 import string
 import sys
 
+# external imports
+
+# local imports
 from vulture import lines
 from vulture import noqa
 from vulture import utils
@@ -78,7 +88,7 @@ def _ignore_method(filename, method_name):
     )
 
 
-def _ignore_variable(filename, varname):
+def _ignore_variable(filename, varname):  # pylint: disable=unused-argument
     """
     Ignore _ (Python idiom), _x (pylint convention) and
     __x__ (special variable or method), but not __x.
@@ -90,7 +100,7 @@ def _ignore_variable(filename, varname):
     )
 
 
-class Item:
+class Item:  # pylint: disable=too-many-instance-attributes
     """
     Hold the name, type and location of defined code.
     """
@@ -106,7 +116,7 @@ class Item:
         "absolute_paths",
     )
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         name,
         typ,
@@ -128,10 +138,12 @@ class Item:
 
     @property
     def size(self):
+        """property: size"""
         assert self.last_lineno >= self.first_lineno
         return self.last_lineno - self.first_lineno + 1
 
     def get_report(self, add_size=False):
+        """method: get_report"""
         if add_size:
             line_format = "line" if self.size == 1 else "lines"
             size_report = f", {self.size:d} {line_format}"
@@ -146,16 +158,17 @@ class Item:
         )
 
     def get_whitelist_string(self):
+        """method: get_whitelist_string"""
         filename = utils.format_path(self.filename, self.absolute_paths)
         if self.typ == "unreachable_code":
             return f"# {self.message} ({filename}:{self.first_lineno})"
-        else:
-            prefix = ""
-            if self.typ in ["attribute", "method", "property"]:
-                prefix = "_."
-            return "{}{}  # unused {} ({}:{:d})".format(
-                prefix, self.name, self.typ, filename, self.first_lineno
-            )
+
+        prefix = ""
+        if self.typ in ["attribute", "method", "property"]:
+            prefix = "_."
+        return "{}{}  # unused {} ({}:{:d})".format(
+            prefix, self.name, self.typ, filename, self.first_lineno
+        )
 
     def _tuple(self):
         return (self.filename, self.first_lineno, self.name)
@@ -170,7 +183,9 @@ class Item:
         return hash(self._tuple())
 
 
-class Vulture(ast.NodeVisitor):
+class Vulture(
+    ast.NodeVisitor
+):  # pylint: disable=too-many-instance-attributes,too-many-public-methods
     """Find dead code."""
 
     def __init__(
@@ -184,6 +199,7 @@ class Vulture(ast.NodeVisitor):
         self.absolute_paths = absolute_paths
 
         def get_list(typ):
+            """function: get_list"""
             return utils.LoggingList(typ, self.verbose)
 
         self.defined_attrs = get_list("attribute")
@@ -203,15 +219,18 @@ class Vulture(ast.NodeVisitor):
         self.filename = ""
         self.code = []
         self.found_dead_code_or_error = False
+        self.noqa_lines = {}
 
     def scan(self, code, filename=""):
+        """method: scan"""
         self.code = code.splitlines()
         self.noqa_lines = noqa.parse_noqa(self.code)
         self.filename = filename
 
         abs_paths = self.absolute_paths
 
-        def handle_syntax_error(e):
+        def handle_syntax_error(e):  # pylint: disable=invalid-name
+            """function: handle_syntax_error"""
             text = f' at "{e.text.strip()}"' if e.text else ""
             print(
                 f"{utils.format_path(filename, absolute=abs_paths)}:\
@@ -246,6 +265,8 @@ class Vulture(ast.NodeVisitor):
                 handle_syntax_error(err)
 
     def scavenge(self, paths, exclude=None):
+        """method: scavenge"""
+
         def prepare_pattern(pattern):
             if not any(char in pattern for char in ["*", "?", "["]):
                 pattern = f"*{pattern}*"
@@ -254,6 +275,7 @@ class Vulture(ast.NodeVisitor):
         exclude = [prepare_pattern(pattern) for pattern in (exclude or [])]
 
         def exclude_file(name):
+            """function: exclude_file"""
             return any(fnmatch(name, pattern) for pattern in exclude)
 
         for module in utils.get_modules(paths):
@@ -291,15 +313,19 @@ class Vulture(ast.NodeVisitor):
 
     def get_unused_code(self, min_confidence=0, sort_by_size=False):
         """
+        method: get_unused code
+
         Return ordered list of unused Item objects.
         """
         if not 0 <= min_confidence <= 100:
             raise ValueError("min_confidence must be between 0 and 100.")
 
         def by_name(item):
+            """function: by_name"""
             return (item.filename.lower(), item.first_lineno)
 
         def by_size(item):
+            """method: by_size"""
             return (item.size,) + by_name(item)
 
         unused_code = (
@@ -325,6 +351,8 @@ class Vulture(ast.NodeVisitor):
         self, min_confidence=0, sort_by_size=False, make_whitelist=False
     ):
         """
+        method: report
+
         Print ordered list of Item objects to stdout.
         """
         for item in self.get_unused_code(
@@ -340,38 +368,48 @@ class Vulture(ast.NodeVisitor):
 
     @property
     def unused_classes(self):
+        """property: unused_classes"""
         return _get_unused_items(self.defined_classes, self.used_names)
 
     @property
     def unused_funcs(self):
+        """property: unused_funcss"""
         return _get_unused_items(self.defined_funcs, self.used_names)
 
     @property
     def unused_imports(self):
+        """property: unused_imports"""
         return _get_unused_items(self.defined_imports, self.used_names)
 
     @property
     def unused_methods(self):
+        """property: unused_methods"""
         return _get_unused_items(self.defined_methods, self.used_names)
 
     @property
     def unused_props(self):
+        """property: unused_props"""
         return _get_unused_items(self.defined_props, self.used_names)
 
     @property
     def unused_vars(self):
+        """property: unused_vars"""
         return _get_unused_items(self.defined_vars, self.used_names)
 
     @property
     def unused_attrs(self):
+        """property: unused_attrs"""
         return _get_unused_items(self.defined_attrs, self.used_names)
 
     def _log(self, *args):
+        """member: _log"""
         if self.verbose:
             print(*args)
 
     def _add_aliases(self, node):
         """
+        member: _add_aliases
+
         We delegate to this method instead of using visit_alias() to have
         access to line numbers and to filter imports from __future__.
         """
@@ -392,6 +430,7 @@ class Vulture(ast.NodeVisitor):
                 self.used_names.add(name_and_alias.name)
 
     def _handle_conditional_node(self, node, name):
+        """member: _handle_conditional_node"""
         if utils.condition_is_always_false(node.test):
             self._define(
                 self.unreachable_code,
@@ -432,7 +471,7 @@ class Vulture(ast.NodeVisitor):
                     confidence=100,
                 )
 
-    def _define(
+    def _define(  # pylint: disable=too-many-arguments
         self,
         collection,
         name,
@@ -442,7 +481,10 @@ class Vulture(ast.NodeVisitor):
         confidence=DEFAULT_CONFIDENCE,
         ignore=None,
     ):
+        """member: _define"""
+
         def ignored(lineno):
+            """function: ignored"""
             return (
                 (ignore and ignore(self.filename, name))
                 or _match(name, self.ignore_names)
@@ -483,17 +525,21 @@ class Vulture(ast.NodeVisitor):
         """Function argument"""
         self._define_variable(node.arg, node, confidence=100)
 
-    def visit_AsyncFunctionDef(self, node):
+    def visit_AsyncFunctionDef(self, node):  # pylint: disable=invalid-name
+        """method: visit_AsyncFunctionDef"""
         return self.visit_FunctionDef(node)
 
-    def visit_Attribute(self, node):
+    def visit_Attribute(self, node):  # pylint: disable=invalid-name
+        """method: visit_Attribute"""
         if isinstance(node.ctx, ast.Store):
             self._define(self.defined_attrs, node.attr, node)
         elif isinstance(node.ctx, ast.Load):
             self.used_names.add(node.attr)
 
-    def visit_BinOp(self, node):
+    def visit_BinOp(self, node):  # pylint: disable=invalid-name
         """
+        method: visit_BinOp
+
         Parse variable names in old format strings:
 
         "%(my_var)s" % locals()
@@ -505,7 +551,8 @@ class Vulture(ast.NodeVisitor):
         ):
             self.used_names |= set(re.findall(r"%\((\w+)\)", node.left.s))
 
-    def visit_Call(self, node):
+    def visit_Call(self, node):  # pylint: disable=invalid-name
+        """method: visit_Call"""
         # Count getattr/hasattr(x, "some_attr", ...) as usage of some_attr.
         if isinstance(node.func, ast.Name) and (
             (node.func.id == "getattr" and 2 <= len(node.args) <= 3)
@@ -528,7 +575,9 @@ class Vulture(ast.NodeVisitor):
         ):
             self._handle_new_format_string(node.func.value.s)
 
-    def _handle_new_format_string(self, s):
+    def _handle_new_format_string(self, s):  # pylint: disable=invalid-name
+        """method: _handle_new_format_string"""
+
         def is_identifier(name):
             return bool(re.match(r"[a-zA-Z_][a-zA-Z0-9_]*", name))
 
@@ -542,8 +591,8 @@ class Vulture(ast.NodeVisitor):
         for field_name in names:
             # Remove brackets and their contents: "a[0][b].c[d].e" -> "a.c.e",
             # then split the resulting string: "a.b.c" -> ["a", "b", "c"]
-            vars = re.sub(r"\[\w*\]", "", field_name).split(".")
-            for var in vars:
+            _vars = re.sub(r"\[\w*\]", "", field_name).split(".")
+            for var in _vars:
                 if is_identifier(var):
                     self.used_names.add(var)
 
@@ -558,7 +607,8 @@ class Vulture(ast.NodeVisitor):
             and not node.keywords
         )
 
-    def visit_ClassDef(self, node):
+    def visit_ClassDef(self, node):  # pylint: disable=invalid-name
+        """method: visit_ClassDef"""
         for decorator in node.decorator_list:
             if _match(
                 utils.get_decorator_name(decorator), self.ignore_decorators
@@ -572,7 +622,8 @@ class Vulture(ast.NodeVisitor):
                 self.defined_classes, node.name, node, ignore=_ignore_class
             )
 
-    def visit_FunctionDef(self, node):
+    def visit_FunctionDef(self, node):  # pylint: disable=invalid-name
+        """method: visit_FunctionDef"""
         decorator_names = [
             utils.get_decorator_name(decorator)
             for decorator in node.decorator_list
@@ -606,20 +657,25 @@ class Vulture(ast.NodeVisitor):
                 self.defined_funcs, node.name, node, ignore=_ignore_function
             )
 
-    def visit_If(self, node):
+    def visit_If(self, node):  # pylint: disable=invalid-name
+        """method: visit_If"""
         self._handle_conditional_node(node, "if")
 
-    def visit_IfExp(self, node):
+    def visit_IfExp(self, node):  # pylint: disable=invalid-name
+        """method: visit_IfExp"""
         self._handle_conditional_node(node, "ternary")
 
-    def visit_Import(self, node):
+    def visit_Import(self, node):  # pylint: disable=invalid-name
+        """method: visit_Import"""
         self._add_aliases(node)
 
-    def visit_ImportFrom(self, node):
+    def visit_ImportFrom(self, node):  # pylint: disable=invalid-name
+        """method: visit_ImportFrom"""
         if node.module != "__future__":
             self._add_aliases(node)
 
-    def visit_Name(self, node):
+    def visit_Name(self, node):  # pylint: disable=invalid-name
+        """method: visit_Name"""
         if (
             isinstance(node.ctx, ast.Load)
             and node.id not in IGNORED_VARIABLE_NAMES
@@ -628,10 +684,12 @@ class Vulture(ast.NodeVisitor):
         elif isinstance(node.ctx, (ast.Param, ast.Store)):
             self._define_variable(node.id, node)
 
-    def visit_While(self, node):
+    def visit_While(self, node):  # pylint: disable=invalid-name
+        """method: visit_While"""
         self._handle_conditional_node(node, "while")
 
     def visit(self, node):
+        """method: visit"""
         method = "visit_" + node.__class__.__name__
         visitor = getattr(self, method, None)
         if self.verbose:
@@ -658,6 +716,8 @@ class Vulture(ast.NodeVisitor):
 
     def _handle_ast_list(self, ast_list):
         """
+        method: _handle_ast_list
+
         Find unreachable nodes in the given sequence of ast nodes.
         """
         for index, node in enumerate(ast_list):
@@ -680,7 +740,11 @@ class Vulture(ast.NodeVisitor):
                 return
 
     def generic_visit(self, node):
-        """Called if no explicit visitor function exists for a node."""
+        """
+        method: generic_visit
+
+        Called if no explicit visitor function exists for a node.
+        """
         for _, value in ast.iter_fields(node):
             if isinstance(value, list):
                 self._handle_ast_list(value)
@@ -691,77 +755,8 @@ class Vulture(ast.NodeVisitor):
                 self.visit(value)
 
 
-def _parse_args():
-    def csv(exclude):
-        return exclude.split(",")
-
-    usage = "%(prog)s [options] PATH [PATH ...]"
-    version = f"vulture {__version__}"
-    glob_help = "Patterns may contain glob wildcards (*, ?, [abc], [!abc])."
-    parser = argparse.ArgumentParser(prog="vulture", usage=usage)
-    parser.add_argument(
-        "paths",
-        nargs="+",
-        metavar="PATH",
-        help="Paths may be Python files or directories. For each directory"
-        " Vulture analyzes all contained *.py files.",
-    )
-    parser.add_argument(
-        "--exclude",
-        metavar="PATTERNS",
-        type=csv,
-        help=f"Comma-separated list of paths to ignore (e.g.,"
-        f' "*settings.py,docs/*.py"). {glob_help} A PATTERN without glob'
-        f" wildcards is treated as *PATTERN*.",
-    )
-    parser.add_argument(
-        "--ignore-decorators",
-        metavar="PATTERNS",
-        type=csv,
-        help=f"Comma-separated list of decorators. Functions and classes using"
-        f' these decorators are ignored (e.g., "@app.route,@require_*").'
-        f" {glob_help}",
-    )
-    parser.add_argument(
-        "--ignore-names",
-        metavar="PATTERNS",
-        type=csv,
-        default=None,
-        help=f'Comma-separated list of names to ignore (e.g., "visit_*,do_*").'
-        f" {glob_help}",
-    )
-    parser.add_argument(
-        "--make-whitelist",
-        action="store_true",
-        help="Report unused code in a format that can be added to a"
-        " whitelist module.",
-    )
-    parser.add_argument(
-        "--min-confidence",
-        type=int,
-        default=0,
-        help="Minimum confidence (between 0 and 100) for code to be"
-        " reported as unused.",
-    )
-    parser.add_argument(
-        "--sort-by-size",
-        action="store_true",
-        help="Sort unused functions and classes by their lines of code.",
-    )
-    parser.add_argument(
-        "--absolute-paths",
-        action="store_true",
-        default=False,
-        required=False,
-        help="Output absolute file paths.",
-    )
-
-    parser.add_argument("-v", "--verbose", action="store_true")
-    parser.add_argument("--version", action="version", version=version)
-    return parser.parse_args()
-
-
 def main():
+    """function: main"""
     config = make_config()
     vulture = Vulture(
         verbose=config["verbose"],

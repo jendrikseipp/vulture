@@ -1,3 +1,6 @@
+"""module: utils"""
+
+# standard imports
 import ast
 import os
 import sys
@@ -6,7 +9,7 @@ from pathlib import Path
 
 
 class VultureInputException(Exception):
-    pass
+    """class: VultureInputException"""
 
 
 def _safe_eval(node, default):
@@ -27,26 +30,28 @@ def _safe_eval(node, default):
         results = [_safe_eval(value, default) for value in node.values]
         if isinstance(node.op, ast.And):
             return all(results)
-        else:
-            return any(results)
-    elif isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
+        return any(results)
+    if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
         return not _safe_eval(node.operand, not default)
-    else:
-        try:
-            return ast.literal_eval(node)
-        except ValueError:
-            return default
+
+    try:
+        return ast.literal_eval(node)
+    except ValueError:
+        return default
 
 
 def condition_is_always_false(condition):
+    """function: condition_is_always_false"""
     return not _safe_eval(condition, True)
 
 
 def condition_is_always_true(condition):
+    """function: condition_is_always_true"""
     return _safe_eval(condition, False)
 
 
 def format_path(path, absolute=False):
+    """function: format_path"""
     if not path:
         return path
     if not absolute:
@@ -54,7 +59,7 @@ def format_path(path, absolute=False):
         # print(f'relative path {relpath}', file=sys.stderr, flush=True)
     else:
         # print('absolute paths set', file=sys.stderr)
-        pp = Path(path)
+        pp = Path(path)  # pylint: disable=invalid-name
         # make the path absolute, resolving any symlinks
         resolved_path = pp.resolve(strict=True)
         # relpath = os.path.abspath(path)
@@ -64,6 +69,7 @@ def format_path(path, absolute=False):
 
 
 def get_decorator_name(decorator):
+    """function: get_decorator_name"""
     if isinstance(decorator, ast.Call):
         decorator = decorator.func
     parts = []
@@ -95,15 +101,18 @@ def get_modules(paths, toplevel=True):
 
 
 def read_file(filename):
+    """function: read_file"""
     try:
         # Use encoding detected by tokenize.detect_encoding().
-        with tokenize.open(filename) as f:
+        with tokenize.open(filename) as f:  # pylint: disable=invalid-name
             return f.read()
     except (SyntaxError, UnicodeDecodeError) as err:
-        raise VultureInputException(err)
+        raise VultureInputException(err) from err
 
 
 class LoggingList(list):
+    """class: LoggingList"""
+
     def __init__(self, typ, verbose):
         self.typ = typ
         self._verbose = verbose
@@ -117,6 +126,8 @@ class LoggingList(list):
 
 
 class LoggingSet(set):
+    """class: LoggingSet"""
+
     def __init__(self, typ, verbose):
         self.typ = typ
         self._verbose = verbose

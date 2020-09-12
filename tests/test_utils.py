@@ -1,6 +1,12 @@
+"""module: test-utils"""
+
+# standard imports
 import ast
 import pathlib
 
+# external imports
+
+# local imports
 from vulture import utils
 
 
