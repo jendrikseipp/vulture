@@ -7,7 +7,7 @@ import pytest
 from vulture import core
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
-WHITELISTS = (REPO / "vulture" / "whitelists").glob("*.py")
+WHITELISTS = list((REPO / "vulture" / "whitelists").glob("*.py"))
 
 
 def call_vulture(args, **kwargs):

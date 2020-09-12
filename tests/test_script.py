@@ -7,7 +7,7 @@ from . import call_vulture, REPO, WHITELISTS
 
 
 def test_module_with_explicit_whitelists():
-    assert call_vulture(["vulture/"] + list(WHITELISTS)) == 0
+    assert call_vulture(["vulture/"] + WHITELISTS) == 0
 
 
 def test_module_with_implicit_whitelists():

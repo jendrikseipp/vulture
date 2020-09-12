@@ -47,11 +47,10 @@ def condition_is_always_true(condition):
 
 
 def format_path(path):
-    path_str = str(path)
-    if not path_str:
-        return path_str
-    relpath = os.path.relpath(path_str)
-    return path_str if relpath.startswith("..") else relpath
+    try:
+        return path.relative_to(os.curdir)
+    except ValueError:
+        return path
 
 
 def get_decorator_name(decorator):
