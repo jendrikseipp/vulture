@@ -431,38 +431,6 @@ class Vulture(ast.NodeVisitor):
                     confidence=100,
                 )
 
-    def _handle_string(self, s):
-        """
-        Parse variable names in format strings:
-
-        '%(my_var)s' % locals()
-        '{my_var}'.format(**locals())
-        f'{my_var}'
-
-        """
-        # Old format strings.
-        # self.used_names |= set(re.findall(r"\%\((\w+)\)", s))
-        self.used_names.update(set(re.findall(r"\%\((\w+)\)", s)))
-
-        def is_identifier(name: str):
-            return bool(re.match(r"[a-zA-Z_][a-zA-Z0-9_]*", name))
-
-        # New format strings.
-        parser = string.Formatter()
-        try:
-            names = [name for _, name, _, _ in parser.parse(s) if name]
-        except ValueError:
-            # Invalid format string.
-            names = []
-
-        for field_name in names:
-            # Remove brackets and their contents: "a[0][b].c[d].e" -> "a.c.e",
-            # then split the resulting string: "a.b.c" -> ["a", "b", "c"]
-            vars = re.sub(r"\[\w*\]", "", field_name).split(".")
-            for var in vars:
-                if is_identifier(var):
-                    self.used_names.add(var)
-
     def _define(
         self,
         collection,

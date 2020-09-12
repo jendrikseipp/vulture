@@ -156,10 +156,7 @@ def test_invalid_config_options_output():
         _check_input_config({"unknown_key_1": 1})
 
 
-@pytest.mark.parametrize(
-    "key, value",
-    list(DEFAULTS.items()),
-)
+@pytest.mark.parametrize("key, value", list(DEFAULTS.items()))
 def test_incompatible_option_type(key, value):
     """
     If a config value has a different type from the default value we abort.
