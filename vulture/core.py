@@ -1,4 +1,3 @@
-# standard imports
 import ast
 from fnmatch import fnmatch, fnmatchcase
 import os.path
