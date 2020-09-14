@@ -20,7 +20,7 @@ DEFAULTS = {
     "make_whitelist": False,
     "sort_by_size": False,
     "verbose": False,
-    "path_format": "relative",
+    "format": "relative",
 }
 
 
@@ -70,7 +70,7 @@ def _parse_toml(infile):
         make_whitelist = true
         min_confidence = 10
         sort_by_size = true
-        path_format = relative
+        format = relative
         verbose = true
         paths = ["path1", "path2"]
     """
@@ -152,7 +152,7 @@ def _parse_args(args=None):
         help="Sort unused functions and classes by their lines of code.",
     )
     parser.add_argument(
-        "--path-format",
+        "--format",
         type=str,
         action="store",
         default="relative",

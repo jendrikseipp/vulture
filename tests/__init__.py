@@ -1,6 +1,7 @@
 import glob
 import os.path
 import subprocess
+from subprocess import PIPE, STDOUT
 import sys
 
 import pytest
@@ -10,12 +11,36 @@ from vulture import core
 DIR = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(DIR)
 WHITELISTS = glob.glob(os.path.join(REPO, "vulture", "whitelists", "*.py"))
+CALL_TIMEOUT_SEC = 60
 
 
 def call_vulture(args, **kwargs):
     return subprocess.call(
         [sys.executable, "-m", "vulture"] + args, cwd=REPO, **kwargs
     )
+
+
+def run_vulture(args_list, **kwargs):
+    check = kwargs.get("check", False)
+    if "check" in kwargs:
+        del kwargs["check"]
+    result = subprocess.run(
+        [sys.executable, "-m", "vulture"] + args_list,
+        stdin=None,
+        input=None,
+        stdout=PIPE,
+        stderr=STDOUT,
+        shell=False,
+        cwd=REPO,
+        timeout=CALL_TIMEOUT_SEC,
+        check=check,
+        encoding=None,
+        errors=None,
+        env=None,
+        universal_newlines=True,
+        **kwargs
+    )
+    return result
 
 
 def check(items_or_names, expected_names):

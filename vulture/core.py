@@ -30,7 +30,7 @@ ERROR_CODES = {
 }
 
 PATH_FORMATTERS = {
-    "relative": utils.RelativePathFormat(),
+    "relative": utils.PathFormat(),
     "absolute": utils.AbsolutePathFormat(),
 }
 
@@ -83,7 +83,7 @@ def _ignore_method(filename, method_name):
     )
 
 
-def _ignore_variable(filename, varname):  # pylint: disable=unused-argument
+def _ignore_variable(filename, varname):
     """
     Ignore _ (Python idiom), _x (pylint convention) and
     __x__ (special variable or method), but not __x.
@@ -95,7 +95,7 @@ def _ignore_variable(filename, varname):  # pylint: disable=unused-argument
     )
 
 
-class Item:  # pylint: disable=too-many-instance-attributes
+class Item:
     """
     Hold the name, type and location of defined code.
     """
@@ -112,7 +112,7 @@ class Item:  # pylint: disable=too-many-instance-attributes
         "__path_formatter",
     )
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(
         self,
         name,
         typ,
@@ -182,9 +182,7 @@ class Item:  # pylint: disable=too-many-instance-attributes
         return hash(self._tuple())
 
 
-class Vulture(
-    ast.NodeVisitor
-):  # pylint: disable=too-many-instance-attributes,too-many-public-methods
+class Vulture(ast.NodeVisitor):
     """Find dead code."""
 
     def __init__(
@@ -225,9 +223,7 @@ class Vulture(
         self.noqa_lines = noqa.parse_noqa(self.code)
         self.filename = filename
 
-        #        abs_paths = self.path_format
-
-        def handle_syntax_error(e):  # pylint: disable=invalid-name
+        def handle_syntax_error(e):
             text = f' at "{e.text.strip()}"' if e.text else ""
             print(
                 f"{self.__path_formatter.m_format_path(Path(filename))}:\
@@ -270,7 +266,6 @@ class Vulture(
         exclude = [prepare_pattern(pattern) for pattern in (exclude or [])]
 
         def exclude_file(name):
-            """function: exclude_file"""
             return any(fnmatch(name, pattern) for pattern in exclude)
 
         for module in utils.get_modules(paths):
@@ -453,7 +448,7 @@ class Vulture(
                     confidence=100,
                 )
 
-    def _define(  # pylint: disable=too-many-arguments
+    def _define(
         self,
         collection,
         name,
@@ -464,7 +459,6 @@ class Vulture(
         ignore=None,
     ):
         def ignored(lineno):
-            """function: ignored"""
             return (
                 (ignore and ignore(self.filename, name))
                 or _match(name, self.ignore_names)
@@ -505,16 +499,16 @@ class Vulture(
         """Function argument"""
         self._define_variable(node.arg, node, confidence=100)
 
-    def visit_AsyncFunctionDef(self, node):  # pylint: disable=invalid-name
+    def visit_AsyncFunctionDef(self, node):
         return self.visit_FunctionDef(node)
 
-    def visit_Attribute(self, node):  # pylint: disable=invalid-name
+    def visit_Attribute(self, node):
         if isinstance(node.ctx, ast.Store):
             self._define(self.defined_attrs, node.attr, node)
         elif isinstance(node.ctx, ast.Load):
             self.used_names.add(node.attr)
 
-    def visit_BinOp(self, node):  # pylint: disable=invalid-name
+    def visit_BinOp(self, node):
         """
         Parse variable names in old format strings:
 
@@ -527,7 +521,7 @@ class Vulture(
         ):
             self.used_names |= set(re.findall(r"%\((\w+)\)", node.left.s))
 
-    def visit_Call(self, node):  # pylint: disable=invalid-name
+    def visit_Call(self, node):
         # Count getattr/hasattr(x, "some_attr", ...) as usage of some_attr.
         if isinstance(node.func, ast.Name) and (
             (node.func.id == "getattr" and 2 <= len(node.args) <= 3)
@@ -550,7 +544,7 @@ class Vulture(
         ):
             self._handle_new_format_string(node.func.value.s)
 
-    def _handle_new_format_string(self, s):  # pylint: disable=invalid-name
+    def _handle_new_format_string(self, s):
         def is_identifier(name):
             return bool(re.match(r"[a-zA-Z_][a-zA-Z0-9_]*", name))
 
@@ -580,7 +574,7 @@ class Vulture(
             and not node.keywords
         )
 
-    def visit_ClassDef(self, node):  # pylint: disable=invalid-name
+    def visit_ClassDef(self, node):
         for decorator in node.decorator_list:
             if _match(
                 utils.get_decorator_name(decorator), self.ignore_decorators
@@ -594,7 +588,7 @@ class Vulture(
                 self.defined_classes, node.name, node, ignore=_ignore_class
             )
 
-    def visit_FunctionDef(self, node):  # pylint: disable=invalid-name
+    def visit_FunctionDef(self, node):
         decorator_names = [
             utils.get_decorator_name(decorator)
             for decorator in node.decorator_list
@@ -628,20 +622,20 @@ class Vulture(
                 self.defined_funcs, node.name, node, ignore=_ignore_function
             )
 
-    def visit_If(self, node):  # pylint: disable=invalid-name
+    def visit_If(self, node):
         self._handle_conditional_node(node, "if")
 
-    def visit_IfExp(self, node):  # pylint: disable=invalid-name
+    def visit_IfExp(self, node):
         self._handle_conditional_node(node, "ternary")
 
-    def visit_Import(self, node):  # pylint: disable=invalid-name
+    def visit_Import(self, node):
         self._add_aliases(node)
 
-    def visit_ImportFrom(self, node):  # pylint: disable=invalid-name
+    def visit_ImportFrom(self, node):
         if node.module != "__future__":
             self._add_aliases(node)
 
-    def visit_Name(self, node):  # pylint: disable=invalid-name
+    def visit_Name(self, node):
         if (
             isinstance(node.ctx, ast.Load)
             and node.id not in IGNORED_VARIABLE_NAMES
@@ -650,7 +644,7 @@ class Vulture(
         elif isinstance(node.ctx, (ast.Param, ast.Store)):
             self._define_variable(node.id, node)
 
-    def visit_While(self, node):  # pylint: disable=invalid-name
+    def visit_While(self, node):
         self._handle_conditional_node(node, "while")
 
     def visit(self, node):
@@ -717,9 +711,9 @@ class Vulture(
 
 def main():
     config = make_config()
-    if config["path_format"] not in PATH_FORMATTERS:
+    if config["format"] not in PATH_FORMATTERS:
         print(
-            "--path-format {} not recognized.".format(config["path_format"]),
+            "--format {} not recognized.".format(config["format"]),
             file=sys.stderr,
             flush=True,
         )
@@ -732,7 +726,7 @@ def main():
         verbose=config["verbose"],
         ignore_names=config["ignore_names"],
         ignore_decorators=config["ignore_decorators"],
-        path_format=config["path_format"],
+        path_format=config["format"],
     )
     vulture.scavenge(config["paths"], exclude=config["exclude"])
     sys.exit(

@@ -6,7 +6,6 @@ import os
 import sys
 import tokenize
 from pathlib import Path
-from abc import ABC, abstractmethod
 
 EMPTY_PATH = ""
 
@@ -15,30 +14,16 @@ class VultureInputException(Exception):
     pass
 
 
-class PathFormat(ABC):
-    """clsss: PathFormat"""
+class PathFormat:
+    """
+    class: PathFormat
+
+    Base class for path formatting.
+    Implements the default behavior of relative path formatting.
+    """
 
     def __init__(self, format_str=None):
         self._format_str = format_str
-
-    @abstractmethod
-    def m_format_path(self, path: Path, *args) -> str:
-        """abstractmethod: m_format_path"""
-
-    @classmethod
-    def __subclasshook__(cls, C):
-        """classmethod: __subsclasshook__"""
-        if cls is PathFormat:
-            if any("m_format_path" in B.__dict__ for B in C.__mro__):
-                return True
-        return NotImplemented
-
-
-class RelativePathFormat(PathFormat):
-    """class: RelativePathFormat"""
-
-    #    def __init__(self, format_str=None):
-    #        super().__init__(format_str)
 
     def m_format_path(self, path: Path, *args) -> str:
         """method: m_format_path"""
@@ -63,12 +48,21 @@ class RelativePathFormat(PathFormat):
 
         return formatted_path_str
 
+    @classmethod
+    def __subclasshook__(cls, C):
+        """classmethod: __subsclasshook__"""
+        if cls is PathFormat:
+            if any("m_format_path" in B.__dict__ for B in C.__mro__):
+                return True
+        return NotImplemented
+
 
 class AbsolutePathFormat(PathFormat):
-    """clsss: AbsolutePathFormat"""
+    """
+    class: AbsolutePathFormat
 
-    #    def __init__(self, format_str=None):
-    #        super().__init__(format_str)
+    Changes the default relative path formatting to absolute.
+    """
 
     def m_format_path(self, path: Path, *args) -> str:
         """method: m_format_path"""
@@ -165,7 +159,7 @@ def get_modules(paths, toplevel=True):
 def read_file(filename):
     try:
         # Use encoding detected by tokenize.detect_encoding().
-        with tokenize.open(filename) as f:  # pylint: disable=invalid-name
+        with tokenize.open(filename) as f:
             return f.read()
     except (SyntaxError, UnicodeDecodeError) as err:
         raise VultureInputException(err) from err

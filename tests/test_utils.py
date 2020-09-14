@@ -4,7 +4,7 @@ from pathlib import Path, PurePath
 from vulture import utils
 
 PATH_FORMATTERS = {
-    "relative": utils.RelativePathFormat(),
+    "relative": utils.PathFormat(),
     "absolute": utils.AbsolutePathFormat(),
 }
 

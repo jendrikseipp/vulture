@@ -2,8 +2,9 @@ import glob
 import os.path
 import subprocess
 import sys
+from pathlib import Path
 
-from . import call_vulture, REPO, WHITELISTS
+from . import call_vulture, run_vulture, REPO, WHITELISTS
 
 
 def test_module_with_explicit_whitelists():
@@ -73,3 +74,24 @@ def test_make_whitelist():
         == 1
     )
     assert call_vulture(["vulture/", "--make-whitelist"]) == 0
+
+
+def test_absolute_paths():
+    # assert call_vulture(["--format", "absolute", "deadcode/"]) == 0
+    try:
+        completed_process = run_vulture(
+            ["--format", "absolute", "deadcode/"], check=False
+        )
+        output_lines = completed_process.stdout.strip().split("\n")
+        for line in output_lines:
+            filename = line.split(":")[0]
+            # make the file resolves to an actual file
+            # and it's an absolute path
+            path = Path(filename)
+            assert path.exists()
+            path.resolve()
+            assert path.is_absolute()
+    except subprocess.TimeoutExpired as time_err:
+        raise AssertionError from time_err
+    except subprocess.SubprocessError as sub_err:
+        raise AssertionError from sub_err
