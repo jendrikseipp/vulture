@@ -89,7 +89,7 @@ def test_absolute_paths():
             # and it's an absolute path
             path = Path(filename)
             assert path.exists()
-            path.resolve()
+            path = path.resolve()
             assert path.is_absolute()
     except subprocess.TimeoutExpired as time_err:
         raise AssertionError from time_err
