@@ -20,7 +20,7 @@ DEFAULTS = {
     "make_whitelist": False,
     "sort_by_size": False,
     "verbose": False,
-    "absolute_paths": False,
+    "path_format": "relative",
 }
 
 
@@ -70,7 +70,7 @@ def _parse_toml(infile):
         make_whitelist = true
         min_confidence = 10
         sort_by_size = true
-        absolute_paths = false
+        path_format = relative
         verbose = true
         paths = ["path1", "path2"]
     """
@@ -152,11 +152,12 @@ def _parse_args(args=None):
         help="Sort unused functions and classes by their lines of code.",
     )
     parser.add_argument(
-        "--absolute-paths",
-        action="store_true",
-        default=False,
+        "--path-format",
+        type=str,
+        action="store",
+        default="relative",
         required=False,
-        help="Output absolute file paths.",
+        help="Specify path format.",
     )
     parser.add_argument(
         "-v", "--verbose", action="store_true", default=missing

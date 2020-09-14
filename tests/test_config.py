@@ -27,7 +27,7 @@ def test_cli_args():
         ignore_names=["name1", "name2"],
         make_whitelist=True,
         min_confidence=10,
-        absolute_paths=True,
+        path_format="relative",
         sort_by_size=True,
         verbose=True,
     )
@@ -40,7 +40,7 @@ def test_cli_args():
             "--min-confidence=10",
             "--sort-by-size",
             "--verbose",
-            "--absolute-paths",
+            "--path-format=relative",
             "path1",
             "path2",
         ]
@@ -62,6 +62,7 @@ def test_toml_config():
         min_confidence=10,
         sort_by_size=True,
         verbose=True,
+        path_format="relative",
     )
     data = StringIO(
         dedent(
@@ -75,6 +76,7 @@ def test_toml_config():
         sort_by_size = true
         verbose = true
         paths = ["path1", "path2"]
+        path_format = "relative"
         """
         )
     )
@@ -99,7 +101,7 @@ def test_config_merging():
         min_confidence = 10
         sort_by_size = false
         verbose = false
-        absolute_paths = true
+        path_format = "relative"
         paths = ["toml_path"]
         """
         )
@@ -111,7 +113,7 @@ def test_config_merging():
         "--make-whitelist",
         "--min-confidence=20",
         "--sort-by-size",
-        "--absolute-paths",
+        "--path-format=relative",
         "--verbose",
         "cli_path",
     ]
@@ -124,7 +126,7 @@ def test_config_merging():
         make_whitelist=True,
         min_confidence=20,
         sort_by_size=True,
-        absolute_paths=True,
+        path_format="relative",
         verbose=True,
     )
     assert result == expected

@@ -6,10 +6,93 @@ import os
 import sys
 import tokenize
 from pathlib import Path
+from abc import ABC, abstractmethod
+
+EMPTY_PATH = ""
 
 
 class VultureInputException(Exception):
-    """class: VultureInputException"""
+    pass
+
+
+class PathFormat(ABC):
+    """clsss: PathFormat"""
+
+    def __init__(self, format_str=None):
+        self._format_str = format_str
+
+    @abstractmethod
+    def m_format_path(self, path: Path, *args) -> str:
+        """abstractmethod: m_format_path"""
+
+    @classmethod
+    def __subclasshook__(cls, C):
+        """classmethod: __subsclasshook__"""
+        if cls is PathFormat:
+            if any("m_format_path" in B.__dict__ for B in C.__mro__):
+                return True
+        return NotImplemented
+
+
+class RelativePathFormat(PathFormat):
+    """class: RelativePathFormat"""
+
+    #    def __init__(self, format_str=None):
+    #        super().__init__(format_str)
+
+    def m_format_path(self, path: Path, *args) -> str:
+        """method: m_format_path"""
+        if not path:
+            return EMPTY_PATH
+
+        path_str = str(path)
+        relpath_str = os.path.relpath(path_str)
+
+        if relpath_str.startswith(".."):
+            if self._format_str:
+                formatted_path_str = self._format_str.format(path, *args)
+            else:
+                formatted_path_str = path
+        else:
+            if self._format_str:
+                formatted_path_str = self._format_str.format(
+                    relpath_str, *args
+                )
+            else:
+                formatted_path_str = relpath_str
+
+        return formatted_path_str
+
+
+class AbsolutePathFormat(PathFormat):
+    """clsss: AbsolutePathFormat"""
+
+    #    def __init__(self, format_str=None):
+    #        super().__init__(format_str)
+
+    def m_format_path(self, path: Path, *args) -> str:
+        """method: m_format_path"""
+        if not path:
+            return EMPTY_PATH
+
+        path_str = str(path)
+        resolved_path = path.resolve(strict=True)
+        resolved_path_str = str(resolved_path)
+
+        if resolved_path_str.startswith(".."):
+            if self._format_str:
+                formatted_path_str = self._format_str.format(path_str, *args)
+            else:
+                formatted_path_str = path_str
+        else:
+            if self._format_str:
+                formatted_path_str = self._format_str.format(
+                    resolved_path_str, *args
+                )
+            else:
+                formatted_path_str = resolved_path_str
+
+        return formatted_path_str
 
 
 def _safe_eval(node, default):
@@ -41,35 +124,14 @@ def _safe_eval(node, default):
 
 
 def condition_is_always_false(condition):
-    """function: condition_is_always_false"""
     return not _safe_eval(condition, True)
 
 
 def condition_is_always_true(condition):
-    """function: condition_is_always_true"""
     return _safe_eval(condition, False)
 
 
-def format_path(path, absolute=False):
-    """function: format_path"""
-    if not path:
-        return path
-    if not absolute:
-        relpath = os.path.relpath(path)
-        # print(f'relative path {relpath}', file=sys.stderr, flush=True)
-    else:
-        # print('absolute paths set', file=sys.stderr)
-        pp = Path(path)  # pylint: disable=invalid-name
-        # make the path absolute, resolving any symlinks
-        resolved_path = pp.resolve(strict=True)
-        # relpath = os.path.abspath(path)
-        relpath = str(resolved_path)
-        # print(f'abs path {relpath}', file=sys.stderr, flush=True)
-    return relpath if not relpath.startswith("..") else path
-
-
 def get_decorator_name(decorator):
-    """function: get_decorator_name"""
     if isinstance(decorator, ast.Call):
         decorator = decorator.func
     parts = []
@@ -101,7 +163,6 @@ def get_modules(paths, toplevel=True):
 
 
 def read_file(filename):
-    """function: read_file"""
     try:
         # Use encoding detected by tokenize.detect_encoding().
         with tokenize.open(filename) as f:  # pylint: disable=invalid-name
@@ -111,8 +172,6 @@ def read_file(filename):
 
 
 class LoggingList(list):
-    """class: LoggingList"""
-
     def __init__(self, typ, verbose):
         self.typ = typ
         self._verbose = verbose
@@ -126,8 +185,6 @@ class LoggingList(list):
 
 
 class LoggingSet(set):
-    """class: LoggingSet"""
-
     def __init__(self, typ, verbose):
         self.typ = typ
         self._verbose = verbose

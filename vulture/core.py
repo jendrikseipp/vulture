@@ -5,10 +5,8 @@ import pkgutil
 import re
 import string
 import sys
+from pathlib import Path
 
-# external imports
-
-# local imports
 from vulture import lines
 from vulture import noqa
 from vulture import utils
@@ -29,6 +27,11 @@ ERROR_CODES = {
     "property": "V106",
     "variable": "V107",
     "unreachable_code": "V201",
+}
+
+PATH_FORMATTERS = {
+    "relative": utils.RelativePathFormat(),
+    "absolute": utils.AbsolutePathFormat(),
 }
 
 
@@ -105,7 +108,8 @@ class Item:  # pylint: disable=too-many-instance-attributes
         "last_lineno",
         "message",
         "confidence",
-        "absolute_paths",
+        "_path_format",
+        "__path_formatter",
     )
 
     def __init__(  # pylint: disable=too-many-arguments
@@ -117,7 +121,7 @@ class Item:  # pylint: disable=too-many-instance-attributes
         last_lineno,
         message="",
         confidence=DEFAULT_CONFIDENCE,
-        absolute_paths=False,
+        path_format="relative",
     ):
         self.name = name
         self.typ = typ
@@ -126,23 +130,27 @@ class Item:  # pylint: disable=too-many-instance-attributes
         self.last_lineno = last_lineno
         self.message = message or f"unused {typ} '{name}'"
         self.confidence = confidence
-        self.absolute_paths = absolute_paths
+        self._path_format = path_format
+        self.__path_formatter = PATH_FORMATTERS[self._path_format]
 
     @property
     def size(self):
-        """property: size"""
         assert self.last_lineno >= self.first_lineno
         return self.last_lineno - self.first_lineno + 1
 
+    @property
+    def path_format(self):
+        """property: path_format"""
+        return self._path_format
+
     def get_report(self, add_size=False):
-        """method: get_report"""
         if add_size:
             line_format = "line" if self.size == 1 else "lines"
             size_report = f", {self.size:d} {line_format}"
         else:
             size_report = ""
         return "{}:{:d}: {} ({}% confidence{})".format(
-            utils.format_path(self.filename, absolute=self.absolute_paths),
+            self.__path_formatter.m_format_path(Path(self.filename)),
             self.first_lineno,
             self.message,
             self.confidence,
@@ -150,8 +158,7 @@ class Item:  # pylint: disable=too-many-instance-attributes
         )
 
     def get_whitelist_string(self):
-        """method: get_whitelist_string"""
-        filename = utils.format_path(self.filename, self.absolute_paths)
+        filename = self.__path_formatter.m_format_path(Path(self.filename))
         if self.typ == "unreachable_code":
             return f"# {self.message} ({filename}:{self.first_lineno})"
 
@@ -185,13 +192,13 @@ class Vulture(
         verbose=False,
         ignore_names=None,
         ignore_decorators=None,
-        absolute_paths=False,
+        path_format="relative",
     ):
         self.verbose = verbose
-        self.absolute_paths = absolute_paths
+        self._path_format = path_format
+        self.__path_formatter = PATH_FORMATTERS[self._path_format]
 
         def get_list(typ):
-            """function: get_list"""
             return utils.LoggingList(typ, self.verbose)
 
         self.defined_attrs = get_list("attribute")
@@ -214,18 +221,16 @@ class Vulture(
         self.noqa_lines = {}
 
     def scan(self, code, filename=""):
-        """method: scan"""
         self.code = code.splitlines()
         self.noqa_lines = noqa.parse_noqa(self.code)
         self.filename = filename
 
-        abs_paths = self.absolute_paths
+        #        abs_paths = self.path_format
 
         def handle_syntax_error(e):  # pylint: disable=invalid-name
-            """function: handle_syntax_error"""
             text = f' at "{e.text.strip()}"' if e.text else ""
             print(
-                f"{utils.format_path(filename, absolute=abs_paths)}:\
+                f"{self.__path_formatter.m_format_path(Path(filename))}:\
 {e.lineno}: {e.msg}{text}",
                 file=sys.stderr,
             )
@@ -244,7 +249,7 @@ class Vulture(
         except ValueError as err:
             # ValueError is raised if source contains null bytes.
             print(
-                f'{utils.format_path(filename, absolute=self.absolute_paths)}: \
+                f'{self.__path_formatter.m_format_path(Path(filename))}: \
                 invalid source code "{err}"',
                 file=sys.stderr,
             )
@@ -500,7 +505,7 @@ class Vulture(
                     last_lineno,
                     message=message,
                     confidence=confidence,
-                    absolute_paths=self.absolute_paths,
+                    path_format=self._path_format,
                 )
             )
 
@@ -750,11 +755,22 @@ class Vulture(
 def main():
     """function: main"""
     config = make_config()
+    if config["path_format"] not in PATH_FORMATTERS:
+        print(
+            "--path-format {} not recognized.".format(config["path_format"]),
+            file=sys.stderr,
+            flush=True,
+        )
+        print("available formats are:", file=sys.stderr, flush=True)
+        for format_name in list(PATH_FORMATTERS):
+            print(f"\t{format_name}", file=sys.stderr, flush=True)
+        sys.exit(1)
+
     vulture = Vulture(
         verbose=config["verbose"],
         ignore_names=config["ignore_names"],
         ignore_decorators=config["ignore_decorators"],
-        absolute_paths=config["absolute_paths"],
+        path_format=config["path_format"],
     )
     vulture.scavenge(config["paths"], exclude=config["exclude"])
     sys.exit(

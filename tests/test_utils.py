@@ -1,32 +1,33 @@
-"""module: test-utils"""
-
-# standard imports
 import ast
-import pathlib
+from pathlib import Path, PurePath
 
-# external imports
-
-# local imports
 from vulture import utils
 
+PATH_FORMATTERS = {
+    "relative": utils.RelativePathFormat(),
+    "absolute": utils.AbsolutePathFormat(),
+}
 
-def check_paths(filename, absolute=False):
-    pathstr = utils.format_path(filename, absolute)
+
+def check_paths(filename, format_name="relative"):
+    assert format_name in PATH_FORMATTERS
+    # only checks relative vs absolute right now
+    pathstr = PATH_FORMATTERS[format_name].m_format_path(Path(filename))
     # platform dependencies and path types need to be accounted for
-    pp = pathlib.PurePath(pathstr)
-    check = pp.is_absolute()
-    if absolute:
+    pure_path = PurePath(pathstr)
+    check = pure_path.is_absolute()
+    if format_name == "absolute":
         assert check
     # even if absolute == True, the path might have been specified absolute
     # so can't conclude negatively
 
 
 def test_absolute_path():
-    check_paths(__file__, absolute=True)
+    check_paths(__file__, format_name="absolute")
 
 
 def test_relative_path():
-    check_paths(__file__, absolute=False)
+    check_paths(__file__, format_name="relative")
 
 
 def check_decorator_names(code, expected_names):
