@@ -14,8 +14,6 @@ from vulture.config import make_config
 
 DEFAULT_CONFIDENCE = 60
 
-DEFAULT_FILE_PATH = pathlib.Path("")
-
 IGNORED_VARIABLE_NAMES = {"object", "self"}
 
 ERROR_CODES = {
@@ -204,7 +202,8 @@ class Vulture(ast.NodeVisitor):
         self.code = []
         self.found_dead_code_or_error = False
 
-    def scan(self, code, filename=DEFAULT_FILE_PATH):
+    def scan(self, code, filename=""):
+        filename = pathlib.Path(filename)
         self.code = code.splitlines()
         self.noqa_lines = noqa.parse_noqa(self.code)
         self.filename = filename
@@ -251,6 +250,8 @@ class Vulture(ast.NodeVisitor):
 
         def exclude_file(name):
             return any(fnmatch(str(name), pattern) for pattern in exclude)
+
+        paths = [pathlib.Path(path) for path in paths]
 
         for module in utils.get_modules(paths):
             if exclude_file(module):

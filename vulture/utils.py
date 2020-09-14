@@ -50,6 +50,7 @@ def format_path(path):
     try:
         return path.relative_to(os.curdir)
     except ValueError:
+        # Path is not below the current directory.
         return path
 
 
@@ -67,8 +68,8 @@ def get_decorator_name(decorator):
 def get_modules(paths):
     """Take files from the command line even if they don't end with .py."""
     modules = []
-    for path_str in paths:
-        path = pathlib.Path(path_str).resolve()
+    for path in paths:
+        path = path.resolve()
 
         if not path.exists():
             sys.exit(f"Error: {path} could not be found.")
