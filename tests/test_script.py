@@ -95,3 +95,12 @@ def test_absolute_paths():
         raise AssertionError from time_err
     except subprocess.SubprocessError as sub_err:
         raise AssertionError from sub_err
+
+
+def test_path_format_config():
+    """
+    Verify any unrecognized format generates an error.
+    By definition, implemented format names will be registered,
+    so no sense testing them.
+    """
+    assert call_vulture(["--format", "unimplemented", "tests/"]) == 1
