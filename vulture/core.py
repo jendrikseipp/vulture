@@ -262,8 +262,6 @@ class Vulture(
                 handle_syntax_error(err)
 
     def scavenge(self, paths, exclude=None):
-        """method: scavenge"""
-
         def prepare_pattern(pattern):
             if not any(char in pattern for char in ["*", "?", "["]):
                 pattern = f"*{pattern}*"
@@ -310,19 +308,15 @@ class Vulture(
 
     def get_unused_code(self, min_confidence=0, sort_by_size=False):
         """
-        method: get_unused code
-
         Return ordered list of unused Item objects.
         """
         if not 0 <= min_confidence <= 100:
             raise ValueError("min_confidence must be between 0 and 100.")
 
         def by_name(item):
-            """function: by_name"""
             return (item.filename.lower(), item.first_lineno)
 
         def by_size(item):
-            """method: by_size"""
             return (item.size,) + by_name(item)
 
         unused_code = (
@@ -348,8 +342,6 @@ class Vulture(
         self, min_confidence=0, sort_by_size=False, make_whitelist=False
     ):
         """
-        method: report
-
         Print ordered list of Item objects to stdout.
         """
         for item in self.get_unused_code(
@@ -365,48 +357,42 @@ class Vulture(
 
     @property
     def unused_classes(self):
-        """property: unused_classes"""
         return _get_unused_items(self.defined_classes, self.used_names)
 
     @property
     def unused_funcs(self):
-        """property: unused_funcss"""
         return _get_unused_items(self.defined_funcs, self.used_names)
 
     @property
     def unused_imports(self):
-        """property: unused_imports"""
         return _get_unused_items(self.defined_imports, self.used_names)
 
     @property
     def unused_methods(self):
-        """property: unused_methods"""
         return _get_unused_items(self.defined_methods, self.used_names)
 
     @property
     def unused_props(self):
-        """property: unused_props"""
+        return _get_unused_items(self.defined_props, self.used_names)
+
+    @property
+    def unused_items(self):
         return _get_unused_items(self.defined_props, self.used_names)
 
     @property
     def unused_vars(self):
-        """property: unused_vars"""
         return _get_unused_items(self.defined_vars, self.used_names)
 
     @property
     def unused_attrs(self):
-        """property: unused_attrs"""
         return _get_unused_items(self.defined_attrs, self.used_names)
 
     def _log(self, *args):
-        """member: _log"""
         if self.verbose:
             print(*args)
 
     def _add_aliases(self, node):
         """
-        member: _add_aliases
-
         We delegate to this method instead of using visit_alias() to have
         access to line numbers and to filter imports from __future__.
         """
@@ -427,7 +413,6 @@ class Vulture(
                 self.used_names.add(name_and_alias.name)
 
     def _handle_conditional_node(self, node, name):
-        """member: _handle_conditional_node"""
         if utils.condition_is_always_false(node.test):
             self._define(
                 self.unreachable_code,
@@ -478,8 +463,6 @@ class Vulture(
         confidence=DEFAULT_CONFIDENCE,
         ignore=None,
     ):
-        """member: _define"""
-
         def ignored(lineno):
             """function: ignored"""
             return (
@@ -523,11 +506,9 @@ class Vulture(
         self._define_variable(node.arg, node, confidence=100)
 
     def visit_AsyncFunctionDef(self, node):  # pylint: disable=invalid-name
-        """method: visit_AsyncFunctionDef"""
         return self.visit_FunctionDef(node)
 
     def visit_Attribute(self, node):  # pylint: disable=invalid-name
-        """method: visit_Attribute"""
         if isinstance(node.ctx, ast.Store):
             self._define(self.defined_attrs, node.attr, node)
         elif isinstance(node.ctx, ast.Load):
@@ -535,8 +516,6 @@ class Vulture(
 
     def visit_BinOp(self, node):  # pylint: disable=invalid-name
         """
-        method: visit_BinOp
-
         Parse variable names in old format strings:
 
         "%(my_var)s" % locals()
@@ -549,7 +528,6 @@ class Vulture(
             self.used_names |= set(re.findall(r"%\((\w+)\)", node.left.s))
 
     def visit_Call(self, node):  # pylint: disable=invalid-name
-        """method: visit_Call"""
         # Count getattr/hasattr(x, "some_attr", ...) as usage of some_attr.
         if isinstance(node.func, ast.Name) and (
             (node.func.id == "getattr" and 2 <= len(node.args) <= 3)
@@ -573,8 +551,6 @@ class Vulture(
             self._handle_new_format_string(node.func.value.s)
 
     def _handle_new_format_string(self, s):  # pylint: disable=invalid-name
-        """method: _handle_new_format_string"""
-
         def is_identifier(name):
             return bool(re.match(r"[a-zA-Z_][a-zA-Z0-9_]*", name))
 
@@ -605,7 +581,6 @@ class Vulture(
         )
 
     def visit_ClassDef(self, node):  # pylint: disable=invalid-name
-        """method: visit_ClassDef"""
         for decorator in node.decorator_list:
             if _match(
                 utils.get_decorator_name(decorator), self.ignore_decorators
@@ -620,7 +595,6 @@ class Vulture(
             )
 
     def visit_FunctionDef(self, node):  # pylint: disable=invalid-name
-        """method: visit_FunctionDef"""
         decorator_names = [
             utils.get_decorator_name(decorator)
             for decorator in node.decorator_list
@@ -655,24 +629,19 @@ class Vulture(
             )
 
     def visit_If(self, node):  # pylint: disable=invalid-name
-        """method: visit_If"""
         self._handle_conditional_node(node, "if")
 
     def visit_IfExp(self, node):  # pylint: disable=invalid-name
-        """method: visit_IfExp"""
         self._handle_conditional_node(node, "ternary")
 
     def visit_Import(self, node):  # pylint: disable=invalid-name
-        """method: visit_Import"""
         self._add_aliases(node)
 
     def visit_ImportFrom(self, node):  # pylint: disable=invalid-name
-        """method: visit_ImportFrom"""
         if node.module != "__future__":
             self._add_aliases(node)
 
     def visit_Name(self, node):  # pylint: disable=invalid-name
-        """method: visit_Name"""
         if (
             isinstance(node.ctx, ast.Load)
             and node.id not in IGNORED_VARIABLE_NAMES
@@ -682,11 +651,9 @@ class Vulture(
             self._define_variable(node.id, node)
 
     def visit_While(self, node):  # pylint: disable=invalid-name
-        """method: visit_While"""
         self._handle_conditional_node(node, "while")
 
     def visit(self, node):
-        """method: visit"""
         method = "visit_" + node.__class__.__name__
         visitor = getattr(self, method, None)
         if self.verbose:
@@ -713,8 +680,6 @@ class Vulture(
 
     def _handle_ast_list(self, ast_list):
         """
-        method: _handle_ast_list
-
         Find unreachable nodes in the given sequence of ast nodes.
         """
         for index, node in enumerate(ast_list):
@@ -738,8 +703,6 @@ class Vulture(
 
     def generic_visit(self, node):
         """
-        method: generic_visit
-
         Called if no explicit visitor function exists for a node.
         """
         for _, value in ast.iter_fields(node):
@@ -753,7 +716,6 @@ class Vulture(
 
 
 def main():
-    """function: main"""
     config = make_config()
     if config["path_format"] not in PATH_FORMATTERS:
         print(
