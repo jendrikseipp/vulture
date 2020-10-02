@@ -142,7 +142,12 @@ if you're using Python 3.7+.
 
 You can also store command line arguments in `pyproject.toml` under the
 `tool.vulture` section. Simply remove leading dashes and replace all
-remaining dashes with underscores. Example:
+remaining dashes with underscores.
+
+When an option is present both in the config-file and as a CLI argument, the
+CLI argument will win.
+
+Example Config:
 
 ``` toml
 [tool.vulture]
