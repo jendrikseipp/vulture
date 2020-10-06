@@ -48,16 +48,7 @@ def _match(name, patterns, case=True):
 def _is_test_file(filename):
     return _match(
         filename.resolve(),
-        [
-            "*/test/*",
-            "*/tests/*",
-            "*/test*.py",
-            "*/*_test.py",
-            "*/*-test.py",
-            "test*.py",
-            "*_test.py",
-            "*-test.py",
-        ],
+        ["*/test/*", "*/tests/*", "*/test*.py", "*[-_]test.py"],
         case=False,
     )
 
