@@ -512,6 +512,12 @@ async def other_func():
 """,
         filename="test_function_names.py",
     )
+    from pathlib import Path
+    from os.path import abspath
+
+    print("path:", Path("test_function_names.py"))
+    print("resolved:", Path("test_function_names.py").resolve())
+    print("abspath:", abspath("test_function_names.py"))
     check(v.defined_funcs, ["other_func"])
     check(v.unused_funcs, ["other_func"])
 
