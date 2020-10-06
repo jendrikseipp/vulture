@@ -65,31 +65,27 @@ def get_decorator_name(decorator):
 
 
 def get_modules(paths):
-    """Take files from the command line even if they don't end with .py."""
+    """Retrieve Python files to check.
+
+    Loop over all given paths, abort if any ends with .pyc and add collect
+    the other given files (even those not ending with .py) and all .py
+    files under the given directories.
+
+    """
     modules = []
     for path in paths:
         path = path.resolve()
 
-        if not path.exists():
+        if path.is_file():
+            if path.suffix == ".pyc":
+                sys.exit(f"Error: *.pyc files are not supported: {path}")
+            else:
+                modules.append(path)
+        elif path.is_dir():
+            modules.extend(path.rglob("*.py"))
+        else:
             sys.exit(f"Error: {path} could not be found.")
 
-        if path.is_file():
-            top_paths = (_ for _ in [path])
-        else:
-            top_paths = path.glob("*")
-
-        for top_path in top_paths:
-            if top_path.is_file():
-                if top_path.suffix == ".pyc":
-                    sys.exit(f".pyc files are not supported: {top_path}")
-                else:
-                    modules.append(top_path)
-            elif not top_path.is_dir():
-                sys.exit(f"Error: {top_path} could not be found.")
-        sub_paths = path.rglob("*.py")
-        for sub_path in sub_paths:
-            if sub_path.is_file():
-                modules.append(sub_path)
     return modules
 
 
