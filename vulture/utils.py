@@ -75,7 +75,6 @@ def get_modules(paths):
     modules = []
     for path in paths:
         path = path.resolve()
-
         if path.is_file():
             if path.suffix == ".pyc":
                 sys.exit(f"Error: *.pyc files are not supported: {path}")
@@ -85,7 +84,6 @@ def get_modules(paths):
             modules.extend(path.rglob("*.py"))
         else:
             sys.exit(f"Error: {path} could not be found.")
-
     return modules
 
 

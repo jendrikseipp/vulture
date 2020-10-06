@@ -1,5 +1,3 @@
-import pathlib
-
 import pytest
 
 from . import v
@@ -31,7 +29,7 @@ def myfunc():
 @pytest.fixture
 def check_report(v, capsys):
     def test_report(code, expected, make_whitelist=False):
-        filename = pathlib.Path("foo.py")
+        filename = "foo.py"
         v.scan(code, filename=filename)
         capsys.readouterr()
         v.report(make_whitelist=make_whitelist)

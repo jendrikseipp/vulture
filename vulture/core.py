@@ -1,6 +1,6 @@
 import ast
 from fnmatch import fnmatch, fnmatchcase
-import pathlib
+from pathlib import Path
 import pkgutil
 import re
 import string
@@ -178,7 +178,7 @@ class Vulture(ast.NodeVisitor):
     """Find dead code."""
 
     def __init__(
-        self, verbose=False, ignore_names=None, ignore_decorators=None,
+        self, verbose=False, ignore_names=None, ignore_decorators=None
     ):
         self.verbose = verbose
 
@@ -199,12 +199,12 @@ class Vulture(ast.NodeVisitor):
         self.ignore_names = ignore_names or []
         self.ignore_decorators = ignore_decorators or []
 
-        self.filename = pathlib.Path()
+        self.filename = Path()
         self.code = []
         self.found_dead_code_or_error = False
 
     def scan(self, code, filename=""):
-        filename = pathlib.Path(filename)
+        filename = Path(filename)
         self.code = code.splitlines()
         self.noqa_lines = noqa.parse_noqa(self.code)
         self.filename = filename
@@ -252,7 +252,7 @@ class Vulture(ast.NodeVisitor):
         def exclude_file(name):
             return any(fnmatch(str(name), pattern) for pattern in exclude)
 
-        paths = [pathlib.Path(path) for path in paths]
+        paths = [Path(path) for path in paths]
 
         for module in utils.get_modules(paths):
             if exclude_file(module):
@@ -274,7 +274,7 @@ class Vulture(ast.NodeVisitor):
 
         unique_imports = {item.name for item in self.defined_imports}
         for import_name in unique_imports:
-            path = pathlib.Path("whitelists") / (import_name + "_whitelist.py")
+            path = Path("whitelists") / (import_name + "_whitelist.py")
             if exclude_file(path):
                 self._log("Excluded whitelist:", path)
             else:
@@ -320,7 +320,7 @@ class Vulture(ast.NodeVisitor):
         )
 
     def report(
-        self, min_confidence=0, sort_by_size=False, make_whitelist=False,
+        self, min_confidence=0, sort_by_size=False, make_whitelist=False
     ):
         """
         Print ordered list of Item objects to stdout.

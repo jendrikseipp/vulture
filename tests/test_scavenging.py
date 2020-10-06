@@ -1,5 +1,4 @@
 import sys
-import pathlib
 
 from . import check, v
 
@@ -490,7 +489,7 @@ class BasicTestCase:
 class OtherClass:
     pass
 """,
-        filename=pathlib.Path("test_function_names.py"),
+        filename="test_function_names.py",
     )
     check(v.defined_attrs, [])
     check(v.defined_classes, ["OtherClass"])
@@ -511,7 +510,7 @@ async def test_func():
 async def other_func():
     pass
 """,
-        filename=pathlib.Path("test_function_names.py"),
+        filename="test_function_names.py",
     )
     check(v.defined_funcs, ["other_func"])
     check(v.unused_funcs, ["other_func"])
@@ -526,7 +525,7 @@ async def test_func():
 async def other_func():
     pass
 """,
-        filename=pathlib.Path("function_names.py"),
+        filename="function_names.py",
     )
     check(v.defined_funcs, ["test_func", "other_func"])
     check(v.unused_funcs, ["other_func", "test_func"])

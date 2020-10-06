@@ -1,5 +1,3 @@
-import pathlib
-
 from . import check, v
 
 assert v  # Silence pyflakes.
@@ -220,7 +218,7 @@ from zoo import zebra
 
 unused_var = 'monty'
 """,
-        filename=pathlib.Path("nested/project/__init__.py"),
+        filename="nested/project/__init__.py",
     )
     check(v.unused_imports, [])
     check(v.unused_vars, ["unused_var"])
