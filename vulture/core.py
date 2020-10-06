@@ -41,19 +41,23 @@ def _is_special_name(name):
 
 
 def _match(name, patterns, case=True):
-    if not case:
-        name = pathlib.Path(str(name).lower())
-    return any(name.match(pattern) for pattern in patterns)
-
-
-def _match_name(name, patterns):
-    return any(fnmatchcase(name, pattern) for pattern in patterns)
+    func = fnmatchcase if case else fnmatch
+    return any(func(name, pattern) for pattern in patterns)
 
 
 def _is_test_file(filename):
     return _match(
         filename.resolve(),
-        ["*/test/*", "*/tests/*", "*/test*.py", "*/*_test.py", "*/*-test.py"],
+        [
+            "*/test/*",
+            "*/tests/*",
+            "*/test*.py",
+            "*/*_test.py",
+            "*/*-test.py",
+            "test*.py",
+            "*_test.py",
+            "*-test.py",
+        ],
         case=False,
     )
 
@@ -174,10 +178,7 @@ class Vulture(ast.NodeVisitor):
     """Find dead code."""
 
     def __init__(
-        self,
-        verbose=False,
-        ignore_names=None,
-        ignore_decorators=None,
+        self, verbose=False, ignore_names=None, ignore_decorators=None,
     ):
         self.verbose = verbose
 
@@ -319,10 +320,7 @@ class Vulture(ast.NodeVisitor):
         )
 
     def report(
-        self,
-        min_confidence=0,
-        sort_by_size=False,
-        make_whitelist=False,
+        self, min_confidence=0, sort_by_size=False, make_whitelist=False,
     ):
         """
         Print ordered list of Item objects to stdout.
@@ -445,7 +443,7 @@ class Vulture(ast.NodeVisitor):
         def ignored(lineno):
             return (
                 (ignore and ignore(self.filename, name))
-                or _match_name(name, self.ignore_names)
+                or _match(name, self.ignore_names)
                 or noqa.ignore_line(self.noqa_lines, lineno, ERROR_CODES[typ])
             )
 
@@ -559,7 +557,7 @@ class Vulture(ast.NodeVisitor):
 
     def visit_ClassDef(self, node):
         for decorator in node.decorator_list:
-            if _match_name(
+            if _match(
                 utils.get_decorator_name(decorator), self.ignore_decorators
             ):
                 self._log(
@@ -591,8 +589,7 @@ class Vulture(ast.NodeVisitor):
             typ = "function"
 
         if any(
-            _match_name(name, self.ignore_decorators)
-            for name in decorator_names
+            _match(name, self.ignore_decorators) for name in decorator_names
         ):
             self._log(f'Ignoring {typ} "{node.name}" (decorator whitelisted)')
         elif typ == "property":
