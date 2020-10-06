@@ -249,13 +249,13 @@ class Vulture(ast.NodeVisitor):
 
         exclude = [prepare_pattern(pattern) for pattern in (exclude or [])]
 
-        def exclude_file(name):
-            return any(fnmatch(str(name), pattern) for pattern in exclude)
+        def exclude_path(path):
+            return _match(path, exclude, case=False)
 
         paths = [Path(path) for path in paths]
 
         for module in utils.get_modules(paths):
-            if exclude_file(module):
+            if exclude_path(module):
                 self._log("Excluded:", module)
                 continue
 
@@ -275,7 +275,7 @@ class Vulture(ast.NodeVisitor):
         unique_imports = {item.name for item in self.defined_imports}
         for import_name in unique_imports:
             path = Path("whitelists") / (import_name + "_whitelist.py")
-            if exclude_file(path):
+            if exclude_path(path):
                 self._log("Excluded whitelist:", path)
             else:
                 try:
