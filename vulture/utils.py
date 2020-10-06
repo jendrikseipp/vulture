@@ -46,10 +46,11 @@ def condition_is_always_true(condition):
 
 
 def format_path(path):
-    if not path:
+    try:
+        return path.relative_to(os.curdir)
+    except ValueError:
+        # Path is not below the current directory.
         return path
-    relpath = os.path.relpath(path)
-    return relpath if not relpath.startswith("..") else path
 
 
 def get_decorator_name(decorator):
@@ -63,22 +64,25 @@ def get_decorator_name(decorator):
     return "@" + ".".join(reversed(parts))
 
 
-def get_modules(paths, toplevel=True):
-    """Take files from the command line even if they don't end with .py."""
+def get_modules(paths):
+    """Retrieve Python files to check.
+
+    Loop over all given paths, abort if any ends with .pyc and add collect
+    the other given files (even those not ending with .py) and all .py
+    files under the given directories.
+
+    """
     modules = []
     for path in paths:
-        path = os.path.abspath(path)
-        if toplevel and path.endswith(".pyc"):
-            sys.exit(f".pyc files are not supported: {path}")
-        if os.path.isfile(path) and (path.endswith(".py") or toplevel):
-            modules.append(path)
-        elif os.path.isdir(path):
-            subpaths = [
-                os.path.join(path, filename)
-                for filename in sorted(os.listdir(path))
-            ]
-            modules.extend(get_modules(subpaths, toplevel=False))
-        elif toplevel:
+        path = path.resolve()
+        if path.is_file():
+            if path.suffix == ".pyc":
+                sys.exit(f"Error: *.pyc files are not supported: {path}")
+            else:
+                modules.append(path)
+        elif path.is_dir():
+            modules.extend(path.rglob("*.py"))
+        else:
             sys.exit(f"Error: {path} could not be found.")
     return modules
 

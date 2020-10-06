@@ -3,8 +3,8 @@ This module handles retrieval of configuration values from either the
 command-line arguments or the pyproject.toml file.
 """
 import argparse
+import pathlib
 import sys
-from os.path import abspath, exists
 
 import toml
 
@@ -183,11 +183,11 @@ def make_config(argv=None, tomlfile=None):
         config = _parse_toml(tomlfile)
         detected_toml_path = str(tomlfile)
     else:
-        toml_path = abspath("pyproject.toml")
-        if exists(toml_path):
-            with open(toml_path) as config:
-                config = _parse_toml(config)
-            detected_toml_path = toml_path
+        toml_path = pathlib.Path("pyproject.toml").resolve()
+        if toml_path.is_file():
+            with open(toml_path) as fconfig:
+                config = _parse_toml(fconfig)
+            detected_toml_path = str(toml_path)
         else:
             config = {}
 

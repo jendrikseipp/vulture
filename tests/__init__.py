@@ -1,5 +1,4 @@
-import glob
-import os.path
+import pathlib
 import subprocess
 import sys
 
@@ -7,9 +6,10 @@ import pytest
 
 from vulture import core
 
-DIR = os.path.dirname(os.path.abspath(__file__))
-REPO = os.path.dirname(DIR)
-WHITELISTS = glob.glob(os.path.join(REPO, "vulture", "whitelists", "*.py"))
+REPO = pathlib.Path(__file__).resolve().parents[1]
+WHITELISTS = [
+    str(path) for path in (REPO / "vulture" / "whitelists").glob("*.py")
+]
 
 
 def call_vulture(args, **kwargs):
