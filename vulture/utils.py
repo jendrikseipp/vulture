@@ -1,6 +1,5 @@
 import ast
 import os
-import pathlib
 import sys
 import tokenize
 
