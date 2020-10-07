@@ -46,8 +46,8 @@ jobs:
         python -m vulture vulture/ tests/
 
     - name: Run Tests
-      run: tox -e py
+      run: python -m tox -e py
 
     - name: Check for Style Issues
       if: ${{ matrix.python-version == 3.6 && matrix.os == 'ubuntu-18.04' }}
-      run: tox -e style
+      run: python -m tox -e style
