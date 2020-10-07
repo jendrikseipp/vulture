@@ -27,7 +27,7 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install coveralls setuptools tox wheel
+        python -m pip install --upgrade coveralls setuptools tox wheel
 
     - name: Build wheel
       run: python setup.py bdist_wheel
