@@ -45,9 +45,13 @@ jobs:
         vulture vulture/ tests/
         python -m vulture vulture/ tests/
 
-    - name: Run Tests
+    - name: Run Tests on non-pypy3 non-windows
       if: ${{ matrix.python-version != 'pypy3' || matrix.os != 'windows-2019' }}
       run: python -m tox -e py
+
+    - name: Run Tests on with pypy3 on windows
+      if: ${{ matrix.python-version == 'pypy3' && matrix.os == 'windows-2019' }}
+      run: python -m tox -e pypy3
 
     - name: Check for Style Issues
       if: ${{ matrix.python-version == 3.6 && matrix.os == 'ubuntu-18.04' }}
