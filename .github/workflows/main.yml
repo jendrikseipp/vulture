@@ -16,7 +16,7 @@ jobs:
         os: [macos-10.15, ubuntu-18.04, ubuntu-20.04, windows-2019]
 
     steps:
-    - name: Checkout Code
+    - name: Checkout code
       uses: actions/checkout@v2
 
     - name: Set up Python ${{ matrix.python-version }}
@@ -24,7 +24,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install Dependencies
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         python -m pip install --upgrade coveralls setuptools tox wheel
@@ -32,11 +32,11 @@ jobs:
     - name: Build wheel
       run: python setup.py bdist_wheel
 
-    - name: Install Vulture from wheel (For Linux and MacOS)
+    - name: Install Vulture from wheel (for Linux and MacOS)
       if: ${{ matrix.os != 'windows-2019' }}
       run: "python -m pip install --only-binary=:all: ./dist/vulture-*.whl"
 
-    - name: Install Vulture from wheel (For Windows)
+    - name: Install Vulture from wheel (for Windows)
       if: ${{ matrix.os == 'windows-2019' }}
       run: "python -m pip install --only-binary=:all: --ignore-installed --find-links=dist/ vulture"
 
@@ -45,14 +45,11 @@ jobs:
         vulture vulture/ tests/
         python -m vulture vulture/ tests/
 
-    - name: Run Tests on non-pypy3 non-windows
+    # Tox fails to find PyPy on Windows. Neither "tox -e py" nor "tox -e pypy3" works. 
+    - name: Run tests
       if: ${{ matrix.python-version != 'pypy3' || matrix.os != 'windows-2019' }}
       run: python -m tox -e py
 
-    - name: Run Tests on with pypy3 on windows
-      if: ${{ matrix.python-version == 'pypy3' && matrix.os == 'windows-2019' }}
-      run: python -m tox -e pypy3
-
-    - name: Check for Style Issues
-      if: ${{ matrix.python-version == 3.6 && matrix.os == 'ubuntu-18.04' }}
+    - name: Check for style issues
+      if: ${{ matrix.python-version == 3.6 && matrix.os == 'ubuntu-20.04' }}
       run: python -m tox -e style
