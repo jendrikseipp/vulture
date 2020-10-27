@@ -4,6 +4,7 @@
 * Don't override paths in pyproject.toml with empty CLI paths (bcbnz, #228).
 * Run continuous integration tests for Python 3.9 (ju-sh, #232).
 * Use pathlib internally (ju-sh, #226).
+* Print a message to stdout on success (exhuma).
 
 # 2.1 (2020-08-19)
 
