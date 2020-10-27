@@ -687,10 +687,11 @@ def main():
         ignore_decorators=config["ignore_decorators"],
     )
     vulture.scavenge(config["paths"], exclude=config["exclude"])
-    sys.exit(
-        vulture.report(
-            min_confidence=config["min_confidence"],
-            sort_by_size=config["sort_by_size"],
-            make_whitelist=config["make_whitelist"],
-        )
+    status = vulture.report(
+        min_confidence=config["min_confidence"],
+        sort_by_size=config["sort_by_size"],
+        make_whitelist=config["make_whitelist"],
     )
+    if status == 0:
+        print("Successfully finisehd. No unused code detected.")
+    sys.exit(status)
