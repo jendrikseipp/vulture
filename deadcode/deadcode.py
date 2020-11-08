@@ -1,6 +1,3 @@
-import sys
-
-
 def deadcode():
     """
     don't call this function from anywhere
