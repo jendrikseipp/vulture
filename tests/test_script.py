@@ -1,5 +1,5 @@
 import glob
-import os.path
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -77,20 +77,29 @@ def test_make_whitelist():
 
 
 def test_absolute_paths():
-    # assert call_vulture(["--format", "absolute", "deadcode/"]) == 0
     try:
         completed_process = run_vulture(
             ["--format", "absolute", "deadcode/"], check=False
         )
-        output_lines = completed_process.stdout.strip().split("\n")
+        output_lines = completed_process.stdout.strip().split(os.linesep)
         for line in output_lines:
-            filename = line.split(":")[0]
-            # make the file resolves to an actual file
-            # and it's an absolute path
-            path = Path(filename)
-            assert path.exists()
-            path = path.resolve()
-            assert path.is_absolute()
+            if line:
+                lineparts = line.split(":")
+                # platform independent logic
+                # Windows differs from other root paths, uses ':' in volumes
+                # unix-like platforms should have 3 parts on an output line
+                # windows (absolute paths) have > 3 (4) including drive spec
+                partcount = len(lineparts)
+                filename = lineparts[0]
+                if partcount >= 3:
+                    for i in range(1, partcount - 2):
+                        filename += f":{lineparts[i]}"
+                # make sure the file resolves to an actual file
+                # and it's an absolute path
+                path = Path(filename)
+                assert path.exists()
+                path = path.resolve()
+                assert path.is_absolute()
     except subprocess.TimeoutExpired as time_err:
         raise AssertionError from time_err
     except subprocess.SubprocessError as sub_err:
