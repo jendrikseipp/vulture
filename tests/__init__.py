@@ -1,5 +1,4 @@
-import glob
-import os.path
+import pathlib
 import subprocess
 from subprocess import PIPE, STDOUT
 import sys
@@ -8,13 +7,21 @@ import pytest
 
 from vulture import core
 
-DIR = os.path.dirname(os.path.abspath(__file__))
-REPO = os.path.dirname(DIR)
-WHITELISTS = glob.glob(os.path.join(REPO, "vulture", "whitelists", "*.py"))
+REPO = pathlib.Path(__file__).resolve().parents[1]
+WHITELISTS = [
+    str(path) for path in (REPO / "vulture" / "whitelists").glob("*.py")
+]
+
 CALL_TIMEOUT_SEC = 60
 
 
 def call_vulture(args, **kwargs):
+    print(
+        f"DEBUG: {sys.executable} -m vulture args={args} \
+        REPO={REPO} kwargs={kwargs}",
+        file=sys.stderr,
+        flush=True,
+    )
     return subprocess.call(
         [sys.executable, "-m", "vulture"] + args, cwd=REPO, **kwargs
     )
@@ -24,6 +31,12 @@ def run_vulture(args_list, **kwargs):
     check = kwargs.get("check", False)
     if "check" in kwargs:
         del kwargs["check"]
+    print(
+        f"DEBUG: {sys.executable} -m vulture args_list={args_list} \
+        REPO={REPO} kwargs={kwargs}",
+        file=sys.stderr,
+        flush=True,
+    )
     result = subprocess.run(
         [sys.executable, "-m", "vulture"] + args_list,
         stdin=None,
@@ -38,7 +51,7 @@ def run_vulture(args_list, **kwargs):
         errors=None,
         env=None,
         universal_newlines=True,
-        **kwargs
+        **kwargs,
     )
     return result
 

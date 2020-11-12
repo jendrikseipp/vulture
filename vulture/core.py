@@ -1,6 +1,5 @@
 import ast
 from fnmatch import fnmatch, fnmatchcase
-import os.path
 import pkgutil
 import re
 import string
@@ -11,8 +10,6 @@ from vulture import lines
 from vulture import noqa
 from vulture import utils
 from vulture.config import make_config
-
-__version__ = "2.0"
 
 DEFAULT_CONFIDENCE = 60
 
@@ -54,8 +51,8 @@ def _match(name, patterns, case=True):
 
 def _is_test_file(filename):
     return _match(
-        os.path.abspath(filename),
-        ["*/test/*", "*/tests/*", "*/test*.py", "*/*_test.py", "*/*-test.py"],
+        filename.resolve(),
+        ["*/test/*", "*/tests/*", "*/test*.py", "*[-_]test.py"],
         case=False,
     )
 
@@ -70,7 +67,7 @@ def _ignore_import(filename, import_name):
     Ignore imports from __init__.py files since they're commonly used to
     collect objects from a package.
     """
-    return os.path.basename(filename) == "__init__.py" or import_name == "*"
+    return filename.name == "__init__.py" or import_name == "*"
 
 
 def _ignore_function(filename, function_name):
@@ -213,12 +210,13 @@ class Vulture(ast.NodeVisitor):
         self.ignore_names = ignore_names or []
         self.ignore_decorators = ignore_decorators or []
 
-        self.filename = ""
+        self.filename = Path()
         self.code = []
         self.found_dead_code_or_error = False
         self.noqa_lines = {}
 
     def scan(self, code, filename=""):
+        filename = Path(filename)
         self.code = code.splitlines()
         self.noqa_lines = noqa.parse_noqa(self.code)
         self.filename = filename
@@ -235,10 +233,10 @@ class Vulture(ast.NodeVisitor):
         try:
             node = (
                 ast.parse(
-                    code, filename=self.filename, type_comments=True
-                )  # fails if not python 3.8.x
+                    code, filename=str(self.filename), type_comments=True
+                )
                 if sys.version_info >= (3, 8)  # type_comments requires 3.8+
-                else ast.parse(code, filename=self.filename)
+                else ast.parse(code, filename=str(self.filename))
             )
         except SyntaxError as err:
             handle_syntax_error(err)
@@ -259,17 +257,19 @@ class Vulture(ast.NodeVisitor):
 
     def scavenge(self, paths, exclude=None):
         def prepare_pattern(pattern):
-            if not any(char in pattern for char in ["*", "?", "["]):
+            if not any(char in pattern for char in "*?["):
                 pattern = f"*{pattern}*"
             return pattern
 
         exclude = [prepare_pattern(pattern) for pattern in (exclude or [])]
 
-        def exclude_file(name):
-            return any(fnmatch(name, pattern) for pattern in exclude)
+        def exclude_path(path):
+            return _match(path, exclude, case=False)
+
+        paths = [Path(path) for path in paths]
 
         for module in utils.get_modules(paths):
-            if exclude_file(module):
+            if exclude_path(module):
                 self._log("Excluded:", module)
                 continue
 
@@ -288,12 +288,12 @@ class Vulture(ast.NodeVisitor):
 
         unique_imports = {item.name for item in self.defined_imports}
         for import_name in unique_imports:
-            path = os.path.join("whitelists", import_name) + "_whitelist.py"
-            if exclude_file(path):
+            path = Path("whitelists") / (import_name + "_whitelist.py")
+            if exclude_path(path):
                 self._log("Excluded whitelist:", path)
             else:
                 try:
-                    module_data = pkgutil.get_data("vulture", path)
+                    module_data = pkgutil.get_data("vulture", str(path))
                     self._log("Included whitelist:", path)
                 except OSError:
                     # Most imported modules don't have a whitelist.
@@ -309,7 +309,7 @@ class Vulture(ast.NodeVisitor):
             raise ValueError("min_confidence must be between 0 and 100.")
 
         def by_name(item):
-            return (item.filename.lower(), item.first_lineno)
+            return (str(item.filename).lower(), item.first_lineno)
 
         def by_size(item):
             return (item.size,) + by_name(item)
