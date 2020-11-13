@@ -5,6 +5,9 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  schedule:
+    # Run daily (* needs quotes).
+    - cron: '0 4 * * *'
 
 jobs:
   test:
@@ -45,7 +48,7 @@ jobs:
         vulture vulture/ tests/
         python -m vulture vulture/ tests/
 
-    # Tox fails to find PyPy on Windows. Neither "tox -e py" nor "tox -e pypy3" works. 
+    # Tox fails to find PyPy on Windows. Neither "tox -e py" nor "tox -e pypy3" works.
     - name: Run tests
       if: ${{ matrix.python-version != 'pypy3' || matrix.os != 'windows-2019' }}
       run: python -m tox -e py
