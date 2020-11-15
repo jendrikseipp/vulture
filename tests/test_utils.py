@@ -1,19 +1,14 @@
 import ast
-from pathlib import Path, PurePath
+from pathlib import PurePath
 
 from vulture import utils
-
-PATH_FORMATTERS = {
-    "relative": utils.PathFormat(),
-    "absolute": utils.AbsolutePathFormat(),
-}
+from vulture.utils import format_path
+from vulture.config import ABSOLUTE_PATH_FORMAT, RELATIVE_PATH_FORMAT
 
 
 def check_paths(filename, format_name="relative"):
-    assert format_name in PATH_FORMATTERS
-    # only checks relative vs absolute right now
-    pathstr = PATH_FORMATTERS[format_name].m_format_path(Path(filename))
-    # platform dependencies and path types need to be accounted for
+    assert format_name in (ABSOLUTE_PATH_FORMAT, RELATIVE_PATH_FORMAT)
+    pathstr = format_path(filename, None, format_id=format_name)
     pure_path = PurePath(pathstr)
     check = pure_path.is_absolute()
     if format_name == "absolute":

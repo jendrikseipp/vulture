@@ -22,9 +22,20 @@ def call_vulture(args, **kwargs):
 
 
 def run_vulture(args_list, **kwargs):
+    """
+    Run vulture using subprocess.run(...)
+
+    Returns a subprocess.CompletedProcess object
+    in order that a caller (i.e. tests) can examine
+    the output in more detail than with call_vulture(...)
+
+    added to enable testing of absolute path generation
+    """
     check = kwargs.get("check", False)
     if "check" in kwargs:
         del kwargs["check"]
+    # WARNING - setting check = True may raise an Error/Exception
+    # on process failure
     result = subprocess.run(
         [sys.executable, "-m", "vulture"] + args_list,
         stdin=None,
@@ -39,7 +50,7 @@ def run_vulture(args_list, **kwargs):
         errors=None,
         env=None,
         universal_newlines=True,
-        **kwargs,
+        **kwargs
     )
     return result
 

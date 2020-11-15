@@ -7,86 +7,13 @@ import sys
 import tokenize
 from pathlib import Path
 
+from .config import RELATIVE_PATH_FORMAT, ABSOLUTE_PATH_FORMAT
+
 EMPTY_PATH = ""
 
 
 class VultureInputException(Exception):
     pass
-
-
-class PathFormat:
-    """
-    class: PathFormat
-
-    Base class for path formatting.
-    Implements the default behavior of relative path formatting.
-    """
-
-    def __init__(self, format_str=None):
-        self._format_str = format_str
-
-    def m_format_path(self, path: Path, *args) -> str:
-        """method: m_format_path"""
-        if not path:
-            return EMPTY_PATH
-
-        path_str = str(path)
-        relpath_str = os.path.relpath(path_str)
-
-        if relpath_str.startswith(".."):
-            if self._format_str:
-                formatted_path_str = self._format_str.format(path, *args)
-            else:
-                formatted_path_str = path
-        else:
-            if self._format_str:
-                formatted_path_str = self._format_str.format(
-                    relpath_str, *args
-                )
-            else:
-                formatted_path_str = relpath_str
-
-        return formatted_path_str
-
-    @classmethod
-    def __subclasshook__(cls, C):
-        """classmethod: __subsclasshook__"""
-        if cls is PathFormat:
-            if any("m_format_path" in B.__dict__ for B in C.__mro__):
-                return True
-        return NotImplemented
-
-
-class AbsolutePathFormat(PathFormat):
-    """
-    class: AbsolutePathFormat
-
-    Changes the default relative path formatting to absolute.
-    """
-
-    def m_format_path(self, path: Path, *args) -> str:
-        """method: m_format_path"""
-        if not path:
-            return EMPTY_PATH
-
-        path_str = str(path)
-        resolved_path = path.resolve(strict=True)
-        resolved_path_str = str(resolved_path)
-
-        if resolved_path_str.startswith(".."):
-            if self._format_str:
-                formatted_path_str = self._format_str.format(path_str, *args)
-            else:
-                formatted_path_str = path_str
-        else:
-            if self._format_str:
-                formatted_path_str = self._format_str.format(
-                    resolved_path_str, *args
-                )
-            else:
-                formatted_path_str = resolved_path_str
-
-        return formatted_path_str
 
 
 def _safe_eval(node, default):
@@ -123,6 +50,38 @@ def condition_is_always_false(condition):
 
 def condition_is_always_true(condition):
     return _safe_eval(condition, False)
+
+
+def format_path(
+    filename_path_str: str,
+    format_str: str,
+    *args,
+    format_id: str = RELATIVE_PATH_FORMAT,
+) -> str:
+    if not filename_path_str:
+        return EMPTY_PATH
+    if format_id not in (RELATIVE_PATH_FORMAT, ABSOLUTE_PATH_FORMAT):
+        raise ValueError(f"path format {format_id} uknown.")
+    _path = Path(filename_path_str)
+    if format_id == RELATIVE_PATH_FORMAT:
+        _path_str = str(filename_path_str)
+        _relpath_str = os.path.relpath(_path_str, start=os.curdir)
+        _use_path_str = (
+            _path_str if _relpath_str.startswith("..") else _relpath_str
+        )
+        _formatted_path_str = (
+            format_str.format(_use_path_str, *args)
+            if format_str
+            else _use_path_str
+        )
+        return _formatted_path_str
+    if format_id == ABSOLUTE_PATH_FORMAT:
+        _abs_path = _path.resolve(strict=True)
+        if format_str:
+            return format_str.format(str(_abs_path), *args)
+        return str(_abs_path)
+    # should never get here
+    raise ValueError(f"path format {format_id} uknown.")
 
 
 def get_decorator_name(decorator):

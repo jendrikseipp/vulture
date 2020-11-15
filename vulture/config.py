@@ -10,6 +10,9 @@ import toml
 
 from .version import __version__
 
+RELATIVE_PATH_FORMAT = "relative"
+ABSOLUTE_PATH_FORMAT = "absolute"
+
 #: Possible configuration options and their respective defaults
 DEFAULTS = {
     "min_confidence": 0,
@@ -20,7 +23,7 @@ DEFAULTS = {
     "make_whitelist": False,
     "sort_by_size": False,
     "verbose": False,
-    "format": "relative",
+    "format": RELATIVE_PATH_FORMAT,
 }
 
 
@@ -156,7 +159,7 @@ def _parse_args(args=None):
         "--format",
         type=str,
         action="store",
-        default="relative",
+        default=RELATIVE_PATH_FORMAT,
         required=False,
         help="Specify path format.",
     )

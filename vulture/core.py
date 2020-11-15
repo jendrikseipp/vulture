@@ -9,7 +9,12 @@ from pathlib import Path
 from vulture import lines
 from vulture import noqa
 from vulture import utils
-from vulture.config import make_config
+from vulture.config import (
+    make_config,
+    RELATIVE_PATH_FORMAT,
+    ABSOLUTE_PATH_FORMAT,
+)
+from vulture.utils import format_path
 
 DEFAULT_CONFIDENCE = 60
 
@@ -24,11 +29,6 @@ ERROR_CODES = {
     "property": "V106",
     "variable": "V107",
     "unreachable_code": "V201",
-}
-
-PATH_FORMATTERS = {
-    "relative": utils.PathFormat(),
-    "absolute": utils.AbsolutePathFormat(),
 }
 
 
@@ -106,7 +106,6 @@ class Item:
         "message",
         "confidence",
         "_path_format",
-        "__path_formatter",
     )
 
     def __init__(
@@ -128,7 +127,6 @@ class Item:
         self.message = message or f"unused {typ} '{name}'"
         self.confidence = confidence
         self._path_format = path_format
-        self.__path_formatter = PATH_FORMATTERS[self._path_format]
 
     @property
     def size(self):
@@ -147,7 +145,7 @@ class Item:
         else:
             size_report = ""
         return "{}:{:d}: {} ({}% confidence{})".format(
-            self.__path_formatter.m_format_path(Path(self.filename)),
+            format_path(self.filename, None, format_id=self._path_format),
             self.first_lineno,
             self.message,
             self.confidence,
@@ -155,7 +153,9 @@ class Item:
         )
 
     def get_whitelist_string(self):
-        filename = self.__path_formatter.m_format_path(Path(self.filename))
+        filename = format_path(
+            self.filename, None, format_id=self._path_format
+        )
         if self.typ == "unreachable_code":
             return f"# {self.message} ({filename}:{self.first_lineno})"
 
@@ -191,7 +191,6 @@ class Vulture(ast.NodeVisitor):
     ):
         self.verbose = verbose
         self._path_format = path_format
-        self.__path_formatter = PATH_FORMATTERS[self._path_format]
 
         def get_list(typ):
             return utils.LoggingList(typ, self.verbose)
@@ -221,10 +220,12 @@ class Vulture(ast.NodeVisitor):
         self.noqa_lines = noqa.parse_noqa(self.code)
         self.filename = filename
 
+        _fpath = format_path(filename, None, format_id=self._path_format)
+
         def handle_syntax_error(e):
             text = f' at "{e.text.strip()}"' if e.text else ""
             print(
-                f"{self.__path_formatter.m_format_path(Path(filename))}:\
+                f"{_fpath}:\
 {e.lineno}: {e.msg}{text}",
                 file=sys.stderr,
             )
@@ -243,7 +244,7 @@ class Vulture(ast.NodeVisitor):
         except ValueError as err:
             # ValueError is raised if source contains null bytes.
             print(
-                f'{self.__path_formatter.m_format_path(Path(filename))}: \
+                f'{_fpath}: \
                 invalid source code "{err}"',
                 file=sys.stderr,
             )
@@ -711,14 +712,14 @@ class Vulture(ast.NodeVisitor):
 
 def main():
     config = make_config()
-    if config["format"] not in PATH_FORMATTERS:
+    if config["format"] not in (RELATIVE_PATH_FORMAT, ABSOLUTE_PATH_FORMAT):
         print(
             "--format {} not recognized.".format(config["format"]),
             file=sys.stderr,
             flush=True,
         )
         print("available formats are:", file=sys.stderr, flush=True)
-        for format_name in list(PATH_FORMATTERS):
+        for format_name in (RELATIVE_PATH_FORMAT, ABSOLUTE_PATH_FORMAT):
             print(f"\t{format_name}", file=sys.stderr, flush=True)
         sys.exit(1)
 

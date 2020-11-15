@@ -20,17 +20,17 @@ def test_cli_args():
     """
     Ensure that CLI arguments are converted to a config object.
     """
-    expected = {
-        "paths": ["path1", "path2"],
-        "exclude": ["file*.py", "dir/"],
-        "ignore_decorators": ["deco1", "deco2"],
-        "ignore_names": ["name1", "name2"],
-        "make_whitelist": True,
-        "min_confidence": 10,
-        "format": "relative",
-        "sort_by_size": True,
-        "verbose": True,
-    }
+    expected = dict(
+        paths=["path1", "path2"],
+        exclude=["file*.py", "dir/"],
+        ignore_decorators=["deco1", "deco2"],
+        ignore_names=["name1", "name2"],
+        make_whitelist=True,
+        min_confidence=10,
+        format="relative",
+        sort_by_size=True,
+        verbose=True,
+    )
     result = _parse_args(
         [
             "--exclude=file*.py,dir/",
@@ -53,17 +53,17 @@ def test_toml_config():
     """
     Ensure parsing of TOML files results in a valid config object.
     """
-    expected = {
-        "paths": ["path1", "path2"],
-        "exclude": ["file*.py", "dir/"],
-        "ignore_decorators": ["deco1", "deco2"],
-        "ignore_names": ["name1", "name2"],
-        "make_whitelist": True,
-        "min_confidence": 10,
-        "sort_by_size": True,
-        "verbose": True,
-        "format": "relative",
-    }
+    expected = dict(
+        paths=["path1", "path2"],
+        exclude=["file*.py", "dir/"],
+        ignore_decorators=["deco1", "deco2"],
+        ignore_names=["name1", "name2"],
+        make_whitelist=True,
+        min_confidence=10,
+        sort_by_size=True,
+        verbose=True,
+        format="relative",
+    )
     data = StringIO(
         dedent(
             """\
@@ -118,17 +118,17 @@ def test_config_merging():
         "cli_path",
     ]
     result = make_config(cliargs, toml)
-    expected = {
-        "paths": ["cli_path"],
-        "exclude": ["cli_exclude"],
-        "ignore_decorators": ["cli_deco"],
-        "ignore_names": ["cli_name"],
-        "make_whitelist": True,
-        "min_confidence": 20,
-        "sort_by_size": True,
-        "format": "relative",
-        "verbose": True,
-    }
+    expected = dict(
+        paths=["cli_path"],
+        exclude=["cli_exclude"],
+        ignore_decorators=["cli_deco"],
+        ignore_names=["cli_name"],
+        make_whitelist=True,
+        min_confidence=20,
+        sort_by_size=True,
+        format="relative",
+        verbose=True,
+    )
     assert result == expected
 
 
