@@ -56,3 +56,8 @@ jobs:
     - name: Check for style issues
       if: ${{ matrix.python-version == 3.6 && matrix.os == 'ubuntu-20.04' }}
       run: python -m tox -e style
+
+    - name: Report coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage.xml
