@@ -1,6 +1,7 @@
 *.py[cod]
 MANIFEST
 build/
+coverage.xml
 dist/
 htmlcov/
 vulture.egg-info/
