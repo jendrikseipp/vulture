@@ -1,7 +1,7 @@
 # Vulture - Find dead code
 
 ![CI:Test](https://github.com/jendrikseipp/vulture/workflows/CI/badge.svg)
-[![image](https://coveralls.io/repos/github/jendrikseipp/vulture/badge.svg?branch=master)](https://coveralls.io/github/jendrikseipp/vulture?branch=master)
+[![Codecov Badge](https://codecov.io/gh/jendrikseipp/vulture/branch/master/graphs/badge.svg)](https://codecov.io/gh/jendrikseipp/vulture?branch=master)
 
 Vulture finds unused code in Python programs. This is useful for
 cleaning up and finding errors in large code bases. If you run Vulture
