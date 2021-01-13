@@ -1,6 +1,6 @@
--   id: vulture
-    name: vulture
-    language: python
-    entry: vulture
-    description: Finds unused code in Python.
-    files: '(.py)$'
+- id: vulture
+  name: vulture
+  language: python
+  entry: vulture
+  description: Find unused Python code.
+  types: [python]
