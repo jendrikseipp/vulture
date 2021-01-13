@@ -4,7 +4,7 @@
 * Don't override paths in pyproject.toml with empty CLI paths (bcbnz, #228).
 * Run continuous integration tests for Python 3.9 (ju-sh, #232).
 * Use pathlib internally (ju-sh, #226).
-
+* Make vulture usable with pre-commit (Clément Robert #244)
 # 2.1 (2020-08-19)
 
 * Treat `getattr/hasattr(obj, "constant_string", ...)` as a reference to
