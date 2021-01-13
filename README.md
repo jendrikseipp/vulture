@@ -24,13 +24,20 @@ tool for higher code quality.
 
     $ pip install vulture
 
-### as a pre-commit hook
-Add this to your `.pre-commit-config.yaml`
+### Version control integration
+      
+After installing [pre-commit](https://pre-commit.com/#install), add the 
+following to the `.pre-commit-config.yaml` file in your repository:
 
-    -   repo: https://github.com/jendrikseipp/vulture
-        rev: 2.2
-        hooks:
-        - id: vulture
+```yaml
+repos:
+  - repo: https://github.com/jendrikseipp/vulture
+    rev: 2.2
+    hooks:
+      - id: vulture
+```
+
+Then run `pre-commit install`.
 
 ## Usage
 
