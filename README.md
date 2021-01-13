@@ -24,6 +24,14 @@ tool for higher code quality.
 
     $ pip install vulture
 
+### as a pre-commit hook
+Add this to your `.pre-commit-config.yaml`
+
+    -   repo: https://github.com/jendrikseipp/vulture
+        rev: 2.2
+        hooks:
+        - id: vulture
+
 ## Usage
 
     $ vulture myscript.py  # or
