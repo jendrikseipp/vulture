@@ -7,10 +7,8 @@ CHANGES="/tmp/vulture-$VERSION-changes"
 
 cd "$(dirname ${0})/../"
 
-source .venv/bin/activate
-
 # Check dependencies.
-python3 -m twine -h > /dev/null
+twine -h > /dev/null
 
 # Check for uncommited changes.
 set +e
@@ -33,7 +31,7 @@ git commit -am "Update version number to ${VERSION} for release."
 git tag -a "v$VERSION" -m "v$VERSION" HEAD
 
 python3 setup.py sdist bdist_wheel --universal
-python3 -m twine upload dist/vulture-${VERSION}.tar.gz dist/vulture-${VERSION}-py2.py3-none-any.whl
+twine upload dist/vulture-${VERSION}.tar.gz dist/vulture-${VERSION}-py2.py3-none-any.whl
 
 git push
 git push --tags
