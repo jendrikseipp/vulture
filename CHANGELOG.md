@@ -1,3 +1,7 @@
+# unreleased 
+
+* Add [pre-commit](https://pre-commit.com) hook (Clément Robert #244).
+
 # 2.2 (2021-01-15)
 
 * Only parse format strings when being used with `locals()` (jingw, #225).
