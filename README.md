@@ -24,23 +24,6 @@ tool for higher code quality.
 
     $ pip install vulture
 
-### Version control integration
-
-After installing [pre-commit](https://pre-commit.com/#install), add the 
-following to the `.pre-commit-config.yaml` file in your repository:
-
-```yaml
-repos:
-  - repo: https://github.com/jendrikseipp/vulture
-    rev: 2.3
-    hooks:
-      - id: vulture
-```
-
-Then run `pre-commit install`. In order to run Vulture before each commit, you will also
-need to specify all files that should be checked in the `pyproject.toml` file under the
-`paths` key.
-
 ## Usage
 
     $ vulture myscript.py  # or
@@ -173,10 +156,28 @@ ignore_decorators = ["@app.route", "@require_*"]
 ignore_names = ["visit_*", "do_*"]
 make_whitelist = true
 min_confidence = 80
+paths = ["myscript.py", "mydir"]
 sort_by_size = true
 verbose = true
-paths = ["myscript.py", "mydir"]
 ```
+
+## Version control integration
+
+You can use a [pre-commit](https://pre-commit.com/#install) hook to run
+Vulture before each commit. For this, install pre-commit and add the
+following to the `.pre-commit-config.yaml` file in your repository:
+
+```yaml
+repos:
+  - repo: https://github.com/jendrikseipp/vulture
+    rev: 2.3  # or any later Vulture version
+    hooks:
+      - id: vulture
+```
+
+Then run `pre-commit install`. Finally, create a `pyproject.toml` file
+in your repository and specify all files that Vulture should check under
+`[tool.vulture] --> paths` (see above).
 
 ## How does it work?
 
