@@ -1,6 +1,6 @@
-# unreleased 
+# 2.3 (2021-01-16)
 
-* Add [pre-commit](https://pre-commit.com) hook (Clément Robert #244).
+* Add [pre-commit](https://pre-commit.com) hook (Clément Robert, #244).
 
 # 2.2 (2021-01-15)
 
