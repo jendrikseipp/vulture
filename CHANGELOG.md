@@ -1,10 +1,13 @@
+# unreleased 
+
+* Add [pre-commit](https://pre-commit.com) hook (Clément Robert #244).
+
 # 2.2 (2021-01-15)
 
 * Only parse format strings when being used with `locals()` (jingw, #225).
 * Don't override paths in pyproject.toml with empty CLI paths (bcbnz, #228).
 * Run continuous integration tests for Python 3.9 (ju-sh, #232).
 * Use pathlib internally (ju-sh, #226).
-* Add [pre-commit](https://pre-commit.com) hook (Clément Robert #244).
 
 # 2.1 (2020-08-19)
 
