@@ -6,10 +6,11 @@ import os
 import sys
 import tokenize
 from pathlib import Path
+from typing import Union
 
 from .config import RELATIVE_PATH_FORMAT, ABSOLUTE_PATH_FORMAT
 
-EMPTY_PATH = ""
+# EMPTY_PATH = ""
 
 
 class VultureInputException(Exception):
@@ -53,18 +54,24 @@ def condition_is_always_true(condition):
 
 
 def format_path(
-    filename_path_str: str,
+    filename_path: Union[str, os.PathLike],
     format_str: str,
     *args,
     format_id: str = RELATIVE_PATH_FORMAT,
 ) -> str:
-    if not filename_path_str:
-        return EMPTY_PATH
+    if not filename_path:
+        raise ValueError("Empty filename/path.")
     if format_id not in (RELATIVE_PATH_FORMAT, ABSOLUTE_PATH_FORMAT):
-        raise ValueError(f"path format {format_id} uknown.")
-    _path = Path(filename_path_str)
+        raise ValueError(f"path format {format_id} unknown.")
+    if not isinstance(filename_path, str) and not isinstance(
+        filename_path, os.PathLike
+    ):
+        raise ValueError(
+            f"filename/path type {type(filename_path)} not supported."
+        )
+    _path = Path(filename_path)
     if format_id == RELATIVE_PATH_FORMAT:
-        _path_str = str(filename_path_str)
+        _path_str = str(filename_path)
         _relpath_str = os.path.relpath(_path_str, start=os.curdir)
         _use_path_str = (
             _path_str if _relpath_str.startswith("..") else _relpath_str
