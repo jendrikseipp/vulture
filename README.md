@@ -158,6 +158,7 @@ make_whitelist = true
 min_confidence = 80
 paths = ["myscript.py", "mydir"]
 sort_by_size = true
+absolute_paths = false
 verbose = true
 ```
 
@@ -197,6 +198,54 @@ When using the `--sort-by-size` option, Vulture sorts unused code by its
 number of lines. This helps developers prioritize where to look for dead
 code first.
 
+## Path Formatting
+
+The `—path-format` option allows control of how file paths are emitted in the output of vulture.
+
+This can be useful when using vulture as a plugin tool for IDEs like PyCharm. Using absolute paths enables ‘jump-to-code’ from the output error messages when vulture is used in PyCharm.
+
+Currently supported formats are:
+
+* `relative` (default) this is the original behavior of vulture before this feature was added
+* `absolute` absolute file path
+
+additional formats my be added in the future
+
+### vulture inside PyCharm
+
+Reference test platform: *macOS 10.14 (Mojave), anaconda python distribution, PyCharm Community 2019.3*
+
+Assumes:
+
+* vulture installed in your (virtual) python environment
+* the same (virtual) environment configured into your PyCharm project settings
+
+Navigate from **PyCharm** menu -> **Preferences** -> **Tools** -> **External Tools**
+
+**Add a new tool** using the PLUS (+) icon
+
+Suggested Settings:
+
+* Name: `vulture`
+
+* Group: `External Tools`
+
+* Description: `dead code identification`
+
+* Tool Settings / Program: `$PyInterpreterDirectory$/python`
+
+* Tool Settings / Arguments: `-m vulture --path-format absolute $FilePath$`
+
+* Tool Settings / Working directory: `$ProjectFileDir$`
+
+* Select all checkboxes under Advanced Options
+
+* Add these Output Filters:
+  * `$FILE_PATH$\:$LINE$\:$COLUMN$\:.*`
+  * `$FILE_PATH$\:$LINE$\:.*`
+
+Save the settings
+
 ## Examples
 
 Consider the following Python script (`dead_code.py`):
@@ -231,6 +280,24 @@ results in the following output:
 Vulture correctly reports "os" and "message" as unused, but it fails to
 detect that "greet" is actually used. The recommended method to deal
 with false positives like this is to create a whitelist Python file.
+
+**Absolute Paths**
+
+Calling:
+
+```
+$ vulture --path-format absolute dead_code.py
+```
+
+results in output similar to the following, depending on your exact path:
+
+```
+/Users/<user>/PycharmProjects/vulture/dead_code.py:1: unused import 'os' (90% confidence)
+/Users/<user>/PycharmProjects/vulture/dead_code.py:4: unused function 'greet' (60% confidence)
+/Users/<user>/PycharmProjects/vulture/dead_code.py:8: unused variable 'message' (60% confidence)
+```
+
+
 
 **Preparing whitelists**
 

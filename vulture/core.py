@@ -1,16 +1,20 @@
 import ast
 from fnmatch import fnmatch, fnmatchcase
-from pathlib import Path
 import pkgutil
 import re
 import string
 import sys
+from pathlib import Path
 
 from vulture import lines
 from vulture import noqa
 from vulture import utils
-from vulture.config import make_config
-
+from vulture.config import (
+    make_config,
+    RELATIVE_PATH_FORMAT,
+    ABSOLUTE_PATH_FORMAT,
+)
+from vulture.utils import format_path
 
 DEFAULT_CONFIDENCE = 60
 
@@ -101,6 +105,7 @@ class Item:
         "last_lineno",
         "message",
         "confidence",
+        "_path_format",
     )
 
     def __init__(
@@ -112,6 +117,7 @@ class Item:
         last_lineno,
         message="",
         confidence=DEFAULT_CONFIDENCE,
+        path_format="relative",
     ):
         self.name = name
         self.typ = typ
@@ -120,11 +126,17 @@ class Item:
         self.last_lineno = last_lineno
         self.message = message or f"unused {typ} '{name}'"
         self.confidence = confidence
+        self._path_format = path_format
 
     @property
     def size(self):
         assert self.last_lineno >= self.first_lineno
         return self.last_lineno - self.first_lineno + 1
+
+    @property
+    def path_format(self):
+        """property: path_format"""
+        return self._path_format
 
     def get_report(self, add_size=False):
         if add_size:
@@ -133,7 +145,7 @@ class Item:
         else:
             size_report = ""
         return "{}:{:d}: {} ({}% confidence{})".format(
-            utils.format_path(self.filename),
+            format_path(self.filename, None, format_id=self._path_format),
             self.first_lineno,
             self.message,
             self.confidence,
@@ -141,16 +153,18 @@ class Item:
         )
 
     def get_whitelist_string(self):
-        filename = utils.format_path(self.filename)
+        filename = format_path(
+            self.filename, None, format_id=self._path_format
+        )
         if self.typ == "unreachable_code":
             return f"# {self.message} ({filename}:{self.first_lineno})"
-        else:
-            prefix = ""
-            if self.typ in ["attribute", "method", "property"]:
-                prefix = "_."
-            return "{}{}  # unused {} ({}:{:d})".format(
-                prefix, self.name, self.typ, filename, self.first_lineno
-            )
+
+        prefix = ""
+        if self.typ in ["attribute", "method", "property"]:
+            prefix = "_."
+        return "{}{}  # unused {} ({}:{:d})".format(
+            prefix, self.name, self.typ, filename, self.first_lineno
+        )
 
     def _tuple(self):
         return (self.filename, self.first_lineno, self.name)
@@ -169,9 +183,14 @@ class Vulture(ast.NodeVisitor):
     """Find dead code."""
 
     def __init__(
-        self, verbose=False, ignore_names=None, ignore_decorators=None
+        self,
+        verbose=False,
+        ignore_names=None,
+        ignore_decorators=None,
+        path_format="relative",
     ):
         self.verbose = verbose
+        self._path_format = path_format
 
         def get_list(typ):
             return utils.LoggingList(typ, self.verbose)
@@ -193,6 +212,7 @@ class Vulture(ast.NodeVisitor):
         self.filename = Path()
         self.code = []
         self.found_dead_code_or_error = False
+        self.noqa_lines = {}
 
     def scan(self, code, filename=""):
         filename = Path(filename)
@@ -200,10 +220,13 @@ class Vulture(ast.NodeVisitor):
         self.noqa_lines = noqa.parse_noqa(self.code)
         self.filename = filename
 
+        _fpath = format_path(filename, None, format_id=self._path_format)
+
         def handle_syntax_error(e):
             text = f' at "{e.text.strip()}"' if e.text else ""
             print(
-                f"{utils.format_path(filename)}:{e.lineno}: {e.msg}{text}",
+                f"{_fpath}:\
+{e.lineno}: {e.msg}{text}",
                 file=sys.stderr,
             )
             self.found_dead_code_or_error = True
@@ -221,7 +244,8 @@ class Vulture(ast.NodeVisitor):
         except ValueError as err:
             # ValueError is raised if source contains null bytes.
             print(
-                f'{utils.format_path(filename)}: invalid source code "{err}"',
+                f'{_fpath}: \
+                invalid source code "{err}"',
                 file=sys.stderr,
             )
             self.found_dead_code_or_error = True
@@ -348,6 +372,10 @@ class Vulture(ast.NodeVisitor):
         return _get_unused_items(self.defined_props, self.used_names)
 
     @property
+    def unused_items(self):
+        return _get_unused_items(self.defined_props, self.used_names)
+
+    @property
     def unused_vars(self):
         return _get_unused_items(self.defined_vars, self.used_names)
 
@@ -455,6 +483,7 @@ class Vulture(ast.NodeVisitor):
                     last_lineno,
                     message=message,
                     confidence=confidence,
+                    path_format=self._path_format,
                 )
             )
 
@@ -530,8 +559,8 @@ class Vulture(ast.NodeVisitor):
         for field_name in names:
             # Remove brackets and their contents: "a[0][b].c[d].e" -> "a.c.e",
             # then split the resulting string: "a.b.c" -> ["a", "b", "c"]
-            vars = re.sub(r"\[\w*\]", "", field_name).split(".")
-            for var in vars:
+            _vars = re.sub(r"\[\w*\]", "", field_name).split(".")
+            for var in _vars:
                 if is_identifier(var):
                     self.used_names.add(var)
 
@@ -668,7 +697,9 @@ class Vulture(ast.NodeVisitor):
                 return
 
     def generic_visit(self, node):
-        """Called if no explicit visitor function exists for a node."""
+        """
+        Called if no explicit visitor function exists for a node.
+        """
         for _, value in ast.iter_fields(node):
             if isinstance(value, list):
                 self._handle_ast_list(value)
@@ -681,10 +712,22 @@ class Vulture(ast.NodeVisitor):
 
 def main():
     config = make_config()
+    if config["format"] not in (RELATIVE_PATH_FORMAT, ABSOLUTE_PATH_FORMAT):
+        print(
+            "--format {} not recognized.".format(config["format"]),
+            file=sys.stderr,
+            flush=True,
+        )
+        print("available formats are:", file=sys.stderr, flush=True)
+        for format_name in (RELATIVE_PATH_FORMAT, ABSOLUTE_PATH_FORMAT):
+            print(f"\t{format_name}", file=sys.stderr, flush=True)
+        sys.exit(1)
+
     vulture = Vulture(
         verbose=config["verbose"],
         ignore_names=config["ignore_names"],
         ignore_decorators=config["ignore_decorators"],
+        path_format=config["format"],
     )
     vulture.scavenge(config["paths"], exclude=config["exclude"])
     sys.exit(

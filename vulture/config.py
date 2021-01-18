@@ -10,6 +10,9 @@ import toml
 
 from .version import __version__
 
+RELATIVE_PATH_FORMAT = "relative"
+ABSOLUTE_PATH_FORMAT = "absolute"
+
 #: Possible configuration options and their respective defaults
 DEFAULTS = {
     "min_confidence": 0,
@@ -20,6 +23,7 @@ DEFAULTS = {
     "make_whitelist": False,
     "sort_by_size": False,
     "verbose": False,
+    "format": RELATIVE_PATH_FORMAT,
 }
 
 
@@ -69,6 +73,7 @@ def _parse_toml(infile):
         make_whitelist = true
         min_confidence = 10
         sort_by_size = true
+        format = relative
         verbose = true
         paths = ["path1", "path2"]
     """
@@ -149,6 +154,14 @@ def _parse_args(args=None):
         action="store_true",
         default=missing,
         help="Sort unused functions and classes by their lines of code.",
+    )
+    parser.add_argument(
+        "--format",
+        type=str,
+        action="store",
+        default=RELATIVE_PATH_FORMAT,
+        required=False,
+        help="Specify path format.",
     )
     parser.add_argument(
         "-v", "--verbose", action="store_true", default=missing

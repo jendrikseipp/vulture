@@ -4,6 +4,9 @@
 
 # 2.2 (2021-01-15)
 
+* added --absolute-paths option to have vulture output absolute paths instead of relative paths (mcooperman, #227)
+  changed git signing key to correct verification
+
 * Only parse format strings when being used with `locals()` (jingw, #225).
 * Don't override paths in pyproject.toml with empty CLI paths (bcbnz, #228).
 * Run continuous integration tests for Python 3.9 (ju-sh, #232).

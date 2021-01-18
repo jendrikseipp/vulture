@@ -1,6 +1,28 @@
 import ast
+from pathlib import PurePath
 
 from vulture import utils
+from vulture.utils import format_path
+from vulture.config import ABSOLUTE_PATH_FORMAT, RELATIVE_PATH_FORMAT
+
+
+def check_paths(filename, format_name="relative"):
+    assert format_name in (ABSOLUTE_PATH_FORMAT, RELATIVE_PATH_FORMAT)
+    pathstr = format_path(filename, None, format_id=format_name)
+    pure_path = PurePath(pathstr)
+    check = pure_path.is_absolute()
+    if format_name == "absolute":
+        assert check
+    # even if absolute == True, the path might have been specified absolute
+    # so can't conclude negatively
+
+
+def test_absolute_path():
+    check_paths(__file__, format_name="absolute")
+
+
+def test_relative_path():
+    check_paths(__file__, format_name="relative")
 
 
 def check_decorator_names(code, expected_names):
