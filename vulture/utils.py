@@ -1,6 +1,6 @@
 import ast
-import sys
 import pathlib
+import sys
 import tokenize
 
 
