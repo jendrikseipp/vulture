@@ -1,5 +1,5 @@
 import ast
-import os
+import pathlib
 import sys
 import tokenize
 
@@ -47,7 +47,7 @@ def condition_is_always_true(condition):
 
 def format_path(path):
     try:
-        return path.relative_to(os.curdir)
+        return path.relative_to(pathlib.Path.cwd())
     except ValueError:
         # Path is not below the current directory.
         return path

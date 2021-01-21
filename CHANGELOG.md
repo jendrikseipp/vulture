@@ -1,3 +1,8 @@
+# 2.4 (unreleased)
+
+* Print absolute filepaths as relative again (as with 2.1 and before) if they
+  are below the current directory. (The-Compiler, #246)
+
 # 2.3 (2021-01-16)
 
 * Add [pre-commit](https://pre-commit.com) hook (Clément Robert, #244).

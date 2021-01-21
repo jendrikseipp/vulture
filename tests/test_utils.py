@@ -1,6 +1,43 @@
 import ast
+import os
+import pathlib
+
+import pytest
 
 from vulture import utils
+
+
+class TestFormatPath:
+    @pytest.fixture
+    def tmp_cwd(self, tmp_path, monkeypatch):
+        cwd = tmp_path / "workingdir"
+        cwd.mkdir()
+        monkeypatch.chdir(cwd)
+        return cwd
+
+    def test_relative_inside(self):
+        filepath = pathlib.Path("testfile.py")
+        formatted = utils.format_path(filepath)
+        assert formatted == filepath
+        assert not formatted.is_absolute()
+
+    def test_relative_outside(self, tmp_cwd):
+        filepath = pathlib.Path(os.pardir) / "testfile.py"
+        formatted = utils.format_path(filepath)
+        assert formatted == filepath
+        assert not formatted.is_absolute()
+
+    def test_absolute_inside(self, tmp_cwd):
+        filepath = tmp_cwd / "testfile.py"
+        formatted = utils.format_path(filepath)
+        assert formatted == pathlib.Path("testfile.py")
+        assert not formatted.is_absolute()
+
+    def test_absolute_outside(self, tmp_cwd):
+        filepath = (tmp_cwd / os.pardir / "testfile.py").resolve()
+        formatted = utils.format_path(filepath)
+        assert formatted == filepath
+        assert formatted.is_absolute()
 
 
 def check_decorator_names(code, expected_names):
