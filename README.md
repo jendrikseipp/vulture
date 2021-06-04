@@ -37,7 +37,8 @@ directory Vulture analyzes all contained
 
 Vulture assigns each chunk of dead code a confidence value. A confidence
 value of 100% means that the code will never be executed. Values below
-100% are only estimates for how likely it is that the code is unused.
+100% are very rough estimates (based on the type of code chunk) for how
+likely it is that the code is unused.
 
 After you have found and deleted dead code, run Vulture again, because
 it may discover more dead code.
