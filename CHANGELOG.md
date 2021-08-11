@@ -2,6 +2,7 @@
 
 * Print absolute filepaths as relative again (as with 2.1 and before) if they
   are below the current directory. (The-Compiler, #246)
+* Add some pandas functions to whitelist. (mathbunnyru, #)
 
 # 2.3 (2021-01-16)
 
