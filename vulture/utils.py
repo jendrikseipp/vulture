@@ -100,21 +100,21 @@ class LoggingList(list):
     def __init__(self, typ, verbose):
         self.typ = typ
         self._verbose = verbose
-        return list.__init__(self)
+        return super().__init__()
 
     def append(self, item):
         if self._verbose:
             print(f'define {self.typ} "{item.name}"')
-        list.append(self, item)
+        super().append(item)
 
 
 class LoggingSet(set):
     def __init__(self, typ, verbose):
         self.typ = typ
         self._verbose = verbose
-        return set.__init__(self)
+        return super().__init__()
 
     def add(self, name):
         if self._verbose:
             print(f'use {self.typ} "{name}"')
-        set.add(self, name)
+        super().add(name)
