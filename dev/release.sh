@@ -10,13 +10,13 @@ cd "$(dirname ${0})/../"
 # Check dependencies.
 twine -h > /dev/null
 
-# Check for uncommited changes.
+# Check for uncommitted changes.
 set +e
 git diff --quiet && git diff --cached --quiet
 retcode=$?
 set -e
 if [[ $retcode != 0 ]]; then
-    echo "There are uncommited changes:"
+    echo "There are uncommitted changes:"
     git status
     exit 1
 fi
