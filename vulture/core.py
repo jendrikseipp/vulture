@@ -1,4 +1,5 @@
 import ast
+import ast_scope
 from fnmatch import fnmatch, fnmatchcase
 from pathlib import Path
 import pkgutil
@@ -24,6 +25,7 @@ ERROR_CODES = {
     "method": "V105",
     "property": "V106",
     "variable": "V107",
+    "parameter": "V108",
     "unreachable_code": "V201",
 }
 
@@ -81,6 +83,7 @@ def _ignore_variable(filename, varname):
     Ignore _ (Python idiom), _x (pylint convention) and
     __x__ (special variable or method), but not __x.
     """
+    varname = varname.split(' in ')[0]
     return (
         varname in IGNORED_VARIABLE_NAMES
         or (varname.startswith("_") and not varname.startswith("__"))
@@ -183,9 +186,11 @@ class Vulture(ast.NodeVisitor):
         self.defined_methods = get_list("method")
         self.defined_props = get_list("property")
         self.defined_vars = get_list("variable")
+        self.defined_params = get_list("parameter")
         self.unreachable_code = get_list("unreachable_code")
 
         self.used_names = utils.LoggingSet("name", self.verbose)
+        self.used_params = utils.LoggingSet("param", self.verbose)
 
         self.ignore_names = ignore_names or []
         self.ignore_decorators = ignore_decorators or []
@@ -216,6 +221,8 @@ class Vulture(ast.NodeVisitor):
                 if sys.version_info >= (3, 8)  # type_comments requires 3.8+
                 else ast.parse(code, filename=str(self.filename))
             )
+            self.scope_info = ast_scope.annotate(node)
+
         except SyntaxError as err:
             handle_syntax_error(err)
         except ValueError as err:
@@ -299,6 +306,7 @@ class Vulture(ast.NodeVisitor):
             + self.unused_methods
             + self.unused_props
             + self.unused_vars
+            + self.unused_params
             + self.unreachable_code
         )
 
@@ -350,6 +358,10 @@ class Vulture(ast.NodeVisitor):
     @property
     def unused_vars(self):
         return _get_unused_items(self.defined_vars, self.used_names)
+
+    @property
+    def unused_params(self):
+        return _get_unused_items(self.defined_params, self.used_params)
 
     @property
     def unused_attrs(self):
@@ -469,7 +481,18 @@ class Vulture(ast.NodeVisitor):
 
     def visit_arg(self, node):
         """Function argument"""
-        self._define_variable(node.arg, node, confidence=100)
+        fn = self.scope_info[node].function_node
+        if isinstance(fn, ast.Lambda):
+            name = f'lambda:{fn.lineno}'
+        else:
+            name = fn.name
+        self._define(
+            self.defined_params,
+            node.arg + ' in ' + name + '()',
+            node,
+            confidence=100,
+            ignore=_ignore_variable,
+        )
 
     def visit_AsyncFunctionDef(self, node):
         return self.visit_FunctionDef(node)
@@ -612,8 +635,32 @@ class Vulture(ast.NodeVisitor):
             isinstance(node.ctx, ast.Load)
             and node.id not in IGNORED_VARIABLE_NAMES
         ):
-            self.used_names.add(node.id)
-        elif isinstance(node.ctx, (ast.Param, ast.Store)):
+            scope = self.scope_info[node]
+            # var = 'paths'
+            # if node.id == 'paths':
+            #     try:
+            #         print(scope.function_node.name)
+            #     except:
+            #         print((scope.function_node))
+            #         print(vars(scope.function_node))
+            if (isinstance(scope, ast_scope.scope.FunctionScope)
+                    and isinstance(scope.function_node, (ast.FunctionDef, ast.Lambda))
+                    # need to check all args type
+                    and node.id in (i.arg for i in scope.function_node.args.args)):
+                fn = self.scope_info[node].function_node
+                if isinstance(fn, ast.Lambda):
+                    name = f'lambda:{fn.lineno}'
+                else:
+                    name = fn.name
+                # if node.id == var:
+                #     print(1)
+                self.used_params.add(
+                    (node.id + ' in ' + name) + '()')
+            else:
+                # if node.id == var:
+                #     print(11)
+                self.used_names.add(node.id)
+        elif isinstance(node.ctx, ast.Store):
             self._define_variable(node.id, node)
 
     def visit_While(self, node):
