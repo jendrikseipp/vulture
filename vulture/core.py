@@ -609,7 +609,7 @@ class Vulture(ast.NodeVisitor):
 
     def visit_Name(self, node):
         if (
-            isinstance(node.ctx, ast.Load)
+            isinstance(node.ctx, (ast.Load, ast.Del))
             and node.id not in IGNORED_VARIABLE_NAMES
         ):
             self.used_names.add(node.id)

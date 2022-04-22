@@ -108,7 +108,14 @@ check that all whitelisted code actually still exists in your project.
 **Marking unused variables**
 
 There are situations where you can't just remove unused variables, e.g.,
-in tuple assignments or function signatures. Vulture will ignore these
+in tuple assignments or function signatures.
+
+The preferred way to solve this problem is to use `del` keyword. It is
+described in
+[PyLint manual](http://pylint-messages.wikidot.com/messages:w0613) and
+[StackOverflow](https://stackoverflow.com/a/14836005)
+
+Additionally, there is another way to solve it. Vulture will ignore these
 variables if they start with an underscore (e.g., `_x, y = get_pos()` or
 `def my_method(self, widget, **_kwargs)`).
 

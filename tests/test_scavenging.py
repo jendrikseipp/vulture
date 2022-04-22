@@ -741,3 +741,21 @@ bad()
         assert not v.found_dead_code_or_error
     else:
         assert v.found_dead_code_or_error
+
+
+def test_unused_args_with_del(v):
+    v.scan(
+        """\
+def foo(a, b, c, d=3):
+    del c, d
+    return a + b
+
+foo(1, 2)
+"""
+    )
+
+    check(v.defined_funcs, ["foo"])
+    check(v.defined_vars, ["a", "b", "c", "d"])
+    check(v.used_names, ["foo", "a", "b", "c", "d"])
+    check(v.unused_vars, [])
+    check(v.unused_funcs, [])
