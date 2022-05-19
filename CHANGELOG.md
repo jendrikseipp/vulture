@@ -1,7 +1,7 @@
-# 2.4 (unreleased)
+# 2.4 (2022-05-19)
 
-* Print absolute filepaths as relative again (as with 2.1 and before) if they
-  are below the current directory (The-Compiler, #246).
+* Print absolute filepaths as relative again (as in version 2.1 and before)
+  if they are below the current directory (The-Compiler, #246).
 * Run tests and add PyPI trove for Python 3.10 (chayim, #266).
 * Allow using the `del` keyword to mark unused variables (sshishov, #279).
 
