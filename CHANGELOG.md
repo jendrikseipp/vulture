@@ -3,7 +3,7 @@
 * Print absolute filepaths as relative again (as with 2.1 and before) if they
   are below the current directory (The-Compiler, #246).
 * Run tests and add PyPI trove for Python 3.10 (chayim, #266).
-* Add support for `del` keyword to mark variable as used for function/methods overrides (sshishov, #279)
+* Allow using the `del` keyword to mark unused variables (sshishov, #279).
 
 # 2.3 (2021-01-16)
 
