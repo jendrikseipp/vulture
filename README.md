@@ -182,7 +182,7 @@ following to the `.pre-commit-config.yaml` file in your repository:
 ```yaml
 repos:
   - repo: https://github.com/jendrikseipp/vulture
-    rev: 'v2.3'  # or any later Vulture version
+    rev: 'v2.4'  # or any later Vulture version
     hooks:
       - id: vulture
 ```
