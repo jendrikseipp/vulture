@@ -187,9 +187,21 @@ repos:
       - id: vulture
 ```
 
-Then run `pre-commit install`. Finally, create a `pyproject.toml` file
-in your repository and specify all files that Vulture should check under
-`[tool.vulture] --> paths` (see above).
+Then run `pre-commit install`, and it is set to run vulture on all
+python files in the repository.
+
+However, if it is needed to run `vulture` specifically on a subset of
+files, e.g. files configured under `[tool.vulture] --> paths` in the
+`pyproject.toml` (see above), set `pass_filenames` as `false` as below:
+
+```yaml
+repos:
+  - repo: https://github.com/jendrikseipp/vulture
+    rev: 'v2.4'  # or any later Vulture version
+    hooks:
+      - id: vulture
+        pass_filenames: false
+```
 
 ## How does it work?
 
