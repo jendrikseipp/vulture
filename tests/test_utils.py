@@ -77,7 +77,7 @@ def test_get_decorator_name_async():
     code = """\
 @foo.bar.route('/foobar')
 async def async_function(request):
-    print(reques)
+    print(request)
 """
     check_decorator_names(code, ["@foo.bar.route"])
 

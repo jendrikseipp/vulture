@@ -37,7 +37,8 @@ directory Vulture analyzes all contained
 
 Vulture assigns each chunk of dead code a confidence value. A confidence
 value of 100% means that the code will never be executed. Values below
-100% are only estimates for how likely it is that the code is unused.
+100% are very rough estimates (based on the type of code chunk) for how
+likely it is that the code is unused.
 
 After you have found and deleted dead code, run Vulture again, because
 it may discover more dead code.
@@ -107,9 +108,20 @@ check that all whitelisted code actually still exists in your project.
 **Marking unused variables**
 
 There are situations where you can't just remove unused variables, e.g.,
-in tuple assignments or function signatures. Vulture will ignore these
-variables if they start with an underscore (e.g., `_x, y = get_pos()` or
-`def my_method(self, widget, **_kwargs)`).
+in function signatures. The recommended solution is to use the `del`
+keyword as described in the
+[PyLint manual](http://pylint-messages.wikidot.com/messages:w0613) and on
+[StackOverflow](https://stackoverflow.com/a/14836005):
+
+```python
+def foo(x, y):
+    del y
+    return x + 3
+```
+
+Vulture will also ignore all variables that start with an underscore, so
+you can use `_x, y = get_pos()` to mark unused tuple assignments or
+function arguments, e.g., `def foo(x, _y)`.
 
 **Minimum confidence**
 

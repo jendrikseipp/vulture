@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [pypy3, 3.6, 3.7, 3.8, 3.9]
+        python-version: ['pypy3', '3.6', '3.7', '3.8', '3.9', '3.10']
         os: [macos-10.15, ubuntu-18.04, ubuntu-20.04, windows-2019]
 
     steps:

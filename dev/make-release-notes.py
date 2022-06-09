@@ -4,7 +4,7 @@ import re
 import sys
 
 _, VERSION, CHANGELOG, LIST = sys.argv
-HEADER_REGEX = fr"# {VERSION} \(\d\d\d\d-\d\d-\d\d\)\n"
+HEADER_REGEX = rf"# {VERSION} \(\d\d\d\d-\d\d-\d\d\)\n"
 
 notes_list = []
 
