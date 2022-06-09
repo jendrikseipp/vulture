@@ -1,3 +1,5 @@
+* Add whitelist for `pint.UnitRegistry.default_formatter` (Ben Elliston, #258).
+
 # 2.4 (2022-05-19)
 
 * Print absolute filepaths as relative again (as in version 2.1 and before)
