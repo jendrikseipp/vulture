@@ -630,10 +630,8 @@ class Vulture(ast.NodeVisitor):
         if _assigns_special_variable__all__(node):
             assert isinstance(node.value, (ast.List, ast.Tuple))
             for elt in node.value.elts:
-                if isinstance(elt, ast.Constant) and isinstance(
-                    elt.value, str
-                ):
-                    self.used_names.add(elt.value)
+                if isinstance(elt, ast.Str):
+                    self.used_names.add(elt.s)
 
     def visit_While(self, node):
         self._handle_conditional_node(node, "while")
