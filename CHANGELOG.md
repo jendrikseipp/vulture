@@ -1,4 +1,5 @@
 * Add whitelist for `pint.UnitRegistry.default_formatter` (Ben Elliston, #258).
+* Mark imports in `__all__` as used (kreathon, #172).
 
 # 2.4 (2022-05-19)
 

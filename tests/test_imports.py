@@ -209,6 +209,27 @@ def test_import_alias_use_alias(v):
     check(v.unused_vars, [])
 
 
+def test_import_with__all__(v):
+    v.scan(
+        """\
+# define.py
+class Foo:
+    pass
+
+class Bar:
+    pass
+
+# main.py
+from define import Foo, Bar
+
+__all__ = ["Foo"]
+
+"""
+    )
+    check(v.defined_imports, ["Foo", "Bar"])
+    check(v.unused_imports, ["Bar"])
+
+
 def test_ignore_init_py_files(v):
     v.scan(
         """\
