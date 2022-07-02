@@ -230,6 +230,72 @@ __all__ = ["Foo"]
     check(v.unused_imports, ["Bar"])
 
 
+def test_import_with__all__normal_reference(v):
+    v.scan(
+        """\
+# define.py
+class Foo:
+    pass
+
+class Bar:
+    pass
+
+# main.py
+from define import Foo, Bar
+
+__all__ = [Foo]
+
+"""
+    )
+    check(v.defined_imports, ["Foo", "Bar"])
+    check(v.unused_imports, ["Bar"])
+
+
+def test_import_with__all__string(v):
+    v.scan(
+        """\
+# define.py
+class Foo:
+    pass
+
+class Bar:
+    pass
+
+# main.py
+from define import Foo, Bar
+
+__all__ = "Foo"
+
+"""
+    )
+    check(v.defined_imports, ["Foo", "Bar"])
+    # __all__ is not a list or tuple, so Foo is unused.
+    check(v.unused_imports, ["Foo", "Bar"])
+
+
+def test_import_with__all__assign_other_module(v):
+    v.scan(
+        """\
+# define.py
+class Foo:
+    pass
+
+class Bar:
+    pass
+
+# main.py
+import define
+from define import Foo, Bar
+
+define.__all__ = ["Foo"]
+
+"""
+    )
+    check(v.defined_imports, ["define", "Foo", "Bar"])
+    # Only assignments to __all__ of the current module are covered.
+    check(v.unused_imports, ["Foo", "Bar"])
+
+
 def test_ignore_init_py_files(v):
     v.scan(
         """\
