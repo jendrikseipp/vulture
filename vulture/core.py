@@ -60,6 +60,11 @@ def _assigns_special_variable__all__(node):
     }
     return "__all__" in name_targets and isinstance(
         node.value, (ast.List, ast.Tuple)
+def _assigns_special_variable__all__(node):
+    assert isinstance(node, ast.Assign)
+    return (
+        isinstance(node.value, (ast.List, ast.Tuple)) and
+        any(target.id == "__all__" for target in node.targets if isinstance(target, ast.Name))
     )
 
 
