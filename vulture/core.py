@@ -53,6 +53,15 @@ def _is_test_file(filename):
     )
 
 
+def _assigns_special_variable__all__(node):
+    assert isinstance(node, ast.Assign)
+    return isinstance(node.value, (ast.List, ast.Tuple)) and any(
+        target.id == "__all__"
+        for target in node.targets
+        if isinstance(target, ast.Name)
+    )
+
+
 def _ignore_class(filename, class_name):
     return _is_test_file(filename) and "Test" in class_name
 
@@ -615,6 +624,13 @@ class Vulture(ast.NodeVisitor):
             self.used_names.add(node.id)
         elif isinstance(node.ctx, (ast.Param, ast.Store)):
             self._define_variable(node.id, node)
+
+    def visit_Assign(self, node):
+        if _assigns_special_variable__all__(node):
+            assert isinstance(node.value, (ast.List, ast.Tuple))
+            for elt in node.value.elts:
+                if isinstance(elt, ast.Str):
+                    self.used_names.add(elt.s)
 
     def visit_While(self, node):
         self._handle_conditional_node(node, "while")
