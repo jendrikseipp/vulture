@@ -1,6 +1,7 @@
 import ast
 import os
 import pathlib
+import sys
 
 import pytest
 
@@ -121,6 +122,9 @@ class Foo:
     check_decorator_names(code, ["@foo", "@bar.yz"])
 
 
+@pytest.mark.skipif(
+    sys.version_info < (3, 9), reason="requires python3.9 or higher"
+)
 def test_get_decorator_name_regression():
     code = """\
 from prometheus_client import Histogram
