@@ -1,3 +1,7 @@
+# 2.6 (Unreleased)
+
+* Fix `get_decorator_name` regression (Llandy3d, #285).
+
 # 2.5 (2022-07-03)
 
 * Mark imports in `__all__` as used (kreathon, #172, #282).
