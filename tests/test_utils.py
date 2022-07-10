@@ -119,3 +119,15 @@ class Foo:
     pass
 """
     check_decorator_names(code, ["@foo", "@bar.yz"])
+
+
+def test_get_decorator_name_regression():
+    code = """\
+from prometheus_client import Histogram
+hist = Histogram("name", "description")
+
+@hist.time()
+def myfunc():
+    pass
+"""
+    check_decorator_names(code, ["@hist.time"])
