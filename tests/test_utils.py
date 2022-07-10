@@ -124,9 +124,10 @@ class Foo:
 def test_get_decorator_name_regression():
     code = """\
 from prometheus_client import Histogram
-hist = Histogram("name", "description")
 
-@hist.time()
+hist = Histogram("name", "description", labelnames=["label1"])
+
+@hist.labels("place1").time()
 def myfunc():
     pass
 """
