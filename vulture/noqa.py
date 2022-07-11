@@ -3,7 +3,7 @@ import re
 
 NOQA_REGEXP = re.compile(
     # Use the same regex as flake8 does.
-    # https://gitlab.com/pycqa/flake8/-/tree/main/src/flake8/defaults.py
+    # https://github.com/pycqa/flake8/blob/main/src/flake8/defaults.py
     # We're looking for items that look like this:
     # `# noqa`
     # `# noqa: E123`
