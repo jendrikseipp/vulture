@@ -125,12 +125,37 @@ class Foo:
 @pytest.mark.skipif(
     sys.version_info < (3, 9), reason="requires python3.9 or higher"
 )
-def test_get_decorator_name_regression():
+def test_get_decorator_callable_in_between():
     code = """\
-from prometheus_client import Histogram
-hist = Histogram("name", "description", labelsname=["label1"])
 @hist.labels("labelvalue").time()
 def myfunc():
     pass
 """
     check_decorator_names(code, ["@hist.labels.time"])
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 9), reason="requires python3.9 or higher"
+)
+@pytest.mark.parametrize(
+    "decorated",
+    [
+        ("def foo():"),
+        ("async def foo():"),
+        ("class Foo:"),
+    ],
+)
+def test_get_decorator_name_multiple_callable(decorated):
+    decorated = f"{decorated}\n\tpass"
+    code = f"""\
+@foo
+@bar.prop
+@z.func("hi").bar().k.foo
+@k("hello").doo("world").x
+@k.hello("world")
+{decorated}
+"""
+    check_decorator_names(
+        code,
+        ["@foo", "@bar.prop", "@z.func.bar.k.foo", "@k.doo.x", "@k.hello"],
+    )
