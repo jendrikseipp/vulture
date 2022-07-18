@@ -267,6 +267,30 @@ makes Vulture ignore the `greet` method:
     dead_code.py:1: unused import 'os' (90% confidence)
     dead_code.py:8: unused variable 'message' (60% confidence)
 
+**Ignore decorators with callable in between**
+
+Consider the following Python script (`callable_decorator.py`):
+
+``` python
+@hist.labels('mylabel').time()
+def hello():
+    pass
+```
+
+Calling :
+
+    $ vulture callable_decorator.py
+
+results in the following output:
+
+    dead_code.py:1: unused function 'hello' (60% confidence)
+
+You can ignore the function decorated with the callable in between decorator with `--ignore-decorator`
+
+    $ vulture callable_decorator.py --ignore-decorator @hist.labels.time
+
+making Vulture ignore the `hello` function and resulting in no output.
+
 <!-- Hide noqa docs until we decide whether we want to support it.
 **Using "# noqa"**
 
