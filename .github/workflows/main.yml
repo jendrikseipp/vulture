@@ -15,8 +15,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['pypy-3.9', '3.6', '3.7', '3.8', '3.9', '3.10']
         os: [macos-11, macos-12, ubuntu-18.04, ubuntu-20.04, ubuntu-22.04, windows-2019, windows-2022]
+        python-version: ['pypy-3.9', '3.6', '3.7', '3.8', '3.9', '3.10']
+        exclude:
+        - os: 'ubuntu-22.04'
+          python-version: '3.6'
 
     steps:
     - name: Checkout code
