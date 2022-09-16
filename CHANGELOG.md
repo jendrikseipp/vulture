@@ -1,3 +1,5 @@
+* Basic `match` statement support (kreathon, #276).
+
 # 2.5 (2022-07-03)
 
 * Mark imports in `__all__` as used (kreathon, #172, #282).

@@ -1,5 +1,7 @@
 import sys
 
+import pytest
+
 from . import check, v
 
 assert v  # Silence pyflakes.
@@ -759,3 +761,99 @@ foo(1, 2)
     check(v.used_names, ["foo", "a", "b", "c", "d"])
     check(v.unused_vars, [])
     check(v.unused_funcs, [])
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 10), reason="requires python3.10 or higher"
+)
+def test_match_class_simple(v):
+    v.scan(
+        """\
+from dataclasses import dataclass
+
+
+@dataclass
+class X:
+    a: int
+    b: int
+    c: int
+
+x = input()
+
+match x:
+    case X(a=0):
+        print("a")
+    case X(b=0, c=0):
+        print("b c")
+"""
+    )
+    check(v.defined_classes, ["X"])
+    check(v.defined_vars, ["a", "b", "c", "x"])
+
+    check(v.unused_classes, [])
+    check(v.unused_vars, [])
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 10), reason="requires python3.10 or higher"
+)
+def test_match_class_recursive(v):
+    v.scan(
+        """\
+from dataclasses import dataclass
+
+
+@dataclass
+class X:
+    a: int
+    b: int
+    c: int
+    d: int
+    e: int
+
+x = input()
+
+match x:
+    case X(a=1) | X(b=0):
+        print("Or")
+    case [X(c=1), X(d=0)]:
+        print("Sequence")
+    case {"k": X(e=1)}:
+        print("Mapping")
+"""
+    )
+    check(v.defined_classes, ["X"])
+    check(v.defined_vars, ["a", "b", "c", "d", "e", "x"])
+
+    check(v.unused_classes, [])
+    check(v.unused_vars, [])
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 10), reason="requires python3.10 or higher"
+)
+def test_match_enum(v):
+    v.scan(
+        """\
+from enum import Enum
+
+
+class Color(Enum):
+    RED = 0
+    YELLOW = 1
+    GREEN = 1
+
+color = input()
+
+match color:
+    case Color.RED:
+        print("Real danger!")
+    case Color.YELLOW | Color.GREEN:
+        print("No danger!")
+"""
+    )
+    check(v.defined_classes, ["Color"])
+    check(v.defined_vars, ["RED", "YELLOW", "GREEN", "color"])
+
+    check(v.unused_classes, [])
+    check(v.unused_vars, [])
