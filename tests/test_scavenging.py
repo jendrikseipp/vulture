@@ -777,6 +777,7 @@ class X:
     a: int
     b: int
     c: int
+    u: int
 
 x = input()
 
@@ -791,13 +792,13 @@ match x:
     check(v.defined_vars, ["a", "b", "c", "x"])
 
     check(v.unused_classes, [])
-    check(v.unused_vars, [])
+    check(v.unused_vars, ["u"])
 
 
 @pytest.mark.skipif(
     sys.version_info < (3, 10), reason="requires python3.10 or higher"
 )
-def test_match_class_recursive(v):
+def test_match_class_embedded(v):
     v.scan(
         """\
 from dataclasses import dataclass
@@ -810,6 +811,7 @@ class X:
     c: int
     d: int
     e: int
+    u: int
 
 x = input()
 
@@ -826,7 +828,7 @@ match x:
     check(v.defined_vars, ["a", "b", "c", "d", "e", "x"])
 
     check(v.unused_classes, [])
-    check(v.unused_vars, [])
+    check(v.unused_vars, ["u"])
 
 
 @pytest.mark.skipif(
@@ -841,7 +843,8 @@ from enum import Enum
 class Color(Enum):
     RED = 0
     YELLOW = 1
-    GREEN = 1
+    GREEN = 2
+    BLUE = 3
 
 color = input()
 
@@ -856,4 +859,4 @@ match color:
     check(v.defined_vars, ["RED", "YELLOW", "GREEN", "color"])
 
     check(v.unused_classes, [])
-    check(v.unused_vars, [])
+    check(v.unused_vars, ["BLUE"])
