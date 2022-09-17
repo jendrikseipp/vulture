@@ -789,7 +789,7 @@ match x:
 """
     )
     check(v.defined_classes, ["X"])
-    check(v.defined_vars, ["a", "b", "c", "x"])
+    check(v.defined_vars, ["a", "b", "c", "u", "x"])
 
     check(v.unused_classes, [])
     check(v.unused_vars, ["u"])
@@ -825,7 +825,7 @@ match x:
 """
     )
     check(v.defined_classes, ["X"])
-    check(v.defined_vars, ["a", "b", "c", "d", "e", "x"])
+    check(v.defined_vars, ["a", "b", "c", "d", "e", "u", "x"])
 
     check(v.unused_classes, [])
     check(v.unused_vars, ["u"])
@@ -856,7 +856,7 @@ match color:
 """
     )
     check(v.defined_classes, ["Color"])
-    check(v.defined_vars, ["RED", "YELLOW", "GREEN", "color"])
+    check(v.defined_vars, ["RED", "YELLOW", "GREEN", "BLUE", "color"])
 
     check(v.unused_classes, [])
     check(v.unused_vars, ["BLUE"])
