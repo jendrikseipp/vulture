@@ -39,6 +39,7 @@ whitelist_node_visitor.visit_Interactive
 whitelist_node_visitor.visit_Lambda
 whitelist_node_visitor.visit_List
 whitelist_node_visitor.visit_ListComp
+whitelist_node_visitor.visit_MatchClass
 whitelist_node_visitor.visit_Module
 whitelist_node_visitor.visit_Name
 whitelist_node_visitor.visit_NameConstant
