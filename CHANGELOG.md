@@ -1,4 +1,6 @@
-* Basic `match` statement support (kreathon, #276).
+# 2.6 (2022-09-19)
+
+* Add basic `match` statement support (kreathon, #276, #291).
 
 # 2.5 (2022-07-03)
 
