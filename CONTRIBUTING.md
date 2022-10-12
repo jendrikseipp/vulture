@@ -62,8 +62,8 @@ To install `tox`, run:
 ### Creating a new branch
 
 To start working on a pull request, create a new branch to work on. You
-should never develop on your master branch because your master branch
-should always be synchronized with the main repo’s master branch, which
+should never develop on your main branch because your main branch
+should always be synchronized with the main repo’s main branch, which
 is challenging if it has new commits. Create a branch using:
 
     $ git checkout -b your-new-branch

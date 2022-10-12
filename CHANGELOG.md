@@ -1,3 +1,10 @@
+# 2.6 (2022-09-19)
+
+* Add basic `match` statement support (kreathon, #276, #291).
+
+# 2.5 (2022-07-03)
+
+* Mark imports in `__all__` as used (kreathon, #172, #282).
 * Add whitelist for `pint.UnitRegistry.default_formatter` (Ben Elliston, #258).
 
 # 2.4 (2022-05-19)

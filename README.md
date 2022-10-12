@@ -1,7 +1,7 @@
 # Vulture - Find dead code
 
 ![CI:Test](https://github.com/jendrikseipp/vulture/workflows/CI/badge.svg)
-[![Codecov Badge](https://codecov.io/gh/jendrikseipp/vulture/branch/master/graphs/badge.svg)](https://codecov.io/gh/jendrikseipp/vulture?branch=master)
+[![Codecov Badge](https://codecov.io/gh/jendrikseipp/vulture/branch/main/graphs/badge.svg)](https://codecov.io/gh/jendrikseipp/vulture?branch=main)
 
 Vulture finds unused code in Python programs. This is useful for
 cleaning up and finding errors in large code bases. If you run Vulture
@@ -327,8 +327,8 @@ Please visit <https://github.com/jendrikseipp/vulture> to report any
 issues or to make pull requests.
 
   - Contributing guide:
-    [CONTRIBUTING.md](https://github.com/jendrikseipp/vulture/blob/master/CONTRIBUTING.md)
+    [CONTRIBUTING.md](https://github.com/jendrikseipp/vulture/blob/main/CONTRIBUTING.md)
   - Release notes:
-    [CHANGELOG.md](https://github.com/jendrikseipp/vulture/blob/master/CHANGELOG.md)
+    [CHANGELOG.md](https://github.com/jendrikseipp/vulture/blob/main/CHANGELOG.md)
   - Roadmap:
-    [TODO.md](https://github.com/jendrikseipp/vulture/blob/master/TODO.md)
+    [TODO.md](https://github.com/jendrikseipp/vulture/blob/main/TODO.md)
