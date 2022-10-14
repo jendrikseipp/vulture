@@ -1,3 +1,5 @@
+* Add whitelist for `socketserver.TCPServer.allow_reuse_address` (Ben Elliston)
+
 # 2.6 (2022-09-19)
 
 * Add basic `match` statement support (kreathon, #276, #291).
