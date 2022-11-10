@@ -307,6 +307,9 @@ codes.
 |     1     | Invalid input (file missing, syntax error, wrong encoding)    |
 |     2     | Invalid command line arguments                                |
 
+**Note:** If you set `--exit-zero`, Vulture will always return 0, which may be 
+helpful if you use it in continuous integration scripts.
+
 ## Similar programs
 
   - [pyflakes](https://pypi.org/project/pyflakes/) finds unused imports

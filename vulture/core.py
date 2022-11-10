@@ -707,10 +707,9 @@ def main():
         ignore_decorators=config["ignore_decorators"],
     )
     vulture.scavenge(config["paths"], exclude=config["exclude"])
-    sys.exit(
-        vulture.report(
-            min_confidence=config["min_confidence"],
-            sort_by_size=config["sort_by_size"],
-            make_whitelist=config["make_whitelist"],
-        )
+    report_code = vulture.report(
+        min_confidence=config["min_confidence"],
+        sort_by_size=config["sort_by_size"],
+        make_whitelist=config["make_whitelist"],
     )
+    sys.exit(report_code if not config["exit_zero"] else 0)

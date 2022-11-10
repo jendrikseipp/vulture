@@ -19,6 +19,7 @@ DEFAULTS = {
     "ignore_names": [],
     "make_whitelist": False,
     "sort_by_size": False,
+    "exit_zero": False,
     "verbose": False,
 }
 
@@ -149,6 +150,14 @@ def _parse_args(args=None):
         action="store_true",
         default=missing,
         help="Sort unused functions and classes by their lines of code.",
+    )
+    parser.add_argument(
+        "--exit-zero",
+        action="store_true",
+        default=missing,
+        help="Always return a 0 (non-error) status code,"
+        " even if Vulture errors are found."
+        " This is primarily useful in continuous integration scripts.",
     )
     parser.add_argument(
         "-v", "--verbose", action="store_true", default=missing
