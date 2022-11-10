@@ -62,6 +62,7 @@ def test_toml_config():
         min_confidence=10,
         sort_by_size=True,
         verbose=True,
+        exit_zero=True,
     )
     data = StringIO(
         dedent(
