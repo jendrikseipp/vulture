@@ -635,6 +635,10 @@ class Vulture(ast.NodeVisitor):
     def visit_While(self, node):
         self._handle_conditional_node(node, "while")
 
+    def visit_MatchClass(self, node):
+        for kwd_attr in node.kwd_attrs:
+            self.used_names.add(kwd_attr)
+
     def visit(self, node):
         method = "visit_" + node.__class__.__name__
         visitor = getattr(self, method, None)
