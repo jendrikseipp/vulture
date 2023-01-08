@@ -121,6 +121,15 @@ class Foo:
     check_decorator_names(code, ["@foo", "@bar.yz"])
 
 
+def test_get_decorator_name_index():
+    code = """\
+@foo[2]
+def bar():
+    pass
+"""
+    check_decorator_names(code, ["@foo"])
+
+
 def test_get_decorator_name_regression():
     code = """\
 from prometheus_client import Histogram
