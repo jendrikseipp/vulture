@@ -80,8 +80,9 @@ We collect whitelists for common Python modules and packages in
 
 #### Ignoring files
 
-If you want to ignore a whole file or directory, use the `--exclude`
-parameter (e.g., `--exclude *settings.py,docs/`).
+If you want to ignore a whole file or directory, use the `--exclude` parameter
+(e.g., `--exclude "*settings.py,*/docs/*.py,*/test_*.py,*/.venv/*.py"`). The
+exclude patterns are matched against absolute paths.
 
 #### Flake8 noqa comments
 
@@ -174,7 +175,7 @@ Example Config:
 
 ``` toml
 [tool.vulture]
-exclude = ["file*.py", "dir/"]
+exclude = ["*file*.py", "dir/"]
 ignore_decorators = ["@app.route", "@require_*"]
 ignore_names = ["visit_*", "do_*"]
 make_whitelist = true

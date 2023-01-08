@@ -1,4 +1,5 @@
 * Add whitelist for `socketserver.TCPServer.allow_reuse_address` (Ben Elliston)
+* Clarify that `--exclude` patterns are matched against absolute paths (Jendrik Seipp, #260).
 
 # 2.6 (2022-09-19)
 
