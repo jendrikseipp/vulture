@@ -2,8 +2,6 @@
 
 * Use end_lineno and end_col_offset attributes once we require Python
   3.8+.
-* Ignore setup_module(), teardown_module(), etc. in test_*.py files
-  (see https://docs.pytest.org/en/latest/xunit_setup.html for full list).
 * Honor (speaking) pylint error codes (e.g., # pylint:
   disable=unused-import): unused-import, unused-variable, unused-argument,
   possibly-unused-variable and unreachable-code. See

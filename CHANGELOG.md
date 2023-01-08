@@ -1,3 +1,4 @@
+* Ignore `setup_module()`, `teardown_module()`, etc. in pytest `test_*.py` files (Jendrik Seipp).
 * Add whitelist for `socketserver.TCPServer.allow_reuse_address` (Ben Elliston)
 * Clarify that `--exclude` patterns are matched against absolute paths (Jendrik Seipp, #260).
 * Fix example in README file (Jendrik Seipp, #272).

@@ -15,6 +15,18 @@ from vulture.config import make_config
 DEFAULT_CONFIDENCE = 60
 
 IGNORED_VARIABLE_NAMES = {"object", "self"}
+PYTEST_FUNCTION_NAMES = {
+    "setup_module",
+    "teardown_module",
+    "setup_function",
+    "teardown_function",
+}
+PYTEST_METHOD_NAMES = {
+    "setup_class",
+    "teardown_class",
+    "setup_method",
+    "teardown_method",
+}
 
 ERROR_CODES = {
     "attribute": "V101",
@@ -76,12 +88,16 @@ def _ignore_import(filename, import_name):
 
 
 def _ignore_function(filename, function_name):
-    return function_name.startswith("test_") and _is_test_file(filename)
+    return (
+        function_name in PYTEST_FUNCTION_NAMES
+        or function_name.startswith("test_")
+    ) and _is_test_file(filename)
 
 
 def _ignore_method(filename, method_name):
     return _is_special_name(method_name) or (
-        method_name.startswith("test_") and _is_test_file(filename)
+        (method_name in PYTEST_METHOD_NAMES or method_name.startswith("test_"))
+        and _is_test_file(filename)
     )
 
 

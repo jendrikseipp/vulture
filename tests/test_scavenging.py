@@ -476,6 +476,18 @@ class Bar(object):
 def test_function_names_in_test_file(v):
     v.scan(
         """\
+def setup_module(module):
+    module
+
+def teardown_module(module):
+    module
+
+def setup_function(function):
+    function
+
+def teardown_function(function):
+    function
+
 def test_func():
     pass
 
@@ -483,7 +495,19 @@ def other_func():
     pass
 
 class TestClass:
-    pass
+    @classmethod
+    def setup_class(cls):
+        cls
+
+    @classmethod
+    def teardown_class(cls):
+        pass
+
+    def setup_method(self, method):
+        method
+
+    def teardown_method(self, method):
+        pass
 
 class BasicTestCase:
     pass
@@ -496,11 +520,26 @@ class OtherClass:
     check(v.defined_attrs, [])
     check(v.defined_classes, ["OtherClass"])
     check(v.defined_funcs, ["other_func"])
-    check(v.defined_vars, [])
-    check(v.used_names, [])
+    check(v.defined_methods, [])
+    check(
+        v.defined_vars,
+        [
+            "cls",
+            "cls",
+            "function",
+            "function",
+            "method",
+            "method",
+            "module",
+            "module",
+        ],
+    )
+    check(v.used_names, ["classmethod", "cls", "function", "method", "module"])
     check(v.unused_attrs, [])
     check(v.unused_classes, ["OtherClass"])
     check(v.unused_funcs, ["other_func"])
+    check(v.unused_methods, [])
+    check(v.unused_vars, [])
 
 
 def test_async_function_name_in_test_file(v):
