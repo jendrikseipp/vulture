@@ -235,7 +235,8 @@ class Greeter:
 def hello_world():
     message = "Hello, world!"
     greeter = Greeter()
-    greet_func = getattr(greeter, "greet")
+    func_name = "greet"
+    greet_func = getattr(greeter, func_name)
     greet_func()
 
 if __name__ == "__main__":
@@ -252,8 +253,8 @@ results in the following output:
     dead_code.py:4: unused function 'greet' (60% confidence)
     dead_code.py:8: unused variable 'message' (60% confidence)
 
-Vulture correctly reports "os" and "message" as unused, but it fails to
-detect that "greet" is actually used. The recommended method to deal
+Vulture correctly reports `os` and `message` as unused but it fails to
+detect that `greet` is actually used. The recommended method to deal
 with false positives like this is to create a whitelist Python file.
 
 **Preparing whitelists**
