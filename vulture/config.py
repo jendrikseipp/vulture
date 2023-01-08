@@ -110,9 +110,9 @@ def _parse_args(args=None):
         type=csv,
         default=missing,
         help=f"Comma-separated list of path patterns to ignore (e.g.,"
-        f' "*settings.py,docs,*/test_*.py,venv"). {glob_help} A PATTERN without '
-        f" glob wildcards is treated as *PATTERN*. Patterns are matched"
-        f" against absolute paths.",
+        f' "*settings.py,docs,*/test_*.py,venv"). {glob_help} A PATTERN'
+        f" without glob wildcards is treated as *PATTERN*. Patterns are"
+        f" matched against absolute paths.",
     )
     parser.add_argument(
         "--ignore-decorators",
