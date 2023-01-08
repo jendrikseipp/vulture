@@ -20,12 +20,12 @@ set -e
 if [[ $retcode != 0 ]]; then
     echo "There are uncommitted changes:"
     git status
-    #exit 1
+    exit 1
 fi
 
 git pull
 
-tox || true
+tox
 
 # Bump version.
 sed -i -e "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" vulture/version.py
