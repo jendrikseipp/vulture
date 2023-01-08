@@ -1,16 +1,13 @@
 # TODOs
 
-* Detect unused variables in assignment expressions under Python 3.8+.
-* Use end_lineno and end_col_offset attributes when running Python
+* Use end_lineno and end_col_offset attributes once we require Python
   3.8+.
-* Ignore functions in conftest.py files that start with "pytest_".
 * Ignore setup_module(), teardown_module(), etc. in test_*.py files
   (see https://docs.pytest.org/en/latest/xunit_setup.html for full list).
 * Honor (speaking) pylint error codes (e.g., # pylint:
   disable=unused-import): unused-import, unused-variable, unused-argument,
   possibly-unused-variable and unreachable-code. See
   https://github.com/janjur/readable-pylint-messages#unused-import.
-* Ignore some decorators by default: @app.route, @cli.command.
 
 # Non-TODOs
 
@@ -33,3 +30,5 @@
   foo: ...).
 * Use coverage.py to detect false-positives (\#109). Workflow too
   complicated.
+* Ignore some decorators by default: @app.route, @cli.command.
+* Ignore functions in conftest.py files that start with "pytest_".
