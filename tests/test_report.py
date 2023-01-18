@@ -40,6 +40,12 @@ def check_report(v, capsys):
     return test_report
 
 
+def test_logging(v, capsys):
+    expected = "\u65e5\u672c\u4eba\xc0\n"
+    v._log("日本人À")
+    assert capsys.readouterr().out == expected
+
+
 def test_item_report(check_report):
     expected = """\
 {filename}:1: unused import 'foo' (90% confidence)
