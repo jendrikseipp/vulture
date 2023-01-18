@@ -11,22 +11,9 @@ from vulture import noqa
 from vulture import utils
 from vulture.config import make_config
 
-
 DEFAULT_CONFIDENCE = 60
 
 IGNORED_VARIABLE_NAMES = {"object", "self"}
-PYTEST_FUNCTION_NAMES = {
-    "setup_module",
-    "teardown_module",
-    "setup_function",
-    "teardown_function",
-}
-PYTEST_METHOD_NAMES = {
-    "setup_class",
-    "teardown_class",
-    "setup_method",
-    "teardown_method",
-}
 
 ERROR_CODES = {
     "attribute": "V101",
@@ -88,16 +75,12 @@ def _ignore_import(filename, import_name):
 
 
 def _ignore_function(filename, function_name):
-    return (
-        function_name in PYTEST_FUNCTION_NAMES
-        or function_name.startswith("test_")
-    ) and _is_test_file(filename)
+    return function_name.startswith("test_") and _is_test_file(filename)
 
 
 def _ignore_method(filename, method_name):
     return _is_special_name(method_name) or (
-        (method_name in PYTEST_METHOD_NAMES or method_name.startswith("test_"))
-        and _is_test_file(filename)
+        method_name.startswith("test_") and _is_test_file(filename)
     )
 
 
@@ -227,7 +210,7 @@ class Vulture(ast.NodeVisitor):
 
         def handle_syntax_error(e):
             text = f' at "{e.text.strip()}"' if e.text else ""
-            print(
+            self._log(
                 f"{utils.format_path(filename)}:{e.lineno}: {e.msg}{text}",
                 file=sys.stderr,
             )
@@ -245,9 +228,10 @@ class Vulture(ast.NodeVisitor):
             handle_syntax_error(err)
         except ValueError as err:
             # ValueError is raised if source contains null bytes.
-            print(
+            self._log(
                 f'{utils.format_path(filename)}: invalid source code "{err}"',
                 file=sys.stderr,
+                force=True,
             )
             self.found_dead_code_or_error = True
         else:
@@ -279,10 +263,11 @@ class Vulture(ast.NodeVisitor):
             try:
                 module_string = utils.read_file(module)
             except utils.VultureInputException as err:  # noqa: F841
-                print(
+                self._log(
                     f"Error: Could not read file {module} - {err}\n"
                     f"Try to change the encoding to UTF-8.",
                     file=sys.stderr,
+                    force=True,
                 )
                 self.found_dead_code_or_error = True
             else:
@@ -344,10 +329,11 @@ class Vulture(ast.NodeVisitor):
         for item in self.get_unused_code(
             min_confidence=min_confidence, sort_by_size=sort_by_size
         ):
-            print(
+            self._log(
                 item.get_whitelist_string()
                 if make_whitelist
-                else item.get_report(add_size=sort_by_size)
+                else item.get_report(add_size=sort_by_size),
+                force=True,
             )
             self.found_dead_code_or_error = True
         return self.found_dead_code_or_error
@@ -380,9 +366,13 @@ class Vulture(ast.NodeVisitor):
     def unused_attrs(self):
         return _get_unused_items(self.defined_attrs, self.used_names)
 
-    def _log(self, *args):
-        if self.verbose:
-            print(*args)
+    def _log(self, *args, file=sys.stdout, force=False):
+        if self.verbose or force:
+            try:
+                print(*args, file=file)
+            except UnicodeEncodeError:
+                x = " ".join(map(str, args))
+                print(x.encode(), file=file)
 
     def _add_aliases(self, node):
         """
@@ -650,10 +640,6 @@ class Vulture(ast.NodeVisitor):
 
     def visit_While(self, node):
         self._handle_conditional_node(node, "while")
-
-    def visit_MatchClass(self, node):
-        for kwd_attr in node.kwd_attrs:
-            self.used_names.add(kwd_attr)
 
     def visit(self, node):
         method = "visit_" + node.__class__.__name__
