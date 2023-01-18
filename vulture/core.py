@@ -388,9 +388,12 @@ class Vulture(ast.NodeVisitor):
         if self.verbose or force:
             try:
                 # NOTE:
-                # The above if condition is needed because if I redirect the print directly to the
-                # sys.stdout then PyTest will be failed because it cannot captures the STDOUT.
-                # So the default "sys.stdout" value of "file" Kwarg doesn't work in this case.
+                # The above if condition is needed because if
+                # I redirect the print directly to the
+                # sys.stdout then PyTest will be failed because
+                # it cannot captures the STDOUT.
+                # So the default "sys.stdout" value of "file"
+                # Kwarg doesn't work in this case.
                 if file:
                     print(*args, file=file)
                 else:
