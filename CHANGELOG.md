@@ -1,3 +1,5 @@
+* Add `UnicodeEncodeError` exception handling to `core.py` (milanbalazs, #299).
+
 # 2.7 (2023-01-08)
 
 * Ignore `setup_module()`, `teardown_module()`, etc. in pytest `test_*.py` files (Jendrik Seipp).
