@@ -387,23 +387,10 @@ class Vulture(ast.NodeVisitor):
     def _log(self, *args, file=None, force=False):
         if self.verbose or force:
             try:
-                # NOTE:
-                # The above if condition is needed because if
-                # I redirect the print directly to the
-                # sys.stdout then PyTest will be failed because
-                # it cannot captures the STDOUT.
-                # So the default "sys.stdout" value of "file"
-                # Kwarg doesn't work in this case.
-                if file:
-                    print(*args, file=file)
-                else:
-                    print(*args)
+                print(*args, file=file if file else sys.stdout)
             except UnicodeEncodeError:
                 x = " ".join(map(str, args))
-                if file:
-                    print(x.encode(), file=file)
-                else:
-                    print(x.encode())
+                print(x.encode(), file=file if file else sys.stdout)
 
     def _add_aliases(self, node):
         """

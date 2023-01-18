@@ -1,5 +1,4 @@
 import pytest
-import sys
 
 from . import v
 
