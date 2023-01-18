@@ -1,4 +1,5 @@
 import pytest
+import sys
 
 from . import v
 
@@ -32,7 +33,8 @@ def check_report(v, capsys):
         filename = "foo.py"
         v.scan(code, filename=filename)
         capsys.readouterr()
-        v.report(make_whitelist=make_whitelist)
+        ret = v.report(make_whitelist=make_whitelist)
+        assert ret
         assert capsys.readouterr().out == expected.format(filename=filename)
 
     return test_report

@@ -384,13 +384,23 @@ class Vulture(ast.NodeVisitor):
     def unused_attrs(self):
         return _get_unused_items(self.defined_attrs, self.used_names)
 
-    def _log(self, *args, file=sys.stdout, force=False):
+    def _log(self, *args, file=None, force=False):
         if self.verbose or force:
             try:
-                print(*args, file=file)
+                # NOTE:
+                # The above if condition is needed because if I redirect the print directly to the
+                # sys.stdout then PyTest will be failed because it cannot captures the STDOUT.
+                # So the default "sys.stdout" value of "file" Kwarg doesn't work in this case.
+                if file:
+                    print(*args, file=file)
+                else:
+                    print(*args)
             except UnicodeEncodeError:
                 x = " ".join(map(str, args))
-                print(x.encode(), file=file)
+                if file:
+                    print(x.encode(), file=file)
+                else:
+                    print(x.encode())
 
     def _add_aliases(self, node):
         """
