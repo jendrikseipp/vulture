@@ -11,9 +11,22 @@ from vulture import noqa
 from vulture import utils
 from vulture.config import make_config
 
+
 DEFAULT_CONFIDENCE = 60
 
 IGNORED_VARIABLE_NAMES = {"object", "self"}
+PYTEST_FUNCTION_NAMES = {
+    "setup_module",
+    "teardown_module",
+    "setup_function",
+    "teardown_function",
+}
+PYTEST_METHOD_NAMES = {
+    "setup_class",
+    "teardown_class",
+    "setup_method",
+    "teardown_method",
+}
 
 ERROR_CODES = {
     "attribute": "V101",
@@ -75,12 +88,16 @@ def _ignore_import(filename, import_name):
 
 
 def _ignore_function(filename, function_name):
-    return function_name.startswith("test_") and _is_test_file(filename)
+    return (
+        function_name in PYTEST_FUNCTION_NAMES
+        or function_name.startswith("test_")
+    ) and _is_test_file(filename)
 
 
 def _ignore_method(filename, method_name):
     return _is_special_name(method_name) or (
-        method_name.startswith("test_") and _is_test_file(filename)
+        (method_name in PYTEST_METHOD_NAMES or method_name.startswith("test_"))
+        and _is_test_file(filename)
     )
 
 
@@ -213,6 +230,7 @@ class Vulture(ast.NodeVisitor):
             self._log(
                 f"{utils.format_path(filename)}:{e.lineno}: {e.msg}{text}",
                 file=sys.stderr,
+                force=True,
             )
             self.found_dead_code_or_error = True
 
@@ -640,6 +658,10 @@ class Vulture(ast.NodeVisitor):
 
     def visit_While(self, node):
         self._handle_conditional_node(node, "while")
+
+    def visit_MatchClass(self, node):
+        for kwd_attr in node.kwd_attrs:
+            self.used_names.add(kwd_attr)
 
     def visit(self, node):
         method = "visit_" + node.__class__.__name__
