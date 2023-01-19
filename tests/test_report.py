@@ -14,6 +14,7 @@ class Foo:
     def bar(self):
         self.foobar = "unused attribute"
         foobar = "unused variable"
+        日本人 = "unused variable"
         return
         print("unreachable")
 
@@ -32,10 +33,17 @@ def check_report(v, capsys):
         filename = "foo.py"
         v.scan(code, filename=filename)
         capsys.readouterr()
-        v.report(make_whitelist=make_whitelist)
+        ret = v.report(make_whitelist=make_whitelist)
+        assert ret
         assert capsys.readouterr().out == expected.format(filename=filename)
 
     return test_report
+
+
+def test_logging(v, capsys):
+    expected = "\u65e5\u672c\u4eba\xc0\n"
+    v._log("日本人À")
+    assert capsys.readouterr().out == expected
 
 
 def test_item_report(check_report):
@@ -45,9 +53,10 @@ def test_item_report(check_report):
 {filename}:7: unused method 'bar' (60% confidence)
 {filename}:8: unused attribute 'foobar' (60% confidence)
 {filename}:9: unused variable 'foobar' (60% confidence)
-{filename}:11: unreachable code after 'return' (100% confidence)
-{filename}:13: unused property 'myprop' (60% confidence)
-{filename}:17: unused function 'myfunc' (60% confidence)
+{filename}:10: unused variable '\u65e5\u672c\u4eba' (60% confidence)
+{filename}:12: unreachable code after 'return' (100% confidence)
+{filename}:14: unused property 'myprop' (60% confidence)
+{filename}:18: unused function 'myfunc' (60% confidence)
 """
     check_report(mock_code, expected)
 
@@ -59,8 +68,9 @@ Foo  # unused class ({filename}:3)
 _.bar  # unused method ({filename}:7)
 _.foobar  # unused attribute ({filename}:8)
 foobar  # unused variable ({filename}:9)
-# unreachable code after 'return' ({filename}:11)
-_.myprop  # unused property ({filename}:13)
-myfunc  # unused function ({filename}:17)
+\u65e5\u672c\u4eba  # unused variable ({filename}:10)
+# unreachable code after 'return' ({filename}:12)
+_.myprop  # unused property ({filename}:14)
+myfunc  # unused function ({filename}:18)
 """
     check_report(mock_code, expected, make_whitelist=True)
