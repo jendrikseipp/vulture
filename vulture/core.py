@@ -386,11 +386,13 @@ class Vulture(ast.NodeVisitor):
 
     def _log(self, *args, file=None, force=False):
         if self.verbose or force:
+            file = file or sys.stdout
             try:
-                print(*args, file=file if file else sys.stdout)
+                print(*args, file=file)
             except UnicodeEncodeError:
+                # Some terminals can't print Unicode symbols.
                 x = " ".join(map(str, args))
-                print(x.encode(), file=file if file else sys.stdout)
+                print(x.encode(), file=file)
 
     def _add_aliases(self, node):
         """
