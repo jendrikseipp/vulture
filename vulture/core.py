@@ -212,6 +212,8 @@ class Vulture(ast.NodeVisitor):
         self.defined_vars = get_list("variable")
         self.unreachable_code = get_list("unreachable_code")
 
+        self.no_fall_through_nodes = set()
+
         self.used_names = utils.LoggingSet("name", self.verbose)
 
         self.ignore_names = ignore_names or []
@@ -227,6 +229,10 @@ class Vulture(ast.NodeVisitor):
         self.code = code.splitlines()
         self.noqa_lines = noqa.parse_noqa(self.code)
         self.filename = filename
+
+        # We can reset the fall_through_nodes for every module to reduce
+        # memory usage:
+        self.no_fall_through_nodes = set()
 
         def handle_syntax_error(e):
             text = f' at "{e.text.strip()}"' if e.text else ""
@@ -630,8 +636,11 @@ class Vulture(ast.NodeVisitor):
                 self.defined_funcs, node.name, node, ignore=_ignore_function
             )
 
+        self._handle_reachability_functiondef(node)
+
     def visit_If(self, node):
         self._handle_conditional_node(node, "if")
+        self._handle_reachability_if(node)
 
     def visit_IfExp(self, node):
         self._handle_conditional_node(node, "ternary")
@@ -661,12 +670,145 @@ class Vulture(ast.NodeVisitor):
 
     def visit_While(self, node):
         self._handle_conditional_node(node, "while")
+        self._handle_reachability_while(node)
 
     def visit_MatchClass(self, node):
         for kwd_attr in node.kwd_attrs:
             self.used_names.add(kwd_attr)
 
+    def visit_Try(self, node):
+        self._handle_reachability_try(node)
+
+    def visit_AsyncFor(self, node):
+        self.visit_For(node)
+
+    def visit_For(self, node):
+        self._handle_reachability_for(node)
+
+    def visit_AsyncWith(self, node):
+        return self.visit_With(node)
+
+    def visit_With(self, node):
+        self._handle_reachability_with(node)
+
+    def visit_Module(self, node):
+        self._handle_reachability_module(node)
+
+    def visit_Return(self, node):
+        self._mark_as_no_fall_through(node)
+
+    def visit_Raise(self, node):
+        self._mark_as_no_fall_through(node)
+
+    def visit_Continue(self, node):
+        self._mark_as_no_fall_through(node)
+
+    def visit_Break(self, node):
+        self._mark_as_no_fall_through(node)
+
+    def _can_fall_through(self, node):
+        return node not in self.no_fall_through_nodes
+
+    def _mark_as_no_fall_through(self, node):
+        self.no_fall_through_nodes.add(node)
+
+    def _can_fall_through_statements_analysis(self, statements):
+        """Report unreachable statements.
+        Returns True if we cannot fall though the list of statements
+        """
+        for idx, statement in enumerate(statements):
+            if not self._can_fall_through(statement):
+                try:
+                    next_sibling = statements[idx + 1]
+                except IndexError:
+                    next_sibling = None
+                if next_sibling is not None:
+                    class_name = statement.__class__.__name__.lower()
+                    self._define(
+                        self.unreachable_code,
+                        class_name,
+                        next_sibling,
+                        last_node=statements[-1],
+                        message=f"unreachable code after '{class_name}'",
+                        confidence=100,
+                    )
+                return False
+        return True
+
+    def _handle_reachability_if(self, node):
+
+        has_else = bool(node.orelse)
+
+        if not has_else:
+            if_can_fall_through = self._can_fall_through_statements_analysis(
+                node.body
+            )
+            else_can_fall_through = True
+        else:
+            if_can_fall_through = self._can_fall_through_statements_analysis(
+                node.body
+            )
+            else_can_fall_through = self._can_fall_through_statements_analysis(
+                node.orelse
+            )
+
+        statement_can_fall_through = (
+            if_can_fall_through or else_can_fall_through
+        )
+
+        if not statement_can_fall_through:
+            self._mark_as_no_fall_through(node)
+
+    def _handle_reachability_try(self, node):
+
+        has_else = bool(node.orelse)
+
+        try_can_fall_through = self._can_fall_through_statements_analysis(
+            node.body
+        )
+
+        if not try_can_fall_through and has_else:
+            else_body = node.orelse
+            self._define(
+                self.unreachable_code,
+                "else",
+                else_body[0],
+                last_node=else_body[-1],
+                message="unreachable 'else' block",
+                confidence=100,
+            )
+
+        any_except_can_fall_through = any(
+            self._can_fall_through_statements_analysis(handler.body)
+            for handler in node.handlers
+        )
+
+        statement_can_fall_through = (
+            try_can_fall_through or any_except_can_fall_through
+        )
+
+        if not statement_can_fall_through:
+            self._mark_as_no_fall_through(node)
+
+    def _handle_reachability_for(self, node):
+        self._can_fall_through_statements_analysis(node.body)
+
+    def _handle_reachability_while(self, node):
+        self._can_fall_through_statements_analysis(node.body)
+
+    def _handle_reachability_with(self, node):
+        self._can_fall_through_statements_analysis(node.body)
+
+    def _handle_reachability_functiondef(self, node):
+        self._can_fall_through_statements_analysis(node.body)
+
+    def _handle_reachability_module(self, node):
+        self._can_fall_through_statements_analysis(node.body)
+
     def visit(self, node):
+
+        self.generic_visit(node)
+
         method = "visit_" + node.__class__.__name__
         visitor = getattr(self, method, None)
         if self.verbose:
@@ -689,36 +831,10 @@ class Vulture(ast.NodeVisitor):
                 ast.parse(type_comment, filename="<type_comment>", mode=mode)
             )
 
-        return self.generic_visit(node)
-
-    def _handle_ast_list(self, ast_list):
-        """
-        Find unreachable nodes in the given sequence of ast nodes.
-        """
-        for index, node in enumerate(ast_list):
-            if isinstance(
-                node, (ast.Break, ast.Continue, ast.Raise, ast.Return)
-            ):
-                try:
-                    first_unreachable_node = ast_list[index + 1]
-                except IndexError:
-                    continue
-                class_name = node.__class__.__name__.lower()
-                self._define(
-                    self.unreachable_code,
-                    class_name,
-                    first_unreachable_node,
-                    last_node=ast_list[-1],
-                    message=f"unreachable code after '{class_name}'",
-                    confidence=100,
-                )
-                return
-
     def generic_visit(self, node):
         """Called if no explicit visitor function exists for a node."""
         for _, value in ast.iter_fields(node):
             if isinstance(value, list):
-                self._handle_ast_list(value)
                 for item in value:
                     if isinstance(item, ast.AST):
                         self.visit(item)

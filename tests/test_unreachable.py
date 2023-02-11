@@ -118,6 +118,28 @@ def foo():
     check_unreachable(v, 4, 1, "return")
 
 
+def test_return_function_definition(v):
+    v.scan(
+        """\
+def foo():
+    return True
+    def bar():
+        return False
+"""
+    )
+    check_unreachable(v, 3, 2, "return")
+
+
+def test_raise_global(v):
+    v.scan(
+        """\
+raise ValueError
+a = 1
+"""
+    )
+    check_unreachable(v, 2, 1, "raise")
+
+
 def test_raise_assignment(v):
     v.scan(
         """\
@@ -325,6 +347,185 @@ while True:
     check_unreachable(v, 4, 1, "break")
 
 
+def test_if_some_branches_return(v):
+    v.scan(
+        """\
+def foo(a):
+    if a == 0:
+        return 0
+    elif a == 1:
+        pass
+    else:
+        return 2
+    print(":-(")
+"""
+    )
+    assert v.unreachable_code == []
+
+
+def test_if_all_branches_return(v):
+    v.scan(
+        """\
+def foo(a):
+    if a == 0:
+        return 0
+    elif a == 1:
+        return 1
+    else:
+        return 2
+    print(":-(")
+"""
+    )
+    check_unreachable(v, 8, 1, "if")
+
+
+def test_if_all_branches_return_nested(v):
+    v.scan(
+        """\
+def foo(a, b):
+    if a:
+        if b:
+            return 1
+        return 2
+    else:
+        return 3
+    print(":-(")
+"""
+    )
+    check_unreachable(v, 8, 1, "if")
+
+
+def test_if_all_branches_return_or_raise(v):
+    v.scan(
+        """\
+def foo(a):
+    if a == 0:
+        return 0
+    else:
+        raise Exception()
+    print(":-(")
+"""
+    )
+    check_unreachable(v, 6, 1, "if")
+
+
+def test_try_fall_through(v):
+    v.scan(
+        """\
+def foo():
+    try:
+        pass
+    except IndexError as e:
+        raise e
+    print(":-(")
+"""
+    )
+    assert v.unreachable_code == []
+
+
+def test_try_some_branches_raise(v):
+    v.scan(
+        """\
+def foo(e):
+    try:
+        raise e
+    except IndexError as e:
+        pass
+    except Exception as e:
+        raise e
+    print(":-(")
+"""
+    )
+    assert v.unreachable_code == []
+
+
+def test_try_all_branches_return_or_raise(v):
+    v.scan(
+        """\
+def foo():
+    try:
+        return 2
+    except IndexError as e:
+        raise e
+    except Exception as e:
+        raise e
+    print(":-(")
+"""
+    )
+    check_unreachable(v, 8, 1, "try")
+
+
+def test_try_nested_no_fall_through(v):
+    v.scan(
+        """\
+def foo(a):
+    try:
+        raise a
+    except:
+        try:
+            return
+        except Exception as e:
+            raise e
+    print(":-(")
+"""
+    )
+    check_unreachable(v, 9, 1, "try")
+
+
+def test_try_reachable_else(v):
+    v.scan(
+        """\
+def foo():
+    try:
+        print(":-)")
+    except:
+        return 1
+    else:
+        print(":-(")
+"""
+    )
+    assert v.unreachable_code == []
+
+
+def test_try_unreachable_else(v):
+    v.scan(
+        """\
+def foo():
+    try:
+        raise Exception()
+    except Exception as e:
+        return 1
+    else:
+        print(":-(")
+"""
+    )
+    check_unreachable(v, 7, 1, "else")
+
+
+def test_with_fall_through(v):
+    v.scan(
+        """\
+def foo(a):
+    with a():
+        raise Exception()
+    print(":-(")
+"""
+    )
+    assert v.unreachable_code == []
+
+
+def test_for_fall_through(v):
+    v.scan(
+        """\
+def foo(a):
+    for i in a:
+        raise Exception()
+    print(":-(")
+"""
+    )
+    assert v.unreachable_code == []
+
+
 def test_while_true_else(v):
     v.scan(
         """\
@@ -335,3 +536,15 @@ else:
 """
     )
     check_unreachable(v, 4, 1, "else")
+
+
+def test_while_fall_through(v):
+    v.scan(
+        """\
+def foo(a):
+    while a > 0:
+        return 1
+    print(":-(")
+"""
+    )
+    assert v.unreachable_code == []
