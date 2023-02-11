@@ -1,4 +1,5 @@
 * Add `UnicodeEncodeError` exception handling to `core.py` (milanbalazs, #299).
+* Improve reachability analysis (kreathon, #270).
 
 # 2.7 (2023-01-08)
 
