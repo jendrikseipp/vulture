@@ -514,11 +514,35 @@ def foo(a):
     assert v.unreachable_code == []
 
 
+def test_async_with_fall_through(v):
+    v.scan(
+        """\
+async def foo(a):
+    async with a():
+        raise Exception()
+    print(":-(")
+"""
+    )
+    assert v.unreachable_code == []
+
+
 def test_for_fall_through(v):
     v.scan(
         """\
 def foo(a):
     for i in a:
+        raise Exception()
+    print(":-(")
+"""
+    )
+    assert v.unreachable_code == []
+
+
+def test_async_for_fall_through(v):
+    v.scan(
+        """\
+async def foo(a):
+    async for i in a:
         raise Exception()
     print(":-(")
 """
