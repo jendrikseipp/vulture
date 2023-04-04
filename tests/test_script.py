@@ -62,6 +62,10 @@ def test_exclude():
         return call_vulture(["vulture/", "--exclude", get_csv(excludes)])
 
     assert call_vulture_with_excludes(["core.py", "utils.py"]) == 1
+    assert (
+        call_vulture_with_excludes(["./vulture/core.py", "./vulture/utils.py"])
+        == 0
+    )
     assert call_vulture_with_excludes(glob.glob("vulture/*.py")) == 0
 
 

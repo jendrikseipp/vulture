@@ -264,7 +264,7 @@ class Vulture(ast.NodeVisitor):
         def prepare_pattern(pattern):
             if pattern.startswith("./") is True:
                 pattern = os.path.abspath(pattern)
-                if os.path.isfile(pattern) is False:
+                if pattern.endswith('.py') is False:
                     pattern = f"{pattern}/*"
                 return pattern
             if not any(char in pattern for char in "*?["):
