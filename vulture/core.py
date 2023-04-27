@@ -5,6 +5,7 @@ import pkgutil
 import re
 import string
 import sys
+from asttokens import asttokens
 
 from vulture import lines
 from vulture import noqa
@@ -242,6 +243,10 @@ class Vulture(ast.NodeVisitor):
                 if sys.version_info >= (3, 8)  # type_comments requires 3.8+
                 else ast.parse(code, filename=str(self.filename))
             )
+            tokens = asttokens.ASTTokens(code, parse=True)
+            print("AST without scoping info:")
+            print(ast.dump(node, indent=4))
+            
         except SyntaxError as err:
             handle_syntax_error(err)
         except ValueError as err:
