@@ -246,9 +246,6 @@ class Vulture(ast.NodeVisitor):
                 else ast.parse(code, filename=str(self.filename))
             )
             tokens = asttokens.ASTTokens(code, parse=True)
-            print("AST without scoping info:")
-            print(ast.dump(node, indent=4))
-            
         except SyntaxError as err:
             handle_syntax_error(err)
         except ValueError as err:
@@ -558,11 +555,10 @@ class Vulture(ast.NodeVisitor):
         ):
             self._handle_new_format_string(node.func.value.s)
 
-        if node.func.id=='list':
+        if (isinstance(node.func, ast.Name) and node.func.id == 'list' and len(node.args) > 0 and isinstance(node.args[0], ast.Name)):
             arg = node.args[0].id
             if arg in self.enum_class_vars:
                 self.used_names.update(self.enum_class_vars[arg])
-
 
     def _handle_new_format_string(self, s):
         def is_identifier(name):
@@ -607,7 +603,7 @@ class Vulture(ast.NodeVisitor):
             self._define(
                 self.defined_classes, node.name, node, ignore=_ignore_class
             )
-            if self._subclassesEnum(node): 
+            if self._subclassesEnum(node):
                 newKey = node.name
                 classVariables = []
                 for stmt in node.body:
@@ -624,7 +620,7 @@ class Vulture(ast.NodeVisitor):
             elif isinstance(base, ast.Attribute):
                 if base.value.id.lower() == 'enum':
                     return True
-        return False         
+        return False
 
     def visit_FunctionDef(self, node):
         decorator_names = [
