@@ -220,6 +220,8 @@ class Vulture(ast.NodeVisitor):
         self.code = []
         self.found_dead_code_or_error = False
 
+        self.enum_class_vars = dict()
+
     def scan(self, code, filename=""):
         filename = Path(filename)
         self.code = code.splitlines()
@@ -556,6 +558,12 @@ class Vulture(ast.NodeVisitor):
         ):
             self._handle_new_format_string(node.func.value.s)
 
+        if node.func.id=='list':
+            arg = node.args[0].id
+            if arg in self.enum_class_vars:
+                self.used_names.update(self.enum_class_vars[arg])
+
+
     def _handle_new_format_string(self, s):
         def is_identifier(name):
             return bool(re.match(r"[a-zA-Z_][a-zA-Z0-9_]*", name))
@@ -599,6 +607,24 @@ class Vulture(ast.NodeVisitor):
             self._define(
                 self.defined_classes, node.name, node, ignore=_ignore_class
             )
+            if self._subclassesEnum(node): 
+                newKey = node.name
+                classVariables = []
+                for stmt in node.body:
+                    if isinstance(stmt, ast.Assign):
+                        for target in stmt.targets:
+                            classVariables.append(target.id)
+                self.enum_class_vars[newKey] = classVariables
+
+    def _subclassesEnum(self, node):
+        for base in node.bases:
+            if isinstance(base, ast.Name):
+                if base.id.lower() == 'enum':
+                    return True
+            elif isinstance(base, ast.Attribute):
+                if base.value.id.lower() == 'enum':
+                    return True
+        return False         
 
     def visit_FunctionDef(self, node):
         decorator_names = [
