@@ -219,7 +219,9 @@ class Vulture(ast.NodeVisitor):
         self.code = []
         self.found_dead_code_or_error = False
 
-        self.enum_class_vars = dict() # stores variables defined in enum classes
+        self.enum_class_vars = (
+            dict()
+        )  # stores variables defined in enum classes
 
     def scan(self, code, filename=""):
         filename = Path(filename)
@@ -619,9 +621,9 @@ class Vulture(ast.NodeVisitor):
                 self.enum_class_vars[newKey] = classVariables
 
     def _subclassesEnum(self, node):
-        '''
+        """
         Checks if a class has Enum as a superclass
-        '''
+        """
         for base in node.bases:
             if isinstance(base, ast.Name):
                 if base.id.lower() == "enum":
