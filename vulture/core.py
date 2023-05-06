@@ -5,7 +5,6 @@ import pkgutil
 import re
 import string
 import sys
-from asttokens import asttokens
 
 from vulture import lines
 from vulture import noqa
@@ -245,7 +244,7 @@ class Vulture(ast.NodeVisitor):
                 if sys.version_info >= (3, 8)  # type_comments requires 3.8+
                 else ast.parse(code, filename=str(self.filename))
             )
-            tokens = asttokens.ASTTokens(code, parse=True)
+            print(ast.dump(node, indent=4))
         except SyntaxError as err:
             handle_syntax_error(err)
         except ValueError as err:
@@ -555,7 +554,12 @@ class Vulture(ast.NodeVisitor):
         ):
             self._handle_new_format_string(node.func.value.s)
 
-        if (isinstance(node.func, ast.Name) and node.func.id == 'list' and len(node.args) > 0 and isinstance(node.args[0], ast.Name)):
+        if (
+            isinstance(node.func, ast.Name)
+            and node.func.id == "list"
+            and len(node.args) > 0
+            and isinstance(node.args[0], ast.Name)
+        ):
             arg = node.args[0].id
             if arg in self.enum_class_vars:
                 self.used_names.update(self.enum_class_vars[arg])
@@ -615,10 +619,13 @@ class Vulture(ast.NodeVisitor):
     def _subclassesEnum(self, node):
         for base in node.bases:
             if isinstance(base, ast.Name):
-                if base.id.lower() == 'enum':
+                if (
+                    base.id.lower() == "enum"
+                    or base.id in self.enum_class_vars
+                ):
                     return True
             elif isinstance(base, ast.Attribute):
-                if base.value.id.lower() == 'enum':
+                if base.value.id.lower() == "enum":
                     return True
         return False
 
