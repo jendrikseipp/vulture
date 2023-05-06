@@ -899,3 +899,38 @@ match color:
 
     check(v.unused_classes, [])
     check(v.unused_vars, ["BLUE"])
+
+
+def test_enum_list(v):
+    v.scan(
+        """\
+import enum
+class E(enum.Enum):
+    A = 1
+    B = 2
+
+print(list(E))
+"""
+    )
+
+    check(v.defined_classes, ["E"])
+    check(v.defined_vars, ["A", "B"])
+    check(v.unused_vars, [])
+
+
+def test_enum_for(v):
+    v.scan(
+        """\
+import enum
+class E(enum.Enum):
+    A = 1
+    B = 2
+
+for e in E:
+    print(e)
+"""
+    )
+
+    check(v.defined_classes, ["E"])
+    check(v.defined_vars, ["A", "B", "e"])
+    check(v.unused_vars, [])
