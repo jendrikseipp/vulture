@@ -244,7 +244,6 @@ class Vulture(ast.NodeVisitor):
                 if sys.version_info >= (3, 8)  # type_comments requires 3.8+
                 else ast.parse(code, filename=str(self.filename))
             )
-            print(ast.dump(node, indent=4))
         except SyntaxError as err:
             handle_syntax_error(err)
         except ValueError as err:
@@ -554,9 +553,11 @@ class Vulture(ast.NodeVisitor):
         ):
             self._handle_new_format_string(node.func.value.s)
 
+        # handle enum.Enum members
+        iter_functions = ["list", "tuple", "set"]
         if (
             isinstance(node.func, ast.Name)
-            and node.func.id == "list"
+            and node.func.id in iter_functions
             and len(node.args) > 0
             and isinstance(node.args[0], ast.Name)
         ):
@@ -619,10 +620,7 @@ class Vulture(ast.NodeVisitor):
     def _subclassesEnum(self, node):
         for base in node.bases:
             if isinstance(base, ast.Name):
-                if (
-                    base.id.lower() == "enum"
-                    or base.id in self.enum_class_vars
-                ):
+                if base.id.lower() == "enum":
                     return True
             elif isinstance(base, ast.Attribute):
                 if base.value.id.lower() == "enum":
@@ -694,6 +692,13 @@ class Vulture(ast.NodeVisitor):
 
     def visit_While(self, node):
         self._handle_conditional_node(node, "while")
+
+    def visit_For(self, node):
+        if (
+            isinstance(node.iter, ast.Name)
+            and node.iter.id in self.enum_class_vars
+        ):
+            self.used_names.update(self.enum_class_vars[node.iter.id])
 
     def visit_MatchClass(self, node):
         for kwd_attr in node.kwd_attrs:
