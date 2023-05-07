@@ -1,5 +1,6 @@
 * Add `UnicodeEncodeError` exception handling to `core.py` (milanbalazs, #299).
 * Add whitelist for `Enum` attributes `_name_` and `_value_` (Eugene Toder, #305).
+* Add scoping info to handle false positives with `typing.Protocol` (pm3512, #309).
 
 # 2.7 (2023-01-08)
 
