@@ -595,6 +595,21 @@ class Vulture(ast.NodeVisitor):
             and not node.keywords
         )
 
+    @staticmethod
+    def _is_subclass(node, class_name):
+        """Return True if the node is a subclass of the given class."""
+        if not isinstance(node, ast.ClassDef):
+            return False
+        for superclass in node.bases:
+            if (
+                isinstance(superclass, ast.Name)
+                and superclass.id == class_name
+                or isinstance(superclass, ast.Attribute)
+                and superclass.attr == class_name
+            ):
+                return True
+        return False
+
     def visit_ClassDef(self, node):
         for decorator in node.decorator_list:
             if _match(
@@ -608,7 +623,7 @@ class Vulture(ast.NodeVisitor):
             self._define(
                 self.defined_classes, node.name, node, ignore=_ignore_class
             )
-            if self._subclassesEnum(node):
+            if self._is_subclass(node, "Enum"):
                 newKey = node.name
                 classVariables = []
                 for stmt in node.body:
@@ -616,16 +631,6 @@ class Vulture(ast.NodeVisitor):
                         for target in stmt.targets:
                             classVariables.append(target.id)
                 self.enum_class_vars[newKey] = classVariables
-
-    def _subclassesEnum(self, node):
-        for base in node.bases:
-            if isinstance(base, ast.Name):
-                if base.id.lower() == "enum":
-                    return True
-            elif isinstance(base, ast.Attribute):
-                if base.value.id.lower() == "enum":
-                    return True
-        return False
 
     def visit_FunctionDef(self, node):
         decorator_names = [
