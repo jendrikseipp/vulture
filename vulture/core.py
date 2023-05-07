@@ -600,8 +600,7 @@ class Vulture(ast.NodeVisitor):
     @staticmethod
     def _is_subclass(node, class_name):
         """Return True if the node is a subclass of the given class."""
-        if not isinstance(node, ast.ClassDef):
-            return False
+        assert isinstance(node, ast.ClassDef)
         for superclass in node.bases:
             if (
                 isinstance(superclass, ast.Name)
