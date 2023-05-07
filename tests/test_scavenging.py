@@ -899,3 +899,28 @@ match color:
 
     check(v.unused_classes, [])
     check(v.unused_vars, ["BLUE"])
+
+
+def test_protocol(v):
+    v.scan(
+        """\
+from typing import Protocol, Mapping
+
+class LoggerProtocol(Protocol):
+    def log(
+        self,
+        level: int,
+        msg: str,
+        *args,
+        extra: Mapping[str, object] | None = None
+    ) -> None:
+        ...
+
+    def foo(self) -> None:
+        ...
+"""
+    )
+
+    check(v.unused_vars, [])
+    check(v.unused_funcs, [])
+    check(v.unused_classes, ["LoggerProtocol"])
