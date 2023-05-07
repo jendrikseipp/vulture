@@ -219,6 +219,10 @@ class Vulture(ast.NodeVisitor):
         self.code = []
         self.found_dead_code_or_error = False
 
+        self.enum_class_vars = (
+            dict()
+        )  # stores variables defined in enum classes
+
     def scan(self, code, filename=""):
         filename = Path(filename)
         self.code = code.splitlines()
@@ -551,6 +555,18 @@ class Vulture(ast.NodeVisitor):
         ):
             self._handle_new_format_string(node.func.value.s)
 
+        # handle enum.Enum members
+        iter_functions = ["list", "tuple", "set"]
+        if (
+            isinstance(node.func, ast.Name)
+            and node.func.id in iter_functions
+            and len(node.args) > 0
+            and isinstance(node.args[0], ast.Name)
+        ):
+            arg = node.args[0].id
+            if arg in self.enum_class_vars:
+                self.used_names.update(self.enum_class_vars[arg])
+
     def _handle_new_format_string(self, s):
         def is_identifier(name):
             return bool(re.match(r"[a-zA-Z_][a-zA-Z0-9_]*", name))
@@ -581,6 +597,20 @@ class Vulture(ast.NodeVisitor):
             and not node.keywords
         )
 
+    @staticmethod
+    def _is_subclass(node, class_name):
+        """Return True if the node is a subclass of the given class."""
+        assert isinstance(node, ast.ClassDef)
+        for superclass in node.bases:
+            if (
+                isinstance(superclass, ast.Name)
+                and superclass.id == class_name
+                or isinstance(superclass, ast.Attribute)
+                and superclass.attr == class_name
+            ):
+                return True
+        return False
+
     def visit_ClassDef(self, node):
         for decorator in node.decorator_list:
             if _match(
@@ -594,6 +624,15 @@ class Vulture(ast.NodeVisitor):
             self._define(
                 self.defined_classes, node.name, node, ignore=_ignore_class
             )
+            # if subclasses enum add class variables to enum_class_vars
+            if self._is_subclass(node, "Enum"):
+                newKey = node.name
+                classVariables = []
+                for stmt in node.body:
+                    if isinstance(stmt, ast.Assign):
+                        for target in stmt.targets:
+                            classVariables.append(target.id)
+                self.enum_class_vars[newKey] = classVariables
 
     def visit_FunctionDef(self, node):
         decorator_names = [
@@ -660,6 +699,14 @@ class Vulture(ast.NodeVisitor):
 
     def visit_While(self, node):
         self._handle_conditional_node(node, "while")
+
+    def visit_For(self, node):
+        # Handle iterating over Enum
+        if (
+            isinstance(node.iter, ast.Name)
+            and node.iter.id in self.enum_class_vars
+        ):
+            self.used_names.update(self.enum_class_vars[node.iter.id])
 
     def visit_MatchClass(self, node):
         for kwd_attr in node.kwd_attrs:
