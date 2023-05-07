@@ -219,7 +219,9 @@ class Vulture(ast.NodeVisitor):
         self.code = []
         self.found_dead_code_or_error = False
 
-        self.enum_class_vars = dict()
+        self.enum_class_vars = (
+            dict()
+        )  # stores variables defined in enum classes
 
     def scan(self, code, filename=""):
         filename = Path(filename)
@@ -623,6 +625,7 @@ class Vulture(ast.NodeVisitor):
             self._define(
                 self.defined_classes, node.name, node, ignore=_ignore_class
             )
+            # if subclasses enum add class variables to enum_class_vars
             if self._is_subclass(node, "Enum"):
                 newKey = node.name
                 classVariables = []
@@ -699,6 +702,7 @@ class Vulture(ast.NodeVisitor):
         self._handle_conditional_node(node, "while")
 
     def visit_For(self, node):
+        # Handle iterating over Enum
         if (
             isinstance(node.iter, ast.Name)
             and node.iter.id in self.enum_class_vars
