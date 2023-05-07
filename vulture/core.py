@@ -244,7 +244,6 @@ class Vulture(ast.NodeVisitor):
                 if sys.version_info >= (3, 8)  # type_comments requires 3.8+
                 else ast.parse(code, filename=str(self.filename))
             )
-            self.scope_info = ast_scope.annotate(node)
         except SyntaxError as err:
             handle_syntax_error(err)
         except ValueError as err:
@@ -256,6 +255,11 @@ class Vulture(ast.NodeVisitor):
             )
             self.found_dead_code_or_error = True
         else:
+            # ast_scope doesn't always parse, so need to handle errors.
+            try:
+                self.scope_info = ast_scope.annotate(node)
+            except Exception:
+                self.scope_info = None
             # When parsing type comments, visiting can throw SyntaxError.
             try:
                 self.visit(node)
@@ -508,7 +512,7 @@ class Vulture(ast.NodeVisitor):
     def visit_arg(self, node):
         """Function argument"""
         self._define_variable(node.arg, node, confidence=100)
-        if node in self.scope_info:
+        if self.scope_info and node in self.scope_info:
             scope = self.scope_info[node]
             if isinstance(scope, ast_scope.scope.FunctionScope) and isinstance(
                 scope.parent, ast_scope.scope.ClassScope
@@ -651,7 +655,7 @@ class Vulture(ast.NodeVisitor):
             self._define(
                 self.defined_methods, node.name, node, ignore=_ignore_method
             )
-            if node in self.scope_info:
+            if self.scope_info and node in self.scope_info:
                 scope = self.scope_info[node]
                 if isinstance(scope, ast_scope.scope.ClassScope):
                     method_class = scope.class_node
