@@ -1,3 +1,5 @@
+# 2.8 (2023-08-10)
+
 * Add `UnicodeEncodeError` exception handling to `core.py` (milanbalazs, #299).
 * Add whitelist for `Enum` attributes `_name_` and `_value_` (Eugene Toder, #305).
 
