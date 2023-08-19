@@ -10,6 +10,7 @@ from vulture import lines
 from vulture import noqa
 from vulture import utils
 from vulture.config import make_config
+from vulture.utils import ExitCode
 
 
 DEFAULT_CONFIDENCE = 60
@@ -217,7 +218,7 @@ class Vulture(ast.NodeVisitor):
 
         self.filename = Path()
         self.code = []
-        self.found_dead_code_or_error = False
+        self.found_dead_code_or_error = ExitCode.NoDeadCode
 
     def scan(self, code, filename=""):
         filename = Path(filename)
@@ -232,7 +233,7 @@ class Vulture(ast.NodeVisitor):
                 file=sys.stderr,
                 force=True,
             )
-            self.found_dead_code_or_error = True
+            self.found_dead_code_or_error = ExitCode.InvalidInput
 
         try:
             node = (
@@ -251,7 +252,7 @@ class Vulture(ast.NodeVisitor):
                 file=sys.stderr,
                 force=True,
             )
-            self.found_dead_code_or_error = True
+            self.found_dead_code_or_error = ExitCode.InvalidInput
         else:
             # When parsing type comments, visiting can throw SyntaxError.
             try:
@@ -287,7 +288,7 @@ class Vulture(ast.NodeVisitor):
                     file=sys.stderr,
                     force=True,
                 )
-                self.found_dead_code_or_error = True
+                self.found_dead_code_or_error = ExitCode.InvalidInput
             else:
                 self.scan(module_string, filename=module)
 
@@ -353,7 +354,7 @@ class Vulture(ast.NodeVisitor):
                 else item.get_report(add_size=sort_by_size),
                 force=True,
             )
-            self.found_dead_code_or_error = True
+            self.found_dead_code_or_error = ExitCode.DeadCode
         return self.found_dead_code_or_error
 
     @property

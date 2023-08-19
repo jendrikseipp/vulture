@@ -1,4 +1,5 @@
 import ast
+from enum import IntEnum
 import pathlib
 import sys
 import tokenize
@@ -6,6 +7,13 @@ import tokenize
 
 class VultureInputException(Exception):
     pass
+
+
+class ExitCode(IntEnum):
+    NoDeadCode = 0
+    InvalidInput = 1
+    InvalidCmdlineArguments = 2
+    DeadCode = 3
 
 
 def _safe_eval(node, default):
