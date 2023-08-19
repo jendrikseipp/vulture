@@ -3,6 +3,7 @@
 * Add `UnicodeEncodeError` exception handling to `core.py` (milanbalazs, #299).
 * Add whitelist for `Enum` attributes `_name_` and `_value_` (Eugene Toder, #305).
 * Run tests and add PyPI trove for Python 3.11 (Jendrik Seipp).
+* Add dedicated exit code for when we find dead code
 
 # 2.7 (2023-01-08)
 
