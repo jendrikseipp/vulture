@@ -1,6 +1,6 @@
-# 2.9 (unreleased)
+# 2.9 (2023-08-20)
 * Use exit code 3 when dead code is found (whosayn, #319).
-* Simplify decorator names that are too hard to parse to "@" (Llandy3d and Jendrik Seipp, #284).
+* Treat non-supported decorator names as "@" instead of crashing (Llandy3d and Jendrik Seipp, #284).
 * Drop support for Python 3.6 (Jendrik Seipp).
 
 # 2.8 (2023-08-10)
