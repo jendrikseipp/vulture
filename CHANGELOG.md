@@ -1,4 +1,5 @@
 # 2.9 (2023-08-20)
+
 * Use exit code 3 when dead code is found (whosayn, #319).
 * Treat non-supported decorator names as "@" instead of crashing (Llandy3d and Jendrik Seipp, #284).
 * Drop support for Python 3.6 (Jendrik Seipp).
