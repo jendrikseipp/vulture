@@ -316,9 +316,9 @@ codes.
 | Exit code |                          Description                          |
 | --------- | ------------------------------------------------------------- |
 |     0     | No dead code found                                            |
-|     1     | Dead code found                                               |
 |     1     | Invalid input (file missing, syntax error, wrong encoding)    |
 |     2     | Invalid command line arguments                                |
+|     3     | Dead code found                                               |
 
 ## Similar programs
 

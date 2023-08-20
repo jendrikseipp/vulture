@@ -1,3 +1,6 @@
+# 2.9 (unreleased)
+* Use exit code 3 when dead code is found (whosayn, #319).
+
 # 2.8 (2023-08-10)
 
 * Add `UnicodeEncodeError` exception handling to `core.py` (milanbalazs, #299).

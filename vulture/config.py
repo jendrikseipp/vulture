@@ -9,6 +9,7 @@ import sys
 import toml
 
 from .version import __version__
+from vulture.utils import ExitCode
 
 #: Possible configuration options and their respective defaults
 DEFAULTS = {
@@ -192,7 +193,10 @@ def make_config(argv=None, tomlfile=None):
         else:
             config = {}
 
-    cli_config = _parse_args(argv)
+    try:
+        cli_config = _parse_args(argv)
+    except SystemExit as e:
+        raise SystemExit(ExitCode.InvalidCmdlineArguments) from e
 
     # Overwrite TOML options with CLI options, if given.
     config.update(cli_config)
