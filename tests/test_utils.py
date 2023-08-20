@@ -127,17 +127,46 @@ def test_get_decorator_name_index():
 def bar():
     pass
 """
-    check_decorator_names(code, ["@foo"])
+    check_decorator_names(code, ["@"])
 
 
-def test_get_decorator_name_regression():
+def test_get_decorator_name_end_function_call():
     code = """\
-from prometheus_client import Histogram
+@foo.bar(x, y, z)
+def bar():
+    pass
+"""
+    check_decorator_names(code, ["@foo.bar"])
 
-hist = Histogram("name", "description", labelnames=["label1"])
 
-@hist.labels("place1").time()
+def test_get_decorator_name_middle_function_call():
+    code = """\
+@foo.bar(x, y, z).baz
 def myfunc():
     pass
 """
-    check_decorator_names(code, ["@hist.time"])
+    check_decorator_names(code, ["@"])
+
+
+@pytest.mark.parametrize(
+    "decorated",
+    [
+        ("def foo():"),
+        ("async def foo():"),
+        ("class Foo:"),
+    ],
+)
+def test_get_decorator_name_multiple_callables(decorated):
+    decorated = f"{decorated}\n    pass"
+    code = f"""\
+@foo
+@bar.prop
+@z.func("hi").bar().k.foo
+@k("hello").doo("world").x
+@k.hello("world")
+{decorated}
+"""
+    check_decorator_names(
+        code,
+        ["@foo", "@bar.prop", "@", "@", "@k.hello"],
+    )

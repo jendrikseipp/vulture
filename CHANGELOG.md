@@ -1,5 +1,6 @@
 # 2.9 (unreleased)
 * Use exit code 3 when dead code is found (whosayn, #319).
+* Simplify decorator names that are too hard to parse to "@" (Jendrik Seipp, #284).
 
 # 2.8 (2023-08-10)
 
