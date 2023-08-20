@@ -1,6 +1,7 @@
 import ast
 import os
 import pathlib
+import sys
 
 import pytest
 
@@ -121,15 +122,6 @@ class Foo:
     check_decorator_names(code, ["@foo", "@bar.yz"])
 
 
-def test_get_decorator_name_index():
-    code = """\
-@foo[2]
-def bar():
-    pass
-"""
-    check_decorator_names(code, ["@"])
-
-
 def test_get_decorator_name_end_function_call():
     code = """\
 @foo.bar(x, y, z)
@@ -139,15 +131,9 @@ def bar():
     check_decorator_names(code, ["@foo.bar"])
 
 
-def test_get_decorator_name_middle_function_call():
-    code = """\
-@foo.bar(x, y, z).baz
-def myfunc():
-    pass
-"""
-    check_decorator_names(code, ["@"])
-
-
+@pytest.mark.skipif(
+    sys.version_info < (3, 9), reason="requires Python 3.9 or higher"
+)
 @pytest.mark.parametrize(
     "decorated",
     [
@@ -164,9 +150,10 @@ def test_get_decorator_name_multiple_callables(decorated):
 @z.func("hi").bar().k.foo
 @k("hello").doo("world").x
 @k.hello("world")
+@foo[2]
 {decorated}
 """
     check_decorator_names(
         code,
-        ["@foo", "@bar.prop", "@", "@", "@k.hello"],
+        ["@foo", "@bar.prop", "@", "@", "@k.hello", "@"],
     )
