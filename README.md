@@ -18,7 +18,7 @@ tool for higher code quality.
 * tested: tests itself and has complete test coverage
 * complements pyflakes and has the same output syntax
 * sorts unused classes and functions by size with `--sort-by-size`
-* supports Python \>= 3.6
+* supports Python \>= 3.7
 
 ## Installation
 
@@ -160,8 +160,6 @@ from __future__ import annotations
 def foo(arg: Sequence):
     ...
 ```
-
-if you're using Python 3.7+.
 
 
 ## Configuration
