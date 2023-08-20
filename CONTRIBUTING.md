@@ -48,7 +48,7 @@ install in development mode:
 
     $ pip install --editable .
 
-### Installing tox
+### Installing test tools
 
 Vulture uses tox for testing. You can read more about it in the [tox
 documentation](https://tox.readthedocs.io).
@@ -56,6 +56,12 @@ documentation](https://tox.readthedocs.io).
 To install `tox`, run:
 
     $ pip install tox
+
+It's also recommended that you use `pre-commit` to catch style errors
+early:
+
+    $ pip install pre-commit
+    $ pre-commit install
 
 ## Coding standards
 

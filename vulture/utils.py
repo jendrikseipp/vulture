@@ -1,4 +1,5 @@
 import ast
+from enum import IntEnum
 import pathlib
 import sys
 import tokenize
@@ -6,6 +7,13 @@ import tokenize
 
 class VultureInputException(Exception):
     pass
+
+
+class ExitCode(IntEnum):
+    NoDeadCode = 0
+    InvalidInput = 1
+    InvalidCmdlineArguments = 2
+    DeadCode = 3
 
 
 def _safe_eval(node, default):
@@ -67,9 +75,9 @@ def get_decorator_name(decorator):
 def get_modules(paths):
     """Retrieve Python files to check.
 
-    Loop over all given paths, abort if any ends with .pyc and add collect
-    the other given files (even those not ending with .py) and all .py
-    files under the given directories.
+    Loop over all given paths, abort if any ends with .pyc, add the other given
+    files (even those not ending with .py) and collect all .py files under the
+    given directories.
 
     """
     modules = []

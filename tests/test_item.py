@@ -16,7 +16,7 @@ class Foo:
 """
     )
     for item in v.get_unused_code():
-        assert repr(item) == f"'{item.name}'"
+        assert repr(item) == f"{item.name!r}"
 
 
 def test_item_attr(v):

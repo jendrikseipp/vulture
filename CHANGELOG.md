@@ -1,4 +1,18 @@
-* Add whitelist for `socketserver.TCPServer.allow_reuse_address` (Ben Elliston)
+# 2.9 (unreleased)
+* Use exit code 3 when dead code is found (whosayn, #319).
+
+# 2.8 (2023-08-10)
+
+* Add `UnicodeEncodeError` exception handling to `core.py` (milanbalazs, #299).
+* Add whitelist for `Enum` attributes `_name_` and `_value_` (Eugene Toder, #305).
+* Run tests and add PyPI trove for Python 3.11 (Jendrik Seipp).
+
+# 2.7 (2023-01-08)
+
+* Ignore `setup_module()`, `teardown_module()`, etc. in pytest `test_*.py` files (Jendrik Seipp).
+* Add whitelist for `socketserver.TCPServer.allow_reuse_address` (Ben Elliston).
+* Clarify that `--exclude` patterns are matched against absolute paths (Jendrik Seipp, #260).
+* Fix example in README file (Jendrik Seipp, #272).
 
 # 2.6 (2022-09-19)
 

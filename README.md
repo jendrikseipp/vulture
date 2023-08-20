@@ -35,13 +35,26 @@ The provided arguments may be Python files or directories. For each
 directory Vulture analyzes all contained
 <span class="title-ref">\*.py</span> files.
 
-Vulture assigns each chunk of dead code a confidence value. A confidence
-value of 100% means that the code will never be executed. Values below
-100% are very rough estimates (based on the type of code chunk) for how
-likely it is that the code is unused.
-
 After you have found and deleted dead code, run Vulture again, because
 it may discover more dead code.
+
+## Types of unused code
+
+In addition to finding unused functions, classes, etc., Vulture can detect
+unreachable code. Each chunk of dead code is assigned a *confidence value*
+between 60% and 100%, where a value of 100% signals that it is certain that the
+code won't be executed. Values below 100% are *very rough* estimates (based on
+the type of code chunk) for how likely it is that the code is unused.
+
+| Code type | Confidence value |
+| ------------------- | -- |
+| function/method/class argument, unreachable code | 100% |
+| import | 90% |
+| attribute, class, function, method, property, variable | 60% |
+
+You can use the `--min-confidence` flag to set the minimum confidence
+for code to be reported as unused. Use `--min-confidence 100` to only
+report code that is guaranteed to be unused within the analyzed files.
 
 ## Handling false positives
 
@@ -49,7 +62,7 @@ When Vulture incorrectly reports chunks of code as unused, you have
 several options for suppressing the false positives. If fixing your false
 positives could benefit other users as well, please file an issue report.
 
-**Whitelists**
+#### Whitelists
 
 The recommended option is to add used code that is reported as unused to a
 Python module and add it to the list of scanned paths. To obtain such a
@@ -65,12 +78,13 @@ make some modifications.
 We collect whitelists for common Python modules and packages in
 `vulture/whitelists/` (pull requests are welcome).
 
-**Ignoring files**
+#### Ignoring files
 
-If you want to ignore a whole file or directory, use the `--exclude`
-parameter (e.g., `--exclude *settings.py,docs/`).
+If you want to ignore a whole file or directory, use the `--exclude` parameter
+(e.g., `--exclude "*settings.py,*/docs/*.py,*/test_*.py,*/.venv/*.py"`). The
+exclude patterns are matched against absolute paths.
 
-**Flake8 noqa comments**
+#### Flake8 noqa comments
 
 <!-- Hide noqa docs until we decide whether we want to support it.
 Another way of ignoring errors is to annotate the line causing the false
@@ -90,7 +104,7 @@ variables (`# noqa: F841`). However, we recommend using whitelists instead
 of `noqa` comments, since `noqa` comments add visual noise to the code and
 make it harder to read.
 
-**Ignoring names**
+#### Ignoring names
 
 You can use `--ignore-names foo*,ba[rz]` to let Vulture ignore all names
 starting with `foo` and the names `bar` and `baz`. Additionally, the
@@ -105,7 +119,7 @@ automatically checked for syntactic correctness when passed to Vulture
 and often you can even pass them to your Python interpreter and let it
 check that all whitelisted code actually still exists in your project.
 
-**Marking unused variables**
+#### Marking unused variables
 
 There are situations where you can't just remove unused variables, e.g.,
 in function signatures. The recommended solution is to use the `del`
@@ -123,19 +137,17 @@ Vulture will also ignore all variables that start with an underscore, so
 you can use `_x, y = get_pos()` to mark unused tuple assignments or
 function arguments, e.g., `def foo(x, _y)`.
 
-**Minimum confidence**
+#### Minimum confidence
 
-You can use the `--min-confidence` flag to set the minimum confidence
-for code to be reported as unused. Use `--min-confidence 100` to only
-report code that is guaranteed to be unused within the analyzed files.
+Raise the minimum [confidence value](#types-of-unused-code) with the `--min-confidence` flag.
 
-**Unreachable code**
+#### Unreachable code
 
 If Vulture complains about code like `if False:`, you can use a Boolean
 flag `debug = False` and write `if debug:` instead. This makes the code
 more readable and silences Vulture.
 
-**Forward references for type annotations**
+#### Forward references for type annotations
 
 See [#216](https://github.com/jendrikseipp/vulture/issues/216). For
 example, instead of `def foo(arg: "Sequence"): ...`, we recommend using
@@ -163,7 +175,7 @@ Example Config:
 
 ``` toml
 [tool.vulture]
-exclude = ["file*.py", "dir/"]
+exclude = ["*file*.py", "dir/"]
 ignore_decorators = ["@app.route", "@require_*"]
 ignore_names = ["visit_*", "do_*"]
 make_whitelist = true
@@ -223,7 +235,8 @@ class Greeter:
 def hello_world():
     message = "Hello, world!"
     greeter = Greeter()
-    greet_func = getattr(greeter, "greet")
+    func_name = "greet"
+    greet_func = getattr(greeter, func_name)
     greet_func()
 
 if __name__ == "__main__":
@@ -240,8 +253,8 @@ results in the following output:
     dead_code.py:4: unused function 'greet' (60% confidence)
     dead_code.py:8: unused variable 'message' (60% confidence)
 
-Vulture correctly reports "os" and "message" as unused, but it fails to
-detect that "greet" is actually used. The recommended method to deal
+Vulture correctly reports `os` and `message` as unused but it fails to
+detect that `greet` is actually used. The recommended method to deal
 with false positives like this is to create a whitelist Python file.
 
 **Preparing whitelists**
@@ -303,9 +316,9 @@ codes.
 | Exit code |                          Description                          |
 | --------- | ------------------------------------------------------------- |
 |     0     | No dead code found                                            |
-|     1     | Dead code found                                               |
 |     1     | Invalid input (file missing, syntax error, wrong encoding)    |
 |     2     | Invalid command line arguments                                |
+|     3     | Dead code found                                               |
 
 ## Similar programs
 

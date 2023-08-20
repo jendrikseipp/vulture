@@ -9,6 +9,7 @@ import sys
 import toml
 
 from .version import __version__
+from vulture.utils import ExitCode
 
 #: Possible configuration options and their respective defaults
 DEFAULTS = {
@@ -109,9 +110,10 @@ def _parse_args(args=None):
         metavar="PATTERNS",
         type=csv,
         default=missing,
-        help=f"Comma-separated list of paths to ignore (e.g.,"
-        f' "*settings.py,docs/*.py"). {glob_help} A PATTERN without glob'
-        f" wildcards is treated as *PATTERN*.",
+        help=f"Comma-separated list of path patterns to ignore (e.g.,"
+        f' "*settings.py,docs,*/test_*.py,venv"). {glob_help} A PATTERN'
+        f" without glob wildcards is treated as *PATTERN*. Patterns are"
+        f" matched against absolute paths.",
     )
     parser.add_argument(
         "--ignore-decorators",
@@ -191,7 +193,10 @@ def make_config(argv=None, tomlfile=None):
         else:
             config = {}
 
-    cli_config = _parse_args(argv)
+    try:
+        cli_config = _parse_args(argv)
+    except SystemExit as e:
+        raise SystemExit(ExitCode.InvalidCmdlineArguments) from e
 
     # Overwrite TOML options with CLI options, if given.
     config.update(cli_config)

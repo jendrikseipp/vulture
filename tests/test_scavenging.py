@@ -3,6 +3,7 @@ import sys
 import pytest
 
 from . import check, v
+from vulture.utils import ExitCode
 
 assert v  # Silence pyflakes.
 
@@ -476,6 +477,18 @@ class Bar(object):
 def test_function_names_in_test_file(v):
     v.scan(
         """\
+def setup_module(module):
+    module
+
+def teardown_module(module):
+    module
+
+def setup_function(function):
+    function
+
+def teardown_function(function):
+    function
+
 def test_func():
     pass
 
@@ -483,7 +496,19 @@ def other_func():
     pass
 
 class TestClass:
-    pass
+    @classmethod
+    def setup_class(cls):
+        cls
+
+    @classmethod
+    def teardown_class(cls):
+        pass
+
+    def setup_method(self, method):
+        method
+
+    def teardown_method(self, method):
+        pass
 
 class BasicTestCase:
     pass
@@ -496,11 +521,26 @@ class OtherClass:
     check(v.defined_attrs, [])
     check(v.defined_classes, ["OtherClass"])
     check(v.defined_funcs, ["other_func"])
-    check(v.defined_vars, [])
-    check(v.used_names, [])
+    check(v.defined_methods, [])
+    check(
+        v.defined_vars,
+        [
+            "cls",
+            "cls",
+            "function",
+            "function",
+            "method",
+            "method",
+            "module",
+            "module",
+        ],
+    )
+    check(v.used_names, ["classmethod", "cls", "function", "method", "module"])
     check(v.unused_attrs, [])
     check(v.unused_classes, ["OtherClass"])
     check(v.unused_funcs, ["other_func"])
+    check(v.unused_methods, [])
+    check(v.unused_vars, [])
 
 
 def test_async_function_name_in_test_file(v):
@@ -726,7 +766,7 @@ for x in []:  # type: Any
         check(v.unused_imports, ["Any", "Dict", "List", "Text", "Tuple"])
     else:
         check(v.unused_imports, [])
-        assert not v.found_dead_code_or_error
+        assert v.exit_code == ExitCode.NoDeadCode
 
 
 def test_invalid_type_comment(v):
@@ -740,9 +780,9 @@ bad()
     )
 
     if sys.version_info < (3, 8):
-        assert not v.found_dead_code_or_error
+        assert v.exit_code == ExitCode.NoDeadCode
     else:
-        assert v.found_dead_code_or_error
+        assert v.exit_code == ExitCode.InvalidInput
 
 
 def test_unused_args_with_del(v):
