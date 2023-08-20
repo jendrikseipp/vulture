@@ -64,11 +64,14 @@ def format_path(path):
 def get_decorator_name(decorator):
     if isinstance(decorator, ast.Call):
         decorator = decorator.func
-    parts = []
-    while isinstance(decorator, ast.Attribute):
-        parts.append(decorator.attr)
-        decorator = decorator.value
-    parts.append(decorator.id)
+    try:
+        parts = []
+        while isinstance(decorator, ast.Attribute):
+            parts.append(decorator.attr)
+            decorator = decorator.value
+        parts.append(decorator.id)
+    except AttributeError:
+        parts = []
     return "@" + ".".join(reversed(parts))
 
 

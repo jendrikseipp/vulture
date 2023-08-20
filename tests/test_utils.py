@@ -1,6 +1,7 @@
 import ast
 import os
 import pathlib
+import sys
 
 import pytest
 
@@ -119,3 +120,40 @@ class Foo:
     pass
 """
     check_decorator_names(code, ["@foo", "@bar.yz"])
+
+
+def test_get_decorator_name_end_function_call():
+    code = """\
+@foo.bar(x, y, z)
+def bar():
+    pass
+"""
+    check_decorator_names(code, ["@foo.bar"])
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 9), reason="requires Python 3.9 or higher"
+)
+@pytest.mark.parametrize(
+    "decorated",
+    [
+        ("def foo():"),
+        ("async def foo():"),
+        ("class Foo:"),
+    ],
+)
+def test_get_decorator_name_multiple_callables(decorated):
+    decorated = f"{decorated}\n    pass"
+    code = f"""\
+@foo
+@bar.prop
+@z.func("hi").bar().k.foo
+@k("hello").doo("world").x
+@k.hello("world")
+@foo[2]
+{decorated}
+"""
+    check_decorator_names(
+        code,
+        ["@foo", "@bar.prop", "@", "@", "@k.hello", "@"],
+    )
