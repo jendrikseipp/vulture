@@ -4,12 +4,10 @@ command-line arguments or the pyproject.toml file.
 """
 import argparse
 import pathlib
-import sys
 
 import toml
 
 from .version import __version__
-from vulture.utils import ExitCode
 
 #: Possible configuration options and their respective defaults
 DEFAULTS = {
@@ -24,19 +22,24 @@ DEFAULTS = {
 }
 
 
+class InputError(Exception):
+    def __init__(self, message):
+        self.message = message
+
+
 def _check_input_config(data):
     """
     Checks the types of the values in *data* against the expected types of
-    config-values. If a value is of the wrong type it will raise a SystemExit.
+    config-values. If a value has the wrong type, raise an InputError.
     """
     for key, value in data.items():
         if key not in DEFAULTS:
-            sys.exit(f"Unknown configuration key: {key}")
+            raise InputError(f"Unknown configuration key: {key}")
         # The linter suggests to use "isinstance" here but this fails to
         # detect the difference between `int` and `bool`.
         if type(value) is not type(DEFAULTS[key]):  # noqa: E721
             expected_type = type(DEFAULTS[key]).__name__
-            sys.exit(f"Data type for {key} must be {expected_type!r}")
+            raise InputError(f"Data type for {key} must be {expected_type!r}")
 
 
 def _check_output_config(config):
@@ -44,10 +47,10 @@ def _check_output_config(config):
     Run sanity checks on the generated config after all parsing and
     preprocessing is done.
 
-    Exit the application if an error is encountered.
+    Raise InputError if an error is encountered.
     """
     if not config["paths"]:
-        sys.exit("Please pass at least one file or directory")
+        raise InputError("Please pass at least one file or directory")
 
 
 def _parse_toml(infile):
@@ -177,6 +180,10 @@ def make_config(argv=None, tomlfile=None):
         auto-detect an existing ``pyproject.toml`` file and exists solely for
         unit-testing.
     """
+
+    # Parse CLI first to skip sanity checks when --version or --help is given.
+    cli_config = _parse_args(argv)
+
     # If we loaded data from a TOML file, we want to print this out on stdout
     # in verbose mode so we need to keep the value around.
     detected_toml_path = ""
@@ -192,11 +199,6 @@ def make_config(argv=None, tomlfile=None):
             detected_toml_path = str(toml_path)
         else:
             config = {}
-
-    try:
-        cli_config = _parse_args(argv)
-    except SystemExit as e:
-        raise SystemExit(ExitCode.InvalidCmdlineArguments) from e
 
     # Overwrite TOML options with CLI options, if given.
     config.update(cli_config)

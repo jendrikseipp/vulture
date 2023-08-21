@@ -9,7 +9,7 @@ import sys
 from vulture import lines
 from vulture import noqa
 from vulture import utils
-from vulture.config import make_config
+from vulture.config import InputError, make_config
 from vulture.utils import ExitCode
 
 
@@ -727,7 +727,12 @@ class Vulture(ast.NodeVisitor):
 
 
 def main():
-    config = make_config()
+    try:
+        config = make_config()
+    except InputError as e:
+        print(e, file=sys.stderr)
+        sys.exit(ExitCode.InvalidCmdlineArguments)
+
     vulture = Vulture(
         verbose=config["verbose"],
         ignore_names=config["ignore_names"],
