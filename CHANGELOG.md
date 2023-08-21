@@ -1,3 +1,7 @@
+# 2.9.1 (2023-08-21)
+
+* Use exit code 0 for `--help` and `--version` again (Jendrik Seipp, #321).
+
 # 2.9 (2023-08-20)
 
 * Use exit code 3 when dead code is found (whosayn, #319).
