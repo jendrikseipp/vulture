@@ -3,26 +3,9 @@ import ast
 from vulture import lines
 
 
-def get_last_line_number_slow(node):
-    """
-    A slower, but also simpler and slightly more accurate version of
-    get_last_line_number().
-
-    It traverses all descendants of node and records the highest line
-    number seen.
-
-    This code is 1.6 times slower than count_lines() on the Python
-    subset of tensorflow. It reports the same sizes for all test cases
-    and the functions and classes in tensorflow.
-
-    """
-    return max(getattr(node, "lineno", -1) for node in ast.walk(node))
-
-
 def count_lines(node):
     """Estimate the number of lines of the given AST node."""
     last_lineno = lines.get_last_line_number(node)
-    assert get_last_line_number_slow(node) == last_lineno
     return last_lineno - lines.get_first_line_number(node) + 1
 
 
@@ -209,7 +192,7 @@ class Foo:
             'long'
             'string')
 """
-    check_size(example, 4)
+    check_size(example, 6)
 
 
 # We currently cannot handle code ending with comment lines.
@@ -302,7 +285,7 @@ class Foo:
     [a, b
     ]
 """
-    check_size(example, 2)
+    check_size(example, 3)
 
 
 def test_size_ellipsis():
