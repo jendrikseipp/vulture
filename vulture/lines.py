@@ -1,5 +1,4 @@
 import ast
-import sys
 
 
 def _get_last_child_with_lineno(node):
@@ -76,8 +75,7 @@ def get_first_line_number(node):
     also don't need it's decorators), we return the lineno of the first
     decorator, if there are any.
     """
-    if sys.version_info >= (3, 8):
-        decorators = getattr(node, "decorator_list", [])
-        if decorators:
-            return decorators[0].lineno
+    decorators = getattr(node, "decorator_list", [])
+    if decorators:
+        return decorators[0].lineno
     return node.lineno
