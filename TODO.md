@@ -7,8 +7,6 @@
     * https://github.com/jendrikseipp/vulture/issues/249
     * https://github.com/jendrikseipp/vulture/issues/315
   Use these as test cases.
-* Use end_lineno and end_col_offset attributes once we require Python
-  3.8+.
 * Honor (speaking) pylint error codes (e.g., # pylint:
   disable=unused-import): unused-import, unused-variable, unused-argument,
   possibly-unused-variable and unreachable-code. See

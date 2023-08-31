@@ -477,14 +477,13 @@ class Vulture(ast.NodeVisitor):
         if ignored(first_lineno):
             self._log(f'Ignoring {typ} "{name}"')
         else:
-            last_lineno = lines.get_last_line_number(last_node)
             collection.append(
                 Item(
                     name,
                     typ,
                     self.filename,
                     first_lineno,
-                    last_lineno,
+                    lines.get_last_line_number(last_node),
                     message=message,
                     confidence=confidence,
                 )
