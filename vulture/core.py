@@ -236,12 +236,8 @@ class Vulture(ast.NodeVisitor):
             self.exit_code = ExitCode.InvalidInput
 
         try:
-            node = (
-                ast.parse(
-                    code, filename=str(self.filename), type_comments=True
-                )
-                if sys.version_info >= (3, 8)  # type_comments requires 3.8+
-                else ast.parse(code, filename=str(self.filename))
+            node = ast.parse(
+                code, filename=str(self.filename), type_comments=True
             )
         except SyntaxError as err:
             handle_syntax_error(err)

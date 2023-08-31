@@ -38,7 +38,6 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
@@ -49,7 +48,7 @@ setuptools.setup(
     ],
     install_requires=["toml"],
     entry_points={"console_scripts": ["vulture = vulture.core:main"]},
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     packages=setuptools.find_packages(exclude=["tests"]),
     package_data={"vulture": ["whitelists/*.py"]},
 )
