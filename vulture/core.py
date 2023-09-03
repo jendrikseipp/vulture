@@ -222,8 +222,8 @@ class Vulture(ast.NodeVisitor):
         self.code = []
         self.exit_code = ExitCode.NoDeadCode
 
-        reporter = partial(self._define, collection=self.unreachable_code)
-        self.reachability = Reachability(reporter=reporter)
+        report = partial(self._define, collection=self.unreachable_code)
+        self.reachability = Reachability(report=report)
 
     def scan(self, code, filename=""):
         filename = Path(filename)

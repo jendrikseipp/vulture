@@ -2,8 +2,8 @@ import ast
 
 
 class Reachability:
-    def __init__(self, reporter):
-        self.reporter = reporter
+    def __init__(self, report):
+        self.report = report
         self.no_fall_through_nodes = set()
 
     def reset(self):
@@ -45,7 +45,7 @@ class Reachability:
                     next_sibling = None
                 if next_sibling is not None:
                     class_name = statement.__class__.__name__.lower()
-                    self.reporter(
+                    self.report(
                         name=class_name,
                         first_node=next_sibling,
                         last_node=statements[-1],
@@ -89,7 +89,7 @@ class Reachability:
 
         if not try_can_fall_through and has_else:
             else_body = node.orelse
-            self.reporter(
+            self.report(
                 name="else",
                 first_node=else_body[0],
                 last_node=else_body[-1],
