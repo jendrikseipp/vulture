@@ -9,7 +9,8 @@ import sys
 from vulture import lines
 from vulture import noqa
 from vulture import utils
-from vulture.config import make_config
+from vulture.config import InputError, make_config
+from vulture.utils import ExitCode
 
 
 DEFAULT_CONFIDENCE = 60
@@ -219,7 +220,7 @@ class Vulture(ast.NodeVisitor):
 
         self.filename = Path()
         self.code = []
-        self.found_dead_code_or_error = False
+        self.exit_code = ExitCode.NoDeadCode
 
     def scan(self, code, filename=""):
         filename = Path(filename)
@@ -238,15 +239,11 @@ class Vulture(ast.NodeVisitor):
                 file=sys.stderr,
                 force=True,
             )
-            self.found_dead_code_or_error = True
+            self.exit_code = ExitCode.InvalidInput
 
         try:
-            node = (
-                ast.parse(
-                    code, filename=str(self.filename), type_comments=True
-                )
-                if sys.version_info >= (3, 8)  # type_comments requires 3.8+
-                else ast.parse(code, filename=str(self.filename))
+            node = ast.parse(
+                code, filename=str(self.filename), type_comments=True
             )
         except SyntaxError as err:
             handle_syntax_error(err)
@@ -257,7 +254,7 @@ class Vulture(ast.NodeVisitor):
                 file=sys.stderr,
                 force=True,
             )
-            self.found_dead_code_or_error = True
+            self.exit_code = ExitCode.InvalidInput
         else:
             # When parsing type comments, visiting can throw SyntaxError.
             try:
@@ -293,7 +290,7 @@ class Vulture(ast.NodeVisitor):
                     file=sys.stderr,
                     force=True,
                 )
-                self.found_dead_code_or_error = True
+                self.exit_code = ExitCode.InvalidInput
             else:
                 self.scan(module_string, filename=module)
 
@@ -359,8 +356,8 @@ class Vulture(ast.NodeVisitor):
                 else item.get_report(add_size=sort_by_size),
                 force=True,
             )
-            self.found_dead_code_or_error = True
-        return self.found_dead_code_or_error
+            self.exit_code = ExitCode.DeadCode
+        return self.exit_code
 
     @property
     def unused_classes(self):
@@ -486,14 +483,13 @@ class Vulture(ast.NodeVisitor):
         if ignored(first_lineno):
             self._log(f'Ignoring {typ} "{name}"')
         else:
-            last_lineno = lines.get_last_line_number(last_node)
             collection.append(
                 Item(
                     name,
                     typ,
                     self.filename,
                     first_lineno,
-                    last_lineno,
+                    lines.get_last_line_number(last_node),
                     message=message,
                     confidence=confidence,
                 )
@@ -842,7 +838,12 @@ class Vulture(ast.NodeVisitor):
 
 
 def main():
-    config = make_config()
+    try:
+        config = make_config()
+    except InputError as e:
+        print(e, file=sys.stderr)
+        sys.exit(ExitCode.InvalidCmdlineArguments)
+
     vulture = Vulture(
         verbose=config["verbose"],
         ignore_names=config["ignore_names"],

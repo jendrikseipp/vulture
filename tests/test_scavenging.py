@@ -3,6 +3,7 @@ import sys
 import pytest
 
 from . import check, v
+from vulture.utils import ExitCode
 
 assert v  # Silence pyflakes.
 
@@ -761,11 +762,8 @@ for x in []:  # type: Any
 """
     )
 
-    if sys.version_info < (3, 8):
-        check(v.unused_imports, ["Any", "Dict", "List", "Text", "Tuple"])
-    else:
-        check(v.unused_imports, [])
-        assert not v.found_dead_code_or_error
+    check(v.unused_imports, [])
+    assert v.exit_code == ExitCode.NoDeadCode
 
 
 def test_invalid_type_comment(v):
@@ -778,10 +776,7 @@ bad()
 """
     )
 
-    if sys.version_info < (3, 8):
-        assert not v.found_dead_code_or_error
-    else:
-        assert v.found_dead_code_or_error
+    assert v.exit_code == ExitCode.InvalidInput
 
 
 def test_unused_args_with_del(v):

@@ -18,7 +18,6 @@ tool for higher code quality.
 * tested: tests itself and has complete test coverage
 * complements pyflakes and has the same output syntax
 * sorts unused classes and functions by size with `--sort-by-size`
-* supports Python \>= 3.6
 
 ## Installation
 
@@ -111,7 +110,9 @@ starting with `foo` and the names `bar` and `baz`. Additionally, the
 `--ignore-decorators` option can be used to ignore functions decorated
 with the given decorator. This is helpful for example in Flask projects,
 where you can use `--ignore-decorators "@app.route"` to ignore all
-functions with the `@app.route` decorator.
+functions with the `@app.route` decorator. Note that Vulture simplifies
+decorators it cannot parse: `@foo.bar(x, y)` becomes "@foo.bar" and
+`@foo.bar(x, y).baz` becomes "@" internally.
 
 We recommend using whitelists instead of `--ignore-names` or
 `--ignore-decorators` whenever possible, since whitelists are
@@ -158,8 +159,6 @@ from __future__ import annotations
 def foo(arg: Sequence):
     ...
 ```
-
-if you're using Python 3.7+.
 
 
 ## Configuration
@@ -316,9 +315,9 @@ codes.
 | Exit code |                          Description                          |
 | --------- | ------------------------------------------------------------- |
 |     0     | No dead code found                                            |
-|     1     | Dead code found                                               |
 |     1     | Invalid input (file missing, syntax error, wrong encoding)    |
 |     2     | Invalid command line arguments                                |
+|     3     | Dead code found                                               |
 
 ## Similar programs
 

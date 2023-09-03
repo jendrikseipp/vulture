@@ -1,6 +1,24 @@
+# 2.10 (unreleased)
+
+* Drop support for Python 3.7 (Jendrik Seipp, #323).
+* Use `end_lineno` AST attribute to obtain more accurate line counts (Jendrik Seipp).
+* Improve reachability analysis (kreathon, #270).
+
+# 2.9.1 (2023-08-21)
+
+* Use exit code 0 for `--help` and `--version` again (Jendrik Seipp, #321).
+
+# 2.9 (2023-08-20)
+
+* Use exit code 3 when dead code is found (whosayn, #319).
+* Treat non-supported decorator names as "@" instead of crashing (Llandy3d and Jendrik Seipp, #284).
+* Drop support for Python 3.6 (Jendrik Seipp).
+
+# 2.8 (2023-08-10)
+
 * Add `UnicodeEncodeError` exception handling to `core.py` (milanbalazs, #299).
 * Add whitelist for `Enum` attributes `_name_` and `_value_` (Eugene Toder, #305).
-* Improve reachability analysis (kreathon, #270).
+* Run tests and add PyPI trove for Python 3.11 (Jendrik Seipp).
 
 # 2.7 (2023-01-08)
 

@@ -13,6 +13,7 @@ from vulture.config import (
     _parse_args,
     _parse_toml,
     make_config,
+    InputError,
 )
 
 
@@ -173,7 +174,7 @@ def test_invalid_config_options_output():
     If the config file contains unknown options we want to abort.
     """
 
-    with pytest.raises(SystemExit):
+    with pytest.raises(InputError):
         _check_input_config({"unknown_key_1": 1})
 
 
@@ -185,7 +186,7 @@ def test_incompatible_option_type(key, value):
     wrong_types = {int, str, list, bool} - {type(value)}
     for wrong_type in wrong_types:
         test_value = wrong_type()
-        with pytest.raises(SystemExit):
+        with pytest.raises(InputError):
             _check_input_config({key: test_value})
 
 
@@ -193,5 +194,5 @@ def test_missing_paths():
     """
     If the script is run without any paths, we want to abort.
     """
-    with pytest.raises(SystemExit):
+    with pytest.raises(InputError):
         make_config([])

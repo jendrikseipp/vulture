@@ -1,7 +1,12 @@
 # TODOs
 
-* Use end_lineno and end_col_offset attributes once we require Python
-  3.8+.
+* Add --ignore-attributes-for-classes option. When visiting such a class,
+  mark all its attributes as used. Fixes (partly):
+    * https://github.com/jendrikseipp/vulture/issues/309
+    * https://github.com/jendrikseipp/vulture/issues/264
+    * https://github.com/jendrikseipp/vulture/issues/249
+    * https://github.com/jendrikseipp/vulture/issues/315
+  Use these as test cases.
 * Honor (speaking) pylint error codes (e.g., # pylint:
   disable=unused-import): unused-import, unused-variable, unused-argument,
   possibly-unused-variable and unreachable-code. See
