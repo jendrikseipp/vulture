@@ -12,18 +12,22 @@ class Reachability:
     def visit(self, node):
         if isinstance(node, (ast.Break, ast.Continue, ast.Return, ast.Raise)):
             self._mark_as_no_fall_through(node)
-        elif isinstance(node, ast.Module):
-            self._handle_reachability_module(node)
-        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            self._handle_reachability_functiondef(node)
+        elif isinstance(
+            node,
+            (
+                ast.Module,
+                ast.FunctionDef,
+                ast.AsyncFunctionDef,
+                ast.While,
+                ast.For,
+                ast.AsyncFor,
+                ast.With,
+                ast.AsyncWith,
+            ),
+        ):
+            self._can_fall_through_statements_analysis(node.body)
         elif isinstance(node, ast.If):
             self._handle_reachability_if(node)
-        elif isinstance(node, ast.While):
-            self._handle_reachability_while(node)
-        elif isinstance(node, (ast.For, ast.AsyncFor)):
-            self._handle_reachability_for(node)
-        elif isinstance(node, (ast.With, ast.AsyncWith)):
-            self._handle_reachability_with(node)
         elif isinstance(node, ast.Try):
             self._handle_reachability_try(node)
 
@@ -108,18 +112,3 @@ class Reachability:
 
         if not statement_can_fall_through:
             self._mark_as_no_fall_through(node)
-
-    def _handle_reachability_for(self, node):
-        self._can_fall_through_statements_analysis(node.body)
-
-    def _handle_reachability_while(self, node):
-        self._can_fall_through_statements_analysis(node.body)
-
-    def _handle_reachability_with(self, node):
-        self._can_fall_through_statements_analysis(node.body)
-
-    def _handle_reachability_functiondef(self, node):
-        self._can_fall_through_statements_analysis(node.body)
-
-    def _handle_reachability_module(self, node):
-        self._can_fall_through_statements_analysis(node.body)
