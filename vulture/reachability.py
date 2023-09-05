@@ -61,17 +61,15 @@ class Reachability:
 
     def _handle_reachability_if(self, node):
 
+        if_can_fall_through = self._can_fall_through_statements_analysis(
+            node.body
+        )
+
         has_else = bool(node.orelse)
 
         if not has_else:
-            if_can_fall_through = self._can_fall_through_statements_analysis(
-                node.body
-            )
             else_can_fall_through = True
         else:
-            if_can_fall_through = self._can_fall_through_statements_analysis(
-                node.body
-            )
             else_can_fall_through = self._can_fall_through_statements_analysis(
                 node.orelse
             )
@@ -85,11 +83,11 @@ class Reachability:
 
     def _handle_reachability_try(self, node):
 
-        has_else = bool(node.orelse)
-
         try_can_fall_through = self._can_fall_through_statements_analysis(
             node.body
         )
+
+        has_else = bool(node.orelse)
 
         if not try_can_fall_through and has_else:
             else_body = node.orelse
