@@ -1,13 +1,12 @@
 import ast
 
+from vulture import utils
+
 
 class Reachability:
     def __init__(self, report):
-        self.report = report
-        self.no_fall_through_nodes = set()
-
-    def reset(self):
-        self.no_fall_through_nodes = set()
+        self._report = report
+        self._no_fall_through_nodes = set()
 
     def visit(self, node):
         if isinstance(node, (ast.Break, ast.Continue, ast.Return, ast.Raise)):
@@ -18,7 +17,6 @@ class Reachability:
                 ast.Module,
                 ast.FunctionDef,
                 ast.AsyncFunctionDef,
-                ast.While,
                 ast.For,
                 ast.AsyncFor,
                 ast.With,
@@ -26,16 +24,23 @@ class Reachability:
             ),
         ):
             self._can_fall_through_statements_analysis(node.body)
+        elif isinstance(node, ast.While):
+            self._handle_reachability_while(node)
         elif isinstance(node, ast.If):
             self._handle_reachability_if(node)
+        elif isinstance(node, ast.IfExp):
+            self._handle_reachability_if_expr(node)
         elif isinstance(node, ast.Try):
             self._handle_reachability_try(node)
 
+    def reset(self):
+        self._no_fall_through_nodes = set()
+
     def _can_fall_through(self, node):
-        return node not in self.no_fall_through_nodes
+        return node not in self._no_fall_through_nodes
 
     def _mark_as_no_fall_through(self, node):
-        self.no_fall_through_nodes.add(node)
+        self._no_fall_through_nodes.add(node)
 
     def _can_fall_through_statements_analysis(self, statements):
         """Report unreachable statements.
@@ -49,29 +54,62 @@ class Reachability:
                     next_sibling = None
                 if next_sibling is not None:
                     class_name = statement.__class__.__name__.lower()
-                    self.report(
+                    self._report(
                         name=class_name,
                         first_node=next_sibling,
                         last_node=statements[-1],
                         message=f"unreachable code after '{class_name}'",
-                        confidence=100,
                     )
                 return False
         return True
 
     def _handle_reachability_if(self, node):
 
-        if_can_fall_through = self._can_fall_through_statements_analysis(
-            node.body
-        )
-
         has_else = bool(node.orelse)
 
-        if not has_else:
-            else_can_fall_through = True
+        if utils.condition_is_always_false(node.test):
+            self._report(
+                name="if",
+                first_node=node,
+                last_node=node.body
+                if isinstance(node, ast.IfExp)
+                else node.body[-1],
+                message="unsatisfiable 'if' condition",
+            )
+            if_can_fall_through = True
+            else_can_fall_through = self.can_else_fall_through(
+                node.orelse, condition_always_true=False
+            )
+
+        elif utils.condition_is_always_true(node.test):
+
+            if_can_fall_through = self._can_fall_through_statements_analysis(
+                node.body
+            )
+            else_can_fall_through = self.can_else_fall_through(
+                node.orelse, condition_always_true=True
+            )
+
+            if has_else:
+                self._report(
+                    name="else",
+                    first_node=node.orelse[0],
+                    last_node=node.orelse[-1],
+                    message="unreachable 'else' block",
+                )
+            else:
+                # Redundant if-condition without else block.
+                self._report(
+                    name="if",
+                    first_node=node,
+                    message="redundant if-condition",
+                )
         else:
-            else_can_fall_through = self._can_fall_through_statements_analysis(
-                node.orelse
+            if_can_fall_through = self._can_fall_through_statements_analysis(
+                node.body
+            )
+            else_can_fall_through = self.can_else_fall_through(
+                node.orelse, condition_always_true=False
             )
 
         statement_can_fall_through = (
@@ -80,6 +118,53 @@ class Reachability:
 
         if not statement_can_fall_through:
             self._mark_as_no_fall_through(node)
+
+    def can_else_fall_through(self, orelse, condition_always_true):
+        if not orelse:
+            return not condition_always_true
+        return self._can_fall_through_statements_analysis(orelse)
+
+    def _handle_reachability_if_expr(self, node):
+        if utils.condition_is_always_false(node.test):
+            self._report(
+                name="ternary",
+                first_node=node,
+                last_node=node.body
+                if isinstance(node, ast.IfExp)
+                else node.body[-1],
+                message="unsatisfiable 'ternary' condition",
+            )
+        elif utils.condition_is_always_true(node.test):
+            else_body = node.orelse
+            self._report(
+                name="ternary",
+                first_node=else_body,
+                message="unreachable 'else' expression",
+            )
+
+    def _handle_reachability_while(self, node):
+
+        if utils.condition_is_always_false(node.test):
+            self._report(
+                name="while",
+                first_node=node,
+                last_node=node.body
+                if isinstance(node, ast.IfExp)
+                else node.body[-1],
+                message="unsatisfiable 'while' condition",
+            )
+
+        elif utils.condition_is_always_true(node.test):
+            else_body = node.orelse
+            if else_body:
+                self._report(
+                    name="else",
+                    first_node=else_body[0],
+                    last_node=else_body[-1],
+                    message="unreachable 'else' block",
+                )
+
+        self._can_fall_through_statements_analysis(node.body)
 
     def _handle_reachability_try(self, node):
 
@@ -91,12 +176,11 @@ class Reachability:
 
         if not try_can_fall_through and has_else:
             else_body = node.orelse
-            self.report(
+            self._report(
                 name="else",
                 first_node=else_body[0],
                 last_node=else_body[-1],
                 message="unreachable 'else' block",
-                confidence=100,
             )
 
         any_except_can_fall_through = any(
