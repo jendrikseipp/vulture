@@ -347,6 +347,157 @@ while True:
     check_unreachable(v, 4, 1, "break")
 
 
+def test_if_false(v):
+    v.scan(
+        """\
+if False:
+    pass
+"""
+    )
+    check_unreachable(v, 1, 2, "if")
+
+
+def test_elif_false(v):
+    v.scan(
+        """\
+if bar():
+    pass
+elif False:
+    print("Unreachable")
+"""
+    )
+    check_unreachable(v, 3, 2, "if")
+
+
+def test_nested_if_statements_false(v):
+    v.scan(
+        """\
+if foo():
+    if bar():
+        pass
+    elif False:
+        print("Unreachable")
+        pass
+    elif something():
+        print("Reachable")
+    else:
+        pass
+else:
+    pass
+"""
+    )
+    check_unreachable(v, 4, 3, "if")
+
+
+def test_if_false_same_line(v):
+    v.scan(
+        """\
+if False: a = 1
+else: c = 3
+"""
+    )
+    check_unreachable(v, 1, 1, "if")
+
+
+def test_if_true(v):
+    v.scan(
+        """\
+if True:
+    a = 1
+    b = 2
+else:
+    c = 3
+    d = 3
+"""
+    )
+    # For simplicity, we don't report the "else" line as dead code.
+    check_unreachable(v, 5, 2, "else")
+
+
+def test_if_true_same_line(v):
+    v.scan(
+        """\
+if True:
+    a = 1
+    b = 2
+else: c = 3
+d = 3
+"""
+    )
+    check_unreachable(v, 4, 1, "else")
+
+
+def test_nested_if_statements_true(v):
+    v.scan(
+        """\
+if foo():
+    if bar():
+        pass
+    elif True:
+        if something():
+            pass
+        else:
+            pass
+    elif something_else():
+        print("foo")
+    else:
+        print("bar")
+else:
+    pass
+"""
+    )
+    check_unreachable(v, 9, 4, "else")
+
+
+def test_redundant_if(v):
+    v.scan(
+        """\
+if [5]:
+    pass
+"""
+    )
+    print(v.unreachable_code[0].size)
+    check_unreachable(v, 1, 2, "if")
+
+
+def test_if_exp_true(v):
+    v.scan("foo if True else bar")
+    check_unreachable(v, 1, 1, "ternary")
+
+
+def test_if_exp_false(v):
+    v.scan("foo if False else bar")
+    check_unreachable(v, 1, 1, "ternary")
+
+
+def test_if_true_return(v):
+    v.scan(
+        """\
+def foo(a):
+    if True:
+        return 0
+    print(":-(")
+"""
+    )
+    check_unreachable(v, 2, 2, "if", multiple=True)
+    check_unreachable(v, 4, 1, "if", multiple=True)
+
+
+def test_if_true_return_else(v):
+    v.scan(
+        """\
+def foo(a):
+    if True:
+        return 0
+    else:
+        return 1
+    print(":-(")
+"""
+    )
+    check_unreachable(v, 5, 1, "else", multiple=True)
+    check_unreachable(v, 6, 1, "if", multiple=True)
+
+
 def test_if_some_branches_return(v):
     v.scan(
         """\
@@ -548,6 +699,27 @@ async def foo(a):
 """
     )
     assert v.unreachable_code == []
+
+
+def test_while_false(v):
+    v.scan(
+        """\
+while False:
+    pass
+"""
+    )
+    check_unreachable(v, 1, 2, "while")
+
+
+def test_while_nested(v):
+    v.scan(
+        """\
+while True:
+    while False:
+        pass
+"""
+    )
+    check_unreachable(v, 2, 2, "while")
 
 
 def test_while_true_else(v):

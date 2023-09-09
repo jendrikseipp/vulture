@@ -224,7 +224,11 @@ class Vulture(ast.NodeVisitor):
         self.exit_code = ExitCode.NoDeadCode
         self.noqa_lines = {}
 
-        report = partial(self._define, collection=self.unreachable_code)
+        report = partial(
+            self._define,
+            collection=self.unreachable_code,
+            confidence=100,
+        )
         self.reachability = Reachability(report=report)
 
     def scan(self, code, filename=""):
@@ -426,47 +430,6 @@ class Vulture(ast.NodeVisitor):
             if alias is not None:
                 self.used_names.add(name_and_alias.name)
 
-    def _handle_conditional_node(self, node, name):
-        if utils.condition_is_always_false(node.test):
-            self._define(
-                self.unreachable_code,
-                name,
-                node,
-                last_node=node.body
-                if isinstance(node, ast.IfExp)
-                else node.body[-1],
-                message=f"unsatisfiable '{name}' condition",
-                confidence=100,
-            )
-        elif utils.condition_is_always_true(node.test):
-            else_body = node.orelse
-            if name == "ternary":
-                self._define(
-                    self.unreachable_code,
-                    name,
-                    else_body,
-                    message="unreachable 'else' expression",
-                    confidence=100,
-                )
-            elif else_body:
-                self._define(
-                    self.unreachable_code,
-                    "else",
-                    else_body[0],
-                    last_node=else_body[-1],
-                    message="unreachable 'else' block",
-                    confidence=100,
-                )
-            elif name == "if":
-                # Redundant if-condition without else block.
-                self._define(
-                    self.unreachable_code,
-                    name,
-                    node,
-                    message="redundant if-condition",
-                    confidence=100,
-                )
-
     def _define(
         self,
         collection,
@@ -639,12 +602,6 @@ class Vulture(ast.NodeVisitor):
                 self.defined_funcs, node.name, node, ignore=_ignore_function
             )
 
-    def visit_If(self, node):
-        self._handle_conditional_node(node, "if")
-
-    def visit_IfExp(self, node):
-        self._handle_conditional_node(node, "ternary")
-
     def visit_Import(self, node):
         self._add_aliases(node)
 
@@ -667,9 +624,6 @@ class Vulture(ast.NodeVisitor):
             for elt in node.value.elts:
                 if utils.is_ast_string(elt):
                     self.used_names.add(elt.value)
-
-    def visit_While(self, node):
-        self._handle_conditional_node(node, "while")
 
     def visit_MatchClass(self, node):
         for kwd_attr in node.kwd_attrs:
