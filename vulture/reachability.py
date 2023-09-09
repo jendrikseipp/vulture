@@ -77,7 +77,7 @@ class Reachability:
                 message="unsatisfiable 'if' condition",
             )
             if_can_fall_through = True
-            else_can_fall_through = self.can_else_fall_through(
+            else_can_fall_through = self._can_else_fall_through(
                 node.orelse, condition_always_true=False
             )
 
@@ -86,7 +86,7 @@ class Reachability:
             if_can_fall_through = self._can_fall_through_statements_analysis(
                 node.body
             )
-            else_can_fall_through = self.can_else_fall_through(
+            else_can_fall_through = self._can_else_fall_through(
                 node.orelse, condition_always_true=True
             )
 
@@ -108,7 +108,7 @@ class Reachability:
             if_can_fall_through = self._can_fall_through_statements_analysis(
                 node.body
             )
-            else_can_fall_through = self.can_else_fall_through(
+            else_can_fall_through = self._can_else_fall_through(
                 node.orelse, condition_always_true=False
             )
 
@@ -119,7 +119,7 @@ class Reachability:
         if not statement_can_fall_through:
             self._mark_as_no_fall_through(node)
 
-    def can_else_fall_through(self, orelse, condition_always_true):
+    def _can_else_fall_through(self, orelse, condition_always_true):
         if not orelse:
             return not condition_always_true
         return self._can_fall_through_statements_analysis(orelse)
