@@ -279,6 +279,13 @@ makes Vulture ignore the `greet` method:
     dead_code.py:1: unused import 'os' (90% confidence)
     dead_code.py:8: unused variable 'message' (60% confidence)
 
+If you'd like Vulture to use the whitelist file any time it is invoked, it can
+be added to the `paths` variable in the `pyproject.toml`:
+
+    [tool.vulture]
+    paths = ["myscript.py", "mydir", "whitelist_dead_code.py"]
+
+
 <!-- Hide noqa docs until we decide whether we want to support it.
 **Using "# noqa"**
 
