@@ -179,7 +179,7 @@ ignore_decorators = ["@app.route", "@require_*"]
 ignore_names = ["visit_*", "do_*"]
 make_whitelist = true
 min_confidence = 80
-paths = ["myscript.py", "mydir"]
+paths = ["myscript.py", "mydir", "whitelist.py"]
 sort_by_size = true
 verbose = true
 ```
