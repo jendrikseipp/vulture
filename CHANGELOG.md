@@ -1,6 +1,7 @@
-# 2.10 (unreleased)
+# 2.10 (2023-10-06)
 
 * Drop support for Python 3.7 (Jendrik Seipp, #323).
+* Add support for Python 3.12 (Jendrik Seipp, #332).
 * Use `end_lineno` AST attribute to obtain more accurate line counts (Jendrik Seipp).
 
 # 2.9.1 (2023-08-21)
