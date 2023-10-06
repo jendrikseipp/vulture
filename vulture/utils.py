@@ -53,6 +53,11 @@ def condition_is_always_true(condition):
     return _safe_eval(condition, False)
 
 
+def is_ast_string(node):
+    print("DIR", node, dir(node))
+    return isinstance(node, ast.Constant) and isinstance(node.value, str)
+
+
 def format_path(path):
     try:
         return path.relative_to(pathlib.Path.cwd())
