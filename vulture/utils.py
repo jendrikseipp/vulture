@@ -54,7 +54,6 @@ def condition_is_always_true(condition):
 
 
 def is_ast_string(node):
-    print("DIR", node, dir(node))
     return isinstance(node, ast.Constant) and isinstance(node.value, str)
 
 
