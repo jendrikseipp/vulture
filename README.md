@@ -107,10 +107,11 @@ make it harder to read.
 
 You can use `--ignore-names foo*,ba[rz]` to let Vulture ignore all names
 starting with `foo` and the names `bar` and `baz`. Additionally, the
-`--ignore-decorators` option can be used to ignore functions decorated
-with the given decorator. This is helpful for example in Flask projects,
-where you can use `--ignore-decorators "@app.route"` to ignore all
-functions with the `@app.route` decorator. Note that Vulture simplifies
+`--ignore-decorators` option can be used to ignore the names of functions
+decorated with the given decorator (but not their arguments or function body).
+This is helpful for example in Flask
+projects, where you can use `--ignore-decorators "@app.route"` to ignore all
+function names with the `@app.route` decorator. Note that Vulture simplifies
 decorators it cannot parse: `@foo.bar(x, y)` becomes "@foo.bar" and
 `@foo.bar(x, y).baz` becomes "@" internally.
 
