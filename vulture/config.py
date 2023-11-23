@@ -5,7 +5,10 @@ command-line arguments or the pyproject.toml file.
 import argparse
 import pathlib
 
-import toml
+try:
+    import tomllib
+except ModuleNotFoundError:
+    import tomli as tomllib
 
 from .version import __version__
 
@@ -76,7 +79,7 @@ def _parse_toml(infile):
         verbose = true
         paths = ["path1", "path2"]
     """
-    data = toml.load(infile)
+    data = tomllib.load(infile)
     settings = data.get("tool", {}).get("vulture", {})
     _check_input_config(settings)
     return settings
@@ -194,7 +197,7 @@ def make_config(argv=None, tomlfile=None):
     else:
         toml_path = pathlib.Path("pyproject.toml").resolve()
         if toml_path.is_file():
-            with open(toml_path) as fconfig:
+            with open(toml_path, "rb") as fconfig:
                 config = _parse_toml(fconfig)
             detected_toml_path = str(toml_path)
         else:
