@@ -1,5 +1,5 @@
-# 2.11 (2023-11-13)
-* Switch to tomllib/tomli to support heterogenous arrays. (Sebastian Csar, #340)
+# next (unreleased)
+* Switch to tomllib/tomli to support heterogeneous arrays (Sebastian Csar, #340).
 
 # 2.10 (2023-10-06)
 

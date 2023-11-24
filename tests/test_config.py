@@ -106,7 +106,7 @@ def test_toml_config_with_heterogenous_array():
                 """\
         [tool.foo]
         # comment for good measure
-        problem_array = [{ a = 1}, [2,3,4], "foo"]
+        problem_array = [{a = 1}, [2,3,4], "foo"]
 
         [tool.vulture]
         exclude = ["file*.py", "dir/"]
