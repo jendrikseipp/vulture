@@ -17,6 +17,13 @@ from vulture.config import (
 )
 
 
+def get_toml_bytes(toml_str: str) -> BytesIO:
+    """
+    Wrap a string in BytesIO to play the role of the incoming config stream.
+    """
+    return BytesIO(bytes(toml_str, "utf-8"))
+
+
 def test_cli_args():
     """
     Ensure that CLI arguments are converted to a config object.
@@ -62,10 +69,9 @@ def test_toml_config():
         sort_by_size=True,
         verbose=True,
     )
-    data = BytesIO(
-        bytes(
-            dedent(
-                """\
+    data = get_toml_bytes(
+        dedent(
+            """\
         [tool.vulture]
         exclude = ["file*.py", "dir/"]
         ignore_decorators = ["deco1", "deco2"]
@@ -76,8 +82,6 @@ def test_toml_config():
         verbose = true
         paths = ["path1", "path2"]
         """
-            ),
-            "utf-8",
         )
     )
     result = _parse_toml(data)
@@ -100,10 +104,9 @@ def test_toml_config_with_heterogenous_array():
         sort_by_size=True,
         verbose=True,
     )
-    data = BytesIO(
-        bytes(
-            dedent(
-                """\
+    data = get_toml_bytes(
+        dedent(
+            """\
         [tool.foo]
         # comment for good measure
         problem_array = [{a = 1}, [2,3,4], "foo"]
@@ -118,8 +121,6 @@ def test_toml_config_with_heterogenous_array():
         verbose = true
         paths = ["path1", "path2"]
         """
-            ),
-            "utf-8",
         )
     )
     result = _parse_toml(data)
@@ -132,10 +133,9 @@ def test_config_merging():
     If we have both CLI args and a ``pyproject.toml`` file, the CLI args should
     have precedence.
     """
-    toml = BytesIO(
-        bytes(
-            dedent(
-                """\
+    toml = get_toml_bytes(
+        dedent(
+            """\
         [tool.vulture]
         exclude = ["toml_exclude"]
         ignore_decorators = ["toml_deco"]
@@ -146,8 +146,6 @@ def test_config_merging():
         verbose = false
         paths = ["toml_path"]
         """
-            ),
-            "utf-8",
         )
     )
     cliargs = [
@@ -179,16 +177,13 @@ def test_config_merging_missing():
     If we have set a boolean value in the TOML file, but not on the CLI, we
     want the TOML value to be taken.
     """
-    toml = BytesIO(
-        bytes(
-            dedent(
-                """\
+    toml = get_toml_bytes(
+        dedent(
+            """\
         [tool.vulture]
         verbose = true
         ignore_names = ["name1"]
         """
-            ),
-            "utf-8",
         )
     )
     cliargs = [
@@ -204,15 +199,12 @@ def test_config_merging_toml_paths_only():
     If we have paths in the TOML but not on the CLI, the TOML paths should be
     used.
     """
-    toml = BytesIO(
-        bytes(
-            dedent(
-                """\
+    toml = get_toml_bytes(
+        dedent(
+            """\
         [tool.vulture]
         paths = ["path1", "path2"]
         """
-            ),
-            "utf-8",
         )
     )
     cliargs = [
