@@ -1,4 +1,6 @@
 # next (unreleased)
+* Bump flake8, flake8-comprehensions and flake8-bugbear. (Sebastian Csar,
+#341).
 * Switch to tomllib/tomli to support heterogeneous arrays (Sebastian Csar, #340).
 
 # 2.10 (2023-10-06)
