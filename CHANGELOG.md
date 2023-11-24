@@ -1,3 +1,6 @@
+# next (unreleased)
+* Switch to tomllib/tomli to support heterogeneous arrays (Sebastian Csar, #340).
+
 # 2.10 (2023-10-06)
 
 * Drop support for Python 3.7 (Jendrik Seipp, #323).

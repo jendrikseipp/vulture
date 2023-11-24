@@ -2,7 +2,7 @@
 Unit tests for config file and CLI argument parsing.
 """
 
-from io import StringIO
+from io import BytesIO
 from textwrap import dedent
 
 import pytest
@@ -15,6 +15,13 @@ from vulture.config import (
     make_config,
     InputError,
 )
+
+
+def get_toml_bytes(toml_str: str) -> BytesIO:
+    """
+    Wrap a string in BytesIO to play the role of the incoming config stream.
+    """
+    return BytesIO(bytes(toml_str, "utf-8"))
 
 
 def test_cli_args():
@@ -62,9 +69,48 @@ def test_toml_config():
         sort_by_size=True,
         verbose=True,
     )
-    data = StringIO(
+    data = get_toml_bytes(
         dedent(
             """\
+        [tool.vulture]
+        exclude = ["file*.py", "dir/"]
+        ignore_decorators = ["deco1", "deco2"]
+        ignore_names = ["name1", "name2"]
+        make_whitelist = true
+        min_confidence = 10
+        sort_by_size = true
+        verbose = true
+        paths = ["path1", "path2"]
+        """
+        )
+    )
+    result = _parse_toml(data)
+    assert isinstance(result, dict)
+    assert result == expected
+
+
+def test_toml_config_with_heterogenous_array():
+    """
+    Ensure parsing of TOML files results in a valid config object, even if some
+    other part of the file contains an array of mixed types.
+    """
+    expected = dict(
+        paths=["path1", "path2"],
+        exclude=["file*.py", "dir/"],
+        ignore_decorators=["deco1", "deco2"],
+        ignore_names=["name1", "name2"],
+        make_whitelist=True,
+        min_confidence=10,
+        sort_by_size=True,
+        verbose=True,
+    )
+    data = get_toml_bytes(
+        dedent(
+            """\
+        [tool.foo]
+        # comment for good measure
+        problem_array = [{a = 1}, [2,3,4], "foo"]
+
         [tool.vulture]
         exclude = ["file*.py", "dir/"]
         ignore_decorators = ["deco1", "deco2"]
@@ -87,7 +133,7 @@ def test_config_merging():
     If we have both CLI args and a ``pyproject.toml`` file, the CLI args should
     have precedence.
     """
-    toml = StringIO(
+    toml = get_toml_bytes(
         dedent(
             """\
         [tool.vulture]
@@ -131,7 +177,7 @@ def test_config_merging_missing():
     If we have set a boolean value in the TOML file, but not on the CLI, we
     want the TOML value to be taken.
     """
-    toml = StringIO(
+    toml = get_toml_bytes(
         dedent(
             """\
         [tool.vulture]
@@ -153,7 +199,7 @@ def test_config_merging_toml_paths_only():
     If we have paths in the TOML but not on the CLI, the TOML paths should be
     used.
     """
-    toml = StringIO(
+    toml = get_toml_bytes(
         dedent(
             """\
         [tool.vulture]
