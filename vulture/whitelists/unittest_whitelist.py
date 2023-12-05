@@ -14,3 +14,6 @@ TestCase.subTest
 
 mock.Mock.return_value
 mock.Mock.side_effect
+
+mock.MagicMock.return_value
+mock.MagicMock.side_effect
