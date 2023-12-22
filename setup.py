@@ -47,7 +47,10 @@ setuptools.setup(
         "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Software Development :: Quality Assurance",
     ],
-    install_requires=["tomli >= 1.1.0; python_version < '3.11'"],
+    install_requires=[
+        "tomli >= 1.1.0; python_version < '3.11'",
+        "pathspec >= 0.12.1",
+    ],
     entry_points={"console_scripts": ["vulture = vulture.core:main"]},
     python_requires=">=3.8",
     packages=setuptools.find_packages(exclude=["tests"]),

@@ -1,6 +1,7 @@
 import ast
 from fnmatch import fnmatch, fnmatchcase
 from pathlib import Path
+from pathspec import PathSpec
 import pkgutil
 import re
 import string
@@ -112,6 +113,13 @@ def _ignore_variable(filename, varname):
         or (varname.startswith("_") and not varname.startswith("__"))
         or _is_special_name(varname)
     )
+
+
+def _get_gitignore_pathspec():
+    if (gitignore := Path(".gitignore").resolve()).is_file:
+        with gitignore.open() as fh:
+            return PathSpec.from_lines("gitwildmatch", fh)
+    return PathSpec.from_lines("gitwildmatch", [])
 
 
 class Item:
@@ -263,9 +271,16 @@ class Vulture(ast.NodeVisitor):
             return pattern
 
         exclude = [prepare_pattern(pattern) for pattern in (exclude or [])]
+        gitignore = _get_gitignore_pathspec()
 
         def exclude_path(path):
-            return _match(path, exclude, case=False)
+            # if no exclude patterns are provided through the cli arguments or
+            # a toml file, use .gitignore patterns to inform exclusion
+            return (
+                _match(path, exclude, case=False)
+                if exclude
+                else gitignore.match_file(path)
+            )
 
         paths = [Path(path) for path in paths]
 
