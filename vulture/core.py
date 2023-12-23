@@ -1,12 +1,12 @@
 import ast
 from fnmatch import fnmatch, fnmatchcase
 from pathlib import Path
-from pathspec import PathSpec
 import pkgutil
 import re
 import string
 import sys
 
+from pathspec import PathSpec
 from vulture import lines
 from vulture import noqa
 from vulture import utils
@@ -274,8 +274,8 @@ class Vulture(ast.NodeVisitor):
         gitignore = _get_gitignore_pathspec()
 
         def exclude_path(path):
-            # if no exclude patterns are provided through the cli arguments or
-            # a toml file, use .gitignore patterns to inform exclusion
+            # If no exclude patterns are provided via the CLI or
+            # a TOML file, use .gitignore patterns to inform exclusion.
             return (
                 _match(path, exclude, case=False)
                 if exclude
