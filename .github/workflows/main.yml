@@ -36,7 +36,7 @@ jobs:
       run: python -m pip wheel .
 
     - name: Install wheels
-      run: python -m pip install --find-links=. *
+      run: python -m pip install --find-links=. *.whl
 
     - name: Run Vulture
       run: |
