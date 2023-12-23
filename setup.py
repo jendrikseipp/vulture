@@ -20,6 +20,9 @@ def find_version(*parts):
 with open("README.md") as f1, open("CHANGELOG.md") as f2:
     long_description = f1.read() + "\n\n" + f2.read()
 
+with open("requirements.txt") as f:
+    install_requires = f.read().splitlines()
+
 setuptools.setup(
     name="vulture",
     version=find_version("vulture", "version.py"),
@@ -47,10 +50,7 @@ setuptools.setup(
         "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Software Development :: Quality Assurance",
     ],
-    install_requires=[
-        "tomli >= 1.1.0; python_version < '3.11'",
-        "pathspec >= 0.12.1",
-    ],
+    install_requires=install_requires,
     entry_points={"console_scripts": ["vulture = vulture.core:main"]},
     python_requires=">=3.8",
     packages=setuptools.find_packages(exclude=["tests"]),
