@@ -116,7 +116,7 @@ def _ignore_variable(filename, varname):
 
 
 def _get_gitignore_pathspec():
-    if (gitignore := Path(".gitignore").resolve()).is_file:
+    if (gitignore := Path(".gitignore").resolve()).is_file():
         with gitignore.open() as fh:
             return PathSpec.from_lines("gitwildmatch", fh)
     return PathSpec.from_lines("gitwildmatch", [])
