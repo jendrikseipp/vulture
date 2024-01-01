@@ -3,6 +3,7 @@
 * Switch to tomllib/tomli to support heterogeneous arrays (Sebastian Csar, #340).
 * Provide whitelist parity for `MagicMock` and `Mock` (maxrake).
 * Use .gitignore to exclude files if --exclude is missing from both pyproject.toml and the command line (whosayn, #344, #345).
+* Properly detect when no .gitignore is present (travisdart, #346).
 
 # 2.10 (2023-10-06)
 
