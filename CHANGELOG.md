@@ -1,7 +1,7 @@
-# next (unreleased)
-* Bump flake8, flake8-comprehensions and flake8-bugbear (Sebastian Csar, #341).
+# 2.11 (2024-01-06)
 * Switch to tomllib/tomli to support heterogeneous arrays (Sebastian Csar, #340).
-* Provide whitelist parity for `MagicMock` and `Mock` (maxrake).
+* Bump flake8, flake8-comprehensions and flake8-bugbear (Sebastian Csar, #341).
+* Provide whitelist parity for `MagicMock` and `Mock` (maxrake, #342).
 
 # 2.10 (2023-10-06)
 
