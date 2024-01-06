@@ -1,2 +1,1 @@
-pathspec >= 0.12.1
 tomli >= 1.1.0; python_version < '3.11'

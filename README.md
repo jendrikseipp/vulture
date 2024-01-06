@@ -83,10 +83,6 @@ If you want to ignore a whole file or directory, use the `--exclude` parameter
 (e.g., `--exclude "*settings.py,*/docs/*.py,*/test_*.py,*/.venv/*.py"`). The
 exclude patterns are matched against absolute paths.
 
-Vulture 2.11+ parses the `.gitignore` file in the current working directory for
-exclude patterns if the `--exclude` parameter is unused and if there are no
-exclude patterns in the pyproject.toml file.
-
 #### Flake8 noqa comments
 
 <!-- Hide noqa docs until we decide whether we want to support it.
