@@ -50,7 +50,7 @@ exclude = [
 ]
 
 # Same as Black.
-line-length = 88
+line-length = 79
 indent-width = 4
 
 # Assume Python 3.8
@@ -60,7 +60,7 @@ target-version = "py38"
 # Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
 # Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
 # McCabe complexity (`C901`) by default.
-select = ["E4", "E7", "E9", "F"]
+select = ["E4", "E7", "E9", "F", "B"]
 ignore = []
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
@@ -69,6 +69,9 @@ unfixable = []
 
 # Allow unused variables when underscore-prefixed.
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.per-file-ignores]
+"vulture/whitelists/*.py" = ["B108"]
 
 [tool.ruff.format]
 # Like Black, use double quotes for strings.
