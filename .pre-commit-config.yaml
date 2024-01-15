@@ -10,7 +10,9 @@ repos:
     rev: '6.1.0'
     hooks:
       - id: flake8
-        additional_dependencies: [flake8-bugbear]
+        additional_dependencies:
+        - flake8-bugbear==23.9.16
+        - flake8-comprehensions==3.14.0
 
   - repo: https://github.com/asottile/pyupgrade
     rev: v2.28.0
