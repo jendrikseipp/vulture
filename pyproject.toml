@@ -29,7 +29,7 @@ exclude = [
   "htmlcov",
   "vulture.egg-info",
   ".cache",
-  ".coverag",
+  ".coverage",
   ".pytest_cache",
   ".tox",
   ".venv",
