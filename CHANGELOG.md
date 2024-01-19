@@ -1,3 +1,9 @@
+# next (unreleased)
+
+* Use `ruff` for linting (Anh Trinh, #347).
+* Use `ruff` for formatting (Anh Trinh, #349).
+* Replace `tox` by `pre-commit` for linting and formatting (Anh Trinh, #349).
+
 # 2.11 (2024-01-06)
 * Switch to tomllib/tomli to support heterogeneous arrays (Sebastian Csar, #340).
 * Bump flake8, flake8-comprehensions and flake8-bugbear (Sebastian Csar, #341).
