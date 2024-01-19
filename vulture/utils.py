@@ -108,7 +108,7 @@ def read_file(filename):
         with tokenize.open(filename) as f:
             return f.read()
     except (SyntaxError, UnicodeDecodeError) as err:
-        raise VultureInputException(err)
+        raise VultureInputException from err
 
 
 class LoggingList(list):
