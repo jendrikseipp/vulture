@@ -21,32 +21,19 @@ exclude = '''
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
 exclude = [
-    ".bzr",
-    ".direnv",
-    ".eggs",
-    ".git",
-    ".git-rewrite",
-    ".hg",
-    ".ipynb_checkpoints",
-    ".mypy_cache",
-    ".nox",
-    ".pants.d",
-    ".pyenv",
-    ".pytest_cache",
-    ".pytype",
-    ".ruff_cache",
-    ".svn",
-    ".tox",
-    ".venv",
-    ".vscode",
-    "__pypackages__",
-    "_build",
-    "buck-out",
-    "build",
-    "dist",
-    "node_modules",
-    "site-packages",
-    "venv",
+  ".eggs",
+  ".git",
+  "_build",
+  "build",
+  "dist",
+  "htmlcov",
+  "vulture.egg-info",
+  ".cache",
+  ".coverag",
+  ".pytest_cache",
+  ".tox",
+  ".venv",
+  ".vscode",
 ]
 
 # Same as Black.
@@ -56,10 +43,16 @@ indent-width = 4
 target-version = "py38"
 
 [tool.ruff.lint]
-select = ["E4", "E7", "E9", "F", "B", "C4", "UP", "W", "C901"]
+# ruff enables Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+select = [
+  "F", # pyflakes
+  "E4", "E7", "E9", # pycodestyle
+  "B", # flake8-bugbear
+  "C4", # comprehensions
+  "UP", # pyupgrade
+]
 ignore = [
-  # C408: unnecessary dict call
-  "C408",
+  "C408", # unnecessary dict call
 ]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.

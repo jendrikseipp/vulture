@@ -256,7 +256,7 @@ class Vulture(ast.NodeVisitor):
             except SyntaxError as err:
                 handle_syntax_error(err)
 
-    def scavenge(self, paths, exclude=None):  # noqa: C901
+    def scavenge(self, paths, exclude=None):
         def prepare_pattern(pattern):
             if not any(char in pattern for char in "*?["):
                 pattern = f"*{pattern}*"
