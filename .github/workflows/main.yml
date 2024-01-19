@@ -47,10 +47,6 @@ jobs:
     - name: Run tests
       run: python -m tox -e py
 
-    - name: Check style
-      if: ${{ matrix.python-version == 3.10 && startsWith(matrix.os, 'ubuntu') }}
-      run: python -m tox -e style
-
     - name: Report coverage to Codecov
       uses: codecov/codecov-action@v3
       with:

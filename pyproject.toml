@@ -3,21 +3,6 @@
 # verbose regular expressions by Black.  Use [ ] to denote a significant space
 # character.
 
-[tool.black]
-line-length = 79
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.eggs
-  | \.git
-  | \.tox
-  | \.venv
-  | _build
-  | build
-  | dist
-)/
-'''
-
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
 exclude = [
