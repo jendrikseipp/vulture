@@ -3,8 +3,8 @@ Unit tests for config file and CLI argument parsing.
 """
 
 from io import BytesIO
-import tempfile
 from textwrap import dedent
+import os
 
 import pytest
 
@@ -179,24 +179,16 @@ def test_toml_config_custom_path():
     """
     Ensure that TOML pyproject.toml files can be read from a custom path,
     other than the current working directory.
+
+    Test file is in tests/toml/mock_pyproject.toml
     """
-    with tempfile.NamedTemporaryFile("w") as tomlfile:
-        tomlfile.write(
-            dedent(
-                """\
-            [tool.vulture]
-            verbose = true
-            ignore_names = ["name_from_toml_file"]
-            """
-            )
-        )
-        tomlfile.flush()
-        cliargs = [
-            f"--config={tomlfile.name}",
-            "cli_path",
-        ]
-        result = make_config(cliargs)
-        assert result["ignore_names"] == ["name_from_toml_file"]
+    tomlfile_path = os.path.join(os.path.dirname(__file__), "toml", "mock_pyproject.toml")
+    cliargs = [
+        f"--config={tomlfile_path}",
+        "cli_path",
+    ]
+    result = make_config(cliargs)
+    assert result["ignore_names"] == ["name_from_toml_file"]
 
 
 def test_config_merging_missing():
