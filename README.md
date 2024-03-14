@@ -185,6 +185,10 @@ sort_by_size = true
 verbose = true
 ```
 
+`vulture` will automatically look for a `pyproject.toml` in the current working directory.
+
+To use a `pyproject.toml` in another directory, you can use the `-c path/to/pyproject.toml` flag.
+
 ## Version control integration
 
 You can use a [pre-commit](https://pre-commit.com/#install) hook to run
