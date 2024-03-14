@@ -160,7 +160,7 @@ def _parse_args(args=None):
         help="Sort unused functions and classes by their lines of code.",
     )
     parser.add_argument(
-        "-c", "--config",
+        "--config",
         type=str,
         default="pyproject.toml",
         help="Path to pyproject.toml config file",
