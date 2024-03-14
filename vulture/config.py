@@ -163,7 +163,7 @@ def _parse_args(args=None):
         "--config",
         type=str,
         default="pyproject.toml",
-        help="Path to pyproject.toml config file",
+        help="Path to pyproject.toml config file.",
     )
     parser.add_argument(
         "-v", "--verbose", action="store_true", default=missing
