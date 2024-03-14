@@ -182,6 +182,9 @@ def test_toml_config_custom_path():
 
     Test file is in tests/toml/mock_pyproject.toml
     """
+    tomlfile_path = os.path.join(
+        os.path.dirname(__file__), "toml", "mock_pyproject.toml"
+    )
     tomlfile_path = os.path.join(os.path.dirname(__file__), "toml", "mock_pyproject.toml")
     cliargs = [
         f"--config={tomlfile_path}",
