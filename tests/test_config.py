@@ -4,8 +4,8 @@ Unit tests for config file and CLI argument parsing.
 
 from io import BytesIO
 from textwrap import dedent
-import os
 
+import pathlib
 import pytest
 
 from vulture.config import (
@@ -182,9 +182,8 @@ def test_toml_config_custom_path():
 
     Test file is in tests/toml/mock_pyproject.toml
     """
-    tomlfile_path = os.path.join(
-        os.path.dirname(__file__), "toml", "mock_pyproject.toml"
-    )
+    here = pathlib.Path(__file__).parent
+    tomlfile_path = here.joinpath("toml", "mock_pyproject.toml")
     cliargs = [
         f"--config={tomlfile_path}",
         "cli_path",
