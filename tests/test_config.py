@@ -3,6 +3,7 @@ Unit tests for config file and CLI argument parsing.
 """
 
 from io import BytesIO
+import pathlib
 from textwrap import dedent
 
 import pytest
@@ -33,6 +34,7 @@ def test_cli_args():
         exclude=["file*.py", "dir/"],
         ignore_decorators=["deco1", "deco2"],
         ignore_names=["name1", "name2"],
+        config="pyproject.toml",
         make_whitelist=True,
         min_confidence=10,
         sort_by_size=True,
@@ -164,12 +166,30 @@ def test_config_merging():
         exclude=["cli_exclude"],
         ignore_decorators=["cli_deco"],
         ignore_names=["cli_name"],
+        config="pyproject.toml",
         make_whitelist=True,
         min_confidence=20,
         sort_by_size=True,
         verbose=True,
     )
     assert result == expected
+
+
+def test_toml_config_custom_path():
+    """
+    Ensure that TOML pyproject.toml files can be read from a custom path,
+    other than the current working directory.
+
+    Test file is in tests/toml/mock_pyproject.toml
+    """
+    here = pathlib.Path(__file__).parent
+    tomlfile_path = here.joinpath("toml", "mock_pyproject.toml")
+    cliargs = [
+        f"--config={tomlfile_path}",
+        "cli_path",
+    ]
+    result = make_config(cliargs)
+    assert result["ignore_names"] == ["name_from_toml_file"]
 
 
 def test_config_merging_missing():

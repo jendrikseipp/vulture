@@ -1,0 +1,5 @@
+# This file exists for the test case: test_config::test_toml_config_custom_path
+
+[tool.vulture]
+verbose = true
+ignore_names = ["name_from_toml_file"]

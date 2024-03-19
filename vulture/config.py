@@ -14,6 +14,7 @@ from .version import __version__
 
 #: Possible configuration options and their respective defaults
 DEFAULTS = {
+    "config": "pyproject.toml",
     "min_confidence": 0,
     "paths": [],
     "exclude": [],
@@ -159,6 +160,12 @@ def _parse_args(args=None):
         help="Sort unused functions and classes by their lines of code.",
     )
     parser.add_argument(
+        "--config",
+        type=str,
+        default="pyproject.toml",
+        help="Path to pyproject.toml config file.",
+    )
+    parser.add_argument(
         "-v", "--verbose", action="store_true", default=missing
     )
     parser.add_argument("--version", action="version", version=version)
@@ -195,7 +202,7 @@ def make_config(argv=None, tomlfile=None):
         config = _parse_toml(tomlfile)
         detected_toml_path = str(tomlfile)
     else:
-        toml_path = pathlib.Path("pyproject.toml").resolve()
+        toml_path = pathlib.Path(cli_config["config"]).resolve()
         if toml_path.is_file():
             with open(toml_path, "rb") as fconfig:
                 config = _parse_toml(fconfig)
