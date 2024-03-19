@@ -3,9 +3,9 @@ Unit tests for config file and CLI argument parsing.
 """
 
 from io import BytesIO
+import pathlib
 from textwrap import dedent
 
-import pathlib
 import pytest
 
 from vulture.config import (
