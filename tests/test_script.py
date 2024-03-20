@@ -64,6 +64,18 @@ def test_min_confidence():
     )
 
 
+def test_exclude_abs_path():
+    assert (
+        call_vulture(
+            [
+                "vulture",
+                "--exclude=./core.py,./whitelists",
+            ]
+        )
+        == 0
+    )
+
+
 def test_exclude():
     def get_csv(paths):
         return ",".join(os.path.join("vulture", path) for path in paths)
