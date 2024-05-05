@@ -3,6 +3,4 @@ repos:
     rev: v0.1.13
     hooks:
       - id: ruff
-        exclude: rednotebook/external/.*\.py
       - id: ruff-format
-        exclude: rednotebook/external/.*\.py
