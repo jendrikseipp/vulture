@@ -1,5 +1,7 @@
 # Vulture - Find dead code
 
+[![PyPI Version](https://img.shields.io/pypi/v/vulture.svg)](https://pypi.python.org/pypi/vulture)
+[![Conda Version](https://img.shields.io/conda/vn/conda-forge/vulture.svg)](https://anaconda.org/conda-forge/vulture)
 ![CI:Test](https://github.com/jendrikseipp/vulture/workflows/CI/badge.svg)
 [![Codecov Badge](https://codecov.io/gh/jendrikseipp/vulture/branch/main/graphs/badge.svg)](https://codecov.io/gh/jendrikseipp/vulture?branch=main)
 
