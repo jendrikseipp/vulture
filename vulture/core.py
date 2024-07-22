@@ -5,6 +5,7 @@ import pkgutil
 import re
 import string
 import sys
+from typing import List
 
 from vulture import lines
 from vulture import noqa
@@ -139,13 +140,13 @@ class Item:
         message="",
         confidence=DEFAULT_CONFIDENCE,
     ):
-        self.name = name
-        self.typ = typ
-        self.filename = filename
-        self.first_lineno = first_lineno
-        self.last_lineno = last_lineno
-        self.message = message or f"unused {typ} '{name}'"
-        self.confidence = confidence
+        self.name: str = name
+        self.typ: str = typ
+        self.filename: Path = filename
+        self.first_lineno: int = first_lineno
+        self.last_lineno: int = last_lineno
+        self.message: str = message or f"unused {typ} '{name}'"
+        self.confidence: int = confidence
 
     @property
     def size(self):
@@ -303,7 +304,9 @@ class Vulture(ast.NodeVisitor):
                 module_string = module_data.decode("utf-8")
                 self.scan(module_string, filename=path)
 
-    def get_unused_code(self, min_confidence=0, sort_by_size=False):
+    def get_unused_code(
+        self, min_confidence=0, sort_by_size=False
+    ) -> List[Item]:
         """
         Return ordered list of unused Item objects.
         """
