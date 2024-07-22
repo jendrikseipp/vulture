@@ -1,4 +1,7 @@
+from pathlib import Path
+
 from . import v
+from vulture.core import Item
 
 assert v  # Silence pyflakes
 
@@ -99,3 +102,29 @@ def test_item_variable(v):
     assert var.name == "v"
     assert var.first_lineno == 1
     assert var.last_lineno == 1
+
+
+def test_item_types(v):
+    v.scan(
+        """\
+import os
+
+message = "foobar"
+
+class Foo:
+    def bar():
+        pass
+"""
+    )
+    for item in (unused_code := v.get_unused_code()):
+        assert isinstance(item, Item)
+        assert isinstance(item.filename, Path)
+        assert all(
+            isinstance(field, str)
+            for field in (item.name, item.typ, item.message)
+        )
+        assert all(
+            isinstance(field, int)
+            for field in (item.first_lineno, item.last_lineno, item.confidence)
+        )
+    assert isinstance(unused_code, list)
