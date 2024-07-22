@@ -301,6 +301,7 @@ class Vulture(ast.NodeVisitor):
                 except OSError:
                     # Most imported modules don't have a whitelist.
                     continue
+                assert module_data is not None
                 module_string = module_data.decode("utf-8")
                 self.scan(module_string, filename=path)
 
