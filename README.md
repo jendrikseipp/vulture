@@ -189,7 +189,7 @@ Vulture will automatically look for a `pyproject.toml` in the current working di
 
 To use a `pyproject.toml` in another directory, you can use the `--config path/to/pyproject.toml` flag.
 
-## Version control integration
+## Integrations
 
 You can use a [pre-commit](https://pre-commit.com/#install) hook to run
 Vulture before each commit. For this, install pre-commit and add the
@@ -206,6 +206,8 @@ repos:
 Then run `pre-commit install`. Finally, create a `pyproject.toml` file
 in your repository and specify all files that Vulture should check under
 `[tool.vulture] --> paths` (see above).
+
+There's also a [GitHub Action for Vulture](https://github.com/gtkacz/vulture-action).
 
 ## How does it work?
 
