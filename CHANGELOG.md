@@ -1,9 +1,8 @@
-# next (unreleased)
+# 2.12 (2024-09-17)
 
-* Use `ruff` for linting (Anh Trinh, #347).
-* Use `ruff` for formatting (Anh Trinh, #349).
+* Use `ruff` for linting and formatting (Anh Trinh, #347, #349).
 * Replace `tox` by `pre-commit` for linting and formatting (Anh Trinh, #349).
-* Add `--config` flag to specify path to pyproject.toml configuration file (Glen Robertson #352).
+* Add `--config` flag to specify path to pyproject.toml configuration file (Glen Robertson, #352).
 
 # 2.11 (2024-01-06)
 
