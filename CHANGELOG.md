@@ -1,3 +1,7 @@
+# 2.13 (unreleased)
+
+* Add PyPI and conda-forge badges to README file (Trevor James Smith, #356).
+
 # 2.12 (2024-09-17)
 
 * Use `ruff` for linting and formatting (Anh Trinh, #347, #349).
