@@ -1,5 +1,6 @@
 include *.md
 include *.txt
 include tests/*.py
+include tests/**/*.toml
 include tox.ini
 include vulture/whitelists/*.py

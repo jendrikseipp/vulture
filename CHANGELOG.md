@@ -1,6 +1,7 @@
 # 2.13 (unreleased)
 
 * Add PyPI and conda-forge badges to README file (Trevor James Smith, #356).
+* Include `tests/**/*.toml` in sdist (Colin Watson).
 
 # 2.12 (2024-09-17)
 
