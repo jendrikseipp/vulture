@@ -1,5 +1,6 @@
 # 2.13 (unreleased)
 
+* Add support for Python 3.13 (Jendrik Seipp, #369).
 * Add PyPI and conda-forge badges to README file (Trevor James Smith, #356).
 * Include `tests/**/*.toml` in sdist (Colin Watson).
 
