@@ -11,7 +11,7 @@ WHITELISTS = [
     str(path)
     for path in (REPO / "vulture" / "whitelists").glob("*.py")
     # Pint is incompatible with Python 3.13 (https://github.com/hgrecco/pint/issues/1969).
-    if sys.version_info < (3, 13) or path.name != "pint.py"
+    if sys.version_info < (3, 13) or path.name != "pint_whitelist.py"
 ]
 
 
