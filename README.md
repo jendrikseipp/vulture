@@ -1,5 +1,7 @@
 # Vulture - Find dead code
 
+[![PyPI Version](https://img.shields.io/pypi/v/vulture.svg)](https://pypi.python.org/pypi/vulture)
+[![Conda Version](https://img.shields.io/conda/vn/conda-forge/vulture.svg)](https://anaconda.org/conda-forge/vulture)
 ![CI:Test](https://github.com/jendrikseipp/vulture/workflows/CI/badge.svg)
 [![Codecov Badge](https://codecov.io/gh/jendrikseipp/vulture/branch/main/graphs/badge.svg)](https://codecov.io/gh/jendrikseipp/vulture?branch=main)
 
@@ -189,7 +191,7 @@ Vulture will automatically look for a `pyproject.toml` in the current working di
 
 To use a `pyproject.toml` in another directory, you can use the `--config path/to/pyproject.toml` flag.
 
-## Version control integration
+## Integrations
 
 You can use a [pre-commit](https://pre-commit.com/#install) hook to run
 Vulture before each commit. For this, install pre-commit and add the
@@ -206,6 +208,8 @@ repos:
 Then run `pre-commit install`. Finally, create a `pyproject.toml` file
 in your repository and specify all files that Vulture should check under
 `[tool.vulture] --> paths` (see above).
+
+There's also a [GitHub Action for Vulture](https://github.com/gtkacz/vulture-action).
 
 ## How does it work?
 
