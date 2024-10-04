@@ -140,7 +140,7 @@ class Item:
         message="",
         confidence=DEFAULT_CONFIDENCE,
     ):
-        self.name: int = name
+        self.name: str = name
         self.typ: str = typ
         self.filename: Path = filename
         self.first_lineno: int = first_lineno
@@ -220,7 +220,6 @@ class Vulture(ast.NodeVisitor):
         self.filename = Path()
         self.code = []
         self.exit_code = ExitCode.NoDeadCode
-        self.noqa_lines = {}
 
     def scan(self, code, filename=""):
         filename = Path(filename)
