@@ -220,6 +220,7 @@ class Vulture(ast.NodeVisitor):
         self.filename = Path()
         self.code = []
         self.exit_code = ExitCode.NoDeadCode
+        self.noqa_lines = {}
 
     def scan(self, code, filename=""):
         filename = Path(filename)
