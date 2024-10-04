@@ -140,7 +140,7 @@ class Item:
         message="",
         confidence=DEFAULT_CONFIDENCE,
     ):
-        self.name: str = name
+        self.name: int = name
         self.typ: str = typ
         self.filename: Path = filename
         self.first_lineno: int = first_lineno
