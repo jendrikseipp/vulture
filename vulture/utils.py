@@ -3,6 +3,7 @@ from enum import IntEnum
 import pathlib
 import sys
 import tokenize
+from typing import Optional, Union
 
 
 class VultureInputException(Exception):
@@ -109,6 +110,33 @@ def read_file(filename):
             return f.read()
     except (SyntaxError, UnicodeDecodeError) as err:
         raise VultureInputException from err
+
+
+def add_parent_info(root: ast.AST) -> None:
+    # https://stackoverflow.com/a/43311383/7743427:
+    root.parent = None
+    for node in ast.walk(root):
+        for child in ast.iter_child_nodes(node):
+            child.parent = node
+
+
+def enclosing_function(
+    node: ast.AST,
+) -> Optional[Union[ast.FunctionDef, ast.AsyncFunctionDef]]:
+    while node and not isinstance(
+        node, (ast.FunctionDef, ast.AsyncFunctionDef)
+    ):
+        node = getattr(node, "parent", None)
+    return node
+
+
+def parent(node: ast.AST) -> Optional[ast.AST]:
+    return getattr(node, "parent", None)
+
+
+def recursive_call(node: ast.Name) -> bool:
+    assert isinstance(node, ast.Name)
+    return node.id == getattr(enclosing_function(node), "name", None)
 
 
 class LoggingList(list):

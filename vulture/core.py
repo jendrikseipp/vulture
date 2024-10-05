@@ -250,7 +250,8 @@ class Vulture(ast.NodeVisitor):
             )
             self.exit_code = ExitCode.InvalidInput
         else:
-            # When parsing type comments, visiting can throw SyntaxError.
+            utils.add_parent_info(node)
+            # When parsing type comments, visiting can throw a SyntaxError:
             try:
                 self.visit(node)
             except SyntaxError as err:
@@ -642,6 +643,7 @@ class Vulture(ast.NodeVisitor):
         if (
             isinstance(node.ctx, (ast.Load, ast.Del))
             and node.id not in IGNORED_VARIABLE_NAMES
+            and not utils.recursive_call(node)
         ):
             self.used_names.add(node.id)
         elif isinstance(node.ctx, (ast.Param, ast.Store)):
