@@ -111,6 +111,21 @@ def read_file(filename):
         raise VultureInputException from err
 
 
+def set_parent_info(tree: ast.AST):
+    tree.parent = None
+    for node in ast.walk(tree):
+        for child in ast.iter_child_nodes(node):
+            child.parent = node
+
+
+def get_class(node: ast.AST) -> ast.ClassDef | None:
+    while node is not None:
+        if isinstance(node, ast.ClassDef):
+            break
+        node = node.parent
+    return node
+
+
 class LoggingList(list):
     def __init__(self, typ, verbose):
         self.typ = typ

@@ -250,6 +250,7 @@ class Vulture(ast.NodeVisitor):
             )
             self.exit_code = ExitCode.InvalidInput
         else:
+            utils.set_parent_info(node)
             # When parsing type comments, visiting can throw SyntaxError.
             try:
                 self.visit(node)
@@ -473,6 +474,10 @@ class Vulture(ast.NodeVisitor):
         last_node = last_node or first_node
         typ = collection.typ
         first_lineno = lines.get_first_line_number(first_node)
+        if isinstance(
+            first_node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Name)
+        ) and (class_part_of := utils.get_class(first_node)):
+            name = f"{class_part_of.name}.{name}"
 
         if ignored(first_lineno):
             self._log(f'Ignoring {typ} "{name}"')
@@ -509,7 +514,7 @@ class Vulture(ast.NodeVisitor):
         if isinstance(node.ctx, ast.Store):
             self._define(self.defined_attrs, node.attr, node)
         elif isinstance(node.ctx, ast.Load):
-            self.used_names.add(node.attr)
+            self.used_names.add(f"{node.value.id}.{node.attr}")
 
     def visit_BinOp(self, node):
         """
