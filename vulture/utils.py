@@ -3,7 +3,7 @@ from enum import IntEnum
 import pathlib
 import sys
 import tokenize
-from typing import Optional, Tuple
+from typing import Optional
 
 
 class VultureInputException(Exception):
@@ -120,32 +120,21 @@ def add_parent_info(root: ast.AST) -> None:
             child.parent = node
 
 
-def parent(node: ast.AST) -> Optional[ast.AST]:
-    return getattr(node, "parent", None)
-
-
-def ancestor(node: ast.AST, ancestor_type: Tuple[type]) -> Optional[ast.AST]:
-    while node and not isinstance(node, ancestor_type):
+def ancestor(node: ast.AST, target_ancestor_types) -> Optional[ast.AST]:
+    while node and not isinstance(node, target_ancestor_types):
         node = getattr(node, "parent", None)
     return node
 
 
 def top_lvl_recursive_call(node: ast.Name) -> bool:
     """Returns true if a recursive call is made from a top level function to itself."""
-    # ideas:
-    # get rid of '.' not in ast.unparse check
-    # try to use lineno of func (get from call_node.func)
     assert isinstance(node, ast.Name)
-    return (
-        (call_node := ancestor(node, (ast.Call,)))
-        and (
-            enclosing_func := ancestor(
-                node, (ast.FunctionDef, ast.AsyncFunctionDef)
-            )
-        )
+    enclosing_func = ancestor(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+    return bool(
+        enclosing_func
         and node.id == enclosing_func.name
         and enclosing_func.col_offset == 0
-        and "." not in ast.unparse(call_node)
+        and ancestor(node, ast.Call)
     )
 
 
