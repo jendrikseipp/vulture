@@ -21,6 +21,7 @@
 * Drop support for Python 3.7 (Jendrik Seipp, #323).
 * Add support for Python 3.12 (Jendrik Seipp, #332).
 * Use `end_lineno` AST attribute to obtain more accurate line counts (Jendrik Seipp).
+* Improve reachability analysis (kreathon, #270).
 
 # 2.9.1 (2023-08-21)
 
