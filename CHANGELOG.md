@@ -1,3 +1,7 @@
+# next (unreleased)
+
+* Add typehints for `get_unused_code` and the fields of the `Item` class (John Doknjas, #361).
+
 # 2.13 (2024-10-02)
 
 * Add support for Python 3.13 (Jendrik Seipp, #369).
