@@ -3,6 +3,7 @@ from enum import IntEnum
 import pathlib
 import sys
 import tokenize
+from typing import Optional
 
 
 class VultureInputException(Exception):
@@ -109,6 +110,32 @@ def read_file(filename):
             return f.read()
     except (SyntaxError, UnicodeDecodeError) as err:
         raise VultureInputException from err
+
+
+def add_parent_info(root: ast.AST) -> None:
+    # https://stackoverflow.com/a/43311383/7743427:
+    root.parent = None
+    for node in ast.walk(root):
+        for child in ast.iter_child_nodes(node):
+            child.parent = node
+
+
+def ancestor(node: ast.AST, target_ancestor_types) -> Optional[ast.AST]:
+    while node and not isinstance(node, target_ancestor_types):
+        node = getattr(node, "parent", None)
+    return node
+
+
+def top_lvl_recursive_call(node: ast.Name) -> bool:
+    """Returns true if a recursive call is made from a top level function to itself."""
+    assert isinstance(node, ast.Name)
+    enclosing_func = ancestor(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+    return bool(
+        enclosing_func
+        and node.id == enclosing_func.name
+        and enclosing_func.col_offset == 0
+        and ancestor(node, ast.Call)
+    )
 
 
 class LoggingList(list):
