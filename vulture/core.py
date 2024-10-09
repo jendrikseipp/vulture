@@ -2,6 +2,7 @@ import ast
 from fnmatch import fnmatch, fnmatchcase
 from pathlib import Path
 import pkgutil
+import os
 import re
 import string
 import sys
@@ -260,6 +261,11 @@ class Vulture(ast.NodeVisitor):
 
     def scavenge(self, paths, exclude=None):
         def prepare_pattern(pattern):
+            if pattern.startswith("./") is True:
+                pattern = os.path.abspath(pattern)
+                if pattern.endswith(".py") is False:
+                    pattern = f"{pattern}/*"
+                return pattern
             if not any(char in pattern for char in "*?["):
                 pattern = f"*{pattern}*"
             return pattern
