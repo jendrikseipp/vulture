@@ -191,16 +191,6 @@ Vulture will automatically look for a `pyproject.toml` in the current working di
 
 To use a `pyproject.toml` in another directory, you can use the `--config path/to/pyproject.toml` flag.
 
-It's also possible to use vulture programatically. For example:
-
-``` python
-import vulture
-
-v = vulture.Vulture()
-v.scavenge(['.'])
-unused_code = v.get_unused_code() # returns a list of `Item` objects
-```
-
 ## Integrations
 
 You can use a [pre-commit](https://pre-commit.com/#install) hook to run
@@ -219,7 +209,16 @@ Then run `pre-commit install`. Finally, create a `pyproject.toml` file
 in your repository and specify all files that Vulture should check under
 `[tool.vulture] --> paths` (see above).
 
-There's also a [GitHub Action for Vulture](https://github.com/gtkacz/vulture-action).
+There's also a [GitHub Action for Vulture](https://github.com/gtkacz/vulture-action)
+and you can use Vulture programatically. For example:
+
+``` python
+import vulture
+
+v = vulture.Vulture()
+v.scavenge(['.'])
+unused_code = v.get_unused_code()  # returns a list of `Item` objects
+```
 
 ## How does it work?
 
