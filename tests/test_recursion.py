@@ -1,7 +1,11 @@
+import sys
+
 from . import check, v, v_rec
 
 assert v
 assert v_rec
+
+new_version = sys.version_info.minor >= 9
 
 
 def test_recursion1(v, v_rec):
@@ -10,8 +14,12 @@ def Rec():
     Rec()
 """
     v_rec.scan(code)
-    check(v_rec.defined_funcs, ["Rec"])
-    check(v_rec.unused_funcs, ["Rec"])
+    if new_version:
+        check(v_rec.defined_funcs, ["Rec"])
+        check(v_rec.unused_funcs, ["Rec"])
+    else:
+        check(v_rec.defined_funcs, ["Rec"])
+        check(v_rec.unused_funcs, [])
     v.scan(code)
     check(v.defined_funcs, ["Rec"])
     check(v.unused_funcs, [])
@@ -51,10 +59,16 @@ def Rec4():
     Rec4()
 """
     v_rec.scan(code)
-    check(v_rec.defined_funcs, ["Rec2", "inst2", "Rec3", "Rec4"])
-    check(v_rec.unused_funcs, ["Rec2", "Rec3", "Rec4"])
-    check(v_rec.defined_methods, ["inst", "inst2", "Rec3", "Rec4"])
-    check(v_rec.unused_methods, ["inst", "Rec3", "Rec4"])
+    if new_version:
+        check(v_rec.defined_funcs, ["Rec2", "inst2", "Rec3", "Rec4"])
+        check(v_rec.unused_funcs, ["Rec2", "Rec3", "Rec4"])
+        check(v_rec.defined_methods, ["inst", "inst2", "Rec3", "Rec4"])
+        check(v_rec.unused_methods, ["inst", "Rec3", "Rec4"])
+    else:
+        check(v_rec.defined_funcs, ["Rec2", "inst2", "Rec3", "Rec4"])
+        check(v_rec.unused_funcs, [])
+        check(v_rec.defined_methods, ["inst", "inst2", "Rec3", "Rec4"])
+        check(v_rec.unused_methods, [])
     v.scan(code)
     check(v.defined_funcs, ["Rec2", "inst2", "Rec3", "Rec4"])
     check(v.unused_funcs, [])
@@ -82,9 +96,15 @@ def aa():
             "aa",
         ],
     )
-    check(v_rec.defined_methods, ["Rec"])
-    check(v_rec.unused_funcs, ["aa"])
-    check(v_rec.unused_methods, ["Rec"])
+    if new_version:
+        check(v_rec.defined_methods, ["Rec"])
+        check(v_rec.unused_funcs, ["aa"])
+        check(v_rec.unused_methods, ["Rec"])
+    else:
+        check(v_rec.defined_methods, ["Rec"])
+        check(v_rec.unused_funcs, [])
+        check(v_rec.unused_methods, [])
+
     v.scan(code)
     check(
         v.defined_funcs,
@@ -110,8 +130,12 @@ class MyClass:
         pass
 """
     v_rec.scan(code)
-    check(v_rec.defined_funcs, ["Rec", "Rec"])
-    check(v_rec.unused_funcs, ["Rec", "Rec"])
+    if new_version:
+        check(v_rec.defined_funcs, ["Rec", "Rec"])
+        check(v_rec.unused_funcs, ["Rec", "Rec"])
+    else:
+        check(v_rec.defined_funcs, ["Rec", "Rec"])
+        check(v_rec.unused_funcs, [])
     v.scan(code)
     check(v.defined_funcs, ["Rec", "Rec"])
     check(v.unused_funcs, [])
@@ -132,8 +156,12 @@ def outer():
         inner()
 """
     v_rec.scan(code)
-    check(v_rec.defined_funcs, ["rec", "outer", "inner"])
-    check(v_rec.unused_funcs, ["rec"])
+    if new_version:
+        check(v_rec.defined_funcs, ["rec", "outer", "inner"])
+        check(v_rec.unused_funcs, ["rec"])
+    else:
+        check(v_rec.defined_funcs, ["rec", "outer", "inner"])
+        check(v_rec.unused_funcs, [])
     v.scan(code)
     check(v.defined_funcs, ["rec", "outer", "inner"])
     check(v.unused_funcs, [])
@@ -147,8 +175,12 @@ def rec(num: int):
         return x
 """
     v_rec.scan(code)
-    check(v_rec.defined_funcs, ["rec"])
-    check(v_rec.unused_funcs, ["rec"])
+    if new_version:
+        check(v_rec.defined_funcs, ["rec"])
+        check(v_rec.unused_funcs, ["rec"])
+    else:
+        check(v_rec.defined_funcs, ["rec"])
+        check(v_rec.unused_funcs, [])
     v.scan(code)
     check(v.defined_funcs, ["rec"])
     check(v.unused_funcs, [])

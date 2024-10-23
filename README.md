@@ -152,7 +152,8 @@ For more verbose output, use the `--verbose` (or `-v`) flag.
 #### Not counting recursion
 
 It's possible that a function is only called by itself. The `--recursion` (or `-r`) flag will get
-vulture to mark most such functions as unused. Note that this will have some performance cost.
+vulture to mark most such functions as unused. Note that this will have some performance cost,
+and requires python >= 3.9.
 
 #### Unreachable code
 
