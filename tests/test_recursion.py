@@ -10,23 +10,6 @@ new_version = sys.version_info.minor >= 9
 
 def test_recursion1(v, v_rec):
     code = """\
-def Rec():
-    Rec()
-"""
-    v_rec.scan(code)
-    if new_version:
-        check(v_rec.defined_funcs, ["Rec"])
-        check(v_rec.unused_funcs, ["Rec"])
-    else:
-        check(v_rec.defined_funcs, ["Rec"])
-        check(v_rec.unused_funcs, [])
-    v.scan(code)
-    check(v.defined_funcs, ["Rec"])
-    check(v.unused_funcs, [])
-
-
-def test_recursion2(v, v_rec):
-    code = """\
 class MyClass:
     def __init__(self):
         pass
@@ -52,72 +35,31 @@ def inst2():
     o = MyClass()
     o.inst2()
 
-def Rec3():
-    Rec3()
+def Rec5():
+    Rec5()
 
-def Rec4():
-    Rec4()
+def Rec6():
+    Rec6()
 """
     v_rec.scan(code)
+    defined_funcs = ["Rec2", "inst2", "Rec5", "Rec6"]
+    defined_methods = ["inst", "inst2", "Rec3", "Rec4"]
+    check(v_rec.defined_funcs, defined_funcs)
+    check(v_rec.defined_methods, defined_methods)
     if new_version:
-        check(v_rec.defined_funcs, ["Rec2", "inst2", "Rec3", "Rec4"])
-        check(v_rec.unused_funcs, ["Rec2", "Rec3", "Rec4"])
-        check(v_rec.defined_methods, ["inst", "inst2", "Rec3", "Rec4"])
+        check(v_rec.unused_funcs, ["Rec2", "Rec5", "Rec6"])
         check(v_rec.unused_methods, ["inst", "Rec3", "Rec4"])
     else:
-        check(v_rec.defined_funcs, ["Rec2", "inst2", "Rec3", "Rec4"])
         check(v_rec.unused_funcs, [])
-        check(v_rec.defined_methods, ["inst", "inst2", "Rec3", "Rec4"])
         check(v_rec.unused_methods, [])
     v.scan(code)
-    check(v.defined_funcs, ["Rec2", "inst2", "Rec3", "Rec4"])
+    check(v.defined_funcs, defined_funcs)
     check(v.unused_funcs, [])
-    check(v.defined_methods, ["inst", "inst2", "Rec3", "Rec4"])
+    check(v.defined_methods, defined_methods)
     check(v.unused_methods, [])
 
 
-def test_recursion3(v, v_rec):
-    code = """\
-class MyClass:
-    def __init__(self):
-        pass
-
-    @classmethod
-    def Rec():
-        MyClass.Rec()
-
-def aa():
-    aa()
-"""
-    v_rec.scan(code)
-    check(
-        v_rec.defined_funcs,
-        [
-            "aa",
-        ],
-    )
-    if new_version:
-        check(v_rec.defined_methods, ["Rec"])
-        check(v_rec.unused_funcs, ["aa"])
-        check(v_rec.unused_methods, ["Rec"])
-    else:
-        check(v_rec.defined_methods, ["Rec"])
-        check(v_rec.unused_funcs, [])
-        check(v_rec.unused_methods, [])
-
-    v.scan(code)
-    check(
-        v.defined_funcs,
-        [
-            "aa",
-        ],
-    )
-    check(v.defined_methods, ["Rec"])
-    check(v.unused_funcs, [])
-    check(v.unused_methods, [])
-
-
-def test_recursion4(v, v_rec):
+def test_recursion2(v, v_rec):
     code = """\
 def Rec():
     Rec()
@@ -126,22 +68,24 @@ class MyClass:
     def __init__(self):
         pass
 
-    def Rec():
+    def Rec(self):
         pass
 """
+    defined_funcs = ["Rec"]
+    defined_methods = ["Rec"]
     v_rec.scan(code)
-    if new_version:
-        check(v_rec.defined_funcs, ["Rec", "Rec"])
-        check(v_rec.unused_funcs, ["Rec", "Rec"])
-    else:
-        check(v_rec.defined_funcs, ["Rec", "Rec"])
-        check(v_rec.unused_funcs, [])
+    check(v_rec.defined_funcs, defined_funcs)
+    check(v_rec.defined_methods, defined_methods)
+    check(v_rec.unused_funcs, defined_funcs if new_version else [])
+    check(v_rec.unused_methods, defined_methods if new_version else [])
     v.scan(code)
-    check(v.defined_funcs, ["Rec", "Rec"])
+    check(v.defined_funcs, defined_funcs)
+    check(v.defined_methods, defined_methods)
     check(v.unused_funcs, [])
+    check(v.unused_methods, [])
 
 
-def test_recursion5(v, v_rec):
+def test_recursion3(v, v_rec):
     code = """\
 def rec():
     if 5 > 4:
@@ -154,20 +98,46 @@ def outer():
         # are disregarded from recursion candidacy (to keep things simple)
         outer()
         inner()
+
+class MyClass:
+    def instMethod(self):
+        if 5 > 4:
+            if 5 > 4:
+                self.instMethod()
+    def classMethod1():
+        if 5 > 4:
+            if 5 > 4:
+                MyClass.classMethod1()
+    @classmethod
+    def classMethod2():
+        if 5 > 4:
+            if 5 > 4:
+                MyClass.classMethod2()
+    @staticmethod
+    def classMethod3():
+        if 5 > 4:
+            if 5 > 4:
+                MyClass.classMethod3()
 """
     v_rec.scan(code)
+    defined_funcs = ["rec", "outer", "inner", "classMethod1"]
+    defined_methods = ["instMethod", "classMethod2", "classMethod3"]
+    check(v_rec.defined_funcs, defined_funcs)
+    check(v_rec.defined_methods, defined_methods)
     if new_version:
-        check(v_rec.defined_funcs, ["rec", "outer", "inner"])
-        check(v_rec.unused_funcs, ["rec"])
+        check(v_rec.unused_funcs, ["rec", "classMethod1"])
+        check(v_rec.unused_methods, defined_methods)
     else:
-        check(v_rec.defined_funcs, ["rec", "outer", "inner"])
         check(v_rec.unused_funcs, [])
+        check(v_rec.unused_methods, [])
     v.scan(code)
-    check(v.defined_funcs, ["rec", "outer", "inner"])
+    check(v.defined_funcs, defined_funcs)
+    check(v.defined_methods, defined_methods)
     check(v.unused_funcs, [])
+    check(v.unused_methods, [])
 
 
-def test_recursion6(v, v_rec):
+def test_recursion4(v, v_rec):
     code = """\
 def rec(num: int):
     if num > 4:
@@ -175,31 +145,63 @@ def rec(num: int):
         return x
 """
     v_rec.scan(code)
-    if new_version:
-        check(v_rec.defined_funcs, ["rec"])
-        check(v_rec.unused_funcs, ["rec"])
-    else:
-        check(v_rec.defined_funcs, ["rec"])
-        check(v_rec.unused_funcs, [])
+    defined_funcs = ["rec"]
+    check(v_rec.defined_funcs, defined_funcs)
+    check(v_rec.unused_funcs, defined_funcs if new_version else [])
     v.scan(code)
-    check(v.defined_funcs, ["rec"])
+    check(v.defined_funcs, defined_funcs)
     check(v.unused_funcs, [])
 
 
-def test_recursion7(v, v_rec):
+def test_recursion5(v, v_rec):
     code = """\
 def rec(num: int):
     for i in (1, num):
         rec(i)
 rec(2)
+
+class myClass:
+    def instMethod(self, num2):
+        for i2 in (1, num2):
+            self.instMethod(i2)
+        myClass.classMethod1(1)
+        myClass.classMethod2(1)
+        myClass.classMethod3(1)
+    def classMethod1(num3):
+        for i3 in (1, num3):
+            myClass.classMethod1(i3)
+    @classmethod
+    def classMethod2(num4):
+        for i4 in (1, num4):
+            myClass.classMethod2(i4)
+    @staticmethod
+    def classMethod3(num5):
+        for i5 in (1, num5):
+            myClass.classMethod3(i5)
+o = MyClass()
+o.instMethod()
 """
+    defined_funcs = ["rec", "classMethod1"]
+    defined_methods = ["instMethod", "classMethod2", "classMethod3"]
+    defined_vars = [
+        "num",
+        "i",
+        "num2",
+        "i2",
+        "num3",
+        "i3",
+        "num4",
+        "i4",
+        "num5",
+        "i5",
+        "o",
+    ]
     v_rec.scan(code)
-    check(v_rec.defined_funcs, ["rec"])
-    check(v_rec.unused_funcs, [])
-    check(v_rec.defined_vars, ["num", "i"])
-    check(v_rec.unused_vars, [])
     v.scan(code)
-    check(v.defined_funcs, ["rec"])
-    check(v.unused_funcs, [])
-    check(v.defined_vars, ["num", "i"])
-    check(v.unused_vars, [])
+    for v_curr in (v_rec, v):
+        check(v_curr.defined_funcs, defined_funcs)
+        check(v_curr.unused_funcs, [])
+        check(v_curr.defined_methods, defined_methods)
+        check(v_curr.unused_methods, [])
+        check(v_curr.defined_vars, defined_vars)
+        check(v_curr.unused_vars, [])
