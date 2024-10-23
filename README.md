@@ -218,7 +218,16 @@ Then run `pre-commit install`. Finally, create a `pyproject.toml` file
 in your repository and specify all files that Vulture should check under
 `[tool.vulture] --> paths` (see above).
 
-There's also a [GitHub Action for Vulture](https://github.com/gtkacz/vulture-action).
+There's also a [GitHub Action for Vulture](https://github.com/gtkacz/vulture-action)
+and you can use Vulture programatically. For example:
+
+``` python
+import vulture
+
+v = vulture.Vulture()
+v.scavenge(['.'])
+unused_code = v.get_unused_code()  # returns a list of `Item` objects
+```
 
 ## How does it work?
 
