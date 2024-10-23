@@ -138,6 +138,7 @@ def ancestor(
 
 def call_info_no_args(call_node: ast.Call) -> str:
     """Returns a string of the portion of the function call that's before the parenthesized arg list."""
+    assert sys.version_info.minor >= 9
     return ast.unparse(call_node).split("(")[0]
 
 

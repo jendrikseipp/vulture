@@ -203,7 +203,7 @@ class Vulture(ast.NodeVisitor):
         recursion=False,
     ):
         self.verbose = verbose
-        self.recursion = recursion
+        self.recursion = recursion and sys.version_info.minor >= 9
 
         def get_list(typ):
             return utils.LoggingList(typ, self.verbose)
