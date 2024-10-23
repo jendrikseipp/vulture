@@ -145,6 +145,16 @@ function arguments, e.g., `def foo(x, _y)`.
 
 Raise the minimum [confidence value](#types-of-unused-code) with the `--min-confidence` flag.
 
+#### Verbose output
+
+For more verbose output, use the `--verbose` (or `-v`) flag.
+
+#### Not counting recursion
+
+It's possible that a function is only called by itself. The `--recursion` (or `-r`) flag will get
+vulture to mark most such functions as unused. Note that this will have some performance cost,
+and requires python >= 3.9.
+
 #### Unreachable code
 
 If Vulture complains about code like `if False:`, you can use a Boolean

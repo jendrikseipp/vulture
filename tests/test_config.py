@@ -39,6 +39,7 @@ def test_cli_args():
         min_confidence=10,
         sort_by_size=True,
         verbose=True,
+        recursion=True,
     )
     result = _parse_args(
         [
@@ -51,6 +52,7 @@ def test_cli_args():
             "--verbose",
             "path1",
             "path2",
+            "-r",
         ]
     )
     assert isinstance(result, dict)
@@ -70,6 +72,7 @@ def test_toml_config():
         min_confidence=10,
         sort_by_size=True,
         verbose=True,
+        recursion=True,
     )
     data = get_toml_bytes(
         dedent(
@@ -82,6 +85,7 @@ def test_toml_config():
         min_confidence = 10
         sort_by_size = true
         verbose = true
+        recursion = true
         paths = ["path1", "path2"]
         """
         )
@@ -146,6 +150,7 @@ def test_config_merging():
         min_confidence = 10
         sort_by_size = false
         verbose = false
+        recursion = false
         paths = ["toml_path"]
         """
         )
@@ -158,6 +163,7 @@ def test_config_merging():
         "--min-confidence=20",
         "--sort-by-size",
         "--verbose",
+        "--recursion",
         "cli_path",
     ]
     result = make_config(cliargs, toml)
@@ -171,6 +177,7 @@ def test_config_merging():
         min_confidence=20,
         sort_by_size=True,
         verbose=True,
+        recursion=True,
     )
     assert result == expected
 

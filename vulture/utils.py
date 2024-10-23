@@ -3,6 +3,7 @@ from enum import IntEnum
 import pathlib
 import sys
 import tokenize
+from typing import Optional, Union
 
 
 class VultureInputException(Exception):
@@ -109,6 +110,59 @@ def read_file(filename):
             return f.read()
     except (SyntaxError, UnicodeDecodeError) as err:
         raise VultureInputException from err
+
+
+def add_parents(root: ast.AST) -> None:
+    # https://stackoverflow.com/a/43311383/7743427:
+    root.parent = None
+    for node in ast.walk(root):
+        for child in ast.iter_child_nodes(node):
+            child.parent = node
+
+
+def parent(node: Optional[ast.AST]) -> Optional[ast.AST]:
+    return getattr(node, "parent", None)
+
+
+def ancestor(
+    node: ast.AST, target_ancestor_types, limit: int
+) -> Optional[ast.AST]:
+    """`limit` is how far back to search before giving up and returning `None` instead"""
+    assert limit < 100
+    if limit == 0:
+        return None
+    if not (node := parent(node)) or isinstance(node, target_ancestor_types):
+        return node
+    return ancestor(node, target_ancestor_types, limit - 1)
+
+
+def call_info_no_args(call_node: ast.Call) -> str:
+    """Returns a string of the portion of the function call that's before the parenthesized arg list."""
+    assert sys.version_info.minor >= 9
+    return ast.unparse(call_node).split("(")[0]
+
+
+def recursive_call(node: Union[ast.Name, ast.Attribute]) -> Optional[bool]:
+    """Returns a boolean if it can be determined the node is part of a recursive call.
+    Otherwise if the function is nested in a complicated way, `None` is returned."""
+    if not isinstance((call_node := parent(node)), ast.Call) or not (
+        func := ancestor(node, (ast.FunctionDef, ast.AsyncFunctionDef), 10)
+    ):
+        return False
+    if isinstance((func_parent := parent(func)), ast.Module):
+        return call_info_no_args(call_node) == func.name
+    if not isinstance(func_parent, ast.ClassDef) or not isinstance(
+        parent(func_parent), ast.Module
+    ):
+        return None
+    return call_info_no_args(call_node).split(".") == [
+        (
+            "self"
+            if "self" == next((x.arg for x in func.args.args), None)
+            else func_parent.name
+        ),
+        func.name,
+    ]
 
 
 class LoggingList(list):
