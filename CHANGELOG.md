@@ -1,3 +1,7 @@
+# next (unreleased)
+
+* Add an option to mark most functions only called recursively as unused (John Doknjas, #374).
+
 # 2.13 (2024-10-02)
 
 * Add support for Python 3.13 (Jendrik Seipp, #369).

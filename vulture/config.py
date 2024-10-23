@@ -23,6 +23,7 @@ DEFAULTS = {
     "make_whitelist": False,
     "sort_by_size": False,
     "verbose": False,
+    "recursion": False,
 }
 
 
@@ -169,6 +170,9 @@ def _parse_args(args=None):
         "-v", "--verbose", action="store_true", default=missing
     )
     parser.add_argument("--version", action="version", version=version)
+    parser.add_argument(
+        "-r", "--recursion", action="store_true", default=missing
+    )
     namespace = parser.parse_args(args)
     cli_args = {
         key: value

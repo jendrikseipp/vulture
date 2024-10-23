@@ -195,9 +195,14 @@ class Vulture(ast.NodeVisitor):
     """Find dead code."""
 
     def __init__(
-        self, verbose=False, ignore_names=None, ignore_decorators=None
+        self,
+        verbose=False,
+        ignore_names=None,
+        ignore_decorators=None,
+        recursion=False,
     ):
         self.verbose = verbose
+        self.recursion = recursion
 
         def get_list(typ):
             return utils.LoggingList(typ, self.verbose)
@@ -250,7 +255,8 @@ class Vulture(ast.NodeVisitor):
             )
             self.exit_code = ExitCode.InvalidInput
         else:
-            utils.add_parent_info(node)
+            if self.recursion:
+                utils.add_parents(node)
             # When parsing type comments, visiting can throw a SyntaxError:
             try:
                 self.visit(node)
@@ -509,7 +515,9 @@ class Vulture(ast.NodeVisitor):
     def visit_Attribute(self, node):
         if isinstance(node.ctx, ast.Store):
             self._define(self.defined_attrs, node.attr, node)
-        elif isinstance(node.ctx, ast.Load):
+        elif isinstance(node.ctx, ast.Load) and not getattr(
+            node, "recursive", None
+        ):
             self.used_names.add(node.attr)
 
     def visit_BinOp(self, node):
@@ -547,6 +555,9 @@ class Vulture(ast.NodeVisitor):
             )
         ):
             self._handle_new_format_string(node.func.value.value)
+
+        if self.recursion and isinstance(node.func, (ast.Name, ast.Attribute)):
+            node.func.recursive = utils.recursive_call(node.func)
 
     def _handle_new_format_string(self, s):
         def is_identifier(name):
@@ -643,7 +654,7 @@ class Vulture(ast.NodeVisitor):
         if (
             isinstance(node.ctx, (ast.Load, ast.Del))
             and node.id not in IGNORED_VARIABLE_NAMES
-            and not utils.top_lvl_recursive_call(node)
+            and not getattr(node, "recursive", None)
         ):
             self.used_names.add(node.id)
         elif isinstance(node.ctx, (ast.Param, ast.Store)):
@@ -734,6 +745,7 @@ def main():
         verbose=config["verbose"],
         ignore_names=config["ignore_names"],
         ignore_decorators=config["ignore_decorators"],
+        recursion=config["recursion"],
     )
     vulture.scavenge(config["paths"], exclude=config["exclude"])
     sys.exit(

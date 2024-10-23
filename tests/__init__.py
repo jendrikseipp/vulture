@@ -42,3 +42,8 @@ def check_unreachable(v, lineno, size, name):
 @pytest.fixture
 def v():
     return core.Vulture(verbose=True)
+
+
+@pytest.fixture
+def v_rec():
+    return core.Vulture(verbose=True, recursion=True)
