@@ -3,7 +3,7 @@ from enum import IntEnum
 import pathlib
 import sys
 import tokenize
-from typing import Optional
+from typing import Optional, Union
 
 
 class VultureInputException(Exception):
@@ -120,7 +120,7 @@ def add_parents(root: ast.AST) -> None:
             child.parent = node
 
 
-def parent(node: Optional[ast.AST]) -> ast.AST | None:
+def parent(node: Optional[ast.AST]) -> Optional[ast.AST]:
     return getattr(node, "parent", None)
 
 
@@ -141,7 +141,7 @@ def call_info_no_args(call_node: ast.Call) -> str:
     return ast.unparse(call_node).split("(")[0]
 
 
-def recursive_call(node: ast.Name | ast.Attribute) -> Optional[bool]:
+def recursive_call(node: Union[ast.Name, ast.Attribute]) -> Optional[bool]:
     """Returns a boolean if it can be determined the node is part of a recursive call.
     Otherwise if the function is nested in a complicated way, `None` is returned."""
     if not isinstance((call_node := parent(node)), ast.Call) or not (
