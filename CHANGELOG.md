@@ -1,6 +1,7 @@
 # next (unreleased)
 
 * Add type hints for `get_unused_code` and the fields of the `Item` class (John Doknjas, #361).
+* Remove `pass_filenames: false` from pre-commit hook config
 
 # 2.13 (2024-10-02)
 
