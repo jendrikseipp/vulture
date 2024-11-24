@@ -630,7 +630,6 @@ class Vulture(ast.NodeVisitor):
             self.used_names.add(kwd_attr)
 
     def visit(self, node):
-
         # Visit children nodes first to allow recursive reachability analysis.
         self.generic_visit(node)
 

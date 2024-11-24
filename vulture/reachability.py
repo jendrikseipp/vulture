@@ -64,7 +64,6 @@ class Reachability:
         return True
 
     def _handle_reachability_if(self, node):
-
         has_else = bool(node.orelse)
 
         if utils.condition_is_always_false(node.test):
@@ -82,7 +81,6 @@ class Reachability:
             )
 
         elif utils.condition_is_always_true(node.test):
-
             if_can_fall_through = self._can_fall_through_statements_analysis(
                 node.body
             )
@@ -143,7 +141,6 @@ class Reachability:
             )
 
     def _handle_reachability_while(self, node):
-
         if utils.condition_is_always_false(node.test):
             self._report(
                 name="while",
@@ -167,7 +164,6 @@ class Reachability:
         self._can_fall_through_statements_analysis(node.body)
 
     def _handle_reachability_try(self, node):
-
         try_can_fall_through = self._can_fall_through_statements_analysis(
             node.body
         )
