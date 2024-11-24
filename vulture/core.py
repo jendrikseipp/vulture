@@ -262,7 +262,7 @@ class Vulture(ast.NodeVisitor):
 
     def scavenge(self, paths, exclude=None):
         def prepare_pattern(pattern):
-            if pattern.startswith("./") is True:
+            if pattern.startswith("./"):
                 pattern = os.path.abspath(pattern)
                 if os.path.isdir(pattern):
                     pattern = os.path.join(pattern, "*")
