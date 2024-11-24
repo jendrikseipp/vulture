@@ -1,5 +1,6 @@
 # next (unreleased)
 
+* Improve reachability analysis (kreathon, #270, #302).
 * Add type hints for `get_unused_code` and the fields of the `Item` class (John Doknjas, #361).
 
 # 2.13 (2024-10-02)
