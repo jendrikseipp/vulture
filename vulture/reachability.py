@@ -9,6 +9,7 @@ class Reachability:
         self._no_fall_through_nodes = set()
 
     def visit(self, node):
+        """When called, all children of this node have already been visited."""
         if isinstance(node, (ast.Break, ast.Continue, ast.Return, ast.Raise)):
             self._mark_as_no_fall_through(node)
         elif isinstance(

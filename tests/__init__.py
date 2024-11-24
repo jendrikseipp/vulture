@@ -31,20 +31,20 @@ def check(items_or_names, expected_names):
         assert items_or_names == set(expected_names)
 
 
-def check_unreachable(v, lineno, size, name, multiple=False):
-    # Match by lineno, if we allow multiple unreachables, otherwise
-    # the first unreachable item is taken.
-    if multiple:
-        item = next(
-            item for item in v.unreachable_code if item.first_lineno == lineno
-        )
-    else:
-        assert len(v.unreachable_code) == 1
-        item = v.unreachable_code[0]
-        assert item.first_lineno == lineno
-
+def check_unreachable(v, lineno, size, name):
+    assert len(v.unreachable_code) == 1
+    item = v.unreachable_code[0]
+    assert item.first_lineno == lineno
     assert item.size == size
     assert item.name == name
+
+
+def check_multiple_unreachable(v, checks):
+    assert len(v.unreachable_code) == len(checks)
+    for item, (lineno, size, name) in zip(v.unreachable_code, checks):
+        assert item.first_lineno == lineno
+        assert item.size == size
+        assert item.name == name
 
 
 @pytest.fixture

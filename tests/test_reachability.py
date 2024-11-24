@@ -1,4 +1,4 @@
-from . import check_unreachable
+from . import check_multiple_unreachable, check_unreachable
 from . import v
 
 assert v  # Silence pyflakes
@@ -479,8 +479,7 @@ def foo(a):
     print(":-(")
 """
     )
-    check_unreachable(v, 2, 2, "if", multiple=True)
-    check_unreachable(v, 4, 1, "if", multiple=True)
+    check_multiple_unreachable(v, [(2, 2, "if"), (4, 1, "if")])
 
 
 def test_if_true_return_else(v):
@@ -494,8 +493,7 @@ def foo(a):
     print(":-(")
 """
     )
-    check_unreachable(v, 5, 1, "else", multiple=True)
-    check_unreachable(v, 6, 1, "if", multiple=True)
+    check_multiple_unreachable(v, [(5, 1, "else"), (6, 1, "if")])
 
 
 def test_if_some_branches_return(v):

@@ -12,8 +12,8 @@ from vulture import lines
 from vulture import noqa
 from vulture import utils
 from vulture.config import InputError, make_config
-from vulture.utils import ExitCode
 from vulture.reachability import Reachability
+from vulture.utils import ExitCode
 
 
 DEFAULT_CONFIDENCE = 60
