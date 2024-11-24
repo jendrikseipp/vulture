@@ -1,8 +1,8 @@
 import ast
-from enum import IntEnum
 import pathlib
 import sys
 import tokenize
+from enum import IntEnum
 
 
 class VultureInputException(Exception):

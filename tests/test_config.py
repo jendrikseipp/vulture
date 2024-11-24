@@ -2,19 +2,19 @@
 Unit tests for config file and CLI argument parsing.
 """
 
-from io import BytesIO
 import pathlib
+from io import BytesIO
 from textwrap import dedent
 
 import pytest
 
 from vulture.config import (
     DEFAULTS,
+    InputError,
     _check_input_config,
     _parse_args,
     _parse_toml,
     make_config,
-    InputError,
 )
 
 

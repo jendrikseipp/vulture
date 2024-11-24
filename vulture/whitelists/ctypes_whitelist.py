@@ -1,5 +1,4 @@
-from ctypes import _CFuncPtr
-from ctypes import _Pointer
+from ctypes import _CFuncPtr, _Pointer
 
 _CFuncPtr.argtypes
 _CFuncPtr.errcheck

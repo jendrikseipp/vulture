@@ -31,7 +31,7 @@ def check(name, text):
     print("*" * 60)
     print(text)
     print("*" * 60)
-    response = input("Accept this %s (Y/n)? " % name).strip().lower()
+    response = input(f"Accept this {name} (Y/n)? ").strip().lower()
     if response and response != "y":
         sys.exit(1)
 

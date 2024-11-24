@@ -1,7 +1,8 @@
 import codecs
 
-from . import v
 from vulture.utils import ExitCode
+
+from . import v
 
 assert v  # Silence pyflakes.
 

@@ -1,20 +1,17 @@
 import ast
-from fnmatch import fnmatch, fnmatchcase
-from functools import partial
-from pathlib import Path
 import pkgutil
 import re
 import string
 import sys
+from fnmatch import fnmatch, fnmatchcase
+from functools import partial
+from pathlib import Path
 from typing import List
 
-from vulture import lines
-from vulture import noqa
-from vulture import utils
+from vulture import lines, noqa, utils
 from vulture.config import InputError, make_config
 from vulture.reachability import Reachability
 from vulture.utils import ExitCode
-
 
 DEFAULT_CONFIDENCE = 60
 
@@ -161,12 +158,9 @@ class Item:
             size_report = f", {self.size:d} {line_format}"
         else:
             size_report = ""
-        return "{}:{:d}: {} ({}% confidence{})".format(
-            utils.format_path(self.filename),
-            self.first_lineno,
-            self.message,
-            self.confidence,
-            size_report,
+        return (
+            f"{utils.format_path(self.filename)}:{self.first_lineno:d}: "
+            f"{self.message} ({self.confidence}% confidence{size_report})"
         )
 
     def get_whitelist_string(self):
@@ -177,8 +171,9 @@ class Item:
             prefix = ""
             if self.typ in ["attribute", "method", "property"]:
                 prefix = "_."
-            return "{}{}  # unused {} ({}:{:d})".format(
-                prefix, self.name, self.typ, filename, self.first_lineno
+            return (
+                f"{prefix}{self.name}  # unused {self.typ} "
+                f"({filename}:{self.first_lineno:d})"
             )
 
     def _tuple(self):

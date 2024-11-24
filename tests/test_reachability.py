@@ -1,5 +1,4 @@
-from . import check_multiple_unreachable, check_unreachable
-from . import v
+from . import check_multiple_unreachable, check_unreachable, v
 
 assert v  # Silence pyflakes
 

@@ -2,8 +2,9 @@ import sys
 
 import pytest
 
-from . import check, v
 from vulture.utils import ExitCode
+
+from . import check, v
 
 assert v  # Silence pyflakes.
 

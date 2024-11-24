@@ -3,8 +3,9 @@ import os.path
 import subprocess
 import sys
 
-from . import call_vulture, REPO, WHITELISTS
 from vulture.utils import ExitCode
+
+from . import REPO, WHITELISTS, call_vulture
 
 
 def test_module_with_explicit_whitelists():

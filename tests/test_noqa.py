@@ -2,6 +2,7 @@ import pytest
 
 from vulture.core import ERROR_CODES
 from vulture.noqa import NOQA_CODE_MAP, NOQA_REGEXP, _parse_error_codes
+
 from . import check, v
 
 assert v  # Silence pyflakes.

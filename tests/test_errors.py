@@ -1,7 +1,8 @@
 import pytest
 
-from . import v, call_vulture
 from vulture.utils import ExitCode
+
+from . import call_vulture, v
 
 assert v  # Silence pyflakes.
 

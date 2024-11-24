@@ -1,5 +1,5 @@
-from collections import defaultdict
 import re
+from collections import defaultdict
 
 NOQA_REGEXP = re.compile(
     # Use the same regex as flake8 does.
