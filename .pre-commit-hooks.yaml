@@ -4,6 +4,9 @@
   entry: vulture
   description: Find unused Python code.
   types: [python]
+  # Vulture needs access to all files for a complete analysis, so we
+  # prevent pre-commit from passing only the changed files. Instead,
+  # please create a `pyproject.toml` file in your repository and specify
+  # all files that Vulture should check under `[tool.vulture] --> paths`.
   pass_filenames: false
   require_serial: true
-  
