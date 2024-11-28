@@ -8,18 +8,25 @@ class Reachability:
         self._report = report
         self._no_fall_through_nodes = set()
 
+        # Since we visit the children nodes first, we need to maintain a flag
+        # that indicates if a break statement was seen. When visiting the
+        # parent (While, For, or AsyncFor), the value is checked and reset.
+        # Assumes code is valid (break statements only in loops).
+        self._current_loop_has_break_statement = False
+
     def visit(self, node):
         """When called, all children of this node have already been visited."""
         if isinstance(node, (ast.Break, ast.Continue, ast.Return, ast.Raise)):
             self._mark_as_no_fall_through(node)
+            if isinstance(node, ast.Break):
+                self._current_loop_has_break_statement = True
+
         elif isinstance(
             node,
             (
                 ast.Module,
                 ast.FunctionDef,
                 ast.AsyncFunctionDef,
-                ast.For,
-                ast.AsyncFor,
                 ast.With,
                 ast.AsyncWith,
             ),
@@ -27,6 +34,10 @@ class Reachability:
             self._can_fall_through_statements_analysis(node.body)
         elif isinstance(node, ast.While):
             self._handle_reachability_while(node)
+            self._current_loop_has_break_statement = False
+        elif isinstance(node, (ast.For, ast.AsyncFor)):
+            self._can_fall_through_statements_analysis(node.body)
+            self._current_loop_has_break_statement = False
         elif isinstance(node, ast.If):
             self._handle_reachability_if(node)
         elif isinstance(node, ast.IfExp):
@@ -161,6 +172,9 @@ class Reachability:
                     last_node=else_body[-1],
                     message="unreachable 'else' block",
                 )
+
+            if not self._current_loop_has_break_statement:
+                self._mark_as_no_fall_through(node)
 
         self._can_fall_through_statements_analysis(node.body)
 
