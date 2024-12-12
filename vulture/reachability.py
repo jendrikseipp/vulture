@@ -10,8 +10,8 @@ class Reachability:
 
         # Since we visit the children nodes first, we need to maintain a flag
         # that indicates if a break statement was seen. When visiting the
-        # parent (While, For, or AsyncFor), the value is checked and reset.
-        # Assumes code is valid (break statements only in loops).
+        # parent (While, For or AsyncFor), the value is checked (for While)
+        # and reset. Assumes code is valid (break statements only in loops).
         self._current_loop_has_break_statement = False
 
     def visit(self, node):

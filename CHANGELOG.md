@@ -1,6 +1,9 @@
-# 2.14 (2024-12-08)
+# next (unreleased)
 
 * Handle `while True` loops without `break` statements (kreathon).
+
+# 2.14 (2024-12-08)
+
 * Improve reachability analysis (kreathon, #270, #302).
 * Add type hints for `get_unused_code` and the fields of the `Item` class (John Doknjas, #361).
 
