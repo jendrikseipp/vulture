@@ -731,13 +731,77 @@ else:
     check_unreachable(v, 4, 1, "else")
 
 
+def test_while_true_no_fall_through(v):
+    v.scan(
+        """\
+while True:
+    raise Exception() 
+print(":-(")
+"""
+    )
+    check_unreachable(v, 3, 1, "while")
+
+
+def test_while_true_no_fall_through_nested(v):
+    v.scan(
+        """\
+while True:
+    if a > 3:
+        raise Exception() 
+    else:
+        pass
+print(":-(")
+"""
+    )
+    check_unreachable(v, 6, 1, "while")
+
+
+def test_while_true_no_fall_through_nested_loops(v):
+    v.scan(
+        """\
+while True:
+    for _ in range(3):
+        break
+    while False:
+        break
+print(":-(")
+"""
+    )
+    check_multiple_unreachable(v, [(4, 2, "while"), (6, 1, "while")])
+
+
+def test_while_true_fall_through(v):
+    v.scan(
+        """\
+while True:
+    break 
+print(":-)")
+"""
+    )
+    assert v.unreachable_code == []
+
+
+def test_while_true_fall_through_nested(v):
+    v.scan(
+        """\
+while True:
+    if a > 3:
+        raise Exception() 
+    else:
+        break
+print(":-(")
+"""
+    )
+    assert v.unreachable_code == []
+
+
 def test_while_fall_through(v):
     v.scan(
         """\
 def foo(a):
     while a > 0:
         return 1
-    print(":-(")
+    print(":-)")
 """
     )
     assert v.unreachable_code == []
