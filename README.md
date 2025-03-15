@@ -238,6 +238,11 @@ When using the `--sort-by-size` option, Vulture sorts unused code by its
 number of lines. This helps developers prioritize where to look for dead
 code first.
 
+## Ignore attributes for classes
+
+When using the `--ignore-attributes-for-classes` option, 
+Vulture suppresses unused class attributes.
+
 ## Examples
 
 Consider the following Python script (`dead_code.py`):

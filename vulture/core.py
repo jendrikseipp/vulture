@@ -3,10 +3,13 @@ import pkgutil
 import re
 import string
 import sys
+from collections.abc import Container
 from fnmatch import fnmatch, fnmatchcase
 from functools import partial
+from itertools import chain
+from operator import attrgetter
 from pathlib import Path
-from typing import List
+from typing import Iterable, List
 
 from vulture import lines, noqa, utils
 from vulture.config import InputError, make_config
@@ -39,79 +42,6 @@ ERROR_CODES = {
     "variable": "V107",
     "unreachable_code": "V201",
 }
-
-
-def _get_unused_items(defined_items, used_names):
-    unused_items = [
-        item for item in set(defined_items) if item.name not in used_names
-    ]
-    unused_items.sort(key=lambda item: item.name.lower())
-    return unused_items
-
-
-def _is_special_name(name):
-    return name.startswith("__") and name.endswith("__")
-
-
-def _match(name, patterns, case=True):
-    func = fnmatchcase if case else fnmatch
-    return any(func(name, pattern) for pattern in patterns)
-
-
-def _is_test_file(filename):
-    return _match(
-        filename.resolve(),
-        ["*/test/*", "*/tests/*", "*/test*.py", "*[-_]test.py"],
-        case=False,
-    )
-
-
-def _assigns_special_variable__all__(node):
-    assert isinstance(node, ast.Assign)
-    return isinstance(node.value, (ast.List, ast.Tuple)) and any(
-        target.id == "__all__"
-        for target in node.targets
-        if isinstance(target, ast.Name)
-    )
-
-
-def _ignore_class(filename, class_name):
-    return _is_test_file(filename) and "Test" in class_name
-
-
-def _ignore_import(filename, import_name):
-    """
-    Ignore star-imported names since we can't detect whether they are used.
-    Ignore imports from __init__.py files since they're commonly used to
-    collect objects from a package.
-    """
-    return filename.name == "__init__.py" or import_name == "*"
-
-
-def _ignore_function(filename, function_name):
-    return (
-        function_name in PYTEST_FUNCTION_NAMES
-        or function_name.startswith("test_")
-    ) and _is_test_file(filename)
-
-
-def _ignore_method(filename, method_name):
-    return _is_special_name(method_name) or (
-        (method_name in PYTEST_METHOD_NAMES or method_name.startswith("test_"))
-        and _is_test_file(filename)
-    )
-
-
-def _ignore_variable(filename, varname):
-    """
-    Ignore _ (Python idiom), _x (pylint convention) and
-    __x__ (special variable or method), but not __x.
-    """
-    return (
-        varname in IGNORED_VARIABLE_NAMES
-        or (varname.startswith("_") and not varname.startswith("__"))
-        or _is_special_name(varname)
-    )
 
 
 class Item:
@@ -189,11 +119,93 @@ class Item:
         return hash(self._tuple())
 
 
+def _get_unused_items(
+    defined_items: Iterable[Item], used_names: Container
+) -> List[Item]:
+    return sorted(
+        [
+            item
+            for item in frozenset(defined_items)
+            if item.name not in used_names
+        ],
+        key=lambda item: item.name.lower(),
+    )
+
+
+def _is_special_name(name):
+    return name.startswith("__") and name.endswith("__")
+
+
+def _match(name, patterns, case=True):
+    func = fnmatchcase if case else fnmatch
+    return any(func(name, pattern) for pattern in patterns)
+
+
+def _is_test_file(filename):
+    return _match(
+        filename.resolve(),
+        ["*/test/*", "*/tests/*", "*/test*.py", "*[-_]test.py"],
+        case=False,
+    )
+
+
+def _assigns_special_variable__all__(node):
+    assert isinstance(node, ast.Assign)
+    return isinstance(node.value, (ast.List, ast.Tuple)) and any(
+        target.id == "__all__"
+        for target in node.targets
+        if isinstance(target, ast.Name)
+    )
+
+
+def _ignore_class(filename, class_name):
+    return _is_test_file(filename) and "Test" in class_name
+
+
+def _ignore_import(filename, import_name):
+    """
+    Ignore star-imported names since we can't detect whether they are used.
+    Ignore imports from __init__.py files since they're commonly used to
+    collect objects from a package.
+    """
+    return filename.name == "__init__.py" or import_name == "*"
+
+
+def _ignore_function(filename, function_name):
+    return (
+        function_name in PYTEST_FUNCTION_NAMES
+        or function_name.startswith("test_")
+    ) and _is_test_file(filename)
+
+
+def _ignore_method(filename, method_name):
+    return _is_special_name(method_name) or (
+        (method_name in PYTEST_METHOD_NAMES or method_name.startswith("test_"))
+        and _is_test_file(filename)
+    )
+
+
+def _ignore_variable(filename, varname):
+    """
+    Ignore _ (Python idiom), _x (pylint convention) and
+    __x__ (special variable or method), but not __x.
+    """
+    return (
+        varname in IGNORED_VARIABLE_NAMES
+        or (varname.startswith("_") and not varname.startswith("__"))
+        or _is_special_name(varname)
+    )
+
+
 class Vulture(ast.NodeVisitor):
     """Find dead code."""
 
     def __init__(
-        self, verbose=False, ignore_names=None, ignore_decorators=None
+        self,
+        verbose=False,
+        ignore_names=None,
+        ignore_decorators=None,
+        ignore_class_attrs=None,
     ):
         self.verbose = verbose
 
@@ -213,6 +225,7 @@ class Vulture(ast.NodeVisitor):
 
         self.ignore_names = ignore_names or []
         self.ignore_decorators = ignore_decorators or []
+        self.ignore_class_attrs = ignore_class_attrs or []
 
         self.filename = Path()
         self.code = []
@@ -550,6 +563,31 @@ class Vulture(ast.NodeVisitor):
         )
 
     def visit_ClassDef(self, node):
+        def get_attrs(elem) -> Iterable[ast.Name]:
+            if isinstance(elem, ast.Name):
+                yield elem
+                return
+            if isinstance(elem, ast.AnnAssign):
+                yield elem.target
+                return
+            if not isinstance(elem, (ast.Assign, ast.Tuple)):
+                return
+            elts = []
+            if isinstance(elem, ast.Tuple):
+                elts = elem.elts
+            for target in elts or elem.targets:
+                yield from get_attrs(target)
+
+        if any(
+            re.findall(pattern, node.name)
+            for pattern in self.ignore_class_attrs
+        ):
+            self.used_names.update(
+                map(
+                    attrgetter("id"),
+                    chain.from_iterable(map(get_attrs, node.body)),
+                )
+            )
         for decorator in node.decorator_list:
             if _match(
                 utils.get_decorator_name(decorator), self.ignore_decorators
@@ -674,6 +712,7 @@ def main():
         verbose=config["verbose"],
         ignore_names=config["ignore_names"],
         ignore_decorators=config["ignore_decorators"],
+        ignore_class_attrs=config["ignore_attributes_for_classes"],
     )
     vulture.scavenge(config["paths"], exclude=config["exclude"])
     sys.exit(

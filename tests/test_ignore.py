@@ -3,11 +3,14 @@ from vulture import core
 from . import check
 
 
-def check_ignore(code, ignore_names, ignore_decorators, expected):
+def check_ignore(
+    code, ignore_names, ignore_decorators, ignore_class_attrs, expected
+):
     v = core.Vulture(
         verbose=True,
         ignore_names=ignore_names,
         ignore_decorators=ignore_decorators,
+        ignore_class_attrs=ignore_class_attrs,
     )
     v.scan(code)
     check(v.get_unused_code(), expected)
@@ -22,7 +25,40 @@ ftobar = 3
 baz = 10000
 funny = True
 """
-    check_ignore(code, ["f?o*", "ba[rz]"], [], ["funny"])
+    check_ignore(code, ["f?o*", "ba[rz]"], [], [], ["funny"])
+
+
+def test_var_and_attrs():
+    code = """\
+class Foo1:
+    foo1: str
+    foo2: str = ""
+    foo3 = None
+    foo4, foo5 = None, None
+class Foo2:
+    foo6: str
+    foo7: str = ""
+    foo8 = None
+    foo9, foo0 = None, None
+funny = True
+"""
+    check_ignore(code, [], [], ["Foo*"], ["Foo1", "Foo2", "funny"])
+    check_ignore(
+        code,
+        [],
+        [],
+        ["Foo1"],
+        [
+            "Foo1",
+            "Foo2",
+            "funny",
+            "foo6",
+            "foo7",
+            "foo8",
+            "foo9",
+            "foo0",
+        ],
+    )
 
 
 def test_function():
@@ -36,7 +72,7 @@ def foo():
 def bar():
     pass
 """
-    check_ignore(code, ["foo*"], [], ["bar"])
+    check_ignore(code, ["foo*"], [], [], ["bar"])
 
 
 def test_async_function():
@@ -46,7 +82,7 @@ async def foobar():
 async def bar():
     pass
 """
-    check_ignore(code, ["foo*"], [], ["bar"])
+    check_ignore(code, ["foo*"], [], [], ["bar"])
 
 
 def test_class():
@@ -55,7 +91,7 @@ class Foo:
     def __init__(self):
         pass
 """
-    check_ignore(code, ["Foo"], [], [])
+    check_ignore(code, ["Foo"], [], [], [])
 
 
 def test_class_ignore():
@@ -67,7 +103,7 @@ class Foo:
 class Bar:
     pass
 """
-    check_ignore(code, [], [], ["Foo", "Bar"])
+    check_ignore(code, [], [], [], ["Foo", "Bar"])
 
 
 def test_property():
@@ -82,8 +118,8 @@ class Foo:
     def foo_bar(self):
         return 'bar'
 """
-    check_ignore(code, ["Foo"], ["@property"], [])
-    check_ignore(code, ["Foo"], [], ["some_property", "foo_bar"])
+    check_ignore(code, ["Foo"], ["@property"], [], [])
+    check_ignore(code, ["Foo"], [], [], ["some_property", "foo_bar"])
 
 
 def test_attribute():
@@ -93,7 +129,7 @@ class Foo:
         self._attr_foo = attr_foo
         self._attr_bar = attr_bar
 """
-    check_ignore(code, ["foo", "*_foo"], [], ["Foo", "_attr_bar"])
+    check_ignore(code, ["foo", "*_foo"], [], [], ["Foo", "_attr_bar"])
 
 
 def test_decorated_functions():
@@ -125,8 +161,8 @@ def foo():
 def barfoo():
     pass
 """
-    check_ignore(code, [], ["@decor", "*@f.foobar"], ["prop_one"])
-    check_ignore(code, [], ["*decor", "@*f.foobar"], ["prop_one"])
+    check_ignore(code, [], ["@decor", "*@f.foobar"], [], ["prop_one"])
+    check_ignore(code, [], ["*decor", "@*f.foobar"], [], ["prop_one"])
 
 
 def test_decorated_async_functions():
@@ -140,7 +176,7 @@ async def async_function():
 async def foo():
     pass
 """
-    check_ignore(code, [], ["@app.route", "@a.b"], ["foo"])
+    check_ignore(code, [], ["@app.route", "@a.b"], [], ["foo"])
 
 
 def test_decorated_property():
@@ -150,9 +186,9 @@ def test_decorated_property():
 def foo():
     pass
 """
-    check_ignore(code, [], ["@bar"], [])
-    check_ignore(code, [], ["@baz"], ["foo"])
-    check_ignore(code, [], ["@property"], [])
+    check_ignore(code, [], ["@bar"], [], [])
+    check_ignore(code, [], ["@baz"], [], ["foo"])
+    check_ignore(code, [], ["@property"], [], [])
 
 
 def test_decorated_property_reversed():
@@ -162,10 +198,10 @@ def test_decorated_property_reversed():
 def foo():
     pass
 """
-    check_ignore(code, [], ["@bar"], [])
-    check_ignore(code, [], ["@property"], [])
-    check_ignore(code, [], ["@b*r"], [])
-    check_ignore(code, [], ["@barfoo"], ["foo"])
+    check_ignore(code, [], ["@bar"], [], [])
+    check_ignore(code, [], ["@property"], [], [])
+    check_ignore(code, [], ["@b*r"], [], [])
+    check_ignore(code, [], ["@barfoo"], [], ["foo"])
 
 
 def test_decorated_class():
@@ -176,5 +212,5 @@ class Bar:
     def __init__(self):
         pass
 """
-    check_ignore(code, [], [], ["Bar"])
-    check_ignore(code, [], ["@bar*"], [])
+    check_ignore(code, [], [], [], ["Bar"])
+    check_ignore(code, [], ["@bar*"], [], [])

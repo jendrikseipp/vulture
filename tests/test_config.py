@@ -34,6 +34,7 @@ def test_cli_args():
         exclude=["file*.py", "dir/"],
         ignore_decorators=["deco1", "deco2"],
         ignore_names=["name1", "name2"],
+        ignore_attributes_for_classes=["class_name1", "class_name2"],
         config="pyproject.toml",
         make_whitelist=True,
         min_confidence=10,
@@ -45,6 +46,7 @@ def test_cli_args():
             "--exclude=file*.py,dir/",
             "--ignore-decorators=deco1,deco2",
             "--ignore-names=name1,name2",
+            "--ignore-attributes-for-classes=class_name1,class_name2",
             "--make-whitelist",
             "--min-confidence=10",
             "--sort-by-size",
@@ -142,6 +144,7 @@ def test_config_merging():
         exclude = ["toml_exclude"]
         ignore_decorators = ["toml_deco"]
         ignore_names = ["toml_name"]
+        ignore_attributes_for_classes = ["toml_class_name"]
         make_whitelist = false
         min_confidence = 10
         sort_by_size = false
@@ -154,6 +157,7 @@ def test_config_merging():
         "--exclude=cli_exclude",
         "--ignore-decorators=cli_deco",
         "--ignore-names=cli_name",
+        "--ignore-attributes-for-classes=cli_class_name",
         "--make-whitelist",
         "--min-confidence=20",
         "--sort-by-size",
@@ -166,6 +170,7 @@ def test_config_merging():
         exclude=["cli_exclude"],
         ignore_decorators=["cli_deco"],
         ignore_names=["cli_name"],
+        ignore_attributes_for_classes=["cli_class_name"],
         config="pyproject.toml",
         make_whitelist=True,
         min_confidence=20,
