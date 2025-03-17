@@ -63,7 +63,7 @@ When Vulture incorrectly reports chunks of code as unused, you have
 several options for suppressing the false positives. If fixing your false
 positives could benefit other users as well, please file an issue report.
 
-#### Ignore lines with whitelists
+#### Ignoring lines with whitelists
 
 The recommended option is to add used code that is reported as unused to a
 Python module and add it to the list of scanned paths. To obtain such a
