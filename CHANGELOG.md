@@ -1,6 +1,7 @@
 # next (unreleased)
 
 * Handle `while True` loops without `break` statements (kreathon).
+* Add support `#noqa` for codes from Ruff flake8-unused-arguments (ARG)
 
 # 2.14 (2024-12-08)
 

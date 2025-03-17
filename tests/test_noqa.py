@@ -309,3 +309,38 @@ def foo():
     check(v.unused_funcs, ["foo"])
     check(v.unused_imports, [])
     check(v.unused_vars, [])
+
+
+def test_ruff_flake8_unused_arguments_noqa_codes(v):
+    assert NOQA_CODE_MAP["ARG001"] == ERROR_CODES["variable"]
+    assert NOQA_CODE_MAP["ARG002"] == ERROR_CODES["variable"]
+    assert NOQA_CODE_MAP["ARG003"] == ERROR_CODES["variable"]
+    assert NOQA_CODE_MAP["ARG004"] == ERROR_CODES["variable"]
+    assert NOQA_CODE_MAP["ARG005"] == ERROR_CODES["variable"]
+    v.scan(
+        """\
+# ARG001 unused-function-argument
+def foo(x): # noqa: ARG001
+    ...
+
+class X:
+
+  # ARG002 unused-method-argument
+  def f(self, x): # noqa: ARG002
+     ...
+
+  # ARG003 unused-class-method-argument
+  @classmethod
+  def cls_m(cls, x): # noqa: ARG003
+     ...
+
+  # ARG004 unused-static-method-argument
+  @classmethod
+  def cls_m(cls, x): # noqa: ARG004
+     ...
+
+  # ARG005 unused-lambda-argument
+  lambda x: 1 # noqa: ARG005
+"""
+    )
+    check(v.unused_vars, [])
