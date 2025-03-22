@@ -7,9 +7,8 @@ from collections.abc import Container
 from fnmatch import fnmatch, fnmatchcase
 from functools import partial
 from itertools import chain
-from operator import attrgetter
 from pathlib import Path
-from typing import Iterable, List
+from typing import Iterable, List, Optional
 
 from vulture import lines, noqa, utils
 from vulture.config import InputError, make_config
@@ -57,6 +56,7 @@ class Item:
         "last_lineno",
         "message",
         "confidence",
+        "node",
     )
 
     def __init__(
@@ -68,6 +68,7 @@ class Item:
         last_lineno,
         message="",
         confidence=DEFAULT_CONFIDENCE,
+        node=None,
     ):
         self.name: str = name
         self.typ: str = typ
@@ -76,6 +77,7 @@ class Item:
         self.last_lineno: int = last_lineno
         self.message: str = message or f"unused {typ} '{name}'"
         self.confidence: int = confidence
+        self.node: Optional[ast.Name] = node
 
     @property
     def size(self):
@@ -107,7 +109,7 @@ class Item:
             )
 
     def _tuple(self):
-        return (self.filename, self.first_lineno, self.name)
+        return self.filename, self.first_lineno, self.name
 
     def __repr__(self):
         return repr(self.name)
@@ -337,7 +339,7 @@ class Vulture(ast.NodeVisitor):
             raise ValueError("min_confidence must be between 0 and 100.")
 
         def by_name(item):
-            return (str(item.filename).lower(), item.first_lineno)
+            return str(item.filename).lower(), item.first_lineno
 
         def by_size(item):
             return (item.size,) + by_name(item)
@@ -471,6 +473,7 @@ class Vulture(ast.NodeVisitor):
                     lines.get_last_line_number(last_node),
                     message=message,
                     confidence=confidence,
+                    node=first_node,
                 )
             )
 
@@ -582,10 +585,16 @@ class Vulture(ast.NodeVisitor):
             re.findall(pattern, node.name)
             for pattern in self.ignore_class_attrs
         ):
-            self.used_names.update(
+            class_attrs = frozenset(
+                chain.from_iterable(map(get_attrs, node.body))
+            )
+            tuple(
                 map(
-                    attrgetter("id"),
-                    chain.from_iterable(map(get_attrs, node.body)),
+                    self.defined_vars.remove,
+                    filter(
+                        lambda item: item.node in class_attrs,
+                        tuple(self.defined_vars),
+                    ),
                 )
             )
         for decorator in node.decorator_list:

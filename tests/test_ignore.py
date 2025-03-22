@@ -41,8 +41,9 @@ class Foo2:
     foo8 = None
     foo9, foo0 = None, None
 funny = True
+foo1 = None
 """
-    check_ignore(code, [], [], ["Foo*"], ["Foo1", "Foo2", "funny"])
+    check_ignore(code, [], [], ["Foo*"], ["Foo1", "Foo2", "funny", "foo1"])
     check_ignore(
         code,
         [],
@@ -57,6 +58,7 @@ funny = True
             "foo8",
             "foo9",
             "foo0",
+            "foo1",
         ],
     )
 
