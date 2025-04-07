@@ -209,7 +209,8 @@ Then run `pre-commit install`. Finally, create a `pyproject.toml` file
 in your repository and specify all files that Vulture should check under
 `[tool.vulture] --> paths` (see above).
 
-There's also a [GitHub Action for Vulture](https://github.com/gtkacz/vulture-action)
+There's also a [GitHub Action for Vulture](https://github.com/gtkacz/vulture-action),
+a [VS Code extension](https://marketplace.visualstudio.com/items?itemName=sebastienfi.dead-code-finder)
 and you can use Vulture programatically. For example:
 
 ``` python
