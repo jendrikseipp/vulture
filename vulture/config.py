@@ -4,6 +4,7 @@ command-line arguments or the pyproject.toml file.
 """
 import argparse
 import pathlib
+from typing import TypedDict
 
 try:
     import tomllib
@@ -20,10 +21,24 @@ DEFAULTS = {
     "exclude": [],
     "ignore_decorators": [],
     "ignore_names": [],
+    "ignore_attributes_for_classes": [],
     "make_whitelist": False,
     "sort_by_size": False,
     "verbose": False,
 }
+
+
+class _Config(TypedDict, total=False):
+    config: str
+    min_confidence: int
+    paths: list
+    exclude: list
+    ignore_decorators: list
+    ignore_names: list
+    ignore_attributes_for_classes: list  # noqa: F841
+    make_whitelist: bool
+    sort_by_size: bool
+    verbose: bool
 
 
 class InputError(Exception):
@@ -31,7 +46,7 @@ class InputError(Exception):
         self.message = message
 
 
-def _check_input_config(data):
+def _check_input_config(data: _Config):
     """
     Checks the types of the values in *data* against the expected types of
     config-values. If a value has the wrong type, raise an InputError.
@@ -57,7 +72,7 @@ def _check_output_config(config):
         raise InputError("Please pass at least one file or directory")
 
 
-def _parse_toml(infile):
+def _parse_toml(infile) -> _Config:
     """
     Parse a TOML file for config values.
 
@@ -140,6 +155,14 @@ def _parse_args(args=None):
         f" {glob_help}",
     )
     parser.add_argument(
+        "--ignore-attributes-for-classes",
+        metavar="PATTERNS",
+        type=csv,
+        default=missing,
+        help=f"Comma-separated list of class names to ignore (e.g., "
+        f' visit_*,do_*"). {glob_help}',
+    )
+    parser.add_argument(
         "--make-whitelist",
         action="store_true",
         default=missing,
@@ -179,7 +202,7 @@ def _parse_args(args=None):
     return cli_args
 
 
-def make_config(argv=None, tomlfile=None):
+def make_config(argv=None, tomlfile=None) -> _Config:
     """
     Returns a config object for vulture, merging both ``pyproject.toml`` and
     CLI arguments (CLI arguments have precedence).
