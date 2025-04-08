@@ -7,7 +7,7 @@
 
 Vulture finds unused code in Python programs. This is useful for
 cleaning up and finding errors in large code bases. If you run Vulture
-on both your library and test suite you can find untested code.
+on both your library and test suite, you can find untested code.
 
 Due to Python's dynamic nature, static code analyzers like Vulture are
 likely to miss some dead code. Also, code that is only called implicitly
@@ -63,7 +63,7 @@ When Vulture incorrectly reports chunks of code as unused, you have
 several options for suppressing the false positives. If fixing your false
 positives could benefit other users as well, please file an issue report.
 
-#### Whitelists
+#### Ignoring lines with whitelists
 
 The recommended option is to add used code that is reported as unused to a
 Python module and add it to the list of scanned paths. To obtain such a
@@ -85,23 +85,36 @@ If you want to ignore a whole file or directory, use the `--exclude` parameter
 (e.g., `--exclude "*settings.py,*/docs/*.py,*/test_*.py,*/.venv/*.py"`). The
 exclude patterns are matched against absolute paths.
 
-#### Flake8 noqa comments
+#### Ignoring lines with flake8 noqa comments
 
-<!-- Hide noqa docs until we decide whether we want to support it.
 Another way of ignoring errors is to annotate the line causing the false
-positive with `# noqa: <ERROR_CODE>` in a trailing comment (e.g., `#
-noqa: V103`). The `ERROR_CODE` specifies what kind of dead code to
+positive with `# noqa: <ERROR_CODE>` in a trailing comment (e.g.,
+`#noqa: V103`). The `ERROR_CODE` specifies what kind of dead code to
 ignore (see the table below for the list of error codes). In case no
 error code is specified, Vulture ignores all results for the line.
 (Note that the line number for decorated objects is the line number of
 the first decorator.)
--->
 
 For compatibility with [flake8](https://flake8.pycqa.org/), Vulture
 supports the [F401 and
 F841](https://flake8.pycqa.org/en/latest/user/error-codes.html) error
 codes for ignoring unused imports (`# noqa: F401`) and unused local
-variables (`# noqa: F841`). However, we recommend using whitelists instead
+variables (`# noqa: F841`) and the [ruff](https://docs.astral.sh/ruff) 
+[flake8-unused-arguments (ARG)](https://docs.astral.sh/ruff/rules/#flake8-unused-arguments-arg)
+codes.
+
+| Error codes                                        | Description      |
+| -------------------------------------------------- | ---------------- |
+| V101                                               | Unused attribute |
+| V102                                               | Unused class     |
+| V103                                               | Unused function  |
+| V104, F401                                         | Unused import    |
+| V105                                               | Unused property  |
+| V106                                               | Unused method    |
+| V107, F841, ARG001, ARG002, ARG003, ARG004, ARG005 | Unused variable  |
+| V201                                               | Unreachable code |
+
+However, we recommend using whitelists instead
 of `noqa` comments, since `noqa` comments add visual noise to the code and
 make it harder to read.
 
@@ -298,36 +311,15 @@ makes Vulture ignore the `greet` method:
     dead_code.py:1: unused import 'os' (90% confidence)
     dead_code.py:8: unused variable 'message' (60% confidence)
 
-<!-- Hide noqa docs until we decide whether we want to support it.
 **Using "# noqa"**
 
 ```python
-import os  # noqa
+import os  # noqa: V104
 
 class Greeter:  # noqa: V102
     def greet(self):  # noqa: V103
-        print("Hi")
+        x = "x"  # noqa: V107
 ```
-
-## Error codes
-
-For compatibility with [flake8](https://flake8.pycqa.org/), Vulture
-supports the [F401 and
-F841](https://flake8.pycqa.org/en/latest/user/error-codes.html) error
-codes.
-
-| Error codes |    Description    |
-| ----------- | ----------------- |
-| V101        | Unused attribute  |
-| V102        | Unused class      |
-| V103        | Unused function   |
-| V104, F401  | Unused import     |
-| V105        | Unused property   |
-| V106        | Unused method     |
-| V107, F841  | Unused variable   |
-| V201        | Unreachable code  |
-
--->
 
 ## Exit codes
 

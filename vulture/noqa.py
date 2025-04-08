@@ -18,6 +18,16 @@ NOQA_CODE_MAP = {
     "F401": "V104",
     # flake8 F841: local variable is assigned to but never used.
     "F841": "V107",
+    # ruff/flake8-unused-arguments ARG001: Unused function argument
+    "ARG001": "V107",
+    # ruff/flake8-unused-arguments ARG002: Unused method argument
+    "ARG002": "V107",
+    # ruff/flake8-unused-arguments ARG003: Unused class method argument
+    "ARG003": "V107",
+    # ruff/flake8-unused-arguments ARG004: Unused static method argument
+    "ARG004": "V107",
+    # ruff/flake8-unused-arguments ARG005: Unused lambda argument
+    "ARG005": "V107",
 }
 
 

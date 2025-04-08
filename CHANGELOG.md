@@ -1,6 +1,7 @@
 # next (unreleased)
 
 * Handle `while True` loops without `break` statements (kreathon).
+* Add support `#noqa` for ARG codes from ruff/flake8-unused-arguments (philvarner, #387).
 
 # 2.14 (2024-12-08)
 
