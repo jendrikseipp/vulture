@@ -1,6 +1,7 @@
 # next (unreleased)
 
 * Handle `while True` loops without `break` statements (kreathon).
+* Add whitelist for `ssl.SSLContext` (tunnelsociety, #392).
 
 # 2.14 (2024-12-08)
 
