@@ -3,6 +3,10 @@
 * Handle `while True` loops without `break` statements (kreathon).
 * Add whitelist for `ssl.SSLContext` (tunnelsociety, #392).
 
+# 2.15 (2025-03-15)
+
+* Added --ignore-attributes-for-classes flag (Tesla2000, #383).
+
 # 2.14 (2024-12-08)
 
 * Improve reachability analysis (kreathon, #270, #302).

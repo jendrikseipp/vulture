@@ -3,10 +3,12 @@ import pkgutil
 import re
 import string
 import sys
+from collections.abc import Container
 from fnmatch import fnmatch, fnmatchcase
 from functools import partial
+from itertools import chain
 from pathlib import Path
-from typing import List
+from typing import Iterable, List, Optional
 
 from vulture import lines, noqa, utils
 from vulture.config import InputError, make_config
@@ -41,12 +43,95 @@ ERROR_CODES = {
 }
 
 
-def _get_unused_items(defined_items, used_names):
-    unused_items = [
-        item for item in set(defined_items) if item.name not in used_names
-    ]
-    unused_items.sort(key=lambda item: item.name.lower())
-    return unused_items
+class Item:
+    """
+    Hold the name, type and location of defined code.
+    """
+
+    __slots__ = (
+        "name",
+        "typ",
+        "filename",
+        "first_lineno",
+        "last_lineno",
+        "message",
+        "confidence",
+        "node",
+    )
+
+    def __init__(
+        self,
+        name,
+        typ,
+        filename,
+        first_lineno,
+        last_lineno,
+        message="",
+        confidence=DEFAULT_CONFIDENCE,
+        node=None,
+    ):
+        self.name: str = name
+        self.typ: str = typ
+        self.filename: Path = filename
+        self.first_lineno: int = first_lineno
+        self.last_lineno: int = last_lineno
+        self.message: str = message or f"unused {typ} '{name}'"
+        self.confidence: int = confidence
+        self.node: Optional[ast.Name] = node
+
+    @property
+    def size(self):
+        assert self.last_lineno >= self.first_lineno
+        return self.last_lineno - self.first_lineno + 1
+
+    def get_report(self, add_size=False):
+        if add_size:
+            line_format = "line" if self.size == 1 else "lines"
+            size_report = f", {self.size:d} {line_format}"
+        else:
+            size_report = ""
+        return (
+            f"{utils.format_path(self.filename)}:{self.first_lineno:d}: "
+            f"{self.message} ({self.confidence}% confidence{size_report})"
+        )
+
+    def get_whitelist_string(self):
+        filename = utils.format_path(self.filename)
+        if self.typ == "unreachable_code":
+            return f"# {self.message} ({filename}:{self.first_lineno})"
+        else:
+            prefix = ""
+            if self.typ in ["attribute", "method", "property"]:
+                prefix = "_."
+            return (
+                f"{prefix}{self.name}  # unused {self.typ} "
+                f"({filename}:{self.first_lineno:d})"
+            )
+
+    def _tuple(self):
+        return self.filename, self.first_lineno, self.name
+
+    def __repr__(self):
+        return repr(self.name)
+
+    def __eq__(self, other):
+        return self._tuple() == other._tuple()
+
+    def __hash__(self):
+        return hash(self._tuple())
+
+
+def _get_unused_items(
+    defined_items: Iterable[Item], used_names: Container
+) -> List[Item]:
+    return sorted(
+        [
+            item
+            for item in frozenset(defined_items)
+            if item.name not in used_names
+        ],
+        key=lambda item: item.name.lower(),
+    )
 
 
 def _is_special_name(name):
@@ -114,86 +199,15 @@ def _ignore_variable(filename, varname):
     )
 
 
-class Item:
-    """
-    Hold the name, type and location of defined code.
-    """
-
-    __slots__ = (
-        "name",
-        "typ",
-        "filename",
-        "first_lineno",
-        "last_lineno",
-        "message",
-        "confidence",
-    )
-
-    def __init__(
-        self,
-        name,
-        typ,
-        filename,
-        first_lineno,
-        last_lineno,
-        message="",
-        confidence=DEFAULT_CONFIDENCE,
-    ):
-        self.name: str = name
-        self.typ: str = typ
-        self.filename: Path = filename
-        self.first_lineno: int = first_lineno
-        self.last_lineno: int = last_lineno
-        self.message: str = message or f"unused {typ} '{name}'"
-        self.confidence: int = confidence
-
-    @property
-    def size(self):
-        assert self.last_lineno >= self.first_lineno
-        return self.last_lineno - self.first_lineno + 1
-
-    def get_report(self, add_size=False):
-        if add_size:
-            line_format = "line" if self.size == 1 else "lines"
-            size_report = f", {self.size:d} {line_format}"
-        else:
-            size_report = ""
-        return (
-            f"{utils.format_path(self.filename)}:{self.first_lineno:d}: "
-            f"{self.message} ({self.confidence}% confidence{size_report})"
-        )
-
-    def get_whitelist_string(self):
-        filename = utils.format_path(self.filename)
-        if self.typ == "unreachable_code":
-            return f"# {self.message} ({filename}:{self.first_lineno})"
-        else:
-            prefix = ""
-            if self.typ in ["attribute", "method", "property"]:
-                prefix = "_."
-            return (
-                f"{prefix}{self.name}  # unused {self.typ} "
-                f"({filename}:{self.first_lineno:d})"
-            )
-
-    def _tuple(self):
-        return (self.filename, self.first_lineno, self.name)
-
-    def __repr__(self):
-        return repr(self.name)
-
-    def __eq__(self, other):
-        return self._tuple() == other._tuple()
-
-    def __hash__(self):
-        return hash(self._tuple())
-
-
 class Vulture(ast.NodeVisitor):
     """Find dead code."""
 
     def __init__(
-        self, verbose=False, ignore_names=None, ignore_decorators=None
+        self,
+        verbose=False,
+        ignore_names=None,
+        ignore_decorators=None,
+        ignore_class_attrs=None,
     ):
         self.verbose = verbose
 
@@ -213,6 +227,7 @@ class Vulture(ast.NodeVisitor):
 
         self.ignore_names = ignore_names or []
         self.ignore_decorators = ignore_decorators or []
+        self.ignore_class_attrs = ignore_class_attrs or []
 
         self.filename = Path()
         self.code = []
@@ -324,7 +339,7 @@ class Vulture(ast.NodeVisitor):
             raise ValueError("min_confidence must be between 0 and 100.")
 
         def by_name(item):
-            return (str(item.filename).lower(), item.first_lineno)
+            return str(item.filename).lower(), item.first_lineno
 
         def by_size(item):
             return (item.size,) + by_name(item)
@@ -458,6 +473,7 @@ class Vulture(ast.NodeVisitor):
                     lines.get_last_line_number(last_node),
                     message=message,
                     confidence=confidence,
+                    node=first_node,
                 )
             )
 
@@ -550,6 +566,37 @@ class Vulture(ast.NodeVisitor):
         )
 
     def visit_ClassDef(self, node):
+        def get_attrs(elem) -> Iterable[ast.Name]:
+            if isinstance(elem, ast.Name):
+                yield elem
+                return
+            if isinstance(elem, ast.AnnAssign):
+                yield elem.target
+                return
+            if not isinstance(elem, (ast.Assign, ast.Tuple)):
+                return
+            elts = []
+            if isinstance(elem, ast.Tuple):
+                elts = elem.elts
+            for target in elts or elem.targets:
+                yield from get_attrs(target)
+
+        if any(
+            re.findall(pattern, node.name)
+            for pattern in self.ignore_class_attrs
+        ):
+            class_attrs = frozenset(
+                chain.from_iterable(map(get_attrs, node.body))
+            )
+            tuple(
+                map(
+                    self.defined_vars.remove,
+                    filter(
+                        lambda item: item.node in class_attrs,
+                        tuple(self.defined_vars),
+                    ),
+                )
+            )
         for decorator in node.decorator_list:
             if _match(
                 utils.get_decorator_name(decorator), self.ignore_decorators
@@ -674,6 +721,7 @@ def main():
         verbose=config["verbose"],
         ignore_names=config["ignore_names"],
         ignore_decorators=config["ignore_decorators"],
+        ignore_class_attrs=config["ignore_attributes_for_classes"],
     )
     vulture.scavenge(config["paths"], exclude=config["exclude"])
     sys.exit(
