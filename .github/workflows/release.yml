@@ -1,0 +1,28 @@
+name: Publish to PyPI
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv and set up the Python version
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install the project
+        run: uv sync --all-groups
+
+      - name: Build wheel
+        run: uv build
+
+      - name: Publish package
+        run: uv publish

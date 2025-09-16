@@ -32,12 +32,11 @@ sed -i -e "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" vulture/version.p
 git commit -am "Update version number to ${VERSION} for release."
 git tag -a "v$VERSION" -m "v$VERSION" HEAD
 
-python3 setup.py sdist bdist_wheel --universal
-twine upload dist/vulture-${VERSION}.tar.gz dist/vulture-${VERSION}-py2.py3-none-any.whl
-
 git push
 git push --tags
 
+# PyPI release is created via GitHub Actions on tag push.
+
 # Add changelog to Github release.
 ./dev/make-release-notes.py "$VERSION" CHANGELOG.md "$CHANGES"
-hub release create v"$VERSION" --file="$CHANGES"
+gh release create v"$VERSION" --notes-file="$CHANGES"

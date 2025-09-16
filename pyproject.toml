@@ -1,3 +1,59 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vulture"
+dynamic = ["version"]
+description = "Find dead code"
+readme = { file = "README.md", content-type = "text/markdown" }
+keywords = ["dead code removal"]
+requires-python = ">=3.8"
+license = { file = "LICENSE.txt" }
+authors = [
+  { name = "Jendrik Seipp", email = "jendrikseipp@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+  "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = [
+  "tomli >= 1.1.0; python_version < '3.11'",
+]
+
+[project.urls]
+Homepage = "https://github.com/jendrikseipp/vulture"
+Repository = "https://github.com/jendrikseipp/vulture"
+Changelog = "https://github.com/jendrikseipp/vulture/blob/main/CHANGELOG.md"
+
+[project.scripts]
+vulture = "vulture.core:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+exclude = ["tests", "tests.*"]
+
+[tool.setuptools.package-data]
+vulture = ["whitelists/*.py"]
+
+[tool.setuptools.dynamic]
+version = { attr = "vulture.version.__version__" }
+
 [tool.ruff]
 exclude = [
   ".eggs",
@@ -73,3 +129,10 @@ docstring-code-format = false
 # This only has an effect when the `docstring-code-format` setting is
 # enabled.
 docstring-code-line-length = "dynamic"
+
+[tool.coverage.run]
+omit = [".tox/*"]
+parallel = true
+
+[tool.pytest.ini_options]
+addopts = "--cov vulture --cov-report=html --cov-report=term --cov-report=xml --cov-append"
