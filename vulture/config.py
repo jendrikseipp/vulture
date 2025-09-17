@@ -2,6 +2,7 @@
 This module handles retrieval of configuration values from either the
 command-line arguments or the pyproject.toml file.
 """
+
 import argparse
 import pathlib
 
