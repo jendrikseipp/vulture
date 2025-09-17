@@ -6,7 +6,6 @@ import sys
 from fnmatch import fnmatch, fnmatchcase
 from functools import partial
 from pathlib import Path
-from typing import List
 
 from vulture import lines, noqa, utils
 from vulture.config import InputError, make_config
@@ -316,7 +315,7 @@ class Vulture(ast.NodeVisitor):
 
     def get_unused_code(
         self, min_confidence=0, sort_by_size=False
-    ) -> List[Item]:
+    ) -> list[Item]:
         """
         Return ordered list of unused Item objects.
         """

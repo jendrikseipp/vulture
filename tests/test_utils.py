@@ -1,7 +1,6 @@
 import ast
 import os
 import pathlib
-import sys
 
 import pytest
 
@@ -131,9 +130,6 @@ def bar():
     check_decorator_names(code, ["@foo.bar"])
 
 
-@pytest.mark.skipif(
-    sys.version_info < (3, 9), reason="requires Python 3.9 or higher"
-)
 @pytest.mark.parametrize(
     "decorated",
     [

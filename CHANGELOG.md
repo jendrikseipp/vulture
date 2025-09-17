@@ -1,5 +1,6 @@
 # next (unreleased)
 
+* Drop support for Python 3.8 (Jendrik Seipp, #398).
 * Handle `while True` loops without `break` statements (kreathon).
 * Add whitelist for `ssl.SSLContext` (tunnelsociety, #392).
 
