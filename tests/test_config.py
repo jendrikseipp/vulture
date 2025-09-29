@@ -36,6 +36,7 @@ def test_cli_args():
         ignore_names=["name1", "name2"],
         config="pyproject.toml",
         make_whitelist=True,
+        header=True,
         min_confidence=10,
         sort_by_size=True,
         verbose=True,
@@ -46,6 +47,7 @@ def test_cli_args():
             "--ignore-decorators=deco1,deco2",
             "--ignore-names=name1,name2",
             "--make-whitelist",
+            "--header",
             "--min-confidence=10",
             "--sort-by-size",
             "--verbose",
@@ -67,6 +69,7 @@ def test_toml_config():
         ignore_decorators=["deco1", "deco2"],
         ignore_names=["name1", "name2"],
         make_whitelist=True,
+        header=True,
         min_confidence=10,
         sort_by_size=True,
         verbose=True,
@@ -79,6 +82,7 @@ def test_toml_config():
         ignore_decorators = ["deco1", "deco2"]
         ignore_names = ["name1", "name2"]
         make_whitelist = true
+        header = true
         min_confidence = 10
         sort_by_size = true
         verbose = true
@@ -102,6 +106,7 @@ def test_toml_config_with_heterogenous_array():
         ignore_decorators=["deco1", "deco2"],
         ignore_names=["name1", "name2"],
         make_whitelist=True,
+        header=True,
         min_confidence=10,
         sort_by_size=True,
         verbose=True,
@@ -118,6 +123,7 @@ def test_toml_config_with_heterogenous_array():
         ignore_decorators = ["deco1", "deco2"]
         ignore_names = ["name1", "name2"]
         make_whitelist = true
+        header = true
         min_confidence = 10
         sort_by_size = true
         verbose = true
@@ -143,6 +149,7 @@ def test_config_merging():
         ignore_decorators = ["toml_deco"]
         ignore_names = ["toml_name"]
         make_whitelist = false
+        header = false
         min_confidence = 10
         sort_by_size = false
         verbose = false
@@ -155,6 +162,7 @@ def test_config_merging():
         "--ignore-decorators=cli_deco",
         "--ignore-names=cli_name",
         "--make-whitelist",
+        "--header",
         "--min-confidence=20",
         "--sort-by-size",
         "--verbose",
@@ -168,6 +176,7 @@ def test_config_merging():
         ignore_names=["cli_name"],
         config="pyproject.toml",
         make_whitelist=True,
+        header=True,
         min_confidence=20,
         sort_by_size=True,
         verbose=True,

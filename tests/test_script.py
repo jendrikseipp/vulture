@@ -96,3 +96,10 @@ def test_make_whitelist():
 
 def test_version():
     assert call_vulture(["--version"]) == ExitCode.NoDeadCode
+
+
+def test_header():
+    assert (
+        call_vulture(["vulture/", "--header", "--exclude", "whitelists"])
+        == ExitCode.DeadCode
+    )

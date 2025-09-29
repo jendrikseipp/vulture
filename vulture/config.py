@@ -22,6 +22,7 @@ DEFAULTS = {
     "ignore_decorators": [],
     "ignore_names": [],
     "make_whitelist": False,
+    "header": False,
     "sort_by_size": False,
     "verbose": False,
 }
@@ -76,6 +77,7 @@ def _parse_toml(infile):
         ignore_decorators = ["deco1", "deco2"]
         ignore_names = ["name1", "name2"]
         make_whitelist = true
+        header = true
         min_confidence = 10
         sort_by_size = true
         verbose = true
@@ -146,6 +148,12 @@ def _parse_args(args=None):
         default=missing,
         help="Report unused code in a format that can be added to a"
         " whitelist module.",
+    )
+    parser.add_argument(
+        "--header",
+        action="store_true",
+        default=missing,
+        help="Output a simple header.",
     )
     parser.add_argument(
         "--min-confidence",

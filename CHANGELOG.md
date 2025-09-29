@@ -3,6 +3,7 @@
 * Drop support for Python 3.8 (Jendrik Seipp, #398).
 * Handle `while True` loops without `break` statements (kreathon).
 * Add whitelist for `ssl.SSLContext` (tunnelsociety, #392).
+* Added `--header` flag to print a simple header, useful when generating whitelist files (tadeubas).
 
 # 2.14 (2024-12-08)
 

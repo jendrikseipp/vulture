@@ -11,6 +11,7 @@ from vulture import lines, noqa, utils
 from vulture.config import InputError, make_config
 from vulture.reachability import Reachability
 from vulture.utils import ExitCode
+from vulture.version import __version__
 
 DEFAULT_CONFIDENCE = 60
 
@@ -348,21 +349,38 @@ class Vulture(ast.NodeVisitor):
         )
 
     def report(
-        self, min_confidence=0, sort_by_size=False, make_whitelist=False
+        self,
+        min_confidence=0,
+        sort_by_size=False,
+        make_whitelist=False,
+        header=False,
     ):
         """
-        Print ordered list of Item objects to stdout.
+        Print an ordered list of unused Item objects to stdout.
+
+        Parameters:
+            min_confidence (int): Minimum confidence threshold for unused code.
+            sort_by_size (bool): Whether to sort items by size.
+            make_whitelist (bool): Whether to format output for whitelist.
+            header (bool): Whether to print a header line.
+
+        Returns:
+            Exit code indicating if dead code was found.
         """
-        for item in self.get_unused_code(
+        unused_list = self.get_unused_code(
             min_confidence=min_confidence, sort_by_size=sort_by_size
-        ):
-            self._log(
-                item.get_whitelist_string()
-                if make_whitelist
-                else item.get_report(add_size=sort_by_size),
-                force=True,
-            )
+        )
+        if unused_list:
             self.exit_code = ExitCode.DeadCode
+            if header:
+                print(f"# Vulture v{__version__} - Find dead code")
+            for item in unused_list:
+                self._log(
+                    item.get_whitelist_string()
+                    if make_whitelist
+                    else item.get_report(add_size=sort_by_size),
+                    force=True,
+                )
         return self.exit_code
 
     @property
@@ -680,5 +698,6 @@ def main():
             min_confidence=config["min_confidence"],
             sort_by_size=config["sort_by_size"],
             make_whitelist=config["make_whitelist"],
+            header=config["header"],
         )
     )

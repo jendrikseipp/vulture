@@ -79,6 +79,11 @@ make some modifications.
 We collect whitelists for common Python modules and packages in
 `vulture/whitelists/` (pull requests are welcome).
 
+#### Output Header
+
+To print a header (especially useful when generating a whitelist file), use
+the `--header` option with Vulture.
+
 #### Ignoring files
 
 If you want to ignore a whole file or directory, use the `--exclude` parameter
@@ -181,6 +186,7 @@ exclude = ["*file*.py", "dir/"]
 ignore_decorators = ["@app.route", "@require_*"]
 ignore_names = ["visit_*", "do_*"]
 make_whitelist = true
+header = true
 min_confidence = 80
 paths = ["myscript.py", "mydir", "whitelist.py"]
 sort_by_size = true
