@@ -263,7 +263,8 @@ class Vulture(ast.NodeVisitor):
             except RecursionError:
                 self._log(
                     f"{utils.format_path(filename)}: "
-                    "RecursionError: maximum recursion depth exceeded while analyzing code. "
+                    "RecursionError: maximum recursion depth exceeded "
+                    "while analyzing code. "
                     "This can happen with extremely nested expressions.",
                     file=sys.stderr,
                     force=True,
