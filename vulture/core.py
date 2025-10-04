@@ -260,6 +260,16 @@ class Vulture(ast.NodeVisitor):
                 self.visit(node)
             except SyntaxError as err:
                 handle_syntax_error(err)
+            except RecursionError:
+                self._log(
+                    f"{utils.format_path(filename)}: "
+                    "RecursionError: maximum recursion depth exceeded "
+                    "while analyzing code. "
+                    "This can happen with extremely nested expressions.",
+                    file=sys.stderr,
+                    force=True,
+                )
+                self.exit_code = ExitCode.InvalidInput
 
         # Reset the reachability internals for every module to reduce memory
         # usage.
@@ -362,7 +372,9 @@ class Vulture(ast.NodeVisitor):
                 else item.get_report(add_size=sort_by_size),
                 force=True,
             )
-            self.exit_code = ExitCode.DeadCode
+            # Only set DeadCode if no error has occurred
+            if self.exit_code == ExitCode.NoDeadCode:
+                self.exit_code = ExitCode.DeadCode
         return self.exit_code
 
     @property

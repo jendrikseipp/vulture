@@ -33,3 +33,12 @@ def test_invalid_cmdline_args():
         call_vulture(["vulture/", "--invalid-argument"])
         == ExitCode.InvalidCmdlineArguments
     )
+
+
+def test_recursion_error(v):
+    # Create code with deeply nested binary operations that will
+    # trigger RecursionError during AST visiting
+    depth = 500
+    code = "result = " + " + ".join(["1"] * depth) + "\n"
+    v.scan(code, filename="test_deep.py")
+    assert int(v.report()) == ExitCode.InvalidInput

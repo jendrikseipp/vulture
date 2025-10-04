@@ -3,6 +3,7 @@
 * Drop support for Python 3.8 (Jendrik Seipp, #398).
 * Handle `while True` loops without `break` statements (kreathon).
 * Add whitelist for `ssl.SSLContext` (tunnelsociety, #392).
+* Handle RecursionError when analyzing deeply nested code structures (GitHub Copilot).
 
 # 2.14 (2024-12-08)
 
