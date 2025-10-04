@@ -1,5 +1,6 @@
 import ast
 import pkgutil
+import os
 import re
 import string
 import sys
@@ -267,6 +268,12 @@ class Vulture(ast.NodeVisitor):
 
     def scavenge(self, paths, exclude=None):
         def prepare_pattern(pattern):
+            if pattern.startswith("./"):
+                pattern = os.path.abspath(pattern)
+                if os.path.isdir(pattern):
+                    pattern = os.path.join(pattern, "*")
+                    pattern = f"{pattern}/*"
+                return pattern
             if not any(char in pattern for char in "*?["):
                 pattern = f"*{pattern}*"
             return pattern
