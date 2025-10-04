@@ -8,6 +8,7 @@ from functools import partial
 from pathlib import Path
 
 from vulture import lines, noqa, utils
+from vulture.annotation_parser import AnnotationParser
 from vulture.config import InputError, make_config
 from vulture.reachability import Reachability
 from vulture.utils import ExitCode
@@ -595,6 +596,21 @@ class Vulture(ast.NodeVisitor):
             self._define(
                 self.defined_funcs, node.name, node, ignore=_ignore_function
             )
+
+        for arg in (
+            node.args.args + node.args.kwonlyargs + node.args.posonlyargs
+        ):
+            self._add_constant_annotation(arg.annotation)
+
+        if node.returns:
+            self._add_constant_annotation(node.returns)
+
+    def _add_constant_annotation(self, annotation: ast.AST):
+        if utils.is_ast_string(annotation):
+            annotation: ast.Constant
+            annotation_parser = AnnotationParser(annotation.value)
+            for name in annotation_parser.parse():
+                self.used_names.add(name)
 
     def visit_Import(self, node):
         self._add_aliases(node)
