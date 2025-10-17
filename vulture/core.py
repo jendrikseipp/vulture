@@ -166,17 +166,16 @@ class Item:
         filename = utils.format_path(self.filename)
         if self.typ == "unreachable_code":
             return f"# {self.message} ({filename}:{self.first_lineno})"
-        else:
-            prefix = ""
-            if self.typ in ["attribute", "method", "property"]:
-                prefix = "_."
-            return (
-                f"{prefix}{self.name}  # unused {self.typ} "
-                f"({filename}:{self.first_lineno:d})"
-            )
+        prefix = ""
+        if self.typ in ["attribute", "method", "property"]:
+            prefix = "_."
+        return (
+            f"{prefix}{self.name}  # unused {self.typ} "
+            f"({filename}:{self.first_lineno:d})"
+        )
 
     def _tuple(self):
-        return (self.filename, self.first_lineno, self.name)
+        return self.filename, self.first_lineno, self.name
 
     def __repr__(self):
         return repr(self.name)

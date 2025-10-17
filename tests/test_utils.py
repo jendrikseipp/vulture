@@ -133,9 +133,9 @@ def bar():
 @pytest.mark.parametrize(
     "decorated",
     [
-        ("def foo():"),
-        ("async def foo():"),
-        ("class Foo:"),
+        "def foo():",
+        "async def foo():",
+        "class Foo:",
     ],
 )
 def test_get_decorator_name_multiple_callables(decorated):
