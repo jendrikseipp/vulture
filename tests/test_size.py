@@ -1,4 +1,7 @@
 import ast
+import sys
+
+import pytest
 
 from vulture import lines
 
@@ -118,6 +121,9 @@ class Foo:
     check_size(example, 9)
 
 
+@pytest.mark.skipif(
+    sys.version_info >= (3, 14), reason="https://peps.python.org/pep-0765/"
+)
 def test_size_try_finally():
     example = """
 class Foo:
