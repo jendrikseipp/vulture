@@ -309,3 +309,63 @@ unused_var = 'monty'
     )
     check(v.unused_imports, [])
     check(v.unused_vars, ["unused_var"])
+
+
+def test_plain_forward_reference_args(v):
+    v.scan(
+        """\
+from foo import Foo, Bar, Baz
+
+def bar(a: "Foo", /, b: "Bar", *, c: "Baz"):
+    ...
+"""
+    )
+    check(v.unused_imports, [])
+
+
+def test_plain_forward_reference_return_type(v):
+    v.scan(
+        """\
+from foo import Foo
+
+def bar() -> "Foo":
+    ...
+"""
+    )
+    check(v.unused_imports, [])
+
+
+def test_plain_forward_reference_with_module(v):
+    v.scan(
+        """\
+import foo
+
+def bar() -> "foo.Foo":
+    ...
+"""
+    )
+    check(v.unused_imports, [])
+
+
+def test_nested_forward_reference_outer_double_quotes(v):
+    v.scan(
+        """\
+from foo import Foo
+
+def bar() -> "List['Foo']":
+    ...
+"""
+    )
+    check(v.unused_imports, [])
+
+
+def test_nested_forward_reference_outer_single_quotes(v):
+    v.scan(
+        """\
+from foo import Foo
+
+def bar() -> 'List["Foo"]':
+    ...
+"""
+    )
+    check(v.unused_imports, [])
