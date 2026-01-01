@@ -82,10 +82,10 @@ target-version = "py39"
 select = [
     "B",    # flake8-bugbear
     "C4",   # comprehensions
-    "E",    # pycodestyle
-    "W",    # pycodestyle
+    "E",    # pycodestyle (errors)
+    "W",    # pycodestyle (warnings)
     "F",    # pyflakes
-    "I001", # isort
+    "I",    # isort
     "SIM",  # flake8-simplify
     "UP",   # pyupgrade
     "RUF",  # ruff-specific rules
