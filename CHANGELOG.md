@@ -1,3 +1,6 @@
+# next (unreleased)
+* Use `ty` instead of `pytype` for testing type annotations (Jendrik Seipp).
+
 # 2.15 (2026-03-04)
 
 * Handle `while True` loops without `break` statements (kreathon).
