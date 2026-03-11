@@ -1,5 +1,6 @@
 # next (unreleased)
 * Use `ty` instead of `pytype` for testing type annotations (Jendrik Seipp).
+* Add pylint disable format (even-even).
 
 # 2.15 (2026-03-04)
 
