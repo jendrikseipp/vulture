@@ -8,7 +8,7 @@ CHANGES="/tmp/vulture-$VERSION-changes"
 cd "$(dirname ${0})/../"
 
 # Check dependencies.
-hub --version > /dev/null
+gh --version > /dev/null
 tox --version > /dev/null
 twine -h > /dev/null
 
