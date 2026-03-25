@@ -8,18 +8,10 @@ class Reachability:
         self._report = report
         self._no_fall_through_nodes = set()
 
-        # Since we visit the children nodes first, we need to maintain a flag
-        # that indicates if a break statement was seen. When visiting the
-        # parent (While, For or AsyncFor), the value is checked (for While)
-        # and reset. Assumes code is valid (break statements only in loops).
-        self._current_loop_has_break_statement = False
-
     def visit(self, node):
         """When called, all children of this node have already been visited."""
         if isinstance(node, (ast.Break, ast.Continue, ast.Return, ast.Raise)):
             self._mark_as_no_fall_through(node)
-            if isinstance(node, ast.Break):
-                self._current_loop_has_break_statement = True
 
         elif isinstance(
             node,
@@ -34,10 +26,8 @@ class Reachability:
             self._can_fall_through_statements_analysis(node.body)
         elif isinstance(node, ast.While):
             self._handle_reachability_while(node)
-            self._current_loop_has_break_statement = False
         elif isinstance(node, (ast.For, ast.AsyncFor)):
             self._can_fall_through_statements_analysis(node.body)
-            self._current_loop_has_break_statement = False
         elif isinstance(node, ast.If):
             self._handle_reachability_if(node)
         elif isinstance(node, ast.IfExp):
@@ -173,10 +163,39 @@ class Reachability:
                     message="unreachable 'else' block",
                 )
 
-            if not self._current_loop_has_break_statement:
+            if not self._body_has_break(node.body):
                 self._mark_as_no_fall_through(node)
 
         self._can_fall_through_statements_analysis(node.body)
+
+    @staticmethod
+    def _body_has_break(stmts):
+        """Return True if stmts contain a break that exits the current loop.
+
+        Does not recurse into nested loops or new function/class scopes, since
+        break statements inside those do not affect the enclosing loop.
+        """
+        for stmt in stmts:
+            if isinstance(stmt, ast.Break):
+                return True
+            if isinstance(
+                stmt,
+                (
+                    ast.While,
+                    ast.For,
+                    ast.AsyncFor,
+                    ast.FunctionDef,
+                    ast.AsyncFunctionDef,
+                    ast.ClassDef,
+                ),
+            ):
+                continue
+            for _, value in ast.iter_fields(stmt):
+                if isinstance(value, list):
+                    ast_stmts = [s for s in value if isinstance(s, ast.AST)]
+                    if Reachability._body_has_break(ast_stmts):
+                        return True
+        return False
 
     def _handle_reachability_try(self, node):
         try_can_fall_through = self._can_fall_through_statements_analysis(

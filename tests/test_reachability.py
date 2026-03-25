@@ -805,3 +805,41 @@ def foo(a):
 """
     )
     assert v.unreachable_code == []
+
+
+def test_while_true_fall_through_break_before_for_loop(v):
+    """Regression: a for-loop after an if-break in a while body must not
+    suppress the break-detection, causing a false-positive unreachable report
+    for code that follows the while loop."""
+    v.scan(
+        """\
+def foo():
+    while True:
+        if condition:
+            break
+        for item in items:
+            process(item)
+    return "reachable"
+"""
+    )
+    assert v.unreachable_code == []
+
+
+def test_while_true_fall_through_for_loop_before_break(v):
+    """Regression: a for-loop before an if-break, followed by another for-loop,
+    must not suppress break-detection (GitHub issue #412).
+    Structure: while True: for→if-break→for, then code after the loop."""
+    v.scan(
+        """\
+def foo():
+    while True:
+        for i in items:
+            process(i)
+        if condition:
+            break
+        for j in others:
+            finalize(j)
+    return "reachable"
+"""
+    )
+    assert v.unreachable_code == []
