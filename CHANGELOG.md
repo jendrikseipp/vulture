@@ -1,4 +1,6 @@
-# next (unreleased)
+# 2.16 (2026-03-25)
+
+* Fix false positives for dead code after while loops (#412, #413, Jendrik Seipp).
 * Use `ty` instead of `pytype` for testing type annotations (Jendrik Seipp).
 
 # 2.15 (2026-03-04)
