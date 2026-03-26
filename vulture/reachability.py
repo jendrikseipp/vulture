@@ -50,15 +50,11 @@ class Reachability:
         """
         for idx, statement in enumerate(statements):
             if not self._can_fall_through(statement):
-                try:
-                    next_sibling = statements[idx + 1]
-                except IndexError:
-                    next_sibling = None
-                if next_sibling is not None:
+                if idx + 1 < len(statements):
                     class_name = statement.__class__.__name__.lower()
                     self._report(
                         name=class_name,
-                        first_node=next_sibling,
+                        first_node=statements[idx + 1],
                         last_node=statements[-1],
                         message=f"unreachable code after '{class_name}'",
                     )
@@ -72,9 +68,7 @@ class Reachability:
             self._report(
                 name="if",
                 first_node=node,
-                last_node=node.body
-                if isinstance(node, ast.IfExp)
-                else node.body[-1],
+                last_node=node.body[-1],
                 message="unsatisfiable 'if' condition",
             )
             if_can_fall_through = True
@@ -129,9 +123,7 @@ class Reachability:
             self._report(
                 name="ternary",
                 first_node=node,
-                last_node=node.body
-                if isinstance(node, ast.IfExp)
-                else node.body[-1],
+                last_node=node.body,
                 message="unsatisfiable 'ternary' condition",
             )
         elif utils.condition_is_always_true(node.test):
@@ -147,9 +139,7 @@ class Reachability:
             self._report(
                 name="while",
                 first_node=node,
-                last_node=node.body
-                if isinstance(node, ast.IfExp)
-                else node.body[-1],
+                last_node=node.body[-1],
                 message="unsatisfiable 'while' condition",
             )
 
@@ -190,11 +180,15 @@ class Reachability:
                 ),
             ):
                 continue
-            for _, value in ast.iter_fields(stmt):
-                if isinstance(value, list):
-                    ast_stmts = [s for s in value if isinstance(s, ast.AST)]
-                    if Reachability._body_has_break(ast_stmts):
-                        return True
+            child_stmts = [
+                item
+                for _, field in ast.iter_fields(stmt)
+                if isinstance(field, list)
+                for item in field
+                if isinstance(item, ast.AST)
+            ]
+            if Reachability._body_has_break(child_stmts):
+                return True
         return False
 
     def _handle_reachability_try(self, node):
