@@ -11,6 +11,10 @@
 * Drop support for Python 3.8 (Jendrik Seipp, #398).
 * Add support for Python 3.14 (even-even).
 
+# 2.15 (2025-03-15)
+
+* Added --ignore-attributes-for-classes flag (Tesla2000, #383).
+
 # 2.14 (2024-12-08)
 
 * Improve reachability analysis (kreathon, #270, #302).
