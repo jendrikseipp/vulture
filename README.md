@@ -105,6 +105,34 @@ variables (`# noqa: F841`). However, we recommend using whitelists instead
 of `noqa` comments, since `noqa` comments add visual noise to the code and
 make it harder to read.
 
+#### Pylint disable comments
+
+For compatibility with [pylint](https://pylint.readthedocs.io/en/latest/user_guide/messages/), Vulture
+supports pylint disable comments in the format `# pylint: disable=<code>`.
+The following pylint codes are supported:
+
+- `unused-import` (or `W0611`) - ignores unused imports
+- `unused-variable` (or `W0612`) - ignores unused local variables
+- `unused-argument` (or `W0613`) - ignores unused function arguments
+- `possibly-unused-variable` (or `W0641`) - ignores possibly unused variables
+- `unreachable-code` (or `W0101`) - ignores unreachable code
+
+You can use either text names (e.g., `# pylint: disable=unused-import`) or
+numeric codes (e.g., `# pylint: disable=W0611`). Multiple codes can be
+specified separated by commas: `# pylint: disable=unused-import,unused-variable`.
+
+Example:
+
+```python
+import this  # pylint: disable=unused-import
+
+def foo(x, y):  # pylint: disable=unused-argument
+    bar = 1  # pylint: disable=unused-variable
+    baq = 2  # pylint: disable=W0101,W0612
+    return
+    baz = 3  # pylint: disable=unreachable-code,unused-variable
+```
+
 #### Ignoring names
 
 You can use `--ignore-names foo*,ba[rz]` to let Vulture ignore all names
@@ -200,7 +228,7 @@ following to the `.pre-commit-config.yaml` file in your repository:
 ```yaml
 repos:
   - repo: https://github.com/jendrikseipp/vulture
-    rev: 'v2.3'  # or any later Vulture version
+    rev: 'v2.14'  # or any later Vulture version
     hooks:
       - id: vulture
 ```
