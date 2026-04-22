@@ -1,1 +1,1 @@
-tomli >= 1.1.0; python_version < '3.11'
+tomli >= 2.4.1; python_version < '3.11'
