@@ -7,10 +7,6 @@
     * https://github.com/jendrikseipp/vulture/issues/249
     * https://github.com/jendrikseipp/vulture/issues/315
   Use these as test cases.
-* Honor (speaking) pylint error codes (e.g., # pylint:
-  disable=unused-import): unused-import, unused-variable, unused-argument,
-  possibly-unused-variable and unreachable-code. See
-  https://github.com/janjur/readable-pylint-messages#unused-import.
 
 # Non-TODOs
 
