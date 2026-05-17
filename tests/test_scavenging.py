@@ -74,61 +74,61 @@ b = foo(5)
 def test_functions_with_same_name_in_different_modules(v):
     v.scan(
         """\
-def find_playbook():
+def load_config():
     pass
 """,
-        filename="apps/data/crud/playbooks.py",
+        filename="package/commands/loaders.py",
     )
     v.scan(
         """\
-def find_playbook():
+def load_config():
     pass
 """,
-        filename="apps/data/services/playbooks.py",
+        filename="package/reports/loaders.py",
     )
     v.scan(
         """\
-from apps.data.crud.playbooks import find_playbook
+from package.commands.loaders import load_config
 
-find_playbook()
+load_config()
 """,
-        filename="apps/data/main.py",
+        filename="package/main.py",
     )
 
     check(
         v.defined_funcs,
         [
-            "apps.data.crud.playbooks.find_playbook",
-            "apps.data.services.playbooks.find_playbook",
+            "package.commands.loaders.load_config",
+            "package.reports.loaders.load_config",
         ],
     )
     check(
         v.unused_funcs,
-        ["apps.data.services.playbooks.find_playbook"],
+        ["package.reports.loaders.load_config"],
     )
 
 
 def test_unused_functions_with_same_name_in_different_modules(v):
     v.scan(
         """\
-def find_playbook():
+def load_config():
     pass
 """,
-        filename="apps/data/crud/playbooks.py",
+        filename="package/commands/loaders.py",
     )
     v.scan(
         """\
-def find_playbook():
+def load_config():
     pass
 """,
-        filename="apps/data/services/playbooks.py",
+        filename="package/reports/loaders.py",
     )
 
     check(
         v.unused_funcs,
         [
-            "apps.data.crud.playbooks.find_playbook",
-            "apps.data.services.playbooks.find_playbook",
+            "package.commands.loaders.load_config",
+            "package.reports.loaders.load_config",
         ],
     )
 
@@ -136,18 +136,18 @@ def find_playbook():
 def test_module_attribute_uses_qualified_function(v):
     v.scan(
         """\
-def find_playbook():
+def load_config():
     pass
 """,
-        filename="apps/data/crud/playbooks.py",
+        filename="package/commands/loaders.py",
     )
     v.scan(
         """\
-from apps.data.crud import playbooks
+from package.commands import loaders
 
-playbooks.find_playbook()
+loaders.load_config()
 """,
-        filename="apps/data/main.py",
+        filename="package/main.py",
     )
 
     check(v.unused_funcs, [])
@@ -156,30 +156,30 @@ playbooks.find_playbook()
 def test_module_attribute_does_not_use_same_name_in_other_module(v):
     v.scan(
         """\
-def find_playbook():
+def load_config():
     pass
 """,
-        filename="apps/data/crud/playbooks.py",
+        filename="package/commands/loaders.py",
     )
     v.scan(
         """\
-def find_playbook():
+def load_config():
     pass
 """,
-        filename="apps/data/services/playbooks.py",
+        filename="package/reports/loaders.py",
     )
     v.scan(
         """\
-from apps.data.crud import playbooks
+from package.commands import loaders
 
-playbooks.find_playbook()
+loaders.load_config()
 """,
-        filename="apps/data/main.py",
+        filename="package/main.py",
     )
 
     check(
         v.unused_funcs,
-        ["apps.data.services.playbooks.find_playbook"],
+        ["package.reports.loaders.load_config"],
     )
 
 
