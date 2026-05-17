@@ -108,6 +108,31 @@ find_playbook()
     )
 
 
+def test_unused_functions_with_same_name_in_different_modules(v):
+    v.scan(
+        """\
+def find_playbook():
+    pass
+""",
+        filename="apps/data/crud/playbooks.py",
+    )
+    v.scan(
+        """\
+def find_playbook():
+    pass
+""",
+        filename="apps/data/services/playbooks.py",
+    )
+
+    check(
+        v.unused_funcs,
+        [
+            "apps.data.crud.playbooks.find_playbook",
+            "apps.data.services.playbooks.find_playbook",
+        ],
+    )
+
+
 def test_module_attribute_uses_qualified_function(v):
     v.scan(
         """\
@@ -126,6 +151,36 @@ playbooks.find_playbook()
     )
 
     check(v.unused_funcs, [])
+
+
+def test_module_attribute_does_not_use_same_name_in_other_module(v):
+    v.scan(
+        """\
+def find_playbook():
+    pass
+""",
+        filename="apps/data/crud/playbooks.py",
+    )
+    v.scan(
+        """\
+def find_playbook():
+    pass
+""",
+        filename="apps/data/services/playbooks.py",
+    )
+    v.scan(
+        """\
+from apps.data.crud import playbooks
+
+playbooks.find_playbook()
+""",
+        filename="apps/data/main.py",
+    )
+
+    check(
+        v.unused_funcs,
+        ["apps.data.services.playbooks.find_playbook"],
+    )
 
 
 def test_async_function(v):
