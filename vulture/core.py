@@ -41,13 +41,21 @@ ERROR_CODES = {
 }
 
 
-def _get_unused_items(defined_items, used_names, used_qualified_names):
+def _get_unused_items(defined_items, used_names):
     unused_items = [
-        item
-        for item in set(defined_items)
-        if item.name not in used_names
-        and item.name not in used_qualified_names
+        item for item in set(defined_items) if item.name not in used_names
     ]
+    unused_items.sort(key=lambda item: item.name.lower())
+    return unused_items
+
+
+def _get_unused_funcs(defined_funcs, used_names, used_full_names):
+    def is_used(item):
+        if item.module:
+            return item.full_name in used_full_names
+        return item.name in used_names
+
+    unused_items = [item for item in set(defined_funcs) if not is_used(item)]
     unused_items.sort(key=lambda item: item.name.lower())
     return unused_items
 
@@ -142,6 +150,7 @@ class Item:
         "first_lineno",
         "last_lineno",
         "message",
+        "module",
         "name",
         "typ",
     )
@@ -155,19 +164,29 @@ class Item:
         last_lineno,
         message="",
         confidence=DEFAULT_CONFIDENCE,
+        module="",
     ):
         self.name: str = name
         self.typ: str = typ
         self.filename: Path = filename
         self.first_lineno: int = first_lineno
         self.last_lineno: int = last_lineno
-        self.message: str = message or f"unused {typ} '{name}'"
+        self.module: str = module
+        self.message: str = message or f"unused {typ} '{self.report_name}'"
         self.confidence: int = confidence
 
     @property
     def size(self):
         assert self.last_lineno >= self.first_lineno
         return self.last_lineno - self.first_lineno + 1
+
+    @property
+    def full_name(self):
+        return f"{self.module}.{self.name}" if self.module else self.name
+
+    @property
+    def report_name(self):
+        return self.full_name if self.typ == "function" else self.name
 
     def get_report(self, add_size=False):
         if add_size:
@@ -188,7 +207,7 @@ class Item:
         if self.typ in ["attribute", "method", "property"]:
             prefix = "_."
         return (
-            f"{prefix}{self.name}  # unused {self.typ} "
+            f"{prefix}{self.report_name}  # unused {self.typ} "
             f"({filename}:{self.first_lineno:d})"
         )
 
@@ -226,9 +245,7 @@ class Vulture(ast.NodeVisitor):
         self.unreachable_code = get_list("unreachable_code")
 
         self.used_names = utils.LoggingSet("name", self.verbose)
-        self.used_qualified_names = utils.LoggingSet(
-            "qualified name", self.verbose
-        )
+        self.used_full_names = utils.LoggingSet("full name", self.verbose)
         self.name_bindings = {}
 
         self.ignore_names = ignore_names or []
@@ -391,45 +408,33 @@ class Vulture(ast.NodeVisitor):
 
     @property
     def unused_classes(self):
-        return _get_unused_items(
-            self.defined_classes, self.used_names, self.used_qualified_names
-        )
+        return _get_unused_items(self.defined_classes, self.used_names)
 
     @property
     def unused_funcs(self):
-        return _get_unused_items(
-            self.defined_funcs, self.used_names, self.used_qualified_names
+        return _get_unused_funcs(
+            self.defined_funcs, self.used_names, self.used_full_names
         )
 
     @property
     def unused_imports(self):
-        return _get_unused_items(
-            self.defined_imports, self.used_names, self.used_qualified_names
-        )
+        return _get_unused_items(self.defined_imports, self.used_names)
 
     @property
     def unused_methods(self):
-        return _get_unused_items(
-            self.defined_methods, self.used_names, self.used_qualified_names
-        )
+        return _get_unused_items(self.defined_methods, self.used_names)
 
     @property
     def unused_props(self):
-        return _get_unused_items(
-            self.defined_props, self.used_names, self.used_qualified_names
-        )
+        return _get_unused_items(self.defined_props, self.used_names)
 
     @property
     def unused_vars(self):
-        return _get_unused_items(
-            self.defined_vars, self.used_names, self.used_qualified_names
-        )
+        return _get_unused_items(self.defined_vars, self.used_names)
 
     @property
     def unused_attrs(self):
-        return _get_unused_items(
-            self.defined_attrs, self.used_names, self.used_qualified_names
-        )
+        return _get_unused_items(self.defined_attrs, self.used_names)
 
     def _log(self, *args, file=None, force=False):
         if self.verbose or force:
@@ -495,15 +500,10 @@ class Vulture(ast.NodeVisitor):
             current_package = current_package[: 1 - node.level]
         return ".".join([*current_package, *module_parts])
 
-    def _qualify_defined_name(self, typ, name):
-        if typ == "function" and self.module_name:
-            return f"{self.module_name}.{name}"
-        return name
-
     def _mark_name_as_used(self, name):
         self.used_names.add(name)
         if name in self.name_bindings:
-            self.used_qualified_names.add(self.name_bindings[name])
+            self.used_full_names.add(self.name_bindings[name])
 
     def _get_attribute_parts(self, node):
         if isinstance(node, ast.Name):
@@ -519,7 +519,7 @@ class Vulture(ast.NodeVisitor):
 
         self.used_names.add(parts[-1])
         if parts[0] in self.name_bindings:
-            self.used_qualified_names.add(
+            self.used_full_names.add(
                 ".".join([self.name_bindings[parts[0]], *parts[1:]])
             )
 
@@ -547,20 +547,22 @@ class Vulture(ast.NodeVisitor):
         if ignored(first_lineno):
             self._log(f'Ignoring {typ} "{name}"')
         else:
-            display_name = self._qualify_defined_name(typ, name)
-            if display_name != name:
-                self.name_bindings.setdefault(name, display_name)
+            module = self.module_name if typ == "function" else ""
+            if module:
+                full_name = f"{module}.{name}"
+                self.name_bindings.setdefault(name, full_name)
                 if name in self.used_names:
-                    self.used_qualified_names.add(display_name)
+                    self.used_full_names.add(full_name)
             collection.append(
                 Item(
-                    display_name,
+                    name,
                     typ,
                     self.filename,
                     first_lineno,
                     lines.get_last_line_number(last_node),
                     message=message,
                     confidence=confidence,
+                    module=module,
                 )
             )
 

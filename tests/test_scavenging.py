@@ -98,14 +98,13 @@ load_config()
     check(
         v.defined_funcs,
         [
-            "package.commands.loaders.load_config",
-            "package.reports.loaders.load_config",
+            "load_config",
+            "load_config",
         ],
     )
-    check(
-        v.unused_funcs,
-        ["package.reports.loaders.load_config"],
-    )
+    assert [item.full_name for item in v.unused_funcs] == [
+        "package.reports.loaders.load_config"
+    ]
 
 
 def test_unused_functions_with_same_name_in_different_modules(v):
@@ -124,16 +123,13 @@ def load_config():
         filename="package/reports/loaders.py",
     )
 
-    check(
-        v.unused_funcs,
-        [
-            "package.commands.loaders.load_config",
-            "package.reports.loaders.load_config",
-        ],
-    )
+    assert sorted(item.full_name for item in v.unused_funcs) == [
+        "package.commands.loaders.load_config",
+        "package.reports.loaders.load_config",
+    ]
 
 
-def test_module_attribute_uses_qualified_function(v):
+def test_module_attribute_uses_full_name_function(v):
     v.scan(
         """\
 def load_config():
@@ -177,10 +173,9 @@ loaders.load_config()
         filename="package/main.py",
     )
 
-    check(
-        v.unused_funcs,
-        ["package.reports.loaders.load_config"],
-    )
+    assert [item.full_name for item in v.unused_funcs] == [
+        "package.reports.loaders.load_config"
+    ]
 
 
 def test_async_function(v):
@@ -629,7 +624,7 @@ class OtherClass:
     )
     check(v.defined_attrs, [])
     check(v.defined_classes, ["OtherClass"])
-    check(v.defined_funcs, ["dir.test_function_names.other_func"])
+    check(v.defined_funcs, ["other_func"])
     check(v.defined_methods, [])
     check(
         v.defined_vars,
@@ -647,7 +642,7 @@ class OtherClass:
     check(v.used_names, ["classmethod", "cls", "function", "method", "module"])
     check(v.unused_attrs, [])
     check(v.unused_classes, ["OtherClass"])
-    check(v.unused_funcs, ["dir.test_function_names.other_func"])
+    check(v.unused_funcs, ["other_func"])
     check(v.unused_methods, [])
     check(v.unused_vars, [])
 
@@ -663,8 +658,8 @@ async def other_func():
 """,
         filename="dir/test_function_names.py",
     )
-    check(v.defined_funcs, ["dir.test_function_names.other_func"])
-    check(v.unused_funcs, ["dir.test_function_names.other_func"])
+    check(v.defined_funcs, ["other_func"])
+    check(v.unused_funcs, ["other_func"])
 
 
 def test_async_function_name_in_normal_file(v):
@@ -678,14 +673,8 @@ async def other_func():
 """,
         filename="dir/function_names.py",
     )
-    check(
-        v.defined_funcs,
-        ["dir.function_names.test_func", "dir.function_names.other_func"],
-    )
-    check(
-        v.unused_funcs,
-        ["dir.function_names.other_func", "dir.function_names.test_func"],
-    )
+    check(v.defined_funcs, ["test_func", "other_func"])
+    check(v.unused_funcs, ["other_func", "test_func"])
 
 
 def test_function_names_in_normal_file(v):
