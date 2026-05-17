@@ -3,6 +3,7 @@ import pkgutil
 import re
 import string
 import sys
+from contextlib import suppress
 from fnmatch import fnmatch, fnmatchcase
 from functools import partial
 from pathlib import Path
@@ -40,9 +41,12 @@ ERROR_CODES = {
 }
 
 
-def _get_unused_items(defined_items, used_names):
+def _get_unused_items(defined_items, used_names, used_qualified_names):
     unused_items = [
-        item for item in set(defined_items) if item.name not in used_names
+        item
+        for item in set(defined_items)
+        if item.name not in used_names
+        and item.name not in used_qualified_names
     ]
     unused_items.sort(key=lambda item: item.name.lower())
     return unused_items
@@ -63,6 +67,20 @@ def _is_test_file(filename):
         ["*/test/*", "*/tests/*", "*/test*.py", "*[-_]test.py"],
         case=False,
     )
+
+
+def _module_name_from_filename(filename):
+    if not filename or filename.suffix != ".py":
+        return ""
+
+    with suppress(ValueError):
+        filename = filename.resolve().relative_to(Path.cwd().resolve())
+
+    path = filename.with_suffix("")
+    parts = path.parts
+    if path.name == "__init__":
+        parts = parts[:-1]
+    return ".".join(part for part in parts if part)
 
 
 def _assigns_special_variable__all__(node):
@@ -208,11 +226,16 @@ class Vulture(ast.NodeVisitor):
         self.unreachable_code = get_list("unreachable_code")
 
         self.used_names = utils.LoggingSet("name", self.verbose)
+        self.used_qualified_names = utils.LoggingSet(
+            "qualified name", self.verbose
+        )
+        self.name_bindings = {}
 
         self.ignore_names = ignore_names or []
         self.ignore_decorators = ignore_decorators or []
 
         self.filename = Path()
+        self.module_name = ""
         self.code = []
         self.exit_code = ExitCode.NoDeadCode
         self.noqa_lines = {}
@@ -229,6 +252,8 @@ class Vulture(ast.NodeVisitor):
         self.code = code.splitlines()
         self.noqa_lines = noqa.parse_noqa(self.code)
         self.filename = filename
+        self.module_name = _module_name_from_filename(filename)
+        self.name_bindings = {}
 
         def handle_syntax_error(e):
             text = f' at "{e.text.strip()}"' if e.text else ""
@@ -366,31 +391,45 @@ class Vulture(ast.NodeVisitor):
 
     @property
     def unused_classes(self):
-        return _get_unused_items(self.defined_classes, self.used_names)
+        return _get_unused_items(
+            self.defined_classes, self.used_names, self.used_qualified_names
+        )
 
     @property
     def unused_funcs(self):
-        return _get_unused_items(self.defined_funcs, self.used_names)
+        return _get_unused_items(
+            self.defined_funcs, self.used_names, self.used_qualified_names
+        )
 
     @property
     def unused_imports(self):
-        return _get_unused_items(self.defined_imports, self.used_names)
+        return _get_unused_items(
+            self.defined_imports, self.used_names, self.used_qualified_names
+        )
 
     @property
     def unused_methods(self):
-        return _get_unused_items(self.defined_methods, self.used_names)
+        return _get_unused_items(
+            self.defined_methods, self.used_names, self.used_qualified_names
+        )
 
     @property
     def unused_props(self):
-        return _get_unused_items(self.defined_props, self.used_names)
+        return _get_unused_items(
+            self.defined_props, self.used_names, self.used_qualified_names
+        )
 
     @property
     def unused_vars(self):
-        return _get_unused_items(self.defined_vars, self.used_names)
+        return _get_unused_items(
+            self.defined_vars, self.used_names, self.used_qualified_names
+        )
 
     @property
     def unused_attrs(self):
-        return _get_unused_items(self.defined_attrs, self.used_names)
+        return _get_unused_items(
+            self.defined_attrs, self.used_names, self.used_qualified_names
+        )
 
     def _log(self, *args, file=None, force=False):
         if self.verbose or force:
@@ -422,6 +461,67 @@ class Vulture(ast.NodeVisitor):
             )
             if alias is not None:
                 self.used_names.add(name_and_alias.name)
+            self._record_name_binding(node, name_and_alias)
+
+    def _record_name_binding(self, node, name_and_alias):
+        if name_and_alias.name == "*":
+            return
+
+        if isinstance(node, ast.Import):
+            if name_and_alias.asname:
+                self.name_bindings[name_and_alias.asname] = name_and_alias.name
+            else:
+                local_name = name_and_alias.name.partition(".")[0]
+                self.name_bindings[local_name] = local_name
+        else:
+            local_name = name_and_alias.asname or name_and_alias.name
+            module = self._get_import_from_module(node)
+            if module:
+                self.name_bindings[local_name] = (
+                    f"{module}.{name_and_alias.name}"
+                )
+
+    def _get_import_from_module(self, node):
+        assert isinstance(node, ast.ImportFrom)
+        module_parts = node.module.split(".") if node.module else []
+        if node.level == 0:
+            return ".".join(module_parts)
+
+        if not self.module_name:
+            return ".".join(["." * node.level, *module_parts])
+
+        current_package = self.module_name.split(".")[:-1]
+        if node.level > 1:
+            current_package = current_package[: 1 - node.level]
+        return ".".join([*current_package, *module_parts])
+
+    def _qualify_defined_name(self, typ, name):
+        if typ == "function" and self.module_name:
+            return f"{self.module_name}.{name}"
+        return name
+
+    def _mark_name_as_used(self, name):
+        self.used_names.add(name)
+        if name in self.name_bindings:
+            self.used_qualified_names.add(self.name_bindings[name])
+
+    def _get_attribute_parts(self, node):
+        if isinstance(node, ast.Name):
+            return [node.id]
+        if isinstance(node, ast.Attribute):
+            return [*self._get_attribute_parts(node.value), node.attr]
+        return []
+
+    def _mark_attribute_as_used(self, node):
+        parts = self._get_attribute_parts(node)
+        if not parts:
+            return
+
+        self.used_names.add(parts[-1])
+        if parts[0] in self.name_bindings:
+            self.used_qualified_names.add(
+                ".".join([self.name_bindings[parts[0]], *parts[1:]])
+            )
 
     def _define(
         self,
@@ -447,9 +547,14 @@ class Vulture(ast.NodeVisitor):
         if ignored(first_lineno):
             self._log(f'Ignoring {typ} "{name}"')
         else:
+            display_name = self._qualify_defined_name(typ, name)
+            if display_name != name:
+                self.name_bindings.setdefault(name, display_name)
+                if name in self.used_names:
+                    self.used_qualified_names.add(display_name)
             collection.append(
                 Item(
-                    name,
+                    display_name,
                     typ,
                     self.filename,
                     first_lineno,
@@ -479,7 +584,7 @@ class Vulture(ast.NodeVisitor):
         if isinstance(node.ctx, ast.Store):
             self._define(self.defined_attrs, node.attr, node)
         elif isinstance(node.ctx, ast.Load):
-            self.used_names.add(node.attr)
+            self._mark_attribute_as_used(node)
 
     def visit_BinOp(self, node):
         """
@@ -607,7 +712,7 @@ class Vulture(ast.NodeVisitor):
             isinstance(node.ctx, (ast.Load, ast.Del))
             and node.id not in IGNORED_VARIABLE_NAMES
         ):
-            self.used_names.add(node.id)
+            self._mark_name_as_used(node.id)
         elif isinstance(node.ctx, (ast.Param, ast.Store)):
             self._define_variable(node.id, node)
 

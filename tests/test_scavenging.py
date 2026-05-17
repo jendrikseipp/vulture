@@ -71,6 +71,63 @@ b = foo(5)
     check(v.defined_funcs, ["foo"])
 
 
+def test_functions_with_same_name_in_different_modules(v):
+    v.scan(
+        """\
+def find_playbook():
+    pass
+""",
+        filename="apps/data/crud/playbooks.py",
+    )
+    v.scan(
+        """\
+def find_playbook():
+    pass
+""",
+        filename="apps/data/services/playbooks.py",
+    )
+    v.scan(
+        """\
+from apps.data.crud.playbooks import find_playbook
+
+find_playbook()
+""",
+        filename="apps/data/main.py",
+    )
+
+    check(
+        v.defined_funcs,
+        [
+            "apps.data.crud.playbooks.find_playbook",
+            "apps.data.services.playbooks.find_playbook",
+        ],
+    )
+    check(
+        v.unused_funcs,
+        ["apps.data.services.playbooks.find_playbook"],
+    )
+
+
+def test_module_attribute_uses_qualified_function(v):
+    v.scan(
+        """\
+def find_playbook():
+    pass
+""",
+        filename="apps/data/crud/playbooks.py",
+    )
+    v.scan(
+        """\
+from apps.data.crud import playbooks
+
+playbooks.find_playbook()
+""",
+        filename="apps/data/main.py",
+    )
+
+    check(v.unused_funcs, [])
+
+
 def test_async_function(v):
     v.scan(
         """\
@@ -517,7 +574,7 @@ class OtherClass:
     )
     check(v.defined_attrs, [])
     check(v.defined_classes, ["OtherClass"])
-    check(v.defined_funcs, ["other_func"])
+    check(v.defined_funcs, ["dir.test_function_names.other_func"])
     check(v.defined_methods, [])
     check(
         v.defined_vars,
@@ -535,7 +592,7 @@ class OtherClass:
     check(v.used_names, ["classmethod", "cls", "function", "method", "module"])
     check(v.unused_attrs, [])
     check(v.unused_classes, ["OtherClass"])
-    check(v.unused_funcs, ["other_func"])
+    check(v.unused_funcs, ["dir.test_function_names.other_func"])
     check(v.unused_methods, [])
     check(v.unused_vars, [])
 
@@ -551,8 +608,8 @@ async def other_func():
 """,
         filename="dir/test_function_names.py",
     )
-    check(v.defined_funcs, ["other_func"])
-    check(v.unused_funcs, ["other_func"])
+    check(v.defined_funcs, ["dir.test_function_names.other_func"])
+    check(v.unused_funcs, ["dir.test_function_names.other_func"])
 
 
 def test_async_function_name_in_normal_file(v):
@@ -566,8 +623,14 @@ async def other_func():
 """,
         filename="dir/function_names.py",
     )
-    check(v.defined_funcs, ["test_func", "other_func"])
-    check(v.unused_funcs, ["other_func", "test_func"])
+    check(
+        v.defined_funcs,
+        ["dir.function_names.test_func", "dir.function_names.other_func"],
+    )
+    check(
+        v.unused_funcs,
+        ["dir.function_names.other_func", "dir.function_names.test_func"],
+    )
 
 
 def test_function_names_in_normal_file(v):
