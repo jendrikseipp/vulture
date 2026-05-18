@@ -52,6 +52,25 @@ def add(a, b):
     assert len(v.unused_funcs) == 1
     f = v.unused_funcs[0]
     assert f.name == "add"
+    assert f.module == ""
+    assert f.full_name == "add"
+    assert f.first_lineno == 1
+    assert f.last_lineno == 2
+
+
+def test_item_function_module(v):
+    v.scan(
+        """\
+def add(a, b):
+    return a + b
+""",
+        filename="package/calculations.py",
+    )
+    assert len(v.unused_funcs) == 1
+    f = v.unused_funcs[0]
+    assert f.name == "add"
+    assert f.module == "package.calculations"
+    assert f.full_name == "package.calculations.add"
     assert f.first_lineno == 1
     assert f.last_lineno == 2
 

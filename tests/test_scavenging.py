@@ -129,6 +129,32 @@ def load_config():
     ]
 
 
+def test_function_in_package_init_uses_package_as_module(v):
+    v.scan(
+        """\
+def load_config():
+    pass
+""",
+        filename="package/commands/__init__.py",
+    )
+
+    assert [item.full_name for item in v.unused_funcs] == [
+        "package.commands.load_config"
+    ]
+
+
+def test_function_in_file_without_py_suffix_has_no_module(v):
+    v.scan(
+        """\
+def load_config():
+    pass
+""",
+        filename="script",
+    )
+
+    assert [item.full_name for item in v.unused_funcs] == ["load_config"]
+
+
 def test_module_attribute_uses_full_name_function(v):
     v.scan(
         """\
@@ -144,6 +170,26 @@ from package.commands import loaders
 loaders.load_config()
 """,
         filename="package/main.py",
+    )
+
+    check(v.unused_funcs, [])
+
+
+def test_relative_import_uses_full_name_function(v):
+    v.scan(
+        """\
+def load_config():
+    pass
+""",
+        filename="package/utils/loaders.py",
+    )
+    v.scan(
+        """\
+from ..utils.loaders import load_config
+
+load_config()
+""",
+        filename="package/commands/main.py",
     )
 
     check(v.unused_funcs, [])
