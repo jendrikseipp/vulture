@@ -517,6 +517,14 @@ class Vulture(ast.NodeVisitor):
         ):
             self._handle_new_format_string(node.func.value.value)
 
+        # Count keyword argument names as usages of same-named attributes/
+        # variables, e.g. `cls(bar=...)` marks `bar` as used. Mirrors
+        # visit_MatchClass; resolves false positives for dataclass/pydantic
+        # fields consumed only via keyword arguments (issue #411).
+        for keyword in node.keywords:
+            if keyword.arg is not None:  # keyword.arg is None for **kwargs.
+                self.used_names.add(keyword.arg)
+
     def _handle_new_format_string(self, s):
         def is_identifier(name):
             return bool(re.match(r"[a-zA-Z_][a-zA-Z0-9_]*", name))

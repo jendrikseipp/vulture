@@ -1,5 +1,6 @@
 # 2.17 (unreleased)
 
+* Count keyword argument names (e.g. `cls(bar=...)`) as uses, fixing false positives for dataclass/pydantic fields consumed only via keyword arguments (#411).
 * Add support for Python 3.15 and drop 3.9 (Hugo van Kemenade, #416).
 
 # 2.16 (2026-03-25)
