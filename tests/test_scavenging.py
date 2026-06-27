@@ -882,3 +882,118 @@ match color:
 
     check(v.unused_classes, [])
     check(v.unused_vars, ["BLUE"])
+
+
+def test_override_typing(v):
+    v.scan(
+        """\
+from typing import override
+
+class A():
+    def my_func(self, a: int, b: int, c: int):
+        return a + b + c
+
+class B(A):
+    @override
+    def my_func(self, a, b, c):
+        return a - b
+"""
+    )
+    check(v.defined_vars, ["a", "b", "c"])
+    check(v.used_names, ["A", "a", "b", "c", "int", "override"])
+    check(v.unused_vars, [])
+
+
+def test_override_typing_extensions(v):
+    v.scan(
+        """\
+from typing_extensions import override
+
+class A():
+    def my_func(self, a: int, b: int, c: int):
+        return a + b + c
+
+class B(A):
+    @override
+    def my_func(self, a, b, c):
+        return a - b
+"""
+    )
+    check(v.defined_vars, ["a", "b", "c"])
+    check(v.used_names, ["A", "a", "b", "c", "int", "override"])
+    check(v.unused_vars, [])
+
+
+def test_override_async(v):
+    v.scan(
+        """\
+from typing import override
+
+class A():
+    async def my_func(self, a: int, b: int, c: int):
+        return a + b + c
+
+class B(A):
+    @override
+    async def my_func(self, a, b, c):
+        return a - b
+"""
+    )
+    check(v.defined_vars, ["a", "b", "c"])
+    check(v.used_names, ["A", "a", "b", "c", "int", "override"])
+    check(v.unused_vars, [])
+
+
+def test_override_nested_function(v):
+    v.scan(
+        """\
+from typing import override
+
+class A():
+    def my_func(self, a: int, b: int, c: int):
+        return a + b + c
+
+class B(A):
+    @override
+    def my_func(self, a, b, c):
+        def inner(x, y):
+            return x
+        return a - b
+"""
+    )
+    check(v.defined_vars, ["a", "b", "c", "x", "y"])
+    check(v.used_names, ["A", "a", "b", "c", "int", "override", "x"])
+    check(v.unused_vars, ["y"])
+
+
+def test_override_with_args_kwargs(v):
+    v.scan(
+        """\
+from typing import override
+
+class A():
+    def my_func(self, *args, **kwargs):
+        return args
+
+class B(A):
+    @override
+    def my_func(self, *args, **kwargs):
+        return None
+"""
+    )
+    check(v.defined_vars, ["args", "kwargs"])
+    check(v.used_names, ["A", "args", "override"])
+    check(v.unused_vars, ["kwargs"])
+
+
+def test_no_override_still_flags(v):
+    v.scan(
+        """\
+class A():
+    def my_func(self, a, b, c):
+        return a - b
+"""
+    )
+    check(v.defined_vars, ["a", "b", "c"])
+    check(v.used_names, ["a", "b"])
+    check(v.unused_vars, ["c"])
