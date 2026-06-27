@@ -216,6 +216,7 @@ class Vulture(ast.NodeVisitor):
         self.code = []
         self.exit_code = ExitCode.NoDeadCode
         self.noqa_lines = {}
+        self._override_depth = 0
 
         report = partial(
             self._define,
@@ -470,7 +471,8 @@ class Vulture(ast.NodeVisitor):
 
     def visit_arg(self, node):
         """Function argument"""
-        self._define_variable(node.arg, node, confidence=100)
+        if self._override_depth == 0:
+            self._define_variable(node.arg, node, confidence=100)
 
     def visit_AsyncFunctionDef(self, node):
         return self.visit_FunctionDef(node)
@@ -546,6 +548,25 @@ class Vulture(ast.NodeVisitor):
             and not node.args
             and not node.keywords
         )
+
+    @staticmethod
+    def _has_override_decorator(node):
+        """Check if a function has the @override decorator.
+
+        Supports:
+        - @override
+        - @typing.override
+        - @typing_extensions.override
+        """
+        for decorator in node.decorator_list:
+            name = utils.get_decorator_name(decorator)
+            if name in (
+                "@override",
+                "@typing.override",
+                "@typing_extensions.override",
+            ):
+                return True
+        return False
 
     def visit_ClassDef(self, node):
         for decorator in node.decorator_list:
@@ -623,8 +644,22 @@ class Vulture(ast.NodeVisitor):
             self.used_names.add(kwd_attr)
 
     def visit(self, node):
+        # For function definitions, save and restore the override depth.
+        # This ensures inner functions don't inherit the parent's override state.
+        saved_override_depth = None
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            saved_override_depth = self._override_depth
+            if self._has_override_decorator(node):
+                self._override_depth = 1
+            else:
+                self._override_depth = 0
+
         # Visit children nodes first to allow recursive reachability analysis.
         self.generic_visit(node)
+
+        # Restore override depth after visiting children.
+        if saved_override_depth is not None:
+            self._override_depth = saved_override_depth
 
         self.reachability.visit(node)
 
