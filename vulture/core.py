@@ -65,13 +65,8 @@ def _is_test_file(filename):
     )
 
 
-def _assigns_special_variable__all__(node):
-    assert isinstance(node, ast.Assign)
-    return isinstance(node.value, (ast.List, ast.Tuple)) and any(
-        target.id == "__all__"
-        for target in node.targets
-        if isinstance(target, ast.Name)
-    )
+def _is__all__name(node):
+    return isinstance(node, ast.Name) and node.id == "__all__"
 
 
 def _ignore_class(filename, class_name):
@@ -611,12 +606,28 @@ class Vulture(ast.NodeVisitor):
         elif isinstance(node.ctx, (ast.Param, ast.Store)):
             self._define_variable(node.id, node)
 
-    def visit_Assign(self, node):
-        if _assigns_special_variable__all__(node):
-            assert isinstance(node.value, (ast.List, ast.Tuple))
-            for elt in node.value.elts:
+    def _handle__all__(self, value):
+        # ``__all__`` may be built from a list/tuple of string literals; mark
+        # each listed name as used so its definition is not reported as dead.
+        if isinstance(value, (ast.List, ast.Tuple)):
+            for elt in value.elts:
                 if utils.is_ast_string(elt):
                     self.used_names.add(elt.value)
+
+    def visit_Assign(self, node):
+        if any(_is__all__name(target) for target in node.targets):
+            self._handle__all__(node.value)
+
+    def visit_AnnAssign(self, node):
+        # ``__all__: list[str] = [...]`` (node.value is None for a bare
+        # annotation, which _handle__all__ ignores).
+        if _is__all__name(node.target):
+            self._handle__all__(node.value)
+
+    def visit_AugAssign(self, node):
+        # ``__all__ += [...]``
+        if _is__all__name(node.target):
+            self._handle__all__(node.value)
 
     def visit_MatchClass(self, node):
         for kwd_attr in node.kwd_attrs:
