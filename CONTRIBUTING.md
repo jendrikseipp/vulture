@@ -87,7 +87,7 @@ of "Fixed issue12.". Please make sure that you only fix the issue at hand
 or implement the desired new feature instead of making "drive-by" changes
 like adding type hints.
 
-### Formating and linting
+### Formatting and linting
 
 Run `pre-commit` using:
 

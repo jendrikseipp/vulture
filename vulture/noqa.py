@@ -33,8 +33,8 @@ def parse_noqa(code):
     for lineno, line in enumerate(code, start=1):
         match = NOQA_REGEXP.search(line)
         if match:
-            for error_code in _parse_error_codes(match):
-                error_code = NOQA_CODE_MAP.get(error_code, error_code)
+            for raw_error_code in _parse_error_codes(match):
+                error_code = NOQA_CODE_MAP.get(raw_error_code, raw_error_code)
                 noqa_lines[error_code].add(lineno)
     return noqa_lines
 

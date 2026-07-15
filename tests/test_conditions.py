@@ -49,8 +49,8 @@ def test_complex_conditions():
         ("foo and (False or [])", True, False),
         ('(foo and bar) or {"a": 1}', False, True),
     ]
-    for condition, always_false, always_true in conditions:
-        condition = ast.parse(condition, mode="eval").body
+    for condition_str, always_false, always_true in conditions:
+        condition = ast.parse(condition_str, mode="eval").body
         assert not (always_false and always_true)
         assert utils.condition_is_always_false(condition) == always_false
         assert utils.condition_is_always_true(condition) == always_true
@@ -68,7 +68,7 @@ def test_errors():
         "locals()",
         "().__class__",
     ]
-    for condition in conditions:
-        condition = ast.parse(condition, mode="eval").body
+    for condition_str in conditions:
+        condition = ast.parse(condition_str, mode="eval").body
         assert not utils.condition_is_always_false(condition)
         assert not utils.condition_is_always_true(condition)

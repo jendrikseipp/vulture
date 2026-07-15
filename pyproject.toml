@@ -90,6 +90,9 @@ select = [
     "UP",   # pyupgrade
     "RUF",  # ruff-specific rules
     "PERF", # perflint
+    "FURB", # refurb
+    "PLE",  # pylint (errors)
+    "PLW",  # pylint (warnings)
 ]
 ignore = [
     "C408",   # unnecessary dict call

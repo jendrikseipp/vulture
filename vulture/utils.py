@@ -88,8 +88,8 @@ def get_modules(paths):
 
     """
     modules = []
-    for path in paths:
-        path = path.resolve()
+    for given_path in paths:
+        path = given_path.resolve()
         if path.is_file():
             if path.suffix == ".pyc":
                 sys.exit(f"Error: *.pyc files are not supported: {path}")
