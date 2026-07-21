@@ -617,6 +617,15 @@ class Vulture(ast.NodeVisitor):
             for elt in node.value.elts:
                 if utils.is_ast_string(elt):
                     self.used_names.add(elt.value)
+        elif any(
+            isinstance(target, ast.Name) and target.id == "__all__"
+            for target in node.targets
+        ) and utils.is_ast_string(node.value):
+            # `__all__ = "a"` is equivalent to `__all__ = ("a",)` for a
+            # single-character name (issue #425). Multi-character strings are
+            # intentionally ignored (see test_import_with__all__string).
+            if len(node.value.value) == 1:
+                self.used_names.add(node.value.value)
 
     def visit_MatchClass(self, node):
         for kwd_attr in node.kwd_attrs:

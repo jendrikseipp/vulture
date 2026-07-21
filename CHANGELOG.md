@@ -1,5 +1,6 @@
 # 2.17 (unreleased)
 
+* Detect single-character string assignments to `__all__` (e.g. `__all__ = "a"`) as exports (#425, Phoenix0531-sudo).
 * Add support for Python 3.15 and drop 3.9 (Hugo van Kemenade, #416).
 
 # 2.16 (2026-03-25)
