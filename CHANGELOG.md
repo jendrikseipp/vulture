@@ -1,6 +1,7 @@
 # 2.17 (unreleased)
 
 * Add support for Python 3.15 and drop 3.9 (Hugo van Kemenade, #416).
+* Fix false positives for members of `typing.TypedDict` subclasses (#335, sudorm-rf0).
 
 # 2.16 (2026-03-25)
 

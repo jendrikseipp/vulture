@@ -113,6 +113,16 @@ def _ignore_variable(filename, varname):
     )
 
 
+def _is_typeddict(node):
+    """Return True if a class definition inherits from typing.TypedDict."""
+    for base in node.bases:
+        if isinstance(base, ast.Name) and base.id == "TypedDict":
+            return True
+        if isinstance(base, ast.Attribute) and base.attr == "TypedDict":
+            return True
+    return False
+
+
 class Item:
     """
     Hold the name, type and location of defined code.
@@ -557,6 +567,11 @@ class Vulture(ast.NodeVisitor):
                 )
                 break
         else:
+            if _is_typeddict(node):
+                # TypedDict members are type declarations, not runtime values,
+                # so neither the class nor its members should be reported as
+                # unused (see issue #335).
+                return
             self._define(
                 self.defined_classes, node.name, node, ignore=_ignore_class
             )
@@ -652,6 +667,19 @@ class Vulture(ast.NodeVisitor):
 
     def generic_visit(self, node):
         """Called if no explicit visitor function exists for a node."""
+        if isinstance(node, ast.ClassDef) and _is_typeddict(node):
+            # TypedDict members are type annotations, not runtime values, so
+            # we must not recurse into the body (which would otherwise define
+            # the annotation targets as unused variables, see issue #335). We
+            # still visit the bases, keywords and decorators.
+            for field, value in ast.iter_fields(node):
+                if field == "body":
+                    continue
+                if isinstance(value, list):
+                    for item in value:
+                        if isinstance(item, ast.AST):
+                            self.visit(item)
+            return
         for _, value in ast.iter_fields(node):
             if isinstance(value, list):
                 for item in value:
