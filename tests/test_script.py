@@ -5,7 +5,9 @@ import sys
 
 from vulture.utils import ExitCode
 
-from . import REPO, WHITELISTS, call_vulture
+from . import REPO, WHITELISTS, call_vulture, v
+
+assert v  # Silence pyflakes.
 
 
 def test_module_with_explicit_whitelists():
@@ -96,3 +98,11 @@ def test_make_whitelist():
 
 def test_version():
     assert call_vulture(["--version"]) == ExitCode.NoDeadCode
+
+
+def test_exclude_empty_pattern(v, tmp_path):
+    """An empty exclude pattern must not exclude everything."""
+    module = tmp_path / "module.py"
+    module.write_text("import os\n")
+    v.scavenge([module], exclude=["", "no_match"])
+    assert [item.name for item in v.get_unused_code()] == ["os"]
