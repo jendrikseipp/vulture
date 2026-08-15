@@ -262,3 +262,12 @@ def test_missing_paths():
     """
     with pytest.raises(InputError):
         make_config([])
+
+
+@pytest.mark.parametrize("min_confidence", [-1, 101])
+def test_min_confidence_out_of_range(min_confidence):
+    """
+    If min_confidence is outside the documented 0-100 range, we want to abort.
+    """
+    with pytest.raises(InputError):
+        make_config([f"--min-confidence={min_confidence}", "path"])
