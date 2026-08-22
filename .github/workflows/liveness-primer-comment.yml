@@ -1,0 +1,104 @@
+name: Liveness Primer Comment
+
+# Post the Liveness Primer rollup as one sticky PR comment. This privileged
+# workflow runs from the default branch, checks out no code, and treats the
+# measuring workflow's artifact strictly as untrusted data.
+on:
+  workflow_run:
+    workflows: ["Liveness Primer"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  comment:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+      actions: read
+    steps:
+      - name: Download the report artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: liveness-primer-report
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+          path: report
+
+      - name: Bind the comment target to the measured commit
+        id: target
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          number=$(tr -dc '0-9' < report/pr-number.txt | head -c 10)
+          test -n "$number"
+          metadata=$(gh api "repos/$REPO/pulls/$number")
+          claimed_head=$(jq -r '.head.sha' <<< "$metadata")
+          if [ "$claimed_head" != "$HEAD_SHA" ]; then
+            echo "PR #$number head is $claimed_head, but this run measured $HEAD_SHA" >&2
+            exit 1
+          fi
+          echo "pr=$number" >> "$GITHUB_OUTPUT"
+          echo "base=$(jq -r '.base.sha' <<< "$metadata")" >> "$GITHUB_OUTPUT"
+          echo "head=$claimed_head" >> "$GITHUB_OUTPUT"
+
+      - name: Extract the rollup summary
+        env:
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          BASE_SHA: ${{ steps.target.outputs.base }}
+          HEAD_SHA: ${{ steps.target.outputs.head }}
+        run: |
+          set -euo pipefail
+          report=report/liveness-primer-report.md
+          test -f "$report"
+
+          {
+            echo '<!-- liveness-primer-summary -->'
+            echo "### Liveness primer — blast radius of \`${HEAD_SHA:0:12}\`"
+            echo
+            if grep -q '^- \*\*comparable\*\*: no' "$report"; then
+              echo '> [!WARNING]'
+              echo '> This historical-detector run used prebuilt commands and is not gateable.'
+              echo
+            fi
+            if grep -q '^## :warning: Environment delta' "$report"; then
+              echo '> [!WARNING]'
+              echo '> The run reported an environment delta. See the full report.'
+              echo
+            fi
+            echo "- **base**: \`$BASE_SHA\`"
+            echo "- **head**: \`$HEAD_SHA\`"
+            grep -E '^- \*\*(comparable|isolation)\*\*:' "$report" || true
+            echo
+            awk '/^## Totals$/{f=1;next} f&&/^## /{exit} f' "$report" | grep -v '^legend:'
+            echo
+            echo "<sub>Re-measured on every push to the pull request."
+            echo "<a href=\"$RUN_URL\">Full report and JSON artifact</a>.</sub>"
+          } > comment.md
+
+          if [ "$(wc -c < comment.md)" -gt 65000 ]; then
+            head -c 64000 comment.md > comment.trimmed
+            printf '\n\n<sub>Truncated; see the full report.</sub>\n' >> comment.trimmed
+            mv comment.trimmed comment.md
+          fi
+
+      - name: Upsert the sticky comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ steps.target.outputs.pr }}
+        run: |
+          set -euo pipefail
+          existing=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+            --jq 'map(select(.body | startswith("<!-- liveness-primer-summary -->"))) | first | .id // empty')
+          if [ -n "$existing" ]; then
+            gh api -X PATCH "repos/$REPO/issues/comments/$existing" -F body=@comment.md
+          else
+            gh api -X POST "repos/$REPO/issues/$PR/comments" -F body=@comment.md
+          fi

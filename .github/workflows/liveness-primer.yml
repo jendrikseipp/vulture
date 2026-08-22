@@ -1,0 +1,81 @@
+name: Liveness Primer
+
+# Measure this PR's Vulture changes without granting PR-controlled code a
+# write token. The default-branch comment workflow consumes the artifact.
+on:
+  pull_request:
+    # Re-measure on every push; workflow_dispatch covers re-runs without a
+    # new commit (for example after a liveness-primer release).
+    types: [opened, reopened, ready_for_review, synchronize]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Pull request number to re-measure
+        required: true
+
+concurrency:
+  group: liveness-primer-${{ github.event.pull_request.number || inputs.pr_number }}
+  cancel-in-progress: true
+
+env:
+  # Float on the latest liveness-primer release; releases are the tool's
+  # stability boundary for the CLI surface used here.
+  LIVENESS_PRIMER_SPEC: "liveness-primer>=0.1"
+  # liveness_primer supports Python 3.14 and Vulture declares compatibility.
+  PYTHON_VERSION: "3.14"
+
+permissions:
+  contents: read
+
+jobs:
+  vulture:
+    name: Vulture blast radius
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Resolve the pull request under measurement
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number }}
+        run: |
+          set -euo pipefail
+          number=$(printf '%s' "$PR_NUMBER" | tr -dc '0-9')
+          test -n "$number"
+          gh api "repos/${{ github.repository }}/pulls/$number" \
+            --jq '"base=" + .base.sha, "head=" + .head.sha' >> "$GITHUB_OUTPUT"
+          printf '%s\n' "$number" > pr-number.txt
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7.6.0
+        with:
+          # Caching is off so every run resolves the latest release instead
+          # of reusing a restored uvx environment.
+          enable-cache: false
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Compare Vulture revisions across the corpus
+        run: |
+          set -o pipefail
+          uvx --from "$LIVENESS_PRIMER_SPEC" \
+            liveness-primer run \
+            --tool vulture \
+            --repo "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git" \
+            --old "${{ steps.pr.outputs.base }}" \
+            --new "${{ steps.pr.outputs.head }}" \
+            --all \
+            --output github \
+            --json-out liveness-primer-report.json \
+            --jobs 4 \
+            --timeout 180 \
+            | tee liveness-primer-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload liveness_primer report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: liveness-primer-report
+          path: |
+            liveness-primer-report.md
+            liveness-primer-report.json
+            pr-number.txt
+          if-no-files-found: error
