@@ -1,0 +1,157 @@
+name: Liveness Primer
+
+# Measure this PR's Vulture changes without granting PR-controlled code a
+# write token. The default-branch comment workflow consumes the artifact.
+on:
+  pull_request:
+    # Re-measure on every push; workflow_dispatch covers re-runs without a
+    # new commit (for example after a liveness-primer release).
+    types: [opened, reopened, ready_for_review, synchronize]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Pull request number to re-measure
+        required: true
+
+concurrency:
+  group: liveness-primer-${{ github.event.pull_request.number || inputs.pr_number }}
+  cancel-in-progress: true
+
+env:
+  # Float on the latest liveness-primer release; releases are the tool's
+  # stability boundary for the CLI surface used here.
+  LIVENESS_PRIMER_SPEC: "liveness-primer>=0.1"
+  # liveness_primer supports Python 3.14 and Vulture declares compatibility.
+  PYTHON_VERSION: "3.14"
+
+permissions:
+  contents: read
+
+jobs:
+  vulture:
+    name: Vulture blast radius
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Resolve the pull request under measurement
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number }}
+        run: |
+          set -euo pipefail
+          number=$(printf '%s' "$PR_NUMBER" | tr -dc '0-9')
+          test -n "$number"
+          metadata=$(gh api "repos/${{ github.repository }}/pulls/$number")
+          base_sha=$(jq -r '.base.sha' <<< "$metadata")
+          head_sha=$(jq -r '.head.sha' <<< "$metadata")
+          printf 'base=%s\nhead=%s\n' "$base_sha" "$head_sha" >> "$GITHUB_OUTPUT"
+          printf '%s\n' "$number" > pr-number.txt
+          printf '%s\n' "$head_sha" > head-sha.txt
+          chmod 0400 pr-number.txt head-sha.txt
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78  # v7.6.0
+        with:
+          # Caching is off so every run resolves the latest release instead
+          # of reusing a restored uvx environment.
+          enable-cache: false
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Compare Vulture revisions across the corpus
+        run: |
+          set -euo pipefail
+          sandbox_user=liveness-primer
+          sudo useradd --system --user-group --no-create-home \
+            --shell /usr/sbin/nologin "$sandbox_user"
+          sandbox_uid=$(id -u "$sandbox_user")
+          sandbox_gid=$(id -g "$sandbox_user")
+          stage_dir=$(mktemp -d /tmp/liveness-primer.XXXXXX)
+          sudo chown "$sandbox_uid:$sandbox_gid" "$stage_dir"
+          sudo chmod 0700 "$stage_dir"
+          sudo -u "$sandbox_user" mkdir \
+            "$stage_dir/home" \
+            "$stage_dir/tmp" \
+            "$stage_dir/uv-cache" \
+            "$stage_dir/uv-tools"
+
+          if sudo -u "$sandbox_user" test -w "$GITHUB_WORKSPACE"; then
+            echo "The unprivileged analysis user can write to the workspace" >&2
+            exit 1
+          fi
+
+          uvx_bin=$(readlink -f "$(command -v uvx)")
+          python_bin=$(readlink -f "$(command -v python)")
+          sandbox_path=$(dirname "$uvx_bin"):$(dirname "$python_bin"):/usr/local/bin:/usr/bin:/bin
+          install -m 0600 /dev/null liveness-primer-report.md
+          install -m 0600 /dev/null liveness-primer-report.json
+
+          cleanup_analysis_processes() {
+            for attempt in 1 2 3 4 5; do
+              sudo pkill -KILL -u "$sandbox_uid" >/dev/null 2>&1 || true
+              if ! sudo pgrep -u "$sandbox_uid" >/dev/null; then
+                return 0
+              fi
+              sleep 1
+            done
+            return 1
+          }
+          trap 'cleanup_analysis_processes || true' EXIT
+
+          set +e
+          sudo -u "$sandbox_user" -- env -i \
+            HOME="$stage_dir/home" \
+            LANG=C.UTF-8 \
+            PATH="$sandbox_path" \
+            TMPDIR="$stage_dir/tmp" \
+            UV_CACHE_DIR="$stage_dir/uv-cache" \
+            UV_TOOL_DIR="$stage_dir/uv-tools" \
+            /usr/bin/bash -c 'cd "$HOME" && exec "$@"' bash \
+            "$uvx_bin" --from "$LIVENESS_PRIMER_SPEC" \
+              liveness-primer run \
+              --tool vulture \
+              --repo "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git" \
+              --old "${{ steps.pr.outputs.base }}" \
+              --new "${{ steps.pr.outputs.head }}" \
+              --all \
+              --output github \
+              --json-out "$stage_dir/liveness-primer-report.json" \
+              --jobs 4 \
+              --timeout 180 \
+            | tee liveness-primer-report.md >> "$GITHUB_STEP_SUMMARY"
+          pipeline_status=("${PIPESTATUS[@]}")
+          set -e
+
+          if ! cleanup_analysis_processes; then
+            echo "An analysis subprocess survived cleanup" >&2
+            exit 1
+          fi
+          trap - EXIT
+          if [ "${pipeline_status[0]}" -ne 0 ] || [ "${pipeline_status[1]}" -ne 0 ]; then
+            echo "The liveness-primer pipeline failed" >&2
+            exit 1
+          fi
+
+          # Resolve and read the sandbox-owned path with sandbox authority. The
+          # runner shell opens the pre-created workspace destination.
+          sudo -u "$sandbox_user" -- test -f \
+            "$stage_dir/liveness-primer-report.json"
+          sudo -u "$sandbox_user" -- test -s \
+            "$stage_dir/liveness-primer-report.json"
+          sudo -u "$sandbox_user" -- cat \
+            "$stage_dir/liveness-primer-report.json" \
+            > liveness-primer-report.json
+          chmod 0400 liveness-primer-report.md liveness-primer-report.json
+          test -s liveness-primer-report.md
+          test -s liveness-primer-report.json
+
+      - name: Upload liveness_primer report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: liveness-primer-report
+          path: |
+            liveness-primer-report.md
+            liveness-primer-report.json
+            head-sha.txt
+            pr-number.txt
+          if-no-files-found: error
