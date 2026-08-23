@@ -1,8 +1,8 @@
 name: Liveness Primer Comment
 
-# Post the Liveness Primer rollup as one sticky PR comment. This privileged
-# workflow runs from the default branch, checks out no code, and treats the
-# measuring workflow's artifact strictly as untrusted data.
+# Post the Liveness Primer report or a trust warning as one sticky PR comment.
+# This privileged workflow runs from the default branch, checks out no code,
+# and treats the measuring workflow's artifact strictly as untrusted data.
 on:
   workflow_run:
     workflows: ["Liveness Primer"]
@@ -16,10 +16,34 @@ jobs:
     if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      COMMENT_CONTENT_TARGET_BYTES: "64000"
+      COMMENT_MAX_BYTES: "65000"
+      MEASUREMENT_WORKFLOW_FILE: liveness-primer.yml
+      MEASUREMENT_WORKFLOW_PATH: .github/workflows/liveness-primer.yml
     permissions:
       pull-requests: write
       actions: read
+      contents: read
     steps:
+      - name: Authenticate the triggering workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TRIGGER_WORKFLOW_ID: ${{ github.event.workflow_run.workflow_id }}
+          TRIGGER_WORKFLOW_PATH: ${{ github.event.workflow_run.path }}
+        run: |
+          set -euo pipefail
+          expected_workflow_id=$(gh api \
+            "repos/$REPO/actions/workflows/$MEASUREMENT_WORKFLOW_FILE" \
+            --jq '.id // empty')
+          test -n "$expected_workflow_id"
+          if [ "$TRIGGER_WORKFLOW_ID" != "$expected_workflow_id" ] || \
+            [ "$TRIGGER_WORKFLOW_PATH" != "$MEASUREMENT_WORKFLOW_PATH" ]; then
+            echo "Refusing artifact from workflow ID $TRIGGER_WORKFLOW_ID at $TRIGGER_WORKFLOW_PATH" >&2
+            exit 1
+          fi
+
       - name: Download the report artifact
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
         with:
@@ -33,30 +57,118 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
+          RUN_EVENT: ${{ github.event.workflow_run.event }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           set -euo pipefail
           number=$(tr -dc '0-9' < report/pr-number.txt | head -c 10)
           test -n "$number"
-          metadata=$(gh api "repos/$REPO/pulls/$number")
-          claimed_head=$(jq -r '.head.sha' <<< "$metadata")
-          if [ "$claimed_head" != "$HEAD_SHA" ]; then
-            echo "PR #$number head is $claimed_head, but this run measured $HEAD_SHA" >&2
+          measured_head=$(tr -d '\n' < report/head-sha.txt)
+          if [ "${#measured_head}" -ne 40 ] || [[ "$measured_head" == *[!0-9a-f]* ]]; then
+            echo "The artifact contains an invalid measured head SHA" >&2
             exit 1
           fi
+          metadata=$(gh api "repos/$REPO/pulls/$number")
+          claimed_head=$(jq -r '.head.sha' <<< "$metadata")
+          if [ "$claimed_head" != "$measured_head" ]; then
+            echo "PR #$number head is $claimed_head, but this run measured $measured_head" >&2
+            exit 1
+          fi
+          if [ "$RUN_EVENT" = pull_request ] && [ "$HEAD_SHA" != "$measured_head" ]; then
+            echo "The pull-request event SHA does not match the measured head" >&2
+            exit 1
+          fi
+          base_sha=$(jq -r '.base.sha' <<< "$metadata")
+          merge_sha=$(jq -r '.merge_commit_sha // empty' <<< "$metadata")
+          # Compare the effective PR merge tree with its base parent. Unlike
+          # base.sha, this base snapshot advances when main is merged into a PR.
+          workflow_state=unknown
+          if [ "${#merge_sha}" -eq 40 ] && [[ "$merge_sha" != *[!0-9a-f]* ]]; then
+            if merge_commit=$(gh api "repos/$REPO/git/commits/$merge_sha") && \
+              [ "$(jq '.parents | length' <<< "$merge_commit")" -eq 2 ]; then
+              merge_base=$(jq -r '.parents[0].sha' <<< "$merge_commit")
+              merge_head=$(jq -r '.parents[1].sha' <<< "$merge_commit")
+              if [ "$merge_head" = "$claimed_head" ]; then
+                owner=${REPO%%/*}
+                name=${REPO#*/}
+                if workflow_objects=$(gh api graphql \
+                  -f owner="$owner" \
+                  -f name="$name" \
+                  -f before="$merge_base:$MEASUREMENT_WORKFLOW_PATH" \
+                  -f after="$merge_sha:$MEASUREMENT_WORKFLOW_PATH" \
+                  -f query='query($owner: String!, $name: String!, $before: String!, $after: String!) {
+                    repository(owner: $owner, name: $name) {
+                      before: object(expression: $before) { ... on Blob { oid } }
+                      after: object(expression: $after) { ... on Blob { oid } }
+                    }
+                  }') && jq -e '
+                    ((.errors // []) | length) == 0 and
+                    .data.repository != null
+                  ' >/dev/null <<< "$workflow_objects"; then
+                  base_workflow=$(jq -r \
+                    '.data.repository.before.oid // "absent"' \
+                    <<< "$workflow_objects")
+                  merge_workflow=$(jq -r \
+                    '.data.repository.after.oid // "absent"' \
+                    <<< "$workflow_objects")
+                  if [ "$base_workflow" = "$merge_workflow" ]; then
+                    workflow_state=unchanged
+                  else
+                    workflow_state=changed
+                  fi
+                fi
+              fi
+            fi
+          fi
           echo "pr=$number" >> "$GITHUB_OUTPUT"
-          echo "base=$(jq -r '.base.sha' <<< "$metadata")" >> "$GITHUB_OUTPUT"
+          echo "base=$base_sha" >> "$GITHUB_OUTPUT"
           echo "head=$claimed_head" >> "$GITHUB_OUTPUT"
+          echo "workflow_state=$workflow_state" >> "$GITHUB_OUTPUT"
 
-      - name: Extract the rollup summary
+      - name: Build the changed-workflow warning
+        if: steps.target.outputs.workflow_state != 'unchanged'
+        env:
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          WORKFLOW_STATE: ${{ steps.target.outputs.workflow_state }}
+        run: |
+          set -euo pipefail
+          {
+            echo '<!-- liveness-primer-summary -->'
+            echo '> [!WARNING]'
+            if [ "$WORKFLOW_STATE" = changed ]; then
+              echo '> This pull request changes `.github/workflows/liveness-primer.yml`.'
+            else
+              echo '> The commenter could not verify that this pull request leaves'
+              echo '> `.github/workflows/liveness-primer.yml` unchanged.'
+            fi
+            echo '> The report contents are not reproduced because the commenter cannot'
+            echo '> establish that they were generated by the merged workflow definition.'
+            echo '> Review the workflow changes and confirm that they are in scope for'
+            echo '> this pull request before trusting the artifact.'
+            echo
+            echo "[Open the workflow run and report artifact]($RUN_URL)."
+          } > comment.md
+          test "$(wc -c < comment.md)" -le "$COMMENT_MAX_BYTES"
+
+      - name: Build the report comment
+        if: steps.target.outputs.workflow_state == 'unchanged'
         env:
           RUN_URL: ${{ github.event.workflow_run.html_url }}
           BASE_SHA: ${{ steps.target.outputs.base }}
           HEAD_SHA: ${{ steps.target.outputs.head }}
         run: |
           set -euo pipefail
+          max_comment_bytes=$COMMENT_MAX_BYTES
+          content_target_bytes=$COMMENT_CONTENT_TARGET_BYTES
           report=report/liveness-primer-report.md
+          details="$RUNNER_TEMP/liveness-primer-details.md"
           test -f "$report"
+
+          awk '
+            /^## Totals$/ { after_totals = 1; next }
+            after_totals && /^## / { in_details = 1 }
+            in_details { print }
+          ' "$report" > "$details"
 
           {
             echo '<!-- liveness-primer-summary -->'
@@ -78,15 +190,54 @@ jobs:
             echo
             awk '/^## Totals$/{f=1;next} f&&/^## /{exit} f' "$report" | grep -v '^legend:'
             echo
-            echo "<sub>Re-measured on every push to the pull request."
-            echo "<a href=\"$RUN_URL\">Full report and JSON artifact</a>.</sub>"
           } > comment.md
 
-          if [ "$(wc -c < comment.md)" -gt 65000 ]; then
-            head -c 64000 comment.md > comment.trimmed
-            printf '\n\n<sub>Truncated; see the full report.</sub>\n' >> comment.trimmed
-            mv comment.trimmed comment.md
+          if [ -s "$details" ]; then
+            {
+              echo '<details>'
+              echo '<summary>Finding details</summary>'
+              echo
+            } >> comment.md
+
+            detail_limit=$((content_target_bytes - $(wc -c < comment.md)))
+            if [ "$detail_limit" -gt 0 ] && [ "$(wc -c < "$details")" -le "$detail_limit" ]; then
+              cat "$details" >> comment.md
+            else
+              if [ "$detail_limit" -gt 0 ]; then
+                LC_ALL=C awk -v limit="$detail_limit" '
+                  length($0) + 1 > limit - used { exit }
+                  { print; used += length($0) + 1 }
+                ' "$details" >> comment.md
+              fi
+              {
+                echo
+                echo '<sub>Finding details truncated to fit GitHub’s comment size limit.</sub>'
+              } >> comment.md
+            fi
+            {
+              echo
+              echo '</details>'
+              echo
+            } >> comment.md
           fi
+
+          {
+            echo "<sub>Re-measured on every push to the pull request."
+            echo "<a href=\"$RUN_URL\">Full report and JSON artifact</a>.</sub>"
+          } >> comment.md
+
+          if [ "$(wc -c < comment.md)" -gt "$max_comment_bytes" ]; then
+            {
+              echo '<!-- liveness-primer-summary -->'
+              echo '> [!WARNING]'
+              echo '> The liveness primer report was too large to reproduce safely in a comment.'
+              echo '> Review the workflow run and complete artifact directly.'
+              echo
+              echo "[Open the workflow run and report artifact]($RUN_URL)."
+            } > comment.md
+          fi
+
+          test "$(wc -c < comment.md)" -le "$max_comment_bytes"
 
       - name: Upsert the sticky comment
         env:
