@@ -13,6 +13,19 @@ except ModuleNotFoundError:
 
 from .version import __version__
 
+#: Categories of unused code that Vulture can report. These match the ``typ``
+#: field of each reported item (see ``ERROR_CODES`` in ``core.py``).
+REPORTABLE_TYPES = (
+    "attribute",
+    "class",
+    "function",
+    "import",
+    "method",
+    "property",
+    "unreachable_code",
+    "variable",
+)
+
 #: Possible configuration options and their respective defaults
 DEFAULTS = {
     "config": "pyproject.toml",
@@ -23,6 +36,7 @@ DEFAULTS = {
     "ignore_names": [],
     "make_whitelist": False,
     "sort_by_size": False,
+    "type": [],
     "verbose": False,
 }
 
@@ -56,6 +70,15 @@ def _check_output_config(config):
     """
     if not config["paths"]:
         raise InputError("Please pass at least one file or directory")
+
+    unknown_types = [
+        typ for typ in config["type"] if typ not in REPORTABLE_TYPES
+    ]
+    if unknown_types:
+        raise InputError(
+            f"Unknown code type(s) for --type: {', '.join(unknown_types)}. "
+            f"Valid types are: {', '.join(REPORTABLE_TYPES)}."
+        )
 
 
 def _parse_toml(infile):
@@ -159,6 +182,15 @@ def _parse_args(args=None):
         action="store_true",
         default=missing,
         help="Sort unused functions and classes by their lines of code.",
+    )
+    parser.add_argument(
+        "--type",
+        metavar="TYPES",
+        type=csv,
+        default=missing,
+        help="Comma-separated list of code types to report (e.g.,"
+        ' "function,class"). By default all types are reported. Valid types'
+        f" are: {', '.join(REPORTABLE_TYPES)}.",
     )
     parser.add_argument(
         "--config",
