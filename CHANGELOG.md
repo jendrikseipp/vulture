@@ -1,5 +1,6 @@
 # 2.17 (unreleased)
 
+* Add `--type` option to report only certain kinds of unused code (#303).
 * Add support for Python 3.15 and drop 3.9 (Hugo van Kemenade, #416).
 
 # 2.16 (2026-03-25)

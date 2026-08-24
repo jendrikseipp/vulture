@@ -313,13 +313,19 @@ class Vulture(ast.NodeVisitor):
                 self.scan(module_string, filename=path)
 
     def get_unused_code(
-        self, min_confidence=0, sort_by_size=False
+        self, min_confidence=0, sort_by_size=False, types=None
     ) -> list[Item]:
         """
         Return ordered list of unused Item objects.
+
+        If *types* is given, only report items whose type is in the
+        collection (e.g. ``["function", "class"]``). By default all types
+        are reported.
         """
         if not 0 <= min_confidence <= 100:
             raise ValueError("min_confidence must be between 0 and 100.")
+
+        types = set(types) if types else None
 
         def by_name(item):
             return str(item.filename).lower(), item.first_lineno
@@ -339,7 +345,10 @@ class Vulture(ast.NodeVisitor):
         )
 
         confidently_unused = [
-            obj for obj in unused_code if obj.confidence >= min_confidence
+            obj
+            for obj in unused_code
+            if obj.confidence >= min_confidence
+            and (types is None or obj.typ in types)
         ]
 
         return sorted(
@@ -347,13 +356,19 @@ class Vulture(ast.NodeVisitor):
         )
 
     def report(
-        self, min_confidence=0, sort_by_size=False, make_whitelist=False
+        self,
+        min_confidence=0,
+        sort_by_size=False,
+        make_whitelist=False,
+        types=None,
     ):
         """
         Print ordered list of Item objects to stdout.
         """
         for item in self.get_unused_code(
-            min_confidence=min_confidence, sort_by_size=sort_by_size
+            min_confidence=min_confidence,
+            sort_by_size=sort_by_size,
+            types=types,
         ):
             self._log(
                 item.get_whitelist_string()
@@ -679,5 +694,6 @@ def main():
             min_confidence=config["min_confidence"],
             sort_by_size=config["sort_by_size"],
             make_whitelist=config["make_whitelist"],
+            types=config["type"],
         )
     )

@@ -10,6 +10,7 @@ import pytest
 
 from vulture.config import (
     DEFAULTS,
+    REPORTABLE_TYPES,
     InputError,
     _check_input_config,
     _parse_args,
@@ -170,6 +171,7 @@ def test_config_merging():
         make_whitelist=True,
         min_confidence=20,
         sort_by_size=True,
+        type=[],
         verbose=True,
     )
     assert result == expected
@@ -262,3 +264,38 @@ def test_missing_paths():
     """
     with pytest.raises(InputError):
         make_config([])
+
+
+def test_type_cli_arg():
+    result = _parse_args(["--type=function,class", "foo.py"])
+    assert result["type"] == ["function", "class"]
+
+
+def test_type_default_is_empty():
+    result = make_config(["foo.py"])
+    assert result["type"] == []
+
+
+def test_type_from_toml():
+    toml = get_toml_bytes(
+        dedent(
+            """\
+        [tool.vulture]
+        type = ["function", "variable"]
+        paths = ["foo.py"]
+        """
+        )
+    )
+    result = make_config([], toml)
+    assert result["type"] == ["function", "variable"]
+
+
+def test_unknown_type_is_rejected():
+    with pytest.raises(InputError):
+        make_config(["--type=funktion", "foo.py"])
+
+
+def test_reportable_types_match_error_codes():
+    from vulture.core import ERROR_CODES
+
+    assert set(REPORTABLE_TYPES) == set(ERROR_CODES)

@@ -57,6 +57,12 @@ You can use the `--min-confidence` flag to set the minimum confidence
 for code to be reported as unused. Use `--min-confidence 100` to only
 report code that is guaranteed to be unused within the analyzed files.
 
+To limit the report to certain kinds of dead code, pass a comma-separated
+list of types to `--type`. For example, `--type function,class` reports only
+unused functions and classes. The valid types are `attribute`, `class`,
+`function`, `import`, `method`, `property`, `unreachable_code` and
+`variable`. By default all types are reported.
+
 ## Handling false positives
 
 When Vulture incorrectly reports chunks of code as unused, you have
@@ -184,6 +190,7 @@ make_whitelist = true
 min_confidence = 80
 paths = ["myscript.py", "mydir", "whitelist.py"]
 sort_by_size = true
+type = ["function", "class"]
 verbose = true
 ```
 

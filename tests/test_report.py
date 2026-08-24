@@ -61,6 +61,28 @@ def test_item_report(check_report):
     check_report(mock_code, expected)
 
 
+def test_filter_by_type(v):
+    v.scan(mock_code, filename="foo.py")
+    unused = v.get_unused_code(types=["function", "class"])
+    assert sorted(item.typ for item in unused) == ["class", "function"]
+
+
+def test_filter_by_type_default_reports_all(v):
+    v.scan(mock_code, filename="foo.py")
+    all_items = v.get_unused_code()
+    assert v.get_unused_code(types=None) == all_items
+    assert v.get_unused_code(types=[]) == all_items
+
+
+def test_report_by_type(v, capsys):
+    v.scan(mock_code, filename="foo.py")
+    capsys.readouterr()
+    v.report(types=["import"])
+    assert capsys.readouterr().out == (
+        "foo.py:1: unused import 'foo' (90% confidence)\n"
+    )
+
+
 def test_make_whitelist(check_report):
     expected = """\
 foo  # unused import ({filename}:1)
