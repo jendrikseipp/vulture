@@ -270,7 +270,10 @@ class Vulture(ast.NodeVisitor):
                 pattern = f"*{pattern}*"
             return pattern
 
-        exclude = [prepare_pattern(pattern) for pattern in (exclude or [])]
+        # an empty pattern becomes "**" above and would exclude everything
+        exclude = [
+            prepare_pattern(pattern) for pattern in (exclude or []) if pattern
+        ]
 
         def exclude_path(path):
             return _match(path, exclude, case=False)
