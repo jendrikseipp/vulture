@@ -14,7 +14,7 @@ from vulture.utils import ExitCode
 
 DEFAULT_CONFIDENCE = 60
 
-IGNORED_VARIABLE_NAMES = {"object", "self"}
+IGNORED_VARIABLE_NAMES = {"object", "self", "cls"}
 PYTEST_FUNCTION_NAMES = {
     "setup_module",
     "teardown_module",
