@@ -57,6 +57,9 @@ def _check_output_config(config):
     if not config["paths"]:
         raise InputError("Please pass at least one file or directory")
 
+    if not 0 <= config["min_confidence"] <= 100:
+        raise InputError("min_confidence must be between 0 and 100")
+
 
 def _parse_toml(infile):
     """
