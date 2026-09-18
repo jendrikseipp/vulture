@@ -273,6 +273,41 @@ __all__ = "Foo"
     check(v.unused_imports, ["Foo", "Bar"])
 
 
+def test_import_with__all__single_char_string(v):
+    v.scan(
+        """\
+from define import a, Bar
+
+__all__ = "a"
+"""
+    )
+    check(v.defined_imports, ["a", "Bar"])
+    # Single-character string is equivalent to __all__ = ("a",)  (#425)
+    check(v.unused_imports, ["Bar"])
+
+
+def test_import_with__all__single_char_tuple(v):
+    v.scan(
+        """\
+from define import a, Bar
+
+__all__ = ("a",)
+"""
+    )
+    check(v.unused_imports, ["Bar"])
+
+
+def test_variable_with__all__single_char_string(v):
+    v.scan(
+        """\
+__all__ = "a"
+a = None
+b = None
+"""
+    )
+    check(v.unused_vars, ["b"])
+
+
 def test_import_with__all__assign_other_module(v):
     v.scan(
         """\
