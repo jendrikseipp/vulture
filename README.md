@@ -20,6 +20,7 @@ tool for higher code quality.
 * tested: tests itself and has complete test coverage
 * complements pyflakes and has the same output syntax
 * sorts unused classes and functions by size with `--sort-by-size`
+* colour output, with confidence shown via a temperature gradient
 
 ## Installation
 
@@ -163,6 +164,16 @@ def foo(arg: Sequence):
     ...
 ```
 
+
+## Colour output
+
+Output is in colour by default when stdout is a terminal. The
+confidence percentage uses a temperature gradient: 60% dark grey, 90%
+yellow, 100% red.
+
+Use `-c`/`--color {yes,no,auto}` to force colour on or off, or set the
+[`NO_COLOR`](https://no-color.org/) or
+[`FORCE_COLOR`](https://force-color.org/) environment variables.
 
 ## Configuration
 
