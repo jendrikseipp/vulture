@@ -7,6 +7,8 @@ from fnmatch import fnmatch, fnmatchcase
 from functools import partial
 from pathlib import Path
 
+from termcolor import colored
+
 from vulture import lines, noqa, utils
 from vulture.config import InputError, make_config
 from vulture.reachability import Reachability
@@ -151,16 +153,45 @@ class Item:
         assert self.last_lineno >= self.first_lineno
         return self.last_lineno - self.first_lineno + 1
 
-    def get_report(self, add_size=False):
+    def get_report(self, add_size=False, *, color="auto"):
         if add_size:
             line_format = "line" if self.size == 1 else "lines"
             size_report = f", {self.size:d} {line_format}"
         else:
             size_report = ""
-        return (
-            f"{utils.format_path(self.filename)}:{self.first_lineno:d}: "
-            f"{self.message} ({self.confidence}% confidence{size_report})"
+
+        no_color = color == "no"
+        force_color = color == "yes"
+
+        def c(text, *args, **kwargs):
+            return colored(
+                text,
+                *args,
+                no_color=no_color,
+                force_color=force_color,
+                **kwargs,
+            )
+
+        path = c(utils.format_path(self.filename), attrs=["bold"])
+        colon = c(":", "cyan")
+        lineno = f"{self.first_lineno:d}"
+        if self.confidence >= 100:
+            confidence_color = "red"
+        elif self.confidence >= 90:
+            confidence_color = "yellow"
+        else:
+            confidence_color = "dark_grey"
+        confidence = c(
+            f"({self.confidence}% confidence{size_report})", confidence_color
         )
+        if self.typ == "unreachable_code":
+            message = c(self.message, "red", attrs=["bold"])
+        else:
+            message = (
+                f"unused {c(self.typ, 'red', attrs=['bold'])} "
+                f"{c(repr(self.name), attrs=['bold'])}"
+            )
+        return f"{path}{colon}{lineno}{colon} {message} {confidence}"
 
     def get_whitelist_string(self):
         filename = utils.format_path(self.filename)
@@ -350,7 +381,11 @@ class Vulture(ast.NodeVisitor):
         )
 
     def report(
-        self, min_confidence=0, sort_by_size=False, make_whitelist=False
+        self,
+        min_confidence=0,
+        sort_by_size=False,
+        make_whitelist=False,
+        color="auto",
     ):
         """
         Print ordered list of Item objects to stdout.
@@ -361,7 +396,7 @@ class Vulture(ast.NodeVisitor):
             self._log(
                 item.get_whitelist_string()
                 if make_whitelist
-                else item.get_report(add_size=sort_by_size),
+                else item.get_report(add_size=sort_by_size, color=color),
                 force=True,
             )
             self.exit_code = ExitCode.DeadCode
@@ -682,5 +717,6 @@ def main():
             min_confidence=config["min_confidence"],
             sort_by_size=config["sort_by_size"],
             make_whitelist=config["make_whitelist"],
+            color=config["color"],
         )
     )

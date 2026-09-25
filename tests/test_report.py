@@ -33,7 +33,7 @@ def check_report(v, capsys):
         filename = "foo.py"
         v.scan(code, filename=filename)
         capsys.readouterr()
-        ret = v.report(make_whitelist=make_whitelist)
+        ret = v.report(make_whitelist=make_whitelist, color="no")
         assert ret
         assert capsys.readouterr().out == expected.format(filename=filename)
 
@@ -59,6 +59,13 @@ def test_item_report(check_report):
 {filename}:18: unused function 'myfunc' (60% confidence)
 """
     check_report(mock_code, expected)
+
+
+def test_color(v):
+    v.scan("import os\n")
+    [item] = v.get_unused_code()
+    assert "\x1b[" in item.get_report(color="yes")
+    assert "\x1b[" not in item.get_report(color="no")
 
 
 def test_make_whitelist(check_report):

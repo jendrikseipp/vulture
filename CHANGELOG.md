@@ -1,5 +1,6 @@
 # 2.17 (unreleased)
 
+* Colour output and add `-c`/`--color {yes,no,auto}` option (#415, Hugo van Kemenade).
 * Add support for Python 3.15 and drop 3.9 (Hugo van Kemenade, #416).
 * Report an out-of-range `--min-confidence` as a usage error instead of a traceback.
 * Ignore empty `--exclude` patterns instead of excluding every file.

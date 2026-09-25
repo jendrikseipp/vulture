@@ -166,6 +166,7 @@ def test_config_merging():
         exclude=["cli_exclude"],
         ignore_decorators=["cli_deco"],
         ignore_names=["cli_name"],
+        color="auto",
         config="pyproject.toml",
         make_whitelist=True,
         min_confidence=20,
