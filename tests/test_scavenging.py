@@ -693,6 +693,98 @@ def foo(*bar):
     check(v.unused_vars, ["bar"])
 
 
+def test_unused_args_of_all_kinds(v):
+    v.scan(
+        """\
+def foo(a, /, b, *c, d, **e):
+    pass
+
+bar = lambda f, /, g, *h, i, **j: None
+"""
+    )
+    args = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
+    check(v.defined_vars, ["bar", *args])
+    check(v.unused_vars, ["bar", *args])
+
+
+def test_stub_function_args_ellipsis(v):
+    v.scan(
+        """\
+from typing import Protocol, overload
+
+class Greeter(Protocol):
+    def greet(self, name: str) -> str: ...
+
+@overload
+def convert(value: int) -> int: ...
+@overload
+def convert(value: str) -> str: ...
+def convert(value):
+    return value
+"""
+    )
+    check(v.defined_vars, ["value"])
+    check(v.unused_vars, [])
+    check(v.unused_methods, ["greet"])
+
+
+def test_stub_function_args_docstring(v):
+    v.scan(
+        """\
+import abc
+
+class Base(abc.ABC):
+    @abc.abstractmethod
+    def start(self, arg1):
+        \"\"\"Start with arg1.\"\"\"
+
+    @abc.abstractmethod
+    def stop(self, arg2):
+        \"\"\"Stop with arg2.\"\"\"
+        ...
+"""
+    )
+    check(v.defined_vars, [])
+    check(v.unused_methods, ["start", "stop"])
+
+
+def test_stub_function_args_not_implemented(v):
+    v.scan(
+        """\
+class Base:
+    def start(self, arg1):
+        raise NotImplementedError
+
+    def stop(self, arg2):
+        \"\"\"Stop with arg2.\"\"\"
+        raise NotImplementedError(f"{type(self)} must implement stop()")
+"""
+    )
+    check(v.defined_vars, [])
+    check(v.unused_methods, ["start", "stop"])
+
+
+def test_non_stub_function_args(v):
+    v.scan(
+        """\
+def foo(arg1):
+    pass
+
+def bar(arg2):
+    \"\"\"Docstring.\"\"\"
+    return 42
+
+def baz(arg3):
+    raise ValueError
+
+def qux(arg4):
+    raise NotImplementedError
+    return 42
+"""
+    )
+    check(v.unused_vars, ["arg1", "arg2", "arg3", "arg4"])
+
+
 def test_multiple_definition(v):
     v.scan(
         """\

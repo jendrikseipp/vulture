@@ -141,6 +141,11 @@ Vulture will also ignore all variables that start with an underscore, so
 you can use `_x, y = get_pos()` to mark unused tuple assignments or
 function arguments, e.g., `def foo(x, _y)`.
 
+Vulture doesn't report the arguments of functions whose body only
+contains a docstring, `...` or `raise NotImplementedError`, such as
+abstract methods, protocol methods and overloads, since their signatures
+define an interface.
+
 #### Minimum confidence
 
 Raise the minimum [confidence value](#types-of-unused-code) with the `--min-confidence` flag.
