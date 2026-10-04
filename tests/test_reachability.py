@@ -843,3 +843,51 @@ def foo():
 """
     )
     assert v.unreachable_code == []
+
+
+def test_while_true_fall_through_break_in_nested_for_else(v):
+    """A break in the else block of a nested loop exits the while loop."""
+    v.scan(
+        """\
+def foo(items):
+    while True:
+        for item in items:
+            if item:
+                return item
+        else:
+            break
+    return "reachable"
+"""
+    )
+    assert v.unreachable_code == []
+
+
+def test_while_true_fall_through_break_in_nested_while_else(v):
+    v.scan(
+        """\
+def foo(a):
+    while True:
+        while a():
+            pass
+        else:
+            if a():
+                break
+    return "reachable"
+"""
+    )
+    assert v.unreachable_code == []
+
+
+def test_while_true_no_fall_through_break_in_nested_loop(v):
+    v.scan(
+        """\
+def foo(items):
+    while True:
+        for item in items:
+            break
+        else:
+            return
+    return "unreachable"
+"""
+    )
+    check_unreachable(v, 7, 1, "while")
