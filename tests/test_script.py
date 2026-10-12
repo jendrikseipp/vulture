@@ -2,10 +2,10 @@ import glob
 import os.path
 import subprocess
 import sys
+
 import pytest
 
 from vulture.core import main
-
 from vulture.utils import ExitCode
 
 from . import REPO, WHITELISTS, call_vulture, v
