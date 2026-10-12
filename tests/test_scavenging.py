@@ -156,6 +156,65 @@ foo.bar = 2
     check(v.unused_attrs, ["bar", "bar"])
 
 
+def test_keyword_argument_marks_variable_used(v):
+    v.scan(
+        """\
+class Foo:
+    bar: str
+
+    @classmethod
+    def create(cls, value):
+        return cls(bar=value)
+"""
+    )
+    assert "bar" in v.used_names
+    check(v.unused_vars, [])
+
+
+def test_keyword_argument_in_plain_call(v):
+    v.scan(
+        """\
+class Config:
+    timeout: int
+
+
+Config(timeout=30)
+"""
+    )
+    assert "timeout" in v.used_names
+    check(v.unused_vars, [])
+
+
+def test_keyword_argument_does_not_use_assigned_attribute(v):
+    """`inst.extra = ...` without a read is still reported (issue #411)."""
+    v.scan(
+        """\
+class Foo:
+    @classmethod
+    def create(cls):
+        inst = cls()
+        inst.extra = 1
+        return inst
+"""
+    )
+    check(v.unused_attrs, ["extra"])
+
+
+def test_double_star_kwargs_add_no_name(v):
+    v.scan(
+        """\
+def call(**kwargs):
+    return func(alpha=1, **kwargs)
+"""
+    )
+    # `alpha` appears only as a keyword name, so its presence is
+    # attributable solely to the new kwarg loop.
+    assert "alpha" in v.used_names
+    # The `**kwargs` splat has `keyword.arg is None` and must be skipped;
+    # a broken guard would add `None` to used_names.
+    assert None not in v.used_names
+
+
 def test_ignored_attributes(v):
     v.scan(
         """\

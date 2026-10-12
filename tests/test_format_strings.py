@@ -65,4 +65,4 @@ def foobar():
 "{} {a} {b}".format(1, a=used_var, b=locals())
     """
     )
-    check(v.used_names, ["used_var", "locals", "format"])
+    check(v.used_names, ["a", "b", "used_var", "locals", "format"])
