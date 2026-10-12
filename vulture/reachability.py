@@ -162,22 +162,20 @@ class Reachability:
     def _body_has_break(stmts):
         """Return True if stmts contain a break that exits the current loop.
 
-        Does not recurse into nested loops or new function/class scopes, since
-        break statements inside those do not affect the enclosing loop.
+        Does not recurse into the bodies of nested loops or into new
+        function/class scopes, since break statements inside those do not
+        affect the enclosing loop. A break in the else block of a nested loop
+        exits the enclosing loop, though.
         """
         for stmt in stmts:
             if isinstance(stmt, ast.Break):
                 return True
+            if isinstance(stmt, (ast.While, ast.For, ast.AsyncFor)):
+                if Reachability._body_has_break(stmt.orelse):
+                    return True
+                continue
             if isinstance(
-                stmt,
-                (
-                    ast.While,
-                    ast.For,
-                    ast.AsyncFor,
-                    ast.FunctionDef,
-                    ast.AsyncFunctionDef,
-                    ast.ClassDef,
-                ),
+                stmt, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)
             ):
                 continue
             child_stmts = [

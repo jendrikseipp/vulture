@@ -3,6 +3,7 @@
 * Add support for Python 3.15 and drop 3.9 (Hugo van Kemenade, #416).
 * Report an out-of-range `--min-confidence` as a usage error instead of a traceback.
 * Ignore empty `--exclude` patterns instead of excluding every file.
+* Don't report code after a `while True` loop as unreachable when the `else` block of a nested loop breaks out of it (Pierre-Yves Le Borgne).
 
 # 2.16 (2026-03-25)
 
