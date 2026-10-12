@@ -2,6 +2,9 @@ import glob
 import os.path
 import subprocess
 import sys
+import pytest
+
+from vulture.core import main
 
 from vulture.utils import ExitCode
 
@@ -186,3 +189,15 @@ def test_ignore_files_glob_pattern(tmp_path):
         )
         == ExitCode.NoDeadCode
     )
+
+
+def test_main_ignore_files(tmp_path, monkeypatch):
+    module = tmp_path / "module.py"
+    module.write_text("def unused():\n    pass\n")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        sys, "argv", ["vulture", str(module), "--ignore-files", "module.py"]
+    )
+    with pytest.raises(SystemExit) as excinfo:
+        main()
+    assert excinfo.value.code == ExitCode.NoDeadCode
