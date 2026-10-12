@@ -45,19 +45,19 @@ def _safe_eval(node, default):
             return default
 
 
-def condition_is_always_false(condition):
+def condition_is_always_false(condition: ast.AST) -> bool:
     return not _safe_eval(condition, True)
 
 
-def condition_is_always_true(condition):
+def condition_is_always_true(condition: ast.AST) -> bool:
     return _safe_eval(condition, False)
 
 
-def is_ast_string(node):
+def is_ast_string(node: ast.AST) -> bool:
     return isinstance(node, ast.Constant) and isinstance(node.value, str)
 
 
-def format_path(path):
+def format_path(path: pathlib.Path) -> pathlib.Path:
     try:
         return path.relative_to(pathlib.Path.cwd())
     except ValueError:
@@ -65,7 +65,7 @@ def format_path(path):
         return path
 
 
-def get_decorator_name(decorator):
+def get_decorator_name(decorator: ast.expr) -> str:
     if isinstance(decorator, ast.Call):
         decorator = decorator.func
     try:

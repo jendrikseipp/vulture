@@ -39,6 +39,12 @@ class TestFormatPath:
         assert formatted == filepath
         assert formatted.is_absolute()
 
+    def test_path_is_cwd(self, tmp_cwd):
+        filepath = pathlib.Path.cwd()
+        formatted = utils.format_path(filepath)
+        assert formatted == pathlib.Path(".")
+        assert not formatted.is_absolute()
+
 
 def check_decorator_names(code, expected_names):
     decorator_names = []
