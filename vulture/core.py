@@ -355,7 +355,7 @@ class Vulture(ast.NodeVisitor):
             obj
             for obj in unused_code
             if obj.confidence >= min_confidence
-               and not self._is_ignored_file(obj.filename)
+            and not self._is_ignored_file(obj.filename)
         ]
 
         return sorted(
