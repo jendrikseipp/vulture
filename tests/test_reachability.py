@@ -44,6 +44,67 @@ def foo():
     check_unreachable(v, 3, 2, "return")
 
 
+def test_unreachable_yield_after_return_is_kept(v):
+    # A yield in unreachable code turns the function into a generator, so
+    # removing it would change the semantics; it must not be reported (#422).
+    v.scan(
+        """\
+async def foo():
+    return
+    yield
+"""
+    )
+    assert v.unreachable_code == []
+
+
+def test_unsatisfiable_if_with_yield_is_kept(v):
+    v.scan(
+        """\
+async def foo():
+    if False:
+        yield
+"""
+    )
+    assert v.unreachable_code == []
+
+
+def test_unreachable_yield_nested_in_loop_is_kept(v):
+    v.scan(
+        """\
+def foo():
+    return
+    for x in y:
+        yield x
+"""
+    )
+    assert v.unreachable_code == []
+
+
+def test_unreachable_without_yield_is_still_reported(v):
+    v.scan(
+        """\
+def foo():
+    return
+    print("dead")
+"""
+    )
+    check_unreachable(v, 3, 1, "return")
+
+
+def test_unreachable_yield_in_nested_function_is_reported(v):
+    # The yield belongs to the nested function, not the unreachable outer code.
+    v.scan(
+        """\
+def foo():
+    return
+
+    def bar():
+        yield
+"""
+    )
+    check_unreachable(v, 4, 2, "return")
+
+
 def test_return_pass(v):
     v.scan(
         """\
