@@ -56,7 +56,7 @@ def test_item_report(check_report):
 {filename}:10: unused variable '\u65e5\u672c\u4eba' (60% confidence)
 {filename}:12: unreachable code after 'return' (100% confidence)
 {filename}:14: unused property 'myprop' (60% confidence)
-{filename}:18: unused function 'myfunc' (60% confidence)
+{filename}:18: unused function 'foo.myfunc' (60% confidence)
 """
     check_report(mock_code, expected)
 
@@ -71,6 +71,6 @@ foobar  # unused variable ({filename}:9)
 \u65e5\u672c\u4eba  # unused variable ({filename}:10)
 # unreachable code after 'return' ({filename}:12)
 _.myprop  # unused property ({filename}:14)
-myfunc  # unused function ({filename}:18)
+foo.myfunc  # unused function ({filename}:18)
 """
     check_report(mock_code, expected, make_whitelist=True)
