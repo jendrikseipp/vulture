@@ -211,6 +211,7 @@ class Vulture(ast.NodeVisitor):
 
         self.ignore_names = ignore_names or []
         self.ignore_decorators = ignore_decorators or []
+        self.ignore_files = []
 
         self.filename = Path()
         self.code = []
@@ -264,7 +265,7 @@ class Vulture(ast.NodeVisitor):
         # usage.
         self.reachability.reset()
 
-    def scavenge(self, paths, exclude=None):
+    def scavenge(self, paths, exclude=None, ignore_files=None):
         def prepare_pattern(pattern):
             if not any(char in pattern for char in "*?["):
                 pattern = f"*{pattern}*"
@@ -273,6 +274,12 @@ class Vulture(ast.NodeVisitor):
         # an empty pattern becomes "**" above and would exclude everything
         exclude = [
             prepare_pattern(pattern) for pattern in (exclude or []) if pattern
+        ]
+
+        self.ignore_files = [
+            prepare_pattern(pattern)
+            for pattern in (ignore_files or [])
+            if pattern
         ]
 
         def exclude_path(path):
@@ -315,6 +322,9 @@ class Vulture(ast.NodeVisitor):
                 module_string = module_data.decode("utf-8")
                 self.scan(module_string, filename=path)
 
+    def _is_ignored_file(self, filename):
+        return _match(filename, self.ignore_files, case=False)
+
     def get_unused_code(
         self, min_confidence=0, sort_by_size=False
     ) -> list[Item]:
@@ -342,7 +352,10 @@ class Vulture(ast.NodeVisitor):
         )
 
         confidently_unused = [
-            obj for obj in unused_code if obj.confidence >= min_confidence
+            obj
+            for obj in unused_code
+            if obj.confidence >= min_confidence
+            and not self._is_ignored_file(obj.filename)
         ]
 
         return sorted(
@@ -676,7 +689,11 @@ def main():
         ignore_names=config["ignore_names"],
         ignore_decorators=config["ignore_decorators"],
     )
-    vulture.scavenge(config["paths"], exclude=config["exclude"])
+    vulture.scavenge(
+        config["paths"],
+        exclude=config["exclude"],
+        ignore_files=config["ignore_files"],
+    )
     sys.exit(
         vulture.report(
             min_confidence=config["min_confidence"],

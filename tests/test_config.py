@@ -32,6 +32,7 @@ def test_cli_args():
     expected = dict(
         paths=["path1", "path2"],
         exclude=["file*.py", "dir/"],
+        ignore_files=["generated.py", "*/migrations/*"],
         ignore_decorators=["deco1", "deco2"],
         ignore_names=["name1", "name2"],
         config="pyproject.toml",
@@ -42,6 +43,7 @@ def test_cli_args():
     )
     result = _parse_args(
         [
+            "--ignore-files=generated.py,*/migrations/*",
             "--exclude=file*.py,dir/",
             "--ignore-decorators=deco1,deco2",
             "--ignore-names=name1,name2",
@@ -64,6 +66,7 @@ def test_toml_config():
     expected = dict(
         paths=["path1", "path2"],
         exclude=["file*.py", "dir/"],
+        ignore_files=["generated.py", "*/migrations/*"],
         ignore_decorators=["deco1", "deco2"],
         ignore_names=["name1", "name2"],
         make_whitelist=True,
@@ -76,6 +79,7 @@ def test_toml_config():
             """\
         [tool.vulture]
         exclude = ["file*.py", "dir/"]
+        ignore_files = ["generated.py", "*/migrations/*"]
         ignore_decorators = ["deco1", "deco2"]
         ignore_names = ["name1", "name2"]
         make_whitelist = true
@@ -99,6 +103,7 @@ def test_toml_config_with_heterogenous_array():
     expected = dict(
         paths=["path1", "path2"],
         exclude=["file*.py", "dir/"],
+        ignore_files=["generated.py", "*/migrations/*"],
         ignore_decorators=["deco1", "deco2"],
         ignore_names=["name1", "name2"],
         make_whitelist=True,
@@ -115,6 +120,7 @@ def test_toml_config_with_heterogenous_array():
 
         [tool.vulture]
         exclude = ["file*.py", "dir/"]
+        ignore_files = ["generated.py", "*/migrations/*"]
         ignore_decorators = ["deco1", "deco2"]
         ignore_names = ["name1", "name2"]
         make_whitelist = true
@@ -140,6 +146,7 @@ def test_config_merging():
             """\
         [tool.vulture]
         exclude = ["toml_exclude"]
+        ignore_files = ["toml_generated.py"]
         ignore_decorators = ["toml_deco"]
         ignore_names = ["toml_name"]
         make_whitelist = false
@@ -152,6 +159,7 @@ def test_config_merging():
     )
     cliargs = [
         "--exclude=cli_exclude",
+        "--ignore-files=cli_generated.py",
         "--ignore-decorators=cli_deco",
         "--ignore-names=cli_name",
         "--make-whitelist",
@@ -163,6 +171,7 @@ def test_config_merging():
     result = make_config(cliargs, toml)
     expected = dict(
         paths=["cli_path"],
+        ignore_files=["cli_generated.py"],
         exclude=["cli_exclude"],
         ignore_decorators=["cli_deco"],
         ignore_names=["cli_name"],
@@ -271,3 +280,22 @@ def test_min_confidence_out_of_range(min_confidence):
     """
     with pytest.raises(InputError):
         make_config([f"--min-confidence={min_confidence}", "path"])
+
+
+def test_ignore_files_from_toml():
+    toml = get_toml_bytes(
+        dedent(
+            """\
+        [tool.vulture]
+        paths = ["path"]
+        ignore_files = ["generated.py", "*/migrations/*"]
+        """
+        )
+    )
+
+    result = make_config([], toml)
+
+    assert result["ignore_files"] == [
+        "generated.py",
+        "*/migrations/*",
+    ]

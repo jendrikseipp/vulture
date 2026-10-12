@@ -3,6 +3,9 @@ import os.path
 import subprocess
 import sys
 
+import pytest
+
+from vulture.core import main
 from vulture.utils import ExitCode
 
 from . import REPO, WHITELISTS, call_vulture, v
@@ -106,3 +109,95 @@ def test_exclude_empty_pattern(v, tmp_path):
     module.write_text("import os\n")
     v.scavenge([module], exclude=["", "no_match"])
     assert [item.name for item in v.get_unused_code()] == ["os"]
+
+
+def test_ignore_files(tmp_path):
+    used_file = tmp_path / "used.py"
+    ignored_file = tmp_path / "ignored.py"
+
+    used_file.write_text("def used_function():\n    pass\n\nused_function()\n")
+
+    ignored_file.write_text("def ignored_function():\n    pass\n")
+
+    assert (
+        call_vulture(
+            [
+                str(used_file),
+                str(ignored_file),
+                "--ignore-files",
+                str(ignored_file),
+            ]
+        )
+        == ExitCode.NoDeadCode
+    )
+
+
+def test_ignore_files_still_scans_file(tmp_path):
+    definition_file = tmp_path / "definition.py"
+    ignored_file = tmp_path / "ignored.py"
+
+    definition_file.write_text("def my_function():\n    pass\n")
+
+    ignored_file.write_text("my_function()\n")
+
+    assert (
+        call_vulture(
+            [
+                str(definition_file),
+                str(ignored_file),
+                "--ignore-files",
+                str(ignored_file),
+            ]
+        )
+        == ExitCode.NoDeadCode
+    )
+
+
+def test_ignore_files_from_toml_actually_ignores_file(tmp_path):
+    config_file = tmp_path / "pyproject.toml"
+    ignored_file = tmp_path / "ignored.py"
+
+    config_file.write_text('[tool.vulture]\nignore_files = ["ignored.py"]\n')
+    ignored_file.write_text("def ignored_function():\n    pass\n")
+
+    assert (
+        call_vulture(
+            [
+                str(tmp_path),
+                "--config",
+                str(config_file),
+            ]
+        )
+        == ExitCode.NoDeadCode
+    )
+
+
+def test_ignore_files_glob_pattern(tmp_path):
+    migrations_dir = tmp_path / "package" / "migrations"
+    migrations_dir.mkdir(parents=True)
+
+    ignored_file = migrations_dir / "generated.py"
+    ignored_file.write_text("def generated_function():\n    pass\n")
+
+    assert (
+        call_vulture(
+            [
+                str(tmp_path),
+                "--ignore-files",
+                "*/migrations/*",
+            ]
+        )
+        == ExitCode.NoDeadCode
+    )
+
+
+def test_main_ignore_files(tmp_path, monkeypatch):
+    module = tmp_path / "module.py"
+    module.write_text("def unused():\n    pass\n")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(
+        sys, "argv", ["vulture", str(module), "--ignore-files", "module.py"]
+    )
+    with pytest.raises(SystemExit) as excinfo:
+        main()
+    assert excinfo.value.code == ExitCode.NoDeadCode

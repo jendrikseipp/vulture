@@ -85,6 +85,9 @@ If you want to ignore a whole file or directory, use the `--exclude` parameter
 (e.g., `--exclude "*settings.py,*/docs/*.py,*/test_*.py,*/.venv/*.py"`). The
 exclude patterns are matched against absolute paths.
 
+If you want to ignore files in unused-code reporting while still scanning them
+for references, use the --ignore-files parameter.
+
 #### Flake8 noqa comments
 
 <!-- Hide noqa docs until we decide whether we want to support it.
@@ -178,6 +181,7 @@ Example Config:
 ``` toml
 [tool.vulture]
 exclude = ["*file*.py", "dir/"]
+ignore_files = ["*generated.py", "*/migrations/*.py"]
 ignore_decorators = ["@app.route", "@require_*"]
 ignore_names = ["visit_*", "do_*"]
 make_whitelist = true
