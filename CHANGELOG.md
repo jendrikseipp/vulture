@@ -1,5 +1,6 @@
 # 2.17 (unreleased)
 
+* Fix false positives for names exported via augmented (`__all__ += [...]`) and annotated (`__all__: list = [...]`) assignments (Vincent Gao).
 * Add support for Python 3.15 and drop 3.9 (Hugo van Kemenade, #416).
 * Report an out-of-range `--min-confidence` as a usage error instead of a traceback.
 * Ignore empty `--exclude` patterns instead of excluding every file.

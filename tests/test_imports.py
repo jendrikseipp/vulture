@@ -296,6 +296,84 @@ define.__all__ = ["Foo"]
     check(v.unused_imports, ["Foo", "Bar"])
 
 
+def test_import_with__all__augmented_assign(v):
+    v.scan(
+        """\
+from define import Foo, Bar
+
+__all__ = []
+__all__ += ["Foo"]
+"""
+    )
+    check(v.defined_imports, ["Foo", "Bar"])
+    # Foo is exported via ``__all__ += [...]``, so only Bar is unused.
+    check(v.unused_imports, ["Bar"])
+
+
+def test_import_with__all__augmented_assign_tuple(v):
+    v.scan(
+        """\
+from define import Foo, Bar
+
+__all__ = []
+__all__ += ("Foo",)
+"""
+    )
+    check(v.unused_imports, ["Bar"])
+
+
+def test_import_with__all__annotated_assign(v):
+    v.scan(
+        """\
+from define import Foo, Bar
+
+__all__: list = ["Foo"]
+"""
+    )
+    check(v.defined_imports, ["Foo", "Bar"])
+    # Foo is exported via an annotated assignment, so only Bar is unused.
+    check(v.unused_imports, ["Bar"])
+
+
+def test_import_with__all__assign_then_augmented(v):
+    v.scan(
+        """\
+from define import Foo, Bar
+
+__all__ = ["Foo"]
+__all__ += ["Bar"]
+"""
+    )
+    # Both names are exported, one via ``=`` and one via ``+=``.
+    check(v.unused_imports, [])
+
+
+def test_import_with__all__augmented_assign_string(v):
+    v.scan(
+        """\
+from define import Foo, Bar
+
+__all__ = []
+__all__ += "Foo"
+"""
+    )
+    # ``+=`` with a string is not a list/tuple of names, so Foo stays unused
+    # (consistent with ``__all__ = "Foo"``).
+    check(v.unused_imports, ["Foo", "Bar"])
+
+
+def test_import_with__all__annotation_without_value(v):
+    v.scan(
+        """\
+from define import Foo
+
+__all__: list
+"""
+    )
+    # A bare annotation has no value to inspect and must not crash.
+    check(v.unused_imports, ["Foo"])
+
+
 def test_ignore_init_py_files(v):
     v.scan(
         """\
