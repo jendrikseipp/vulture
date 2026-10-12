@@ -113,6 +113,26 @@ def _ignore_variable(filename, varname):
     )
 
 
+def _is_stub_statement(node):
+    if isinstance(node, ast.Expr):
+        # Docstring or "...".
+        return isinstance(node.value, ast.Constant) and (
+            isinstance(node.value.value, str) or node.value.value is Ellipsis
+        )
+    if isinstance(node, ast.Raise) and node.exc is not None:
+        exc = node.exc.func if isinstance(node.exc, ast.Call) else node.exc
+        return isinstance(exc, ast.Name) and exc.id == "NotImplementedError"
+    return False
+
+
+def _is_stub_function(node):
+    """
+    Return True if the function body only contains a docstring, "..." or
+    "raise NotImplementedError".
+    """
+    return all(_is_stub_statement(statement) for statement in node.body)
+
+
 class Item:
     """
     Hold the name, type and location of defined code.
@@ -471,9 +491,18 @@ class Vulture(ast.NodeVisitor):
             ignore=_ignore_variable,
         )
 
-    def visit_arg(self, node):
-        """Function argument"""
-        self._define_variable(node.arg, node, confidence=100)
+    def _define_arguments(self, node):
+        """Define the arguments of a function or lambda."""
+        args = node.args
+        for arg in [
+            *args.posonlyargs,
+            *args.args,
+            args.vararg,
+            *args.kwonlyargs,
+            args.kwarg,
+        ]:
+            if arg is not None:
+                self._define_variable(arg.arg, arg, confidence=100)
 
     def visit_AsyncFunctionDef(self, node):
         return self.visit_FunctionDef(node)
@@ -597,6 +626,16 @@ class Vulture(ast.NodeVisitor):
             self._define(
                 self.defined_funcs, node.name, node, ignore=_ignore_function
             )
+
+        # Stub functions (e.g., abstract methods, protocol methods and
+        # overloads) can't use their arguments, so ignore them.
+        if _is_stub_function(node):
+            self._log(f'Ignoring arguments of stub {typ} "{node.name}"')
+        else:
+            self._define_arguments(node)
+
+    def visit_Lambda(self, node):
+        self._define_arguments(node)
 
     def visit_Import(self, node):
         self._add_aliases(node)

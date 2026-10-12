@@ -3,6 +3,7 @@
 * Add support for Python 3.15 and drop 3.9 (Hugo van Kemenade, #416).
 * Report an out-of-range `--min-confidence` as a usage error instead of a traceback.
 * Ignore empty `--exclude` patterns instead of excluding every file.
+* Ignore arguments of functions whose body only contains a docstring, `...` or `raise NotImplementedError`, such as abstract methods, protocol methods and overloads (Pierre-Yves Le Borgne, #309, #317).
 
 # 2.16 (2026-03-25)
 
