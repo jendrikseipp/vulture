@@ -1,3 +1,5 @@
+import pathlib
+
 import pytest
 
 from . import check, v
@@ -78,3 +80,66 @@ def foo():
     print("Hello")
 """
     check_whitelist(code, ["foo", "return"], ["return"])
+
+
+def test_whitelist_entry_only_matches_its_own_location(v):
+    """A generated entry must not silence same-named items elsewhere."""
+    code = """\
+def zeta_reservoir():
+    pass
+"""
+    v.scan(code, filename="a.py")
+    v.scan(code, filename="b.py")
+    check(v.unused_funcs, ["zeta_reservoir", "zeta_reservoir"])
+
+    v.scan("zeta_reservoir  # unused function (a.py:1)")
+
+    check(v.unused_funcs, ["zeta_reservoir"])
+    assert v.unused_funcs[0].filename == pathlib.Path("b.py")
+
+
+def test_whitelist_entry_matches_its_own_location(v):
+    v.scan(
+        """\
+def zeta_reservoir():
+    pass
+""",
+        filename="a.py",
+    )
+    check(v.unused_funcs, ["zeta_reservoir"])
+
+    v.scan("zeta_reservoir  # unused function (a.py:1)")
+
+    check(v.unused_funcs, [])
+
+
+def test_whitelist_entry_for_method(v):
+    """Methods are prefixed with "_." in generated whitelists."""
+    code = """\
+class Foo:
+    def bar(self):
+        pass
+"""
+    v.scan(code, filename="a.py")
+    v.scan(code, filename="b.py")
+    check(v.unused_methods, ["bar", "bar"])
+
+    v.scan("_.bar  # unused method (a.py:2)")
+
+    check(v.unused_methods, ["bar"])
+    assert v.unused_methods[0].filename == pathlib.Path("b.py")
+
+
+def test_whitelist_entry_without_location(v):
+    """A hand-written entry without a location keeps its old behaviour."""
+    code = """\
+def zeta_reservoir():
+    pass
+"""
+    v.scan(code, filename="a.py")
+    v.scan(code, filename="b.py")
+    check(v.unused_funcs, ["zeta_reservoir", "zeta_reservoir"])
+
+    v.scan("zeta_reservoir")
+
+    check(v.unused_funcs, [])
