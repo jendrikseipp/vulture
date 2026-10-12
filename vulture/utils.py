@@ -79,12 +79,30 @@ def get_decorator_name(decorator):
     return "@" + ".".join(reversed(parts))
 
 
+def _is_valid_module_name(filename):
+    """Check if a filename (without .py extension) is a valid Python module name.
+
+    According to PEP 8, module names should be valid Python identifiers.
+    A valid identifier starts with a letter (a-z, A-Z) or underscore (_),
+    followed by any number of letters, digits, or underscores.
+
+    """
+    if not filename:
+        return False
+    # Check if the first character is valid (letter or underscore)
+    if not (filename[0].isalpha() or filename[0] == "_"):
+        return False
+    # Check if all characters are valid (alphanumeric or underscore)
+    return all(c.isalnum() or c == "_" for c in filename)
+
+
 def get_modules(paths):
     """Retrieve Python files to check.
 
     Loop over all given paths, abort if any ends with .pyc, add the other given
     files (even those not ending with .py) and collect all .py files under the
-    given directories.
+    given directories. When scanning directories, only include files with valid
+    Python module names (according to PEP 8).
 
     """
     modules = []
@@ -96,7 +114,12 @@ def get_modules(paths):
             else:
                 modules.append(path)
         elif path.is_dir():
-            modules.extend(path.rglob("*.py"))
+            # Collect all .py files, but filter out invalid module names
+            for py_file in path.rglob("*.py"):
+                # Get the filename without the .py extension
+                module_name = py_file.stem
+                if _is_valid_module_name(module_name):
+                    modules.append(py_file)
         else:
             sys.exit(f"Error: {path} could not be found.")
     return modules

@@ -7,6 +7,96 @@ import pytest
 from vulture import utils
 
 
+class TestIsValidModuleName:
+    def test_valid_lowercase(self):
+        assert utils._is_valid_module_name("module")
+
+    def test_valid_with_underscores(self):
+        assert utils._is_valid_module_name("my_module")
+
+    def test_valid_with_numbers(self):
+        assert utils._is_valid_module_name("module2")
+        assert utils._is_valid_module_name("my_module_123")
+
+    def test_valid_starting_with_underscore(self):
+        assert utils._is_valid_module_name("_private")
+        assert utils._is_valid_module_name("__init__")
+
+    def test_invalid_starting_with_dot(self):
+        assert not utils._is_valid_module_name(".module")
+
+    def test_invalid_emacs_temp_file(self):
+        assert not utils._is_valid_module_name(".#module")
+
+    def test_invalid_starting_with_number(self):
+        assert not utils._is_valid_module_name("2module")
+
+    def test_invalid_with_dash(self):
+        assert not utils._is_valid_module_name("my-module")
+
+    def test_invalid_with_special_chars(self):
+        assert not utils._is_valid_module_name("my@module")
+        assert not utils._is_valid_module_name("my$module")
+        assert not utils._is_valid_module_name("my!module")
+
+    def test_invalid_empty(self):
+        assert not utils._is_valid_module_name("")
+
+
+class TestGetModules:
+    def test_get_modules_filters_invalid_names(self, tmp_path):
+        # Create files with valid and invalid names
+        valid_file = tmp_path / "valid_module.py"
+        valid_file.write_text("def foo(): pass")
+
+        emacs_temp = tmp_path / ".#valid_module.py"
+        emacs_temp.write_text("def bar(): pass")
+
+        invalid_with_dash = tmp_path / "my-module.py"
+        invalid_with_dash.write_text("def baz(): pass")
+
+        invalid_start_num = tmp_path / "2module.py"
+        invalid_start_num.write_text("def qux(): pass")
+
+        # Get modules from the directory
+        modules = utils.get_modules([tmp_path])
+
+        # Only the valid module should be included
+        assert len(modules) == 1
+        assert modules[0].name == "valid_module.py"
+
+    def test_get_modules_explicit_file_with_invalid_name(self, tmp_path):
+        # When explicitly specifying a file, it should still be included
+        # even if the name is invalid (user knows what they're doing)
+        invalid_file = tmp_path / ".#test.py"
+        invalid_file.write_text("def foo(): pass")
+
+        modules = utils.get_modules([invalid_file])
+
+        # Explicitly specified file should be included
+        assert len(modules) == 1
+        assert modules[0].name == ".#test.py"
+
+    def test_get_modules_valid_underscore_names(self, tmp_path):
+        # Test various valid module names
+        files = [
+            "_private.py",
+            "__init__.py",
+            "module_123.py",
+            "valid_module.py",
+        ]
+
+        for filename in files:
+            (tmp_path / filename).write_text("def foo(): pass")
+
+        modules = utils.get_modules([tmp_path])
+
+        # All files should be included
+        assert len(modules) == len(files)
+        module_names = {m.name for m in modules}
+        assert module_names == set(files)
+
+
 class TestFormatPath:
     @pytest.fixture
     def tmp_cwd(self, tmp_path, monkeypatch):
