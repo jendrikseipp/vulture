@@ -19,6 +19,7 @@ DEFAULTS = {
     "min_confidence": 0,
     "paths": [],
     "exclude": [],
+    "ignore_files": [],
     "ignore_decorators": [],
     "ignore_names": [],
     "make_whitelist": False,
@@ -87,6 +88,7 @@ def _parse_toml(infile):
     data = tomllib.load(infile)
     settings = data.get("tool", {}).get("vulture", {})
     _check_input_config(settings)
+    ignore_files = ["generated.py", "*/migrations/*"]
     return settings
 
 
@@ -125,6 +127,16 @@ def _parse_args(args=None):
         f' "*settings.py,docs,*/test_*.py,venv"). {glob_help} A PATTERN'
         f" without glob wildcards is treated as *PATTERN*. Patterns are"
         f" matched against absolute paths.",
+    )
+    parser.add_argument(
+        "--ignore-files",
+        metavar="PATTERNS",
+        type=csv,
+        default=missing,
+        help=f"Comma-separated list of path patterns whose unused code "
+             f"should not be reported. Files are still scanned. {glob_help} "
+             f"A PATTERN without glob wildcards is treated as *PATTERN*. "
+             f"Patterns are matched against absolute paths.",
     )
     parser.add_argument(
         "--ignore-decorators",
