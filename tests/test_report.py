@@ -1,4 +1,8 @@
+import json
+
 import pytest
+
+from vulture.utils import ExitCode
 
 from . import v
 
@@ -74,3 +78,38 @@ _.myprop  # unused property ({filename}:14)
 myfunc  # unused function ({filename}:18)
 """
     check_report(mock_code, expected, make_whitelist=True)
+
+
+def test_json_report(v, capsys):
+    v.scan(mock_code, filename="foo.py")
+    capsys.readouterr()
+
+    assert v.report(output_format="json") == ExitCode.DeadCode
+    findings = json.loads(capsys.readouterr().out)
+    assert findings[0] == {
+        "filename": "foo.py",
+        "line": 1,
+        "end_line": 1,
+        "name": "foo",
+        "type": "import",
+        "code": "V104",
+        "message": "unused import 'foo'",
+        "confidence": 90,
+    }
+    assert findings[-1]["name"] == "myfunc"
+    assert findings[-1]["end_line"] == 19
+    assert any(item["type"] == "unreachable_code" for item in findings)
+
+    assert (
+        v.report(min_confidence=100, output_format="json") == ExitCode.DeadCode
+    )
+    findings = json.loads(capsys.readouterr().out)
+    assert [item["type"] for item in findings] == ["unreachable_code"]
+
+
+def test_empty_json_report(v, capsys):
+    v.scan("print('used')", filename="foo.py")
+    capsys.readouterr()
+
+    assert v.report(output_format="json") == ExitCode.NoDeadCode
+    assert json.loads(capsys.readouterr().out) == []

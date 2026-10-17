@@ -35,6 +35,7 @@ def test_cli_args():
         ignore_decorators=["deco1", "deco2"],
         ignore_names=["name1", "name2"],
         config="pyproject.toml",
+        format="json",
         make_whitelist=True,
         min_confidence=10,
         sort_by_size=True,
@@ -45,6 +46,7 @@ def test_cli_args():
             "--exclude=file*.py,dir/",
             "--ignore-decorators=deco1,deco2",
             "--ignore-names=name1,name2",
+            "--format=json",
             "--make-whitelist",
             "--min-confidence=10",
             "--sort-by-size",
@@ -66,6 +68,7 @@ def test_toml_config():
         exclude=["file*.py", "dir/"],
         ignore_decorators=["deco1", "deco2"],
         ignore_names=["name1", "name2"],
+        format="json",
         make_whitelist=True,
         min_confidence=10,
         sort_by_size=True,
@@ -78,6 +81,7 @@ def test_toml_config():
         exclude = ["file*.py", "dir/"]
         ignore_decorators = ["deco1", "deco2"]
         ignore_names = ["name1", "name2"]
+        format = "json"
         make_whitelist = true
         min_confidence = 10
         sort_by_size = true
@@ -101,6 +105,7 @@ def test_toml_config_with_heterogenous_array():
         exclude=["file*.py", "dir/"],
         ignore_decorators=["deco1", "deco2"],
         ignore_names=["name1", "name2"],
+        format="json",
         make_whitelist=True,
         min_confidence=10,
         sort_by_size=True,
@@ -117,6 +122,7 @@ def test_toml_config_with_heterogenous_array():
         exclude = ["file*.py", "dir/"]
         ignore_decorators = ["deco1", "deco2"]
         ignore_names = ["name1", "name2"]
+        format = "json"
         make_whitelist = true
         min_confidence = 10
         sort_by_size = true
@@ -167,6 +173,7 @@ def test_config_merging():
         ignore_decorators=["cli_deco"],
         ignore_names=["cli_name"],
         config="pyproject.toml",
+        format="text",
         make_whitelist=True,
         min_confidence=20,
         sort_by_size=True,
@@ -271,3 +278,22 @@ def test_min_confidence_out_of_range(min_confidence):
     """
     with pytest.raises(InputError):
         make_config([f"--min-confidence={min_confidence}", "path"])
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        ["--format=json", "--make-whitelist"],
+        ["--format=json", "--verbose"],
+    ],
+)
+def test_json_format_conflicts(args):
+    with pytest.raises(InputError):
+        make_config([*args, "path"])
+
+
+def test_unknown_toml_format():
+    with pytest.raises(InputError):
+        make_config(
+            ["path"], get_toml_bytes('[tool.vulture]\nformat = "xml"\n')
+        )
