@@ -1,4 +1,5 @@
 import glob
+import json
 import os.path
 import subprocess
 import sys
@@ -50,6 +51,23 @@ def test_sort_by_size():
         call_vulture(["vulture/utils.py", "--sort-by-size"])
         == ExitCode.DeadCode
     )
+
+
+def test_json_output(tmp_path):
+    module = tmp_path / "module.py"
+    module.write_text("def unused():\n    pass\n", encoding="utf-8")
+    result = subprocess.run(
+        [sys.executable, "-m", "vulture", str(module), "--format", "json"],
+        cwd=REPO,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == ExitCode.DeadCode
+    findings = json.loads(result.stdout)
+    assert len(findings) == 1
+    assert findings[0]["name"] == "unused"
+    assert findings[0]["code"] == "V103"
 
 
 def test_min_confidence():

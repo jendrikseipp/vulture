@@ -1,4 +1,5 @@
 import ast
+import json
 import pkgutil
 import re
 import string
@@ -350,14 +351,41 @@ class Vulture(ast.NodeVisitor):
         )
 
     def report(
-        self, min_confidence=0, sort_by_size=False, make_whitelist=False
+        self,
+        min_confidence=0,
+        sort_by_size=False,
+        make_whitelist=False,
+        output_format="text",
     ):
         """
         Print ordered list of Item objects to stdout.
         """
-        for item in self.get_unused_code(
+        items = self.get_unused_code(
             min_confidence=min_confidence, sort_by_size=sort_by_size
-        ):
+        )
+        if output_format == "json":
+            print(
+                json.dumps(
+                    [
+                        {
+                            "filename": str(utils.format_path(item.filename)),
+                            "line": item.first_lineno,
+                            "end_line": item.last_lineno,
+                            "name": item.name,
+                            "type": item.typ,
+                            "code": ERROR_CODES[item.typ],
+                            "message": item.message,
+                            "confidence": item.confidence,
+                        }
+                        for item in items
+                    ]
+                )
+            )
+            if items:
+                self.exit_code = ExitCode.DeadCode
+            return self.exit_code
+
+        for item in items:
             self._log(
                 item.get_whitelist_string()
                 if make_whitelist
@@ -682,5 +710,6 @@ def main():
             min_confidence=config["min_confidence"],
             sort_by_size=config["sort_by_size"],
             make_whitelist=config["make_whitelist"],
+            output_format=config["format"],
         )
     )

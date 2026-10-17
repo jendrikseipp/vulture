@@ -31,6 +31,7 @@ tool for higher code quality.
     $ python3 -m vulture myscript.py
     $ vulture myscript.py mypackage/
     $ vulture myscript.py --min-confidence 100  # Only report 100% dead code.
+    $ vulture myscript.py --format json  # Machine-readable findings.
 
 The provided arguments may be Python files or directories. For each
 directory Vulture analyzes all contained
@@ -46,6 +47,12 @@ unreachable code. Each chunk of dead code is assigned a *confidence value*
 between 60% and 100%, where a value of 100% signals that it is certain that the
 code won't be executed. Values below 100% are *very rough* estimates (based on
 the type of code chunk) for how likely it is that the code is unused.
+
+`--format json` writes a JSON array of findings with `filename`, `line`,
+`end_line`, `name`, `type`, `code`, `message`, and `confidence` fields. The
+same confidence threshold and sort order apply as in text output. When no
+dead code is found, the output is `[]`. JSON output cannot be combined with
+`--make-whitelist` or `--verbose`.
 
 | Code type                                              | Confidence value |
 |--------------------------------------------------------|------------------|
