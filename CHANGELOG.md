@@ -1,6 +1,8 @@
 # 2.17 (unreleased)
 
 * Add support for Python 3.15 and drop 3.9 (Hugo van Kemenade, #416).
+* Don't report parameters of `@override` methods as unused, since they mirror
+  the base signature (#410).
 * Report an out-of-range `--min-confidence` as a usage error instead of a traceback.
 * Ignore empty `--exclude` patterns instead of excluding every file.
 
