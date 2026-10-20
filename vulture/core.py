@@ -570,6 +570,16 @@ class Vulture(ast.NodeVisitor):
             for decorator in node.decorator_list
         ]
 
+        if "@override" in decorator_names:
+            # An overriding method mirrors the base signature, so its
+            # parameters are part of the interface even when the body does
+            # not use them. Report them as used (#410). *args/**kwargs are
+            # left alone: they are not part of the mirrored signature.
+            for arg in (
+                node.args.posonlyargs + node.args.args + node.args.kwonlyargs
+            ):
+                self.used_names.add(arg.arg)
+
         first_arg = node.args.args[0].arg if node.args.args else None
 
         if "@property" in decorator_names:

@@ -882,3 +882,110 @@ match color:
 
     check(v.unused_classes, [])
     check(v.unused_vars, ["BLUE"])
+
+
+def test_override_parameters_not_flagged(v):
+    """Parameters of an @override method mirror the base signature (#410)."""
+    v.scan(
+        """\
+from typing import override
+
+class A():
+    def my_func(self, a: int, b: int, c: int):
+        return a + b + c
+
+class B(A):
+    @override
+    def my_func(self, a, b, c):
+        return a - b
+"""
+    )
+    check(v.unused_vars, [])
+
+
+def test_override_parameters_not_flagged_typing_extensions(v):
+    v.scan(
+        """\
+from typing_extensions import override
+
+class A():
+    def my_func(self, a: int, b: int, c: int):
+        return a + b + c
+
+class B(A):
+    @override
+    def my_func(self, a, b, c):
+        return a - b
+"""
+    )
+    check(v.unused_vars, [])
+
+
+def test_override_parameters_not_flagged_async(v):
+    v.scan(
+        """\
+from typing import override
+
+class A():
+    async def my_func(self, a: int, b: int, c: int):
+        return a + b + c
+
+class B(A):
+    @override
+    async def my_func(self, a, b, c):
+        return a - b
+"""
+    )
+    check(v.unused_vars, [])
+
+
+def test_override_does_not_mask_nested_function_params(v):
+    """Only the override's own parameters are exempt, not nested functions."""
+    v.scan(
+        """\
+from typing import override
+
+class A():
+    def my_func(self, a: int, b: int, c: int):
+        return a + b + c
+
+class B(A):
+    @override
+    def my_func(self, a, b, c):
+        def inner(x, y):
+            return x
+        return a - b
+"""
+    )
+    check(v.unused_vars, ["y"])
+
+
+def test_override_does_not_exempt_kwargs(v):
+    """*args/**kwargs are not part of the mirrored signature."""
+    v.scan(
+        """\
+from typing import override
+
+class A():
+    def my_func(self, *args, **kwargs):
+        return args
+
+class B(A):
+    @override
+    def my_func(self, *args, **kwargs):
+        return None
+"""
+    )
+    check({item.name for item in v.unused_vars}, ["kwargs"])
+
+
+def test_non_override_parameters_still_flagged(v):
+    """The exemption must not leak to functions without @override."""
+    v.scan(
+        """\
+class A():
+    def my_func(self, a, b, c):
+        return a - b
+"""
+    )
+    check(v.unused_vars, ["c"])
