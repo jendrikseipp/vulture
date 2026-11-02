@@ -7,6 +7,15 @@ import pytest
 from vulture import utils
 
 
+def test_get_modules_skips_directories(tmp_path):
+    directory = tmp_path / "directory.py"
+    directory.mkdir()
+    module = directory / "module.py"
+    module.touch()
+
+    assert utils.get_modules([tmp_path]) == [module]
+
+
 class TestFormatPath:
     @pytest.fixture
     def tmp_cwd(self, tmp_path, monkeypatch):
