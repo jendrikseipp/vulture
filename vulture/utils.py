@@ -96,7 +96,9 @@ def get_modules(paths):
             else:
                 modules.append(path)
         elif path.is_dir():
-            modules.extend(path.rglob("*.py"))
+            modules.extend(
+                module for module in path.rglob("*.py") if module.is_file()
+            )
         else:
             sys.exit(f"Error: {path} could not be found.")
     return modules
