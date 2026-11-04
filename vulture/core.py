@@ -28,6 +28,24 @@ PYTEST_METHOD_NAMES = {
     "teardown_method",
 }
 
+# Decorators that register a function as an entry point with the Flask
+# web framework, either on an application or blueprint object (e.g.
+# "@app.route") or as a bare name ("@after_this_request"). Flask calls
+# the decorated functions, so they are never reported as unused.
+FLASK_DECORATOR_PATTERNS = [
+    "@*.route",
+    "@*.errorhandler",
+    "@*.app_errorhandler",
+    "@*.before_request",
+    "@*.before_app_request",
+    "@*.after_request",
+    "@*.after_app_request",
+    "@*.teardown_request",
+    "@*.teardown_app_request",
+    "@*.after_this_request",
+    "@after_this_request",
+]
+
 ERROR_CODES = {
     "attribute": "V101",
     "class": "V102",
@@ -584,7 +602,8 @@ class Vulture(ast.NodeVisitor):
             typ = "function"
 
         if any(
-            _match(name, self.ignore_decorators) for name in decorator_names
+            _match(name, self.ignore_decorators + FLASK_DECORATOR_PATTERNS)
+            for name in decorator_names
         ):
             self._log(f'Ignoring {typ} "{node.name}" (decorator whitelisted)')
         elif typ == "property":

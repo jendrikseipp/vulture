@@ -168,6 +168,59 @@ def foo():
     check_ignore(code, [], ["@barfoo"], ["foo"])
 
 
+def test_flask_decorators():
+    code = """\
+@app.route('/')
+def index():
+    pass
+
+@bp.route('/items', methods=['POST'])
+def items():
+    pass
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return error
+
+@app.before_request
+def before_request():
+    pass
+
+@app.after_request
+def after_request(response):
+    return response
+
+@app.teardown_app_request
+def teardown_app_request(error):
+    return error
+
+@after_this_request
+def after_this_request(response):
+    return response
+
+@app.route('/async')
+async def async_view():
+    pass
+
+def unused_function():
+    pass
+"""
+    check_ignore(code, [], [], ["unused_function"])
+
+
+def test_similar_decorators_are_not_ignored():
+    code = """\
+@app.router('/items')
+def items():
+    pass
+
+@app.shell_context_processor
+def shell_context():
+    pass
+"""
+    check_ignore(code, [], [], ["items", "shell_context"])
+
+
 def test_decorated_class():
     code = """\
 @barfoo
