@@ -570,7 +570,8 @@ class Vulture(ast.NodeVisitor):
             for decorator in node.decorator_list
         ]
 
-        first_arg = node.args.args[0].arg if node.args.args else None
+        positional_args = node.args.posonlyargs + node.args.args
+        first_arg = positional_args[0].arg if positional_args else None
 
         if "@property" in decorator_names:
             typ = "property"

@@ -347,6 +347,25 @@ class Bar(object):
     check(v.unused_methods, ["bar", "foobar"])
 
 
+def test_method_positional_only_self(v):
+    v.scan(
+        """\
+class Bar:
+    def __call__(self, /):
+        pass
+
+    def foo(self, a, /):
+        pass
+"""
+    )
+    check(v.defined_classes, ["Bar"])
+    check(v.defined_funcs, [])
+    check(v.defined_methods, ["foo"])
+    check(v.unused_classes, ["Bar"])
+    check(v.unused_funcs, [])
+    check(v.unused_methods, ["foo"])
+
+
 def test_token_types(v):
     v.scan(
         """\
