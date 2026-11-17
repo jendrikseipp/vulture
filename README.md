@@ -228,6 +228,9 @@ given files. While traversing all syntax trees it records the names of
 defined and used objects. Afterwards, it reports the objects which have
 been defined, but not used. This analysis ignores scopes and only takes
 object names into account.
+Function definitions are reported with their module path when Vulture can
+derive one from the filename, so equally named functions in different modules
+are tracked separately.
 
 Vulture also detects unreachable code by looking for code after
 `return`, `break`, `continue` and `raise` statements, and by searching
