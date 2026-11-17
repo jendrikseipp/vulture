@@ -67,7 +67,7 @@ def _is_test_file(filename):
 
 def _assigns_special_variable__all__(node):
     assert isinstance(node, ast.Assign)
-    return isinstance(node.value, (ast.List, ast.Tuple)) and any(
+    return any(
         target.id == "__all__"
         for target in node.targets
         if isinstance(target, ast.Name)
@@ -616,10 +616,18 @@ class Vulture(ast.NodeVisitor):
 
     def visit_Assign(self, node):
         if _assigns_special_variable__all__(node):
-            assert isinstance(node.value, (ast.List, ast.Tuple))
-            for elt in node.value.elts:
-                if utils.is_ast_string(elt):
-                    self.used_names.add(elt.value)
+            if isinstance(node.value, (ast.List, ast.Tuple)):
+                for elt in node.value.elts:
+                    if utils.is_ast_string(elt):
+                        self.used_names.add(elt.value)
+            elif (
+                utils.is_ast_string(node.value) and len(node.value.value) == 1
+            ):
+                # `__all__ = "a"` is equivalent to __all__ = ("a",) for a
+                # single-character name (issue #425). Multi-character strings
+                # are intentionally ignored (see
+                # test_import_with__all__string).
+                self.used_names.add(node.value.value)
 
     def visit_MatchClass(self, node):
         for kwd_attr in node.kwd_attrs:
