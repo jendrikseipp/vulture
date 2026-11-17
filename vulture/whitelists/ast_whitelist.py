@@ -3,6 +3,7 @@ from whitelist_utils import Whitelist
 # NodeVisitor methods are called implicitly.
 whitelist_node_visitor = Whitelist()
 
+whitelist_node_visitor.visit_AnnAssign
 whitelist_node_visitor.visit_Assert
 whitelist_node_visitor.visit_Assign
 whitelist_node_visitor.visit_AsyncFor
