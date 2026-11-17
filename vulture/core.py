@@ -525,19 +525,26 @@ class Vulture(ast.NodeVisitor):
             return bool(re.match(r"[a-zA-Z_][a-zA-Z0-9_]*", name))
 
         parser = string.Formatter()
-        try:
-            names = [name for _, name, _, _ in parser.parse(s) if name]
-        except ValueError:
-            # Invalid format string.
-            names = []
+        pending = [s]
+        while pending:
+            try:
+                fields = list(parser.parse(pending.pop()))
+            except ValueError:
+                # Invalid format string.
+                continue
 
-        for field_name in names:
-            # Remove brackets and their contents: "a[0][b].c[d].e" -> "a.c.e",
-            # then split the resulting string: "a.b.c" -> ["a", "b", "c"]
-            vars = re.sub(r"\[\w*\]", "", field_name).split(".")
-            for var in vars:
-                if is_identifier(var):
-                    self.used_names.add(var)
+            for _, field_name, format_spec, _ in fields:
+                if format_spec:
+                    pending.append(format_spec)
+                if not field_name:
+                    continue
+                # Remove brackets and their contents:
+                # "a[0][b].c[d].e" -> "a.c.e", then split the resulting string:
+                # "a.b.c" -> ["a", "b", "c"].
+                vars = re.sub(r"\[\w*\]", "", field_name).split(".")
+                for var in vars:
+                    if is_identifier(var):
+                        self.used_names.add(var)
 
     @staticmethod
     def _is_locals_call(node):
