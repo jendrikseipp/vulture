@@ -39,11 +39,33 @@ ERROR_CODES = {
     "unreachable_code": "V201",
 }
 
+# Whitelist entries written by "--make-whitelist" carry the location of the
+# item they refer to, e.g. "name  # unused function (a.py:1)".
+WHITELIST_ENTRY_REGEX = re.compile(
+    r"#\s*unused\s+\w+\s+\((?P<filename>.+):(?P<lineno>\d+)\)\s*$"
+)
 
-def _get_unused_items(defined_items, used_names):
-    unused_items = [
-        item for item in set(defined_items) if item.name not in used_names
-    ]
+
+def _get_unused_items(defined_items, used_names, whitelisted_positions=None):
+    unused_items = []
+    for item in set(defined_items):
+        if item.name in used_names:
+            continue
+        # An entry written by "--make-whitelist" refers to one specific
+        # item by location. It must not mark same-named items in other
+        # files as used (see issue #430).
+        if whitelisted_positions is not None:
+            positions = whitelisted_positions.get(item.name)
+            if (
+                positions
+                and (
+                    str(utils.format_path(item.filename)),
+                    item.first_lineno,
+                )
+                in positions
+            ):
+                continue
+        unused_items.append(item)
     unused_items.sort(key=lambda item: item.name.lower())
     return unused_items
 
@@ -214,6 +236,7 @@ class Vulture(ast.NodeVisitor):
 
         self.filename = Path()
         self.code = []
+        self.whitelisted_positions = {}
         self.exit_code = ExitCode.NoDeadCode
         self.noqa_lines = {}
 
@@ -369,31 +392,45 @@ class Vulture(ast.NodeVisitor):
 
     @property
     def unused_classes(self):
-        return _get_unused_items(self.defined_classes, self.used_names)
+        return _get_unused_items(
+            self.defined_classes, self.used_names, self.whitelisted_positions
+        )
 
     @property
     def unused_funcs(self):
-        return _get_unused_items(self.defined_funcs, self.used_names)
+        return _get_unused_items(
+            self.defined_funcs, self.used_names, self.whitelisted_positions
+        )
 
     @property
     def unused_imports(self):
-        return _get_unused_items(self.defined_imports, self.used_names)
+        return _get_unused_items(
+            self.defined_imports, self.used_names, self.whitelisted_positions
+        )
 
     @property
     def unused_methods(self):
-        return _get_unused_items(self.defined_methods, self.used_names)
+        return _get_unused_items(
+            self.defined_methods, self.used_names, self.whitelisted_positions
+        )
 
     @property
     def unused_props(self):
-        return _get_unused_items(self.defined_props, self.used_names)
+        return _get_unused_items(
+            self.defined_props, self.used_names, self.whitelisted_positions
+        )
 
     @property
     def unused_vars(self):
-        return _get_unused_items(self.defined_vars, self.used_names)
+        return _get_unused_items(
+            self.defined_vars, self.used_names, self.whitelisted_positions
+        )
 
     @property
     def unused_attrs(self):
-        return _get_unused_items(self.defined_attrs, self.used_names)
+        return _get_unused_items(
+            self.defined_attrs, self.used_names, self.whitelisted_positions
+        )
 
     def _log(self, *args, file=None, force=False):
         if self.verbose or force:
@@ -563,6 +600,39 @@ class Vulture(ast.NodeVisitor):
             self._define(
                 self.defined_classes, node.name, node, ignore=_ignore_class
             )
+
+    def visit_Expr(self, node):
+        # An entry written by "--make-whitelist" carries the location of
+        # the item it refers to. Such an entry only whitelists that one
+        # item, so the name must not stay in used_names (issue #430).
+        # Don't call generic_visit() here: visit() has already visited
+        # the children of this node.
+        entry = self._parse_whitelist_entry(node)
+        if entry is not None:
+            name, filename, lineno = entry
+            self.whitelisted_positions.setdefault(name, set()).add(
+                (filename, lineno)
+            )
+            self.used_names.discard(name)
+
+    def _parse_whitelist_entry(self, node):
+        """Return (name, filename, lineno) for a --make-whitelist entry."""
+        value = node.value
+        if isinstance(value, ast.Attribute):
+            # Methods, properties and attributes are prefixed with "_.".
+            if not isinstance(value.value, ast.Name) or value.value.id != "_":
+                return None
+            name = value.attr
+        elif isinstance(value, ast.Name):
+            name = value.id
+        else:
+            return None
+        if not 1 <= node.lineno <= len(self.code):
+            return None
+        match = WHITELIST_ENTRY_REGEX.search(self.code[node.lineno - 1])
+        if match is None:
+            return None
+        return name, match.group("filename"), int(match.group("lineno"))
 
     def visit_FunctionDef(self, node):
         decorator_names = [
