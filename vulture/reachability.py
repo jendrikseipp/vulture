@@ -50,12 +50,13 @@ class Reachability:
         """
         for idx, statement in enumerate(statements):
             if not self._can_fall_through(statement):
-                if idx + 1 < len(statements):
+                unreachable = statements[idx + 1 :]
+                if unreachable and not self._contains_yield(unreachable):
                     class_name = statement.__class__.__name__.lower()
                     self._report(
                         name=class_name,
-                        first_node=statements[idx + 1],
-                        last_node=statements[-1],
+                        first_node=unreachable[0],
+                        last_node=unreachable[-1],
                         message=f"unreachable code after '{class_name}'",
                     )
                 return False
@@ -65,12 +66,13 @@ class Reachability:
         has_else = bool(node.orelse)
 
         if utils.condition_is_always_false(node.test):
-            self._report(
-                name="if",
-                first_node=node,
-                last_node=node.body[-1],
-                message="unsatisfiable 'if' condition",
-            )
+            if not self._contains_yield(node.body):
+                self._report(
+                    name="if",
+                    first_node=node,
+                    last_node=node.body[-1],
+                    message="unsatisfiable 'if' condition",
+                )
             if_can_fall_through = True
             else_can_fall_through = self._can_else_fall_through(
                 node.orelse, condition_always_true=False
@@ -85,12 +87,13 @@ class Reachability:
             )
 
             if has_else:
-                self._report(
-                    name="else",
-                    first_node=node.orelse[0],
-                    last_node=node.orelse[-1],
-                    message="unreachable 'else' block",
-                )
+                if not self._contains_yield(node.orelse):
+                    self._report(
+                        name="else",
+                        first_node=node.orelse[0],
+                        last_node=node.orelse[-1],
+                        message="unreachable 'else' block",
+                    )
             else:
                 # Redundant if-condition without else block.
                 self._report(
@@ -136,16 +139,17 @@ class Reachability:
 
     def _handle_reachability_while(self, node):
         if utils.condition_is_always_false(node.test):
-            self._report(
-                name="while",
-                first_node=node,
-                last_node=node.body[-1],
-                message="unsatisfiable 'while' condition",
-            )
+            if not self._contains_yield(node.body):
+                self._report(
+                    name="while",
+                    first_node=node,
+                    last_node=node.body[-1],
+                    message="unsatisfiable 'while' condition",
+                )
 
         elif utils.condition_is_always_true(node.test):
             else_body = node.orelse
-            if else_body:
+            if else_body and not self._contains_yield(else_body):
                 self._report(
                     name="else",
                     first_node=else_body[0],
@@ -157,6 +161,29 @@ class Reachability:
                 self._mark_as_no_fall_through(node)
 
         self._can_fall_through_statements_analysis(node.body)
+
+    @staticmethod
+    def _contains_yield(stmts):
+        """Return True if stmts contain a yield outside a nested scope.
+
+        A ``yield``/``yield from`` anywhere in a function body makes it a
+        (async) generator, so such code changes the function's semantics and is
+        not safely removable even when it is unreachable. Nested function and
+        lambda scopes are skipped, since their yields belong to them.
+        """
+        if isinstance(stmts, ast.AST):
+            stmts = [stmts]
+        stack = list(stmts)
+        while stack:
+            node = stack.pop()
+            if isinstance(node, (ast.Yield, ast.YieldFrom)):
+                return True
+            if isinstance(
+                node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)
+            ):
+                continue
+            stack.extend(ast.iter_child_nodes(node))
+        return False
 
     @staticmethod
     def _body_has_break(stmts):
@@ -200,12 +227,13 @@ class Reachability:
 
         if not try_can_fall_through and has_else:
             else_body = node.orelse
-            self._report(
-                name="else",
-                first_node=else_body[0],
-                last_node=else_body[-1],
-                message="unreachable 'else' block",
-            )
+            if not self._contains_yield(else_body):
+                self._report(
+                    name="else",
+                    first_node=else_body[0],
+                    last_node=else_body[-1],
+                    message="unreachable 'else' block",
+                )
 
         any_except_can_fall_through = any(
             self._can_fall_through_statements_analysis(handler.body)
