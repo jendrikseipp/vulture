@@ -57,6 +57,17 @@ print("{value:{width}.{precision}f}".format(**locals()))
     check(v.unused_vars, [])
 
 
+@pytest.mark.parametrize("format_string", ["{value", "{value:{width}} {"])
+def test_invalid_new_format_string(v, format_string):
+    v.scan(f"{format_string!r}.format(**locals())")
+    check(v.used_names, ["format", "locals"])
+
+
+def test_invalid_nested_format_specification(v):
+    v.scan("'{value:{width}} {other:{settings[width}}'.format(**locals())")
+    check(v.used_names, ["value", "width", "other", "format", "locals"])
+
+
 def test_f_string(v):
     v.scan(
         """\
