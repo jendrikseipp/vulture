@@ -16,6 +16,7 @@ from .version import __version__
 #: Possible configuration options and their respective defaults
 DEFAULTS = {
     "config": "pyproject.toml",
+    "format": "text",
     "min_confidence": 0,
     "paths": [],
     "exclude": [],
@@ -59,6 +60,17 @@ def _check_output_config(config):
 
     if not 0 <= config["min_confidence"] <= 100:
         raise InputError("min_confidence must be between 0 and 100")
+
+    if config["format"] not in ("text", "json"):
+        raise InputError("format must be 'text' or 'json'")
+
+    if config["format"] == "json" and config["make_whitelist"]:
+        raise InputError(
+            "--format json cannot be combined with --make-whitelist"
+        )
+
+    if config["format"] == "json" and config["verbose"]:
+        raise InputError("--format json cannot be combined with --verbose")
 
 
 def _parse_toml(infile):
@@ -151,6 +163,12 @@ def _parse_args(args=None):
         " whitelist module.",
     )
     parser.add_argument(
+        "--format",
+        choices=("text", "json"),
+        default=missing,
+        help="Output format (default: text).",
+    )
+    parser.add_argument(
         "--min-confidence",
         type=int,
         default=missing,
@@ -221,9 +239,9 @@ def make_config(argv=None, tomlfile=None):
     for key, value in DEFAULTS.items():
         config.setdefault(key, value)
 
+    _check_output_config(config)
+
     if detected_toml_path and config["verbose"]:
         print(f"Reading configuration from {detected_toml_path}")
-
-    _check_output_config(config)
 
     return config
