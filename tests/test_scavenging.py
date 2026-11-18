@@ -599,6 +599,73 @@ class OtherClass:
     check(v.unused_funcs, ["other_func", "test_func"])
 
 
+def test_pytest_autouse_fixtures(v):
+    v.scan(
+        """\
+import pytest
+import pytest_asyncio
+from pytest import fixture
+
+flag = True
+
+@pytest.fixture(autouse=True)
+def auto_sync():
+    dead_local = 1
+
+@fixture(scope="session", autouse=True)
+async def auto_imported():
+    pass
+
+@pytest_asyncio.fixture(autouse=True)
+async def auto_async():
+    pass
+
+@pytest.fixture
+def unused_bare():
+    pass
+
+@pytest.fixture()
+def unused_call():
+    pass
+
+@pytest.fixture(autouse=False)
+def unused_false():
+    pass
+
+@pytest.fixture(autouse=flag)
+def unused_dynamic():
+    pass
+
+@other.decorator(autouse=True)
+def unused_other():
+    pass
+
+class TestSuite:
+    @pytest.fixture(autouse=True)
+    def auto_method(self):
+        pass
+
+    @pytest.fixture(autouse=False)
+    def unused_method(self):
+        pass
+""",
+        filename="conftest.py",
+    )
+    check(v.unused_imports, [])
+    check(
+        v.unused_funcs,
+        [
+            "unused_bare",
+            "unused_call",
+            "unused_dynamic",
+            "unused_false",
+            "unused_other",
+        ],
+    )
+    check(v.unused_methods, ["unused_method"])
+    check(v.unused_vars, ["dead_local"])
+
+
 def test_global_attribute(v):
     v.scan(
         """\

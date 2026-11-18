@@ -101,6 +101,18 @@ def _ignore_method(filename, method_name):
     )
 
 
+def _is_pytest_autouse_fixture(decorator):
+    name = utils.get_decorator_name(decorator)
+    return (
+        isinstance(decorator, ast.Call)
+        and (name == "@fixture" or name.endswith(".fixture"))
+        and any(
+            kw.arg == "autouse" and utils.condition_is_always_true(kw.value)
+            for kw in decorator.keywords
+        )
+    )
+
+
 def _ignore_variable(filename, varname):
     """
     Ignore _ (Python idiom), _x (pylint convention) and
@@ -585,6 +597,9 @@ class Vulture(ast.NodeVisitor):
 
         if any(
             _match(name, self.ignore_decorators) for name in decorator_names
+        ) or any(
+            _is_pytest_autouse_fixture(decorator)
+            for decorator in node.decorator_list
         ):
             self._log(f'Ignoring {typ} "{node.name}" (decorator whitelisted)')
         elif typ == "property":
