@@ -1,3 +1,7 @@
+import sys
+
+import pytest
+
 from . import check_multiple_unreachable, check_unreachable, v
 
 assert v  # Silence pyflakes
@@ -843,3 +847,97 @@ def foo():
 """
     )
     assert v.unreachable_code == []
+
+
+def test_try_finally_unreachable(v):
+    v.scan(
+        """\
+def foo():
+    try:
+        pass
+    finally:
+        return 1
+        x = 2
+    return 3
+"""
+    )
+    check_multiple_unreachable(v, [(6, 1, "return"), (7, 1, "try")])
+
+
+def test_try_finally_fall_through(v):
+    v.scan(
+        """\
+def foo():
+    try:
+        pass
+    finally:
+        cleanup()
+    return 1
+"""
+    )
+    assert v.unreachable_code == []
+
+
+def test_try_else_no_fall_through(v):
+    v.scan(
+        """\
+def foo():
+    try:
+        pass
+    except ValueError:
+        return 1
+    else:
+        return 2
+        dead = 3
+    return 4
+"""
+    )
+    check_multiple_unreachable(v, [(8, 1, "return"), (9, 1, "try")])
+
+
+def test_try_else_with_falling_except(v):
+    v.scan(
+        """\
+def foo():
+    try:
+        pass
+    except ValueError:
+        pass
+    else:
+        return 1
+    return 2
+"""
+    )
+    assert v.unreachable_code == []
+
+
+def test_try_second_except_unreachable(v):
+    v.scan(
+        """\
+def foo():
+    try:
+        pass
+    except ValueError:
+        pass
+    except TypeError:
+        return 1
+        dead = 2
+    return 3
+"""
+    )
+    check_unreachable(v, 8, 1, "return")
+
+
+@pytest.mark.skipif(sys.version_info < (3, 11), reason="except* needs 3.11+")
+def test_try_star_unreachable(v):
+    v.scan(
+        """\
+def foo():
+    try:
+        return 1
+    except* ValueError:
+        return 2
+    return 3
+"""
+    )
+    check_unreachable(v, 6, 1, "try")

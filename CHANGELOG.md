@@ -4,6 +4,7 @@
 * Report an out-of-range `--min-confidence` as a usage error instead of a traceback.
 * Ignore empty `--exclude` patterns instead of excluding every file.
 * Skip directories ending in `.py` when collecting Python files.
+* Analyze reachability for `try`/`finally`, `try`/`else`, all `except` handlers, and `try`/`except*` blocks.
 
 # 2.16 (2026-03-25)
 

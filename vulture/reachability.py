@@ -2,6 +2,8 @@ import ast
 
 from vulture import utils
 
+_TRY_NODES = (ast.Try, ast.TryStar) if hasattr(ast, "TryStar") else (ast.Try,)
+
 
 class Reachability:
     def __init__(self, report):
@@ -32,7 +34,7 @@ class Reachability:
             self._handle_reachability_if(node)
         elif isinstance(node, ast.IfExp):
             self._handle_reachability_if_expr(node)
-        elif isinstance(node, ast.Try):
+        elif isinstance(node, _TRY_NODES):
             self._handle_reachability_try(node)
 
     def reset(self):
@@ -51,7 +53,11 @@ class Reachability:
         for idx, statement in enumerate(statements):
             if not self._can_fall_through(statement):
                 if idx + 1 < len(statements):
-                    class_name = statement.__class__.__name__.lower()
+                    class_name = (
+                        "try"
+                        if isinstance(statement, _TRY_NODES)
+                        else statement.__class__.__name__.lower()
+                    )
                     self._report(
                         name=class_name,
                         first_node=statements[idx + 1],
@@ -198,23 +204,37 @@ class Reachability:
 
         has_else = bool(node.orelse)
 
-        if not try_can_fall_through and has_else:
-            else_body = node.orelse
-            self._report(
-                name="else",
-                first_node=else_body[0],
-                last_node=else_body[-1],
-                message="unreachable 'else' block",
-            )
+        if has_else:
+            if not try_can_fall_through:
+                else_body = node.orelse
+                self._report(
+                    name="else",
+                    first_node=else_body[0],
+                    last_node=else_body[-1],
+                    message="unreachable 'else' block",
+                )
+                try_else_can_fall_through = False
+            else:
+                try_else_can_fall_through = (
+                    self._can_fall_through_statements_analysis(node.orelse)
+                )
+        else:
+            try_else_can_fall_through = try_can_fall_through
 
-        any_except_can_fall_through = any(
-            self._can_fall_through_statements_analysis(handler.body)
-            for handler in node.handlers
+        any_except_can_fall_through = False
+        for handler in node.handlers:
+            if self._can_fall_through_statements_analysis(handler.body):
+                any_except_can_fall_through = True
+
+        finally_can_fall_through = (
+            self._can_fall_through_statements_analysis(node.finalbody)
+            if node.finalbody
+            else True
         )
 
         statement_can_fall_through = (
-            try_can_fall_through or any_except_can_fall_through
-        )
+            try_else_can_fall_through or any_except_can_fall_through
+        ) and finally_can_fall_through
 
         if not statement_can_fall_through:
             self._mark_as_no_fall_through(node)
