@@ -45,6 +45,10 @@ def _check_input_config(data):
         if type(value) is not type(DEFAULTS[key]):
             expected_type = type(DEFAULTS[key]).__name__
             raise InputError(f"Data type for {key} must be {expected_type!r}")
+        if isinstance(value, list) and not all(
+            isinstance(element, str) for element in value
+        ):
+            raise InputError(f"Data type for {key} must be a list of strings")
 
 
 def _check_output_config(config):

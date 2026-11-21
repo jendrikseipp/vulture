@@ -3,6 +3,8 @@ import os.path
 import subprocess
 import sys
 
+import pytest
+
 from vulture.utils import ExitCode
 
 from . import REPO, WHITELISTS, call_vulture, v
@@ -27,6 +29,26 @@ def test_module_without_whitelists():
 
 def test_missing_file():
     assert call_vulture(["missing.py"]) == ExitCode.InvalidInput
+
+
+@pytest.mark.parametrize(
+    "option", ["paths", "exclude", "ignore_decorators", "ignore_names"]
+)
+def test_config_rejects_non_string_list_items(option, tmp_path, capfd):
+    config = tmp_path / "pyproject.toml"
+    settings = f'[tool.vulture]\n{option} = ["vulture", 42]\n'
+    if option != "paths":
+        settings += 'paths = ["vulture"]\n'
+    config.write_text(settings, encoding="utf-8")
+
+    status = call_vulture([f"--config={config}"])
+    out, err = capfd.readouterr()
+
+    assert status == ExitCode.InvalidCmdlineArguments
+    assert not out
+    assert err.splitlines() == [
+        f"Data type for {option} must be a list of strings"
+    ]
 
 
 def test_tests():
