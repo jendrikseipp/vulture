@@ -46,7 +46,9 @@ def test_config_rejects_non_string_list_items(option, tmp_path, capfd):
 
     assert status == ExitCode.InvalidCmdlineArguments
     assert not out
-    assert err == f"Data type for {option} must be a list of strings\n"
+    assert err.splitlines() == [
+        f"Data type for {option} must be a list of strings"
+    ]
 
 
 def test_tests():
