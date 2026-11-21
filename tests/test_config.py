@@ -256,6 +256,13 @@ def test_incompatible_option_type(key, value):
             _check_input_config({key: test_value})
 
 
+def test_incompatible_list_item_type():
+    with pytest.raises(
+        InputError, match=r"^Data type for paths must be a list of strings$"
+    ):
+        _check_input_config({"paths": ["vulture", 42]})
+
+
 def test_missing_paths():
     """
     If the script is run without any paths, we want to abort.
