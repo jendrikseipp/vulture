@@ -493,7 +493,7 @@ class Vulture(ast.NodeVisitor):
         if (
             utils.is_ast_string(node.left)
             and isinstance(node.op, ast.Mod)
-            and self._is_locals_call(node.right)
+            and self._is_noarg_call(node.right, "locals")
         ):
             self.used_names |= set(re.findall(r"%\((\w+)\)", node.left.value))
 
@@ -514,7 +514,7 @@ class Vulture(ast.NodeVisitor):
             and utils.is_ast_string(node.func.value)
             and node.func.attr == "format"
             and any(
-                kw.arg is None and self._is_locals_call(kw.value)
+                kw.arg is None and self._is_noarg_call(kw.value, "locals")
                 for kw in node.keywords
             )
         ):
@@ -540,15 +540,24 @@ class Vulture(ast.NodeVisitor):
                     self.used_names.add(var)
 
     @staticmethod
-    def _is_locals_call(node):
-        """Return True if the node is `locals()`."""
+    def _is_noarg_call(node, name):
+        """Return True if the node calls a bare name without arguments."""
         return (
             isinstance(node, ast.Call)
             and isinstance(node.func, ast.Name)
-            and node.func.id == "locals"
+            and node.func.id == name
             and not node.args
             and not node.keywords
         )
+
+    def visit_Subscript(self, node):
+        # Count globals()["name"] as a use of name when reading the value.
+        if (
+            isinstance(node.ctx, ast.Load)
+            and self._is_noarg_call(node.value, "globals")
+            and utils.is_ast_string(node.slice)
+        ):
+            self.used_names.add(node.slice.value)
 
     def visit_ClassDef(self, node):
         for decorator in node.decorator_list:
