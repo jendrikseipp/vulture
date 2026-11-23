@@ -71,6 +71,47 @@ b = foo(5)
     check(v.defined_funcs, ["foo"])
 
 
+def test_globals_lookup(v):
+    v.scan(
+        """\
+def func():
+    pass
+
+globals()["func"]()
+"""
+    )
+    check(v.defined_funcs, ["func"])
+    check(v.unused_funcs, [])
+
+
+def test_other_subscripts_do_not_reference_global_names(v):
+    v.scan(
+        """\
+def overwritten():
+    pass
+
+def dynamic():
+    pass
+
+def from_mapping():
+    pass
+
+def fake_globals():
+    pass
+
+globals()["overwritten"] = None
+name = "dynamic"
+globals()[name]()
+mapping["from_mapping"]()
+obj.globals()["fake_globals"]()
+"""
+    )
+    check(
+        v.unused_funcs,
+        ["overwritten", "dynamic", "from_mapping", "fake_globals"],
+    )
+
+
 def test_async_function(v):
     v.scan(
         """\
