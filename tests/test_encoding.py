@@ -1,4 +1,8 @@
 import codecs
+import os
+import sys
+
+import pytest
 
 from vulture.utils import ExitCode
 
@@ -46,3 +50,19 @@ def test_utf8_with_bom(v, tmp_path):
     filepath.write_text("", encoding="utf-8-sig")
     v.scavenge([filepath])
     assert v.exit_code == ExitCode.NoDeadCode
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32" or os.geteuid() == 0,
+    reason="Unreadable files need POSIX permissions and a non-root user.",
+)
+def test_unreadable_file(v, tmp_path, capfd):
+    filepath = tmp_path / "unreadable.py"
+    filepath.write_text("import os\n")
+    filepath.chmod(0o000)
+    try:
+        v.scavenge([filepath])
+    finally:
+        filepath.chmod(0o644)
+    assert "Could not read file" in capfd.readouterr().err
+    assert v.exit_code == ExitCode.InvalidInput

@@ -296,6 +296,16 @@ class Vulture(ast.NodeVisitor):
                     force=True,
                 )
                 self.exit_code = ExitCode.InvalidInput
+            except OSError as err:
+                # The file exists, but opening or reading it failed (e.g.
+                # because of missing permissions).
+                self._log(
+                    f"Error: Could not read file {module} - "
+                    f"{err.strerror or err}",
+                    file=sys.stderr,
+                    force=True,
+                )
+                self.exit_code = ExitCode.InvalidInput
             else:
                 self.scan(module_string, filename=module)
 
