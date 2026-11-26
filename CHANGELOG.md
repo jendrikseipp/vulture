@@ -4,6 +4,7 @@
 * Report an out-of-range `--min-confidence` as a usage error instead of a traceback.
 * Ignore empty `--exclude` patterns instead of excluding every file.
 * Skip directories ending in `.py` when collecting Python files.
+* Report a file that cannot be read as an error instead of a traceback.
 
 # 2.16 (2026-03-25)
 
