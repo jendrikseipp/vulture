@@ -1,3 +1,5 @@
+import pytest
+
 from . import check, v
 
 assert v  # Silence pyflakes.
@@ -11,6 +13,59 @@ def test_old_format_string(v):
 def test_new_format_string(v):
     v.scan("'{a}, {b:0d} {c:<30} {d:.2%}'.format(**locals())")
     check(v.used_names, ["a", "b", "c", "d", "format", "locals"])
+
+
+@pytest.mark.parametrize(
+    "expression, names",
+    [
+        (
+            "'{value:{width}.{precision}f}'.format(**locals())",
+            ["value", "width", "precision"],
+        ),
+        ("'{value!s:>{width}}'.format(**locals())", ["value", "width"]),
+        (
+            "'{value:{settings.width}}'.format(**locals())",
+            ["value", "settings", "width"],
+        ),
+        (
+            "'{value:{settings[width]}}'.format(**locals())",
+            ["value", "settings"],
+        ),
+        (
+            "'{value:>{width}} {{unused}}'.format(**locals())",
+            ["value", "width"],
+        ),
+        ("'{0:{width}}'.format(1, **locals())", ["width"]),
+        ("'{:{width}}'.format(1, **locals())", ["width"]),
+        ("'{value:{{width}}}'.format(**locals())", ["value"]),
+    ],
+)
+def test_nested_format_specification(v, expression, names):
+    v.scan(expression)
+    check(v.used_names, [*names, "format", "locals"])
+
+
+def test_variables_used_only_in_format_specification(v):
+    v.scan(
+        """\
+value = 12.345
+width = 8
+precision = 2
+print("{value:{width}.{precision}f}".format(**locals()))
+"""
+    )
+    check(v.unused_vars, [])
+
+
+@pytest.mark.parametrize("format_string", ["{value", "{value:{width}} {"])
+def test_invalid_new_format_string(v, format_string):
+    v.scan(f"{format_string!r}.format(**locals())")
+    check(v.used_names, ["format", "locals"])
+
+
+def test_invalid_nested_format_specification(v):
+    v.scan("'{value:{width}} {other:{settings[width}}'.format(**locals())")
+    check(v.used_names, ["value", "width", "other", "format", "locals"])
 
 
 def test_f_string(v):
