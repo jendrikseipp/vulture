@@ -84,7 +84,11 @@ def _parse_toml(infile):
         verbose = true
         paths = ["path1", "path2"]
     """
-    data = tomllib.load(infile)
+    try:
+        data = tomllib.load(infile)
+    except tomllib.TOMLDecodeError as e:
+        # a broken config file used to escape as a traceback
+        raise InputError(f"Invalid configuration file: {e}") from e
     settings = data.get("tool", {}).get("vulture", {})
     _check_input_config(settings)
     return settings
@@ -166,7 +170,7 @@ def _parse_args(args=None):
     parser.add_argument(
         "--config",
         type=str,
-        default="pyproject.toml",
+        default=missing,
         help="Path to pyproject.toml config file.",
     )
     parser.add_argument(
@@ -206,11 +210,18 @@ def make_config(argv=None, tomlfile=None):
         config = _parse_toml(tomlfile)
         detected_toml_path = str(tomlfile)
     else:
-        toml_path = pathlib.Path(cli_config["config"]).resolve()
+        # An explicitly given --config must exist, silently falling back to the
+        # defaults would run the linter with a completely different config
+        # (e.g. a typo in the CI job would drop min_confidence and exclude).
+        explicit_config = cli_config.get("config")
+        toml_path = pathlib.Path(
+            explicit_config or DEFAULTS["config"]).resolve()
         if toml_path.is_file():
             with open(toml_path, "rb") as fconfig:
                 config = _parse_toml(fconfig)
             detected_toml_path = str(toml_path)
+        elif explicit_config:
+            raise InputError(f"Config file not found: {explicit_config}")
         else:
             config = {}
 

@@ -34,7 +34,6 @@ def test_cli_args():
         exclude=["file*.py", "dir/"],
         ignore_decorators=["deco1", "deco2"],
         ignore_names=["name1", "name2"],
-        config="pyproject.toml",
         make_whitelist=True,
         min_confidence=10,
         sort_by_size=True,
@@ -55,6 +54,11 @@ def test_cli_args():
     )
     assert isinstance(result, dict)
     assert result == expected
+
+    # "--config" is only part of the CLI config when it is given explicitly,
+    # otherwise the default pyproject.toml is looked up (see make_config)
+    result = _parse_args(["--config", "custom.toml", "path1"])
+    assert result["config"] == "custom.toml"
 
 
 def test_toml_config():
@@ -233,6 +237,40 @@ def test_config_merging_toml_paths_only():
     result = make_config(cliargs, toml)
     assert result["paths"] == ["path1", "path2"]
     assert result["exclude"] == ["test_*.py"]
+
+
+def test_missing_config_file(tmp_path):
+    """
+    An explicitly requested --config file that does not exist must abort
+    instead of silently falling back to the defaults.
+    """
+    missing = tmp_path / "does-not-exist.toml"
+    with pytest.raises(InputError, match="Config file not found"):
+        make_config(["--config", str(missing), "cli_path"])
+
+
+def test_missing_default_config_file():
+    """
+    The auto-detected pyproject.toml is optional, so a missing default must
+    keep working.
+    """
+    result = make_config(
+        ["cli_path"], None
+    ) if pathlib.Path(DEFAULTS["config"]).is_file() else None
+    if result is None:
+        # no pyproject.toml in the cwd: make sure make_config does not raise
+        result = make_config(["cli_path"])
+    assert result["paths"] == ["cli_path"]
+
+
+def test_invalid_toml_config():
+    """
+    A malformed config file must be reported as an input error, not as a
+    traceback.
+    """
+    toml = get_toml_bytes("[tool.vulture\nverbose = true\n")
+    with pytest.raises(InputError, match="Invalid configuration file"):
+        _parse_toml(toml)
 
 
 def test_invalid_config_options_output():
